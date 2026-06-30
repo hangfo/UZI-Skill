@@ -235,6 +235,13 @@ def apply_profile_to_env(profile: AnalysisProfile) -> None:
     os.environ["UZI_LITE"] = "1" if profile.depth == DEPTH_LITE else "0"
     os.environ["UZI_DDG_BUDGET"] = str(profile.ddg_budget) if profile.ddg_budget > 0 else "0"
     os.environ["UZI_FUND_STATS_TOP"] = str(profile.fund_stats_top_n)
+    if profile.depth == DEPTH_DEEP:
+        fund_limit = "all"
+    elif profile.depth == DEPTH_MEDIUM:
+        fund_limit = "100"
+    else:
+        fund_limit = str(profile.fund_stats_top_n)
+    os.environ["UZI_FUND_LIMIT"] = fund_limit
 
 
 def format_banner(profile: AnalysisProfile) -> str:
@@ -247,7 +254,8 @@ def format_banner(profile: AnalysisProfile) -> str:
         f"  · 评委: {profile.investors_count} 位" + ("（含 Bull-Bear 辩论）" if profile.enable_bull_bear_debate else ""),
         f"  · 机构方法: {len(profile.institutional_methods)} 种",
         f"  · ddgs 预算: {'无限' if profile.ddg_budget == 0 and profile.depth != DEPTH_LITE else profile.ddg_budget}",
-        f"  · fund_holders: 头部 {profile.fund_stats_top_n} 家完整",
+        f"  · fund_holders: 头部 {profile.fund_stats_top_n} 家完整"
+        + (" · 全量清单" if profile.depth == DEPTH_DEEP else " · 清单限速"),
     ]
     return "\n".join(lines)
 

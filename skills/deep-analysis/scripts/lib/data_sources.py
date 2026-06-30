@@ -164,6 +164,73 @@ def _merge_missing_basic_fields(out: dict, source: dict, marker: str, fields: tu
     return changed
 
 
+def _safe_positive_float(v: Any) -> float | None:
+    """Return a finite positive number, or None for missing/bad provider values."""
+    if v in (None, "", "-", "—"):
+        return None
+    try:
+        num = float(str(v).replace(",", "").replace("%", "").replace("+", "").strip())
+    except (TypeError, ValueError):
+        return None
+    if num > 0 and num == num and num not in (float("inf"), float("-inf")):
+        return num
+    return None
+
+
+def _format_market_cap_yi(raw: Any) -> str | None:
+    mcap = _safe_positive_float(raw)
+    if mcap is None:
+        return None
+    return f"{round(mcap / 1e8, 1)}亿"
+
+
+def _normalize_market_cap_fields(out: dict) -> None:
+    """Keep market cap fields in the repo-wide shape: raw yuan/HKD/USD + xx.x亿 display."""
+    raw = _safe_positive_float(out.get("market_cap_raw"))
+    display = out.get("market_cap")
+    if raw is None and isinstance(display, (int, float)):
+        raw = _safe_positive_float(display)
+    if raw is None and isinstance(display, str):
+        text = display.strip().replace(",", "")
+        if text.endswith("亿"):
+            yi = _safe_positive_float(text[:-1])
+            if yi is not None:
+                raw = yi * 1e8
+        else:
+            raw = _safe_positive_float(text)
+    if raw is not None:
+        out["market_cap_raw"] = raw
+        out["market_cap"] = _format_market_cap_yi(raw)
+
+    circ_raw = _safe_positive_float(out.get("circulating_cap_raw"))
+    circ = out.get("circulating_cap")
+    if circ_raw is None and isinstance(circ, (int, float)):
+        circ_raw = _safe_positive_float(circ)
+    if circ_raw is None and isinstance(circ, str):
+        text = circ.strip().replace(",", "")
+        if text.endswith("亿"):
+            yi = _safe_positive_float(text[:-1])
+            if yi is not None:
+                circ_raw = yi * 1e8
+        else:
+            circ_raw = _safe_positive_float(text)
+    if circ_raw is not None:
+        out["circulating_cap_raw"] = circ_raw
+        out["circulating_cap"] = _format_market_cap_yi(circ_raw)
+
+
+def _normalize_change_pct_from_prices(out: dict) -> None:
+    """Recompute implausible change_pct from price/prev_close when both exist."""
+    price = _safe_positive_float(out.get("price"))
+    prev_close = _safe_positive_float(out.get("prev_close"))
+    if price is None or prev_close is None:
+        return
+    computed = (price - prev_close) / prev_close * 100
+    current = _safe_positive_float(out.get("change_pct"))
+    if current is None or abs(current) > 100 or abs(current - computed) > 20:
+        out["change_pct"] = round(computed, 2)
+
+
 def _fetch_a_share_name_from_ak_code_name(ti: TickerInfo) -> dict:
     """Return {name} from AkShare's A-share code-name table, or {}."""
     if ak is None:
@@ -256,6 +323,8 @@ def _ensure_a_share_basic_fields(out: dict, ti: TickerInfo) -> dict:
         return any(out.get(f) in (None, "", "-") for f in fields)
 
     if not _missing_any(critical_fields):
+        _normalize_market_cap_fields(out)
+        _normalize_change_pct_from_prices(out)
         return out
 
     try:
@@ -290,6 +359,8 @@ def _ensure_a_share_basic_fields(out: dict, ti: TickerInfo) -> dict:
             out["industry"] = industry
             _append_fallback_snap(out, "field:known_industry")
 
+    _normalize_market_cap_fields(out)
+    _normalize_change_pct_from_prices(out)
     return out
 
 
@@ -475,7 +546,7 @@ def _fetch_basic_a(ti: TickerInfo) -> dict:
             url = "https://push2.eastmoney.com/api/qt/stock/get"
             params = {
                 "secid": secid,
-                "fields": "f43,f44,f45,f46,f47,f48,f50,f57,f58,f116,f117,f162,f164",
+                "fields": "f43,f44,f45,f46,f47,f48,f50,f57,f58,f116,f117,f162,f164,f167,f170",
                 "ut": "fa5fd1943c7b386f172d6893dbfba10b",
             }
             r = requests.get(url, params=params, timeout=8, headers={"User-Agent": "Mozilla/5.0"})
@@ -483,13 +554,15 @@ def _fetch_basic_a(ti: TickerInfo) -> dict:
             if data:
                 scale = 100.0
                 price = (data.get("f43") or 0) / scale
-                chg = (data.get("f170") or data.get("f47") or 0) / scale if data.get("f47") else None
+                chg = (data.get("f170") or 0) / scale if data.get("f170") not in (None, "", "-") else None
+                mcap_raw = _safe_positive_float(data.get("f116"))
                 out.update({
                     "price": price if price else out.get("price"),
                     "change_pct": chg,
                     "pe_ttm": (data.get("f162") or 0) / 100 if data.get("f162") else out.get("pe_ttm"),
                     "pb": (data.get("f167") or 0) / 100 if data.get("f167") else out.get("pb"),
-                    "market_cap": data.get("f116") or out.get("market_cap"),
+                    "market_cap": _format_market_cap_yi(mcap_raw) or out.get("market_cap"),
+                    "market_cap_raw": mcap_raw or out.get("market_cap_raw"),
                 })
                 out["_fallback_snap"] = "em-direct"
         except Exception as e:
@@ -791,6 +864,8 @@ def _fetch_basic_hk(ti: TickerInfo) -> dict:
             except (ValueError, TypeError): pass
             if not out.get("market_cap"):
                 out["market_cap"] = r.get("总市值")
+            if not out.get("market_cap_raw"):
+                out["market_cap_raw"] = r.get("总市值")
             if not out.get("name"):
                 out["name"] = r.get("名称")
     except Exception as e:
@@ -829,7 +904,14 @@ def _fetch_basic_hk(ti: TickerInfo) -> dict:
             out["low"] = out.get("low") or qt.get("low")
             out["_fallback_snap"] = (out.get("_fallback_snap", "") + "+tencent_qt").lstrip("+")
 
+    _normalize_market_cap_fields(out)
+    _normalize_change_pct_from_prices(out)
     return out
+
+
+def _hk_yahoo_symbol(code5: str) -> str:
+    """Yahoo HK symbols keep at least four digits: 00700 -> 0700.HK, 09988 -> 9988.HK."""
+    return f"{code5[-4:]}.HK"
 
 
 def _fetch_basic_us(ti: TickerInfo) -> dict:
@@ -837,16 +919,59 @@ def _fetch_basic_us(ti: TickerInfo) -> dict:
         raise RuntimeError("yfinance not installed")
     t = yf.Ticker(ti.code)
     info = _retry(lambda: t.info)
-    return {
+
+    fast: dict[str, Any] = {}
+    try:
+        raw_fast = t.fast_info
+        if hasattr(raw_fast, "items"):
+            fast = dict(raw_fast.items())
+        elif isinstance(raw_fast, dict):
+            fast = raw_fast
+    except Exception:
+        fast = {}
+
+    qt = _fetch_price_tencent_qt("U", ti.code)
+    price = (
+        _safe_positive_float(info.get("currentPrice"))
+        or _safe_positive_float(info.get("regularMarketPrice"))
+        or _safe_positive_float(fast.get("last_price"))
+        or _safe_positive_float(fast.get("lastPrice"))
+        or _safe_positive_float(qt.get("price"))
+    )
+    prev_close = (
+        _safe_positive_float(info.get("regularMarketPreviousClose"))
+        or _safe_positive_float(fast.get("previous_close"))
+        or _safe_positive_float(fast.get("previousClose"))
+        or _safe_positive_float(fast.get("regularMarketPreviousClose"))
+    )
+    change_pct = info.get("regularMarketChangePercent")
+    if change_pct in (None, "", "—") and price is not None and prev_close:
+        change_pct = (price - prev_close) / prev_close * 100
+
+    market_cap_raw = _safe_positive_float(info.get("marketCap")) or _safe_positive_float(fast.get("market_cap")) or _safe_positive_float(fast.get("marketCap"))
+    shares = _safe_positive_float(info.get("sharesOutstanding")) or _safe_positive_float(fast.get("shares"))
+    if market_cap_raw is None and price is not None and shares is not None:
+        market_cap_raw = price * shares
+
+    out = {
         "code": ti.full,
         "name": info.get("longName") or info.get("shortName"),
         "industry": info.get("industry"),
-        "market_cap": info.get("marketCap"),
-        "price": info.get("currentPrice") or info.get("regularMarketPrice"),
-        "change_pct": info.get("regularMarketChangePercent"),
+        "market_cap": _format_market_cap_yi(market_cap_raw),
+        "market_cap_raw": market_cap_raw,
+        "price": price,
+        "change_pct": change_pct,
+        "prev_close": prev_close,
         "pe_ttm": info.get("trailingPE"),
         "pb": info.get("priceToBook"),
     }
+    markers = ["yfinance.info"]
+    if fast:
+        markers.append("yfinance.fast_info")
+    if qt:
+        markers.append("tencent_qt")
+    out["_fallback_snap"] = "+".join(markers)
+    return {k: v for k, v in out.items() if v is not None}
 
 
 # ─────────────────────────────────────────────────────────────
@@ -1065,7 +1190,7 @@ def _kline_hk_chain(ti: TickerInfo, period: str, start: str, adjust: str) -> lis
     # ── 3. yfinance
     if yf:
         try:
-            yf_code = f"{code5.lstrip('0') or '0'}.HK"  # 0700 → 700.HK, 09988 → 9988.HK
+            yf_code = _hk_yahoo_symbol(code5)
             t = yf.Ticker(yf_code)
             start_date = f"{start[:4]}-{start[4:6]}-{start[6:8]}" if start and len(start) == 8 else "2024-01-01"
             df = _retry(lambda: t.history(start=start_date, interval="1d"), attempts=2)
@@ -1080,7 +1205,7 @@ def _kline_hk_chain(ti: TickerInfo, period: str, start: str, adjust: str) -> lis
 
     # ── 4. v2.13.7 · Yahoo Chart v8 HTTP fallback（Grok 验证源 · 零 Key）
     try:
-        yf_code = f"{code5.lstrip('0') or '0'}.HK"
+        yf_code = _hk_yahoo_symbol(code5)
         rows = _yahoo_v8_chart(yf_code, range_="2y")
         if rows:
             return rows

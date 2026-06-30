@@ -10,7 +10,9 @@
   • 筹码分布 stock_cyq_em
 """
 import json
+import math
 import sys
+from datetime import datetime
 from statistics import mean
 
 import akshare as ak  # type: ignore
@@ -90,6 +92,14 @@ def _williams_r(closes, highs, lows, n=14):
     return round((hh - closes[-1]) / (hh - ll) * -100, 1)
 
 
+def _finite_float(v, default=None):
+    try:
+        x = float(v)
+    except (TypeError, ValueError):
+        return default
+    return x if math.isfinite(x) else default
+
+
 def _stage(closes, ma200) -> int:
     """Weinstein Stage Analysis: 1=底部 2=上升 3=顶部 4=下降"""
     if len(closes) < 60 or ma200 is None:
@@ -129,10 +139,15 @@ def _vcp_score(highs: list[float], lows: list[float]) -> float:
 def compute_indicators(klines: list[dict]) -> dict:
     if not klines:
         return {}
-    closes = [float(r.get("收盘") or r.get("Close") or 0) for r in klines]
-    highs = [float(r.get("最高") or r.get("High") or 0) for r in klines]
-    lows = [float(r.get("最低") or r.get("Low") or 0) for r in klines]
-    vols = [float(r.get("成交量") or r.get("Volume") or 0) for r in klines]
+    closes, highs, lows, vols = [], [], [], []
+    for r in klines:
+        close = _finite_float(r.get("收盘") or r.get("Close"))
+        if close is None or close <= 0:
+            continue
+        closes.append(close)
+        highs.append(_finite_float(r.get("最高") or r.get("High"), close))
+        lows.append(_finite_float(r.get("最低") or r.get("Low"), close))
+        vols.append(_finite_float(r.get("成交量") or r.get("Volume"), 0.0))
     if not closes or all(c == 0 for c in closes):
         return {}
 
@@ -205,26 +220,37 @@ def _extract_for_viz(klines: list[dict]) -> dict:
     def _v(r, *keys, default=0):
         for k in keys:
             if k in r and r[k] is not None:
-                try:
-                    return float(r[k])
-                except (ValueError, TypeError):
-                    pass
+                value = _finite_float(r[k])
+                if value is not None:
+                    return value
         return default
 
-    closes = [_v(r, "收盘", "Close") for r in klines]
-    opens = [_v(r, "开盘", "Open") for r in klines]
-    highs = [_v(r, "最高", "High") for r in klines]
-    lows = [_v(r, "最低", "Low") for r in klines]
-
+    rows = []
     dates = []
     for r in klines:
         d = r.get("日期") or r.get("Date") or ""
+        close = _v(r, "收盘", "Close", default=None)
+        if close is None or close <= 0:
+            continue
+        rows.append({
+            "open": _v(r, "开盘", "Open", default=close),
+            "close": close,
+            "high": _v(r, "最高", "High", default=close),
+            "low": _v(r, "最低", "Low", default=close),
+        })
         dates.append(str(d)[:10])
+    if not rows:
+        return {}
+
+    closes = [r["close"] for r in rows]
+    opens = [r["open"] for r in rows]
+    highs = [r["high"] for r in rows]
+    lows = [r["low"] for r in rows]
 
     # last 60 candles
-    last_n = min(60, len(klines))
+    last_n = min(60, len(rows))
     candles_60d = []
-    for i in range(len(klines) - last_n, len(klines)):
+    for i in range(len(rows) - last_n, len(rows)):
         candles_60d.append({
             "date": dates[i],
             "open": round(opens[i], 2),
@@ -238,22 +264,40 @@ def _extract_for_viz(klines: list[dict]) -> dict:
     ma20_60d = [round(v, 2) if i >= 19 else None for i, v in enumerate(ma20_full)][-last_n:]
     ma60_60d = [round(v, 2) if i >= 59 else None for i, v in enumerate(ma60_full)][-last_n:]
 
+    def _year_from_date_text(text: str) -> int | None:
+        if not text or len(text) < 4:
+            return None
+        try:
+            return datetime.fromisoformat(text[:10]).year
+        except ValueError:
+            try:
+                return int(text[:4])
+            except ValueError:
+                return None
+
     # stats
     stats: dict = {}
-    if len(closes) >= 252:
+    last_year = _year_from_date_text(dates[-1]) if dates else None
+    ytd_idx = None
+    if last_year is not None:
+        for i, d in enumerate(dates):
+            if _year_from_date_text(d) == last_year:
+                ytd_idx = i
+                break
+    if ytd_idx is None and len(closes) >= 252:
         ytd_idx = max(0, len(closes) - 252)
+    if ytd_idx is not None and closes[ytd_idx] > 0:
         ytd_return = (closes[-1] - closes[ytd_idx]) / closes[ytd_idx] * 100
         stats["ytd_return"] = f"{ytd_return:+.1f}%"
     if len(closes) >= 20:
         # annualized volatility
         rets = [(closes[i] / closes[i - 1] - 1) for i in range(1, len(closes))]
-        if rets:
-            import statistics as _st
-            try:
-                vol = _st.stdev(rets[-252:] if len(rets) >= 252 else rets) * (252 ** 0.5) * 100
-                stats["volatility"] = f"{vol:.1f}%"
-            except _st.StatisticsError:
-                pass
+        sample = [float(x) for x in (rets[-252:] if len(rets) >= 252 else rets)]
+        if len(sample) >= 2:
+            avg = sum(sample) / len(sample)
+            variance = sum((x - avg) ** 2 for x in sample) / (len(sample) - 1)
+            vol = (variance ** 0.5) * (252 ** 0.5) * 100
+            stats["volatility"] = f"{vol:.1f}%"
         # max drawdown last 252 days
         window = closes[-252:] if len(closes) >= 252 else closes
         peak = window[0]

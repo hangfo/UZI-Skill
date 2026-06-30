@@ -240,6 +240,16 @@ def main(ticker: str, limit: int | None = None) -> dict:
             "fallback": True,
         }
 
+    import os as _os
+
+    if limit is None:
+        env_limit = str(_os.environ.get("UZI_FUND_LIMIT", "")).strip().lower()
+        if env_limit and env_limit not in ("all", "none", "0", "-1"):
+            try:
+                limit = max(1, int(env_limit))
+            except ValueError:
+                limit = None
+
     holders = cached(ti.full, f"fund_holders_v2", lambda: fetch_holding_funds(ti.code), ttl=TTL_QUARTERLY)
 
     # Filter out obvious ETFs/indexes (their 5Y return is not meaningful as "抄作业")
@@ -257,7 +267,6 @@ def main(ticker: str, limit: int | None = None) -> dict:
     #   · 其余家只列清单（名字 + 持仓% + 基金链接）
     # 这样 649 家 × 每家 2 API ≈ 1300 次 → 缩到 20 × 2 = 40 次 API
     # 用户想看某家 5Y 业绩，点 fund_url 到东财看
-    import os as _os
     stats_top_n = int(_os.environ.get("UZI_FUND_STATS_TOP", "20"))
 
     # 按持仓金额/比例降序，保证头部大票仓位的拿到完整业绩
