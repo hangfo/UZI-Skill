@@ -137,7 +137,7 @@ def test_investment_score_keeps_extreme_smallcap_momentum_risk_capped():
     assert scorecard["axes"]["risk_control"] < 30
 
 
-def test_synthesis_exports_investment_score_and_calibrates_overall():
+def test_synthesis_exports_investment_score_without_blending_overall():
     from lib.pipeline.score_fns import generate_synthesis
 
     raw = {
@@ -195,6 +195,9 @@ def test_synthesis_exports_investment_score_and_calibrates_overall():
     syn = generate_synthesis(raw, dims_scored, panel)
 
     assert syn["investment_score"] >= 70
-    assert syn["overall_score"] > syn["legacy_overall_score"]
+    assert syn["overall_score"] == syn["legacy_overall_score"]
     assert "买入评分" in syn["verdict_detail"]
+    assert syn["investment_decision"]["quadrant"] in {
+        "core_watch", "tactical_only", "quality_watch", "avoid",
+    }
     assert syn["investment_scorecard"]["axes"]["quality"] >= 70

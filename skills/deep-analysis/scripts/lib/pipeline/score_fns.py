@@ -1171,7 +1171,10 @@ def generate_synthesis(raw: dict, dims_scored: dict, panel: dict, agent_analysis
     investment_scorecard = compute_investment_score(features)
     buy_score = investment_scorecard.get("score", fund_score * 0.6 + consensus * 0.4)
     legacy_overall = fund_score * 0.6 + consensus * 0.4
-    overall = legacy_overall * 0.55 + buy_score * 0.45
+    # Backtest note (2026-07-01): the buyability score is best kept separate.
+    # It is a quality/risk gate, not a replacement for the panel-driven overall
+    # score. Mixing it at 45% diluted the legacy score's ranking signal.
+    overall = legacy_overall
 
     # v2.11 · verdict 阈值重校准 · 论坛+微信反馈用户心理及格线是 65 分
     # 调整：85/70/55/40 → 80/65/50/35，让白马/真强股进"可以蹲一蹲"档
@@ -1211,6 +1214,31 @@ def generate_synthesis(raw: dict, dims_scored: dict, panel: dict, agent_analysis
 
     # v3.4.1 · 同时记 verdict_detail · 含 fund + consensus 精确分（让相近股票能区分）
     verdict_detail = f"基本面 {fund_score:.1f} · 共识 {consensus:.1f} · 买入评分 {buy_score:.1f}"
+
+    if overall >= 55 and buy_score >= 60:
+        investment_decision = {
+            "quadrant": "core_watch",
+            "label": "总评和买入评分共振",
+            "action": "可进入正式研究 / 核心观察",
+        }
+    elif overall >= 55 and buy_score < 60:
+        investment_decision = {
+            "quadrant": "tactical_only",
+            "label": "总评较强但买入评分不足",
+            "action": "偏交易或等待更好买点",
+        }
+    elif overall < 55 and buy_score >= 60:
+        investment_decision = {
+            "quadrant": "quality_watch",
+            "label": "买入评分较好但总评不足",
+            "action": "质量观察池，等待趋势/催化确认",
+        }
+    else:
+        investment_decision = {
+            "quadrant": "avoid",
+            "label": "总评和买入评分均不足",
+            "action": "回避或仅保留跟踪",
+        }
 
     # Pick bull and bear for great divide
     # CRITICAL: must pick from ACTUALLY bullish/bearish investors, never misattribute
@@ -1422,6 +1450,7 @@ def generate_synthesis(raw: dict, dims_scored: dict, panel: dict, agent_analysis
         "investment_score": round(buy_score, 1),
         "investment_rating": investment_scorecard.get("rating"),
         "investment_scorecard": investment_scorecard,
+        "investment_decision": investment_decision,
         "verdict_label": verdict_label,
         "verdict_detail": verdict_detail,  # v3.4.1 · 基本面/共识精确分 · 区分相近 verdict 段的票
         "fundamental_score": round(fund_score, 1),
