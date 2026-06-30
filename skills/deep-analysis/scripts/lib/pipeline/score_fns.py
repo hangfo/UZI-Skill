@@ -548,6 +548,199 @@ def generate_panel(dims_scored: dict, raw: dict) -> dict:
     }
 
 
+def compute_investment_score(features: dict) -> dict:
+    """Market-agnostic buyability score.
+
+    The legacy UZI score is intentionally conservative and panel-driven. This
+    five-axis score adds a direct buy-decision layer that works across A/H/US:
+    company quality, growth, catalyst, valuation, and risk control. It is not a
+    ticker-specific wrapper and should never let a hot theme override weak
+    quality plus poor risk.
+    """
+    def _num(key: str, default: float = 0.0) -> float:
+        try:
+            v = features.get(key, default)
+            if v in (None, "", "—", "-"):
+                return default
+            return float(v)
+        except (TypeError, ValueError):
+            return default
+
+    def _clamp(x: float, lo: float = 0.0, hi: float = 100.0) -> float:
+        return max(lo, min(hi, x))
+
+    market = str(features.get("market") or "")
+    pe = _num("pe")
+    pb = _num("pb")
+    roe = _num("roe_5y_avg") or _num("roe_latest")
+    roe_min = _num("roe_5y_min")
+    net_margin = _num("net_margin")
+    gross_margin = _num("gross_margin")
+    rev_growth = _num("revenue_growth_3y_cagr") or _num("revenue_growth_latest")
+    profit_growth = _num("net_profit_growth_latest")
+    debt = _num("debt_ratio")
+    fcf_margin = _num("fcf_margin")
+    ytd = _num("ytd_return")
+    vol = _num("volatility_1y")
+    max_dd = _num("max_drawdown_1y")
+    stage_num = int(_num("stage_num"))
+    pe_q = _num("pe_quantile_5y", 50)
+    moat_total = _num("moat_total")
+    ai_score = _num("ai_chokepoint_score")
+    buy_rating = _num("buy_rating_pct")
+    upside = _num("upside_to_target")
+    sentiment = _num("sentiment_heat")
+    mcap = _num("market_cap_yi")
+
+    # Quality: profitability and durable moat. Missing fields do not collapse
+    # the axis to zero; they simply do not earn the positive increments.
+    quality = 50.0
+    if roe >= 25: quality += 18
+    elif roe >= 15: quality += 12
+    elif roe >= 10: quality += 6
+    elif roe and roe < 5: quality -= 10
+    if roe_min >= 10: quality += 8
+    elif roe_min and roe_min < 0: quality -= 8
+    if net_margin >= 25: quality += 12
+    elif net_margin >= 15: quality += 8
+    elif net_margin > 0: quality += 3
+    elif net_margin < 0: quality -= 12
+    if gross_margin >= 55: quality += 6
+    elif gross_margin >= 35: quality += 3
+    if moat_total >= 28: quality += 10
+    elif moat_total >= 20: quality += 4
+    if fcf_margin > 5: quality += 6
+    elif fcf_margin < 0: quality -= 6
+
+    # Growth: fundamental growth, then market confirmation. YTD is capped so a
+    # +300% small cap does not dominate the company score.
+    growth = 45.0
+    if rev_growth >= 35: growth += 22
+    elif rev_growth >= 20: growth += 16
+    elif rev_growth >= 10: growth += 9
+    elif rev_growth < 0: growth -= 10
+    if profit_growth >= 50: growth += 14
+    elif profit_growth >= 20: growth += 9
+    elif profit_growth >= 5: growth += 4
+    elif profit_growth < 0: growth -= 10
+    if stage_num == 2: growth += 10
+    elif stage_num == 4: growth -= 10
+    if ytd > 0:
+        growth += min(14, ytd / 8)
+    elif ytd < -20:
+        growth -= 8
+
+    # Catalyst: industry/cycle catalysts, technical confirmation, analyst
+    # support, and AI chokepoint signal where applicable.
+    catalyst = 42.0
+    if features.get("has_positive_catalyst"): catalyst += 12
+    if features.get("policy_supportive"): catalyst += 8
+    if stage_num == 2: catalyst += 8
+    if buy_rating >= 70: catalyst += 8
+    if upside >= 20: catalyst += 7
+    if ai_score >= 70: catalyst += 16
+    elif ai_score >= 45: catalyst += 8
+    if market == "A" and _num("lhb_30d_count") >= 2:
+        catalyst += 5
+
+    # Valuation: score the current odds, not just cheapness. Negative-profit
+    # companies can still get some valuation credit on PB/PS, but PE=0 should
+    # not look cheap.
+    valuation = 50.0
+    if pe > 0:
+        if pe <= 12: valuation += 18
+        elif pe <= 25: valuation += 10
+        elif pe <= 40: valuation += 2
+        elif pe >= 80: valuation -= 22
+        elif pe >= 50: valuation -= 12
+    else:
+        valuation -= 10
+    if pb > 0:
+        if pb <= 2: valuation += 8
+        elif pb >= 20: valuation -= 18
+        elif pb >= 8: valuation -= 10
+    if pe_q <= 30: valuation += 10
+    elif pe_q >= 80: valuation -= 10
+    if _num("dividend_yield") >= 3:
+        valuation += 5
+
+    # Risk: volatility/drawdown, balance sheet, valuation crowding, and scam
+    # flags. High-ytd microcaps are kept investable only if risk earns it.
+    risk = 62.0
+    if debt >= 70: risk -= 14
+    elif debt >= 50: risk -= 7
+    elif debt and debt <= 35: risk += 5
+    if max_dd <= -60: risk -= 18
+    elif max_dd <= -40: risk -= 11
+    elif max_dd <= -25: risk -= 5
+    if vol >= 120: risk -= 18
+    elif vol >= 80: risk -= 10
+    elif vol and vol <= 35: risk += 4
+    if ytd >= 250: risk -= 14
+    elif ytd >= 100: risk -= 8
+    if sentiment >= 80: risk -= 6
+    if features.get("is_safe") is False: risk -= 18
+    if pe >= 80 or pb >= 20: risk -= 8
+    if 0 < mcap < 50: risk -= 6
+
+    axes = {
+        "quality": round(_clamp(quality), 1),
+        "growth": round(_clamp(growth), 1),
+        "catalyst": round(_clamp(catalyst), 1),
+        "valuation": round(_clamp(valuation), 1),
+        "risk_control": round(_clamp(risk), 1),
+    }
+    weights = {
+        "quality": 0.25,
+        "growth": 0.20,
+        "catalyst": 0.20,
+        "valuation": 0.20,
+        "risk_control": 0.15,
+    }
+    score = sum(axes[k] * weights[k] for k in weights)
+
+    # Guardrails: do not turn speculative, expensive, or fragile names into buy
+    # ratings only because growth/catalyst is high.
+    if axes["quality"] < 45 and axes["risk_control"] < 30:
+        score = min(score, 58)
+    if axes["valuation"] < 35 and axes["risk_control"] < 35:
+        score = min(score, 60)
+    if axes["quality"] >= 75 and axes["risk_control"] >= 55 and axes["valuation"] >= 45:
+        score = max(score, 68)
+
+    if score >= 78:
+        rating = "强关注"
+    elif score >= 70:
+        rating = "关注"
+    elif score >= 60:
+        rating = "观察"
+    elif score >= 50:
+        rating = "谨慎观察"
+    else:
+        rating = "回避"
+
+    return {
+        "score": round(score, 1),
+        "rating": rating,
+        "axes": axes,
+        "weights": weights,
+        "diagnostics": {
+            "market": market,
+            "pe": pe,
+            "pb": pb,
+            "roe": roe,
+            "net_margin": net_margin,
+            "rev_growth": rev_growth,
+            "profit_growth": profit_growth,
+            "stage_num": stage_num,
+            "ytd_return": ytd,
+            "volatility": vol,
+            "max_drawdown": max_dd,
+            "market_cap_yi": mcap,
+        },
+    }
+
+
 # ─────────────────────────────────────────────────────────────
 # v2.6.1 · 自动综合各维度 raw_data 字段为可读 commentary
 # 替代旧版 "[脚本占位]" 废话；让直跑模式（无 agent）也能产出有信息量的报告
@@ -974,7 +1167,11 @@ def generate_synthesis(raw: dict, dims_scored: dict, panel: dict, agent_analysis
     except Exception as _se:
         print(f"  ⚠️ v2.7 风格加权失败（沿用原始公式）: {type(_se).__name__}: {str(_se)[:120]}")
 
-    overall = fund_score * 0.6 + consensus * 0.4
+    features = extract_features(raw, raw.get("dimensions", {}))
+    investment_scorecard = compute_investment_score(features)
+    buy_score = investment_scorecard.get("score", fund_score * 0.6 + consensus * 0.4)
+    legacy_overall = fund_score * 0.6 + consensus * 0.4
+    overall = legacy_overall * 0.55 + buy_score * 0.45
 
     # v2.11 · verdict 阈值重校准 · 论坛+微信反馈用户心理及格线是 65 分
     # 调整：85/70/55/40 → 80/65/50/35，让白马/真强股进"可以蹲一蹲"档
@@ -1013,7 +1210,7 @@ def generate_synthesis(raw: dict, dims_scored: dict, panel: dict, agent_analysis
             verdict_label += f" · {len(bearish_schools)} 派看空"
 
     # v3.4.1 · 同时记 verdict_detail · 含 fund + consensus 精确分（让相近股票能区分）
-    verdict_detail = f"基本面 {fund_score:.1f} · 共识 {consensus:.1f}"
+    verdict_detail = f"基本面 {fund_score:.1f} · 共识 {consensus:.1f} · 买入评分 {buy_score:.1f}"
 
     # Pick bull and bear for great divide
     # CRITICAL: must pick from ACTUALLY bullish/bearish investors, never misattribute
@@ -1221,6 +1418,10 @@ def generate_synthesis(raw: dict, dims_scored: dict, panel: dict, agent_analysis
         "ticker": raw["ticker"],
         "name": name,
         "overall_score": round(overall, 1),
+        "legacy_overall_score": round(legacy_overall, 1),
+        "investment_score": round(buy_score, 1),
+        "investment_rating": investment_scorecard.get("rating"),
+        "investment_scorecard": investment_scorecard,
         "verdict_label": verdict_label,
         "verdict_detail": verdict_detail,  # v3.4.1 · 基本面/共识精确分 · 区分相近 verdict 段的票
         "fundamental_score": round(fund_score, 1),
@@ -1311,4 +1512,3 @@ def generate_synthesis(raw: dict, dims_scored: dict, panel: dict, agent_analysis
             },
         },
     }
-
