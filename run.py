@@ -314,6 +314,7 @@ def main():
     _maybe_prompt_update()
 
     # v2.10.2 · 深度选择（优先级: --depth > UZI_DEPTH env > UZI_LITE env > 默认 medium）
+    profile = None
     try:
         sys.path.insert(0, str(Path(__file__).parent / "skills" / "deep-analysis" / "scripts"))
         from lib.analysis_profile import get_profile, apply_profile_to_env, format_banner
@@ -403,7 +404,13 @@ def main():
     if has_cache and not args.no_resume:
         print(f"♻️  resume 模式 · 复用 .cache/{args.ticker}/raw_data.json 已有维度（用 --no-resume 强制重抓）")
     elif args.no_resume:
-        print(f"🔄 --no-resume · 强制重抓所有 22 个 fetcher")
+        if profile is not None:
+            print(
+                f"🔄 --no-resume · 强制重抓 {len(profile.fetchers_enabled)}/20 个启用 fetcher "
+                f"（depth={profile.depth}）"
+            )
+        else:
+            print(f"🔄 --no-resume · 强制重抓当前 profile 启用的 fetcher")
         os.environ["UZI_NO_RESUME"] = "1"
 
     if env["is_codex"]:
