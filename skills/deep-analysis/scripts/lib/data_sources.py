@@ -998,7 +998,7 @@ def _fetch_kline_impl(ti: TickerInfo, period: str, start: str, adjust: str) -> l
         return _kline_a_share_chain(ti, period, start, adjust)
     if ti.market == "H":
         return _kline_hk_chain(ti, period, start, adjust)
-    if ti.market == "U":
+    if ti.market in ("U", "G"):
         return _kline_us_chain(ti)
     return []
 

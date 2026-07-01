@@ -54,9 +54,9 @@ def check_industry_mapping_sanity(ctx: dict) -> list[Issue]:
     """BUG#R10 class · 行业被错误映射到高碰撞类别"""
     issues = []
     basic = _get_dim(ctx, "0_basic")
-    ind = basic.get("industry", "")
+    ind = str(basic.get("industry") or "")
     ind_metrics = _get_dim(ctx, "7_industry").get("cninfo_metrics") or {}
-    matched = ind_metrics.get("industry_name_match", "")
+    matched = str(ind_metrics.get("industry_name_match") or "")
 
     # 已知的高碰撞错位：工业金属 不该映射到 农副食品加工
     COLLISION_REDFLAGS = [
@@ -119,6 +119,7 @@ def check_empty_dims(ctx: dict) -> list[Issue]:
     """有 key 但 data 完全空的维度 · v2.10.4 · profile-aware (lite 只查启用的维度)"""
     issues = []
     dims = ctx["dims"]
+    market = ctx.get("market")
 
     # v2.10.4 · 只检查当前 profile 启用的维度
     enabled_nums = None
@@ -147,8 +148,13 @@ def check_empty_dims(ctx: dict) -> list[Issue]:
         if data in (None, {}, []):
             # 区分是 timeout 还是真空
             is_timeout = bool(v.get("_timeout"))
-            err = v.get("error", "")
+            err = str(v.get("error") or "")
             sev = "warning" if is_timeout or err else "critical"
+            if market == "G" and k.startswith("1_"):
+                # Yahoo-style global listings are a routing/data-quality holdout.
+                # Missing financial statements should be visible, but should not
+                # block a lite compatibility report the way it does for A/H/US.
+                sev = "warning"
             issues.append(Issue(
                 severity=sev,
                 category="data",
@@ -388,7 +394,7 @@ def check_metals_materials_populated(ctx: dict) -> list[Issue]:
     """v2.8.4 coverage · 有色金属类股票必须有原材料数据"""
     issues = []
     basic = _get_dim(ctx, "0_basic")
-    ind = basic.get("industry", "")
+    ind = str(basic.get("industry") or "")
     METAL_IND = ("工业金属", "有色金属", "贵金属", "能源金属", "小金属", "稀有金属",
                  "钢铁", "普钢", "特钢", "煤炭开采")
     if not any(k in ind for k in METAL_IND):

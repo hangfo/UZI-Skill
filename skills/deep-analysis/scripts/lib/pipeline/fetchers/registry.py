@@ -28,7 +28,7 @@ def _make_adapter(
     args_fn: Callable[[Any, dict], tuple],
     top_level: list[str] = None,
     depends_on: list[str] = None,
-    markets: tuple[str, ...] = ("A", "H", "U"),
+    markets: tuple[str, ...] = ("A", "H", "U", "G"),
     sources: list[str] = None,
     keep_zero_fields: set[str] = None,
 ) -> type:
@@ -77,7 +77,7 @@ FETCHER_REGISTRY: dict[str, type] = {
         required=["name", "price"],
         optional=["industry", "market_cap", "pe_ttm", "pb", "eps", "actual_controller", "listed_date", "full_name"],
         args_fn=lambda t, r: (t,),
-        markets=("A", "H", "U"),
+        markets=("A", "H", "U", "G"),
         sources=["legacy:fetch_basic"],
     ),
 

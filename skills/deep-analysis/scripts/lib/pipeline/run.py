@@ -44,7 +44,7 @@ def run_pipeline(ticker: str, resume: bool = True) -> str:
     _basic_market = _basic.get("market") if isinstance(_basic, dict) else None
     raw_data_compatible = {
         "ticker": ticker,
-        "market": _basic_market if _basic_market in ("A", "H", "U") else _ti.market,
+        "market": _basic_market if _basic_market in ("A", "H", "U", "G") else _ti.market,
         "code": _ti.code,
         "full": _ti.full,
         "dimensions": {k: v for k, v in raw_dict.items()

@@ -84,7 +84,7 @@ def main(user_input: str) -> dict:
         "ticker": ti.full,
         "market": ti.market,
         "data": data,
-        "source": f"akshare:{ti.market}",
+        "source": "yfinance:global" if ti.market == "G" else f"akshare:{ti.market}",
         "fallback": False,
     }
 
