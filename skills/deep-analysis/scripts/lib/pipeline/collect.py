@@ -18,13 +18,24 @@ feature flag：UZI_PIPELINE=1 时 stage1 走新管道 · 否则走老 collect_ra
 from __future__ import annotations
 
 import os
+import sys
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
+from lib.analysis_profile import get_profile
+
 from .fetchers.registry import FETCHER_REGISTRY, get_fetcher
 from .schema import DimResult, Quality
+
+
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        try:
+            _stream.reconfigure(errors="replace")
+        except Exception:
+            pass
 
 
 # 依赖 0_basic.industry 的 dim · 必须在 wave 3
@@ -63,6 +74,8 @@ def collect(ticker: Any, raw_previous: dict | None = None, max_workers: int = 6)
     t0 = time.time()
     out: dict[str, Any] = {}
     raw_previous = raw_previous or {}
+    profile = get_profile()
+    enabled_dims = set(profile.fetchers_enabled)
 
     # Wave 1 · 0_basic 必须先跑
     basic_dim = raw_previous.get("dimensions", {}).get("0_basic")
@@ -84,7 +97,7 @@ def collect(ticker: Any, raw_previous: dict | None = None, max_workers: int = 6)
 
     # Wave 2 · 非依赖型 fetcher 并发
     non_dep_dims = [d for d in FETCHER_REGISTRY.keys()
-                    if d not in DEPENDENT_DIMS and d != "0_basic"]
+                    if d in enabled_dims and d not in DEPENDENT_DIMS and d != "0_basic"]
     print(f"  [pipeline] wave 2 · {len(non_dep_dims)} fetcher (max_workers={max_workers})")
 
     def _run(dim_key: str) -> tuple[str, dict, dict]:
@@ -126,10 +139,11 @@ def collect(ticker: Any, raw_previous: dict | None = None, max_workers: int = 6)
                 out[d] = DimResult.error_result(d, f"{type(e).__name__}: {e}").to_dict()
 
     # Wave 3 · 依赖 industry 的 fetcher · 串行（industry 是 shared context）
-    print(f"  [pipeline] wave 3 · {len(DEPENDENT_DIMS)} dependent fetcher")
+    dependent_dims = sorted(d for d in DEPENDENT_DIMS if d in enabled_dims)
+    print(f"  [pipeline] wave 3 · {len(dependent_dims)} dependent fetcher")
     # 构造 raw-shaped dict 给 args_fn
     raw_for_deps = {"0_basic": out["0_basic"]}
-    for dim_key in sorted(DEPENDENT_DIMS):
+    for dim_key in dependent_dims:
         cached = raw_previous.get("dimensions", {}).get(dim_key)
         if cached and _is_resume_valid(cached):
             out[dim_key] = cached

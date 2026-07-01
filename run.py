@@ -281,6 +281,8 @@ def main():
                         help="分析完后用 Cloudflare Tunnel 映射公网链接")
     parser.add_argument("--no-browser", action="store_true",
                         help="不自动打开浏览器")
+    parser.add_argument("--no-open-report", action="store_true",
+                        help="生成报告但不自动打开本地 HTML 或 remote URL")
     parser.add_argument("--port", type=int, default=8976,
                         help="HTTP 服务端口 (默认 8976)")
     parser.add_argument("--force-name", metavar="CODE",
@@ -312,6 +314,7 @@ def main():
     _maybe_prompt_update()
 
     # v2.10.2 · 深度选择（优先级: --depth > UZI_DEPTH env > UZI_LITE env > 默认 medium）
+    profile = None
     try:
         sys.path.insert(0, str(Path(__file__).parent / "skills" / "deep-analysis" / "scripts"))
         from lib.analysis_profile import get_profile, apply_profile_to_env, format_banner
@@ -401,7 +404,13 @@ def main():
     if has_cache and not args.no_resume:
         print(f"♻️  resume 模式 · 复用 .cache/{args.ticker}/raw_data.json 已有维度（用 --no-resume 强制重抓）")
     elif args.no_resume:
-        print(f"🔄 --no-resume · 强制重抓所有 22 个 fetcher")
+        if profile is not None:
+            print(
+                f"🔄 --no-resume · 强制重抓 {len(profile.fetchers_enabled)}/20 个启用 fetcher "
+                f"（depth={profile.depth}）"
+            )
+        else:
+            print(f"🔄 --no-resume · 强制重抓当前 profile 启用的 fetcher")
         os.environ["UZI_NO_RESUME"] = "1"
 
     if env["is_codex"]:
@@ -621,8 +630,14 @@ def main():
         except Exception as _e:
             print(f"⚠️  --output-dir 导出失败（不影响本地报告）: {_e}")
 
+    auto_open_report = (
+        not args.no_open_report
+        and not args.no_browser
+        and os.environ.get("UZI_NO_AUTO_OPEN") != "1"
+    )
+
     # 打开浏览器（本地模式）
-    if env["has_browser"] and not args.no_browser and not args.remote:
+    if env["has_browser"] and auto_open_report and not args.remote:
         import webbrowser
         webbrowser.open(standalone.as_uri())
         print(f"   🌐 已在浏览器中打开")
@@ -643,7 +658,7 @@ def main():
             print(f"按 Ctrl+C 停止服务。\n")
 
             # 如果有浏览器也打开
-            if env["has_browser"] and not args.no_browser:
+            if env["has_browser"] and auto_open_report:
                 import webbrowser
                 webbrowser.open(full_url)
 
