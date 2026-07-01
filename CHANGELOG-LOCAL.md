@@ -4,6 +4,24 @@
 
 ## 2026-07-01
 
+### Self-review 误报修复
+
+- 修复 `self_review.check_factcheck_redflags` 将 `AAPL / Apple Inc.` 公司名误判为“苹果产业链”声称的问题。
+- 同步处理 `TSLA / Tesla` 同类边界：公司自身名称不触发供应链红旗。
+- 保留对抗性检查：非 Apple / Tesla 公司如声称 Apple / Tesla 供应链，但主营没有光学、镜头、代工、电池、零部件等支撑词，仍会触发 warning。
+- 新增 `test_self_review_factcheck_redflags.py`，覆盖：
+  - Apple 本体不误报；
+  - 非 Apple 供应链声称仍拦截；
+  - 有光学/精密主营证据时放行；
+  - Tesla 本体不误报。
+
+### Lite / Medium 回归
+
+- AAPL lite / medium 复验：原“苹果产业链”误报 warning 已收敛，只剩 CLI/lite 可接受的 `agent_analysis.json` 缺失 warning。
+- 同篮子 lite 复验成功：`600519.SH`、`AAPL`、`AXTI`、`00700.HK`。
+- 同篮子 medium 复验成功：`600519.SH`、`AAPL`、`AXTI`、`00700.HK`。
+- 观察到 A 股 `600519.SH` medium 会触发 859 项持仓/基金类枚举，约 7 分钟完成；这是性能优化候选，不是功能失败。
+
 ### GitHub / Gmail 对比
 
 - 添加并读取 MacBook 开发远程 `hangfo`：`https://github.com/hangfo/UZI-Skill.git`。
