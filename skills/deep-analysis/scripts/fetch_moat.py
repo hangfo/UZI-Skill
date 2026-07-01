@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 
 from lib import data_sources as ds
@@ -74,6 +75,27 @@ def _result_mentions_company(result: dict, company_name: str, superstar_names: s
 
 def main(ticker: str) -> dict:
     ti = parse_ticker(ticker)
+
+    if os.environ.get("UZI_AUX_HEAVY") != "1":
+        scores = {"intangible": 5, "switching": 5, "network": 5, "scale": 5}
+        return {
+            "ticker": ti.full,
+            "data": {
+                "intangible": "—",
+                "switching": "—",
+                "network": "—",
+                "scale": "—",
+                "scores": scores,
+                "rd_summary": "—",
+                "web_search_snippets": {},
+                "moat_framework": ["intangible", "switching", "network", "scale", "efficient_scale"],
+                "evidence_strength": "sampled",
+                "_note": "medium/lite skip heavy moat web search; deep enables full search evidence",
+            },
+            "source": "sampled:UZI_AUX_HEAVY=0",
+            "fallback": False,
+        }
+
     basic = ds.fetch_basic(ti)
     name = basic.get("name", ti.code)
 

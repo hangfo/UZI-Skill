@@ -927,6 +927,23 @@ def test_a_share_empty_financials_still_blocks(monkeypatch):
     assert issues[0].severity == "critical"
 
 
+def test_stock_features_uses_roe_string_when_history_missing():
+    from lib.stock_features import extract_features
+
+    raw = {
+        "ticker": "AAPL",
+        "dimensions": {
+            "0_basic": {"data": {"code": "AAPL", "price": 289, "market_cap": "42499亿", "pe_ttm": 35, "pb": 40}},
+            "1_financials": {"data": {"roe": "141.5%", "net_margin": "27.2%", "gross_margin": "44.9%"}},
+        },
+    }
+    features = extract_features(raw, raw["dimensions"])
+
+    assert features["roe_latest"] == 141.5
+    assert features["roe_5y_avg"] == 141.5
+    assert features["roe_5y_min"] == 141.5
+
+
 if __name__ == "__main__":
     # Manual runner — no pytest required
     import inspect

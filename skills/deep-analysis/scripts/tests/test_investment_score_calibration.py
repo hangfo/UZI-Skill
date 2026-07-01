@@ -27,9 +27,10 @@ def test_investment_score_rewards_quality_a_share_without_ignoring_valuation():
         "is_safe": True,
     })
 
-    assert scorecard["score"] >= 64
+    assert 55 <= scorecard["score"] <= 60
     assert scorecard["axes"]["quality"] >= 80
     assert scorecard["axes"]["risk_control"] >= 50
+    assert scorecard["diagnostics"]["guardrails"]["falling_trend_cap"] is True
 
 
 def test_investment_score_caps_expensive_unprofitable_us_growth():
@@ -57,6 +58,7 @@ def test_investment_score_caps_expensive_unprofitable_us_growth():
     assert scorecard["score"] < 65
     assert scorecard["axes"]["growth"] >= 70
     assert scorecard["axes"]["valuation"] < 45
+    assert scorecard["diagnostics"]["guardrails"]["buyback_distorted_pb"] is False
     assert scorecard["axes"]["risk_control"] < 50
 
 
@@ -82,7 +84,8 @@ def test_investment_score_handles_quality_us_with_valuation_cap():
 
     assert 55 <= scorecard["score"] <= 70
     assert scorecard["axes"]["quality"] >= 80
-    assert scorecard["axes"]["valuation"] < 45
+    assert scorecard["axes"]["valuation"] >= 40
+    assert scorecard["diagnostics"]["guardrails"]["buyback_distorted_pb"] is True
 
 
 def test_investment_score_handles_hk_platform_without_a_share_fields():
@@ -108,6 +111,7 @@ def test_investment_score_handles_hk_platform_without_a_share_fields():
     assert 50 <= scorecard["score"] <= 70
     assert scorecard["axes"]["quality"] >= 70
     assert scorecard["axes"]["growth"] < 55
+    assert scorecard["diagnostics"]["guardrails"]["falling_trend_cap"] is True
 
 
 def test_investment_score_keeps_extreme_smallcap_momentum_risk_capped():
@@ -202,3 +206,36 @@ def test_synthesis_exports_investment_score_without_blending_overall():
         "core_watch", "tactical_only", "quality_watch", "avoid",
     }
     assert syn["investment_scorecard"]["axes"]["quality"] >= 70
+
+
+def test_buy_score_orders_aapl_above_falling_a_h_quality_names():
+    from lib.pipeline.score_fns import compute_investment_score
+
+    maotai = compute_investment_score({
+        "market": "A", "market_cap_yi": 14819, "roe_5y_avg": 32.6, "roe_5y_min": 29.9,
+        "net_margin": 47.8, "gross_margin": 65.8, "revenue_growth_3y_cagr": 10.5,
+        "net_profit_growth_latest": -4.5, "pe": 17.9, "pb": 6.4, "pe_quantile_5y": 5,
+        "stage_num": 4, "ytd_return": -14.9, "volatility_1y": 20.1, "max_drawdown_1y": -23.1,
+        "is_safe": True,
+    })
+    tencent = compute_investment_score({
+        "market": "HK", "market_cap_yi": 33266, "roe_5y_avg": 22.5, "roe_5y_min": 15.1,
+        "net_margin": 29.9, "gross_margin": 56.2, "revenue_growth_3y_cagr": 10.7,
+        "net_profit_growth_latest": 15.9, "pe": 14.9, "pb": 3.1,
+        "stage_num": 4, "ytd_return": -30.2, "volatility_1y": 30.2, "max_drawdown_1y": -38.5,
+        "is_safe": True,
+    })
+    apple = compute_investment_score({
+        "market": "US", "market_cap_yi": 42499, "roe_5y_avg": 141.5, "roe_5y_min": 141.5,
+        "net_margin": 26.9, "gross_margin": 44.9, "revenue_growth_3y_cagr": 1.8,
+        "net_profit_growth_latest": 19.5, "pe": 35.1, "pb": 39.9,
+        "stage_num": 2, "ytd_return": 7.0, "volatility_1y": 23.8, "max_drawdown_1y": -13.8,
+        "is_safe": True,
+    })
+
+    assert apple["score"] > maotai["score"]
+    assert apple["score"] > tencent["score"]
+    assert maotai["score"] != tencent["score"]
+    assert maotai["diagnostics"]["guardrails"]["falling_trend_cap"] is True
+    assert tencent["diagnostics"]["guardrails"]["falling_trend_cap"] is True
+    assert apple["diagnostics"]["guardrails"]["buyback_distorted_pb"] is True

@@ -29,6 +29,15 @@ def _f(v, default=0.0) -> float:
         return default
 
 
+def _finite_positive(values: list) -> list[float]:
+    out: list[float] = []
+    for v in values or []:
+        fv = _f(v)
+        if fv > 0:
+            out.append(fv)
+    return out
+
+
 def _pct_change(values: list, n: int = 1) -> float:
     """n-period % change between first and last."""
     if not values or len(values) < 2:
@@ -109,9 +118,10 @@ def extract_features(raw: dict, dims: dict) -> dict:
     div_years = fin.get("dividend_years") or []
     div_amounts = fin.get("dividend_amounts") or []
 
-    f["roe_latest"] = _last(roe_hist)
-    f["roe_5y_avg"] = _avg(roe_hist[-5:]) if len(roe_hist) >= 2 else _last(roe_hist)
-    f["roe_5y_min"] = _min(roe_hist[-5:]) if len(roe_hist) >= 2 else _last(roe_hist)
+    roe_fallback = _f(fin.get("roe"))
+    f["roe_latest"] = _last(roe_hist, default=roe_fallback) or roe_fallback
+    f["roe_5y_avg"] = _avg(roe_hist[-5:], default=roe_fallback) if len(_finite_positive(roe_hist)) >= 2 else f["roe_latest"]
+    f["roe_5y_min"] = _min(roe_hist[-5:], default=roe_fallback) if len(_finite_positive(roe_hist)) >= 2 else f["roe_latest"]
     f["roe_5y_above_15"] = sum(1 for v in roe_hist[-5:] if _f(v) > 15)
     f["roe_5y_above_10"] = sum(1 for v in roe_hist[-5:] if _f(v) > 10)
     f["roe_trend_up"] = _last(roe_hist) > _avg(roe_hist[:-1]) if len(roe_hist) >= 3 else False

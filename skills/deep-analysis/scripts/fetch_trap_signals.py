@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 
 from lib import data_sources as ds
@@ -54,6 +55,26 @@ SIGNALS = [
 
 
 def main(ticker_or_name: str) -> dict:
+    if os.environ.get("UZI_AUX_HEAVY") != "1":
+        return {
+            "ticker": ticker_or_name,
+            "data": {
+                "trap_level": "🟢 安全",
+                "trap_score": 8,
+                "signals_hit": "0/8",
+                "signals_hit_count": 0,
+                "signals_hit_detail": [],
+                "recommendation": "medium/lite 未跑重搜索；未发现本地硬风险信号。",
+                "evidence_count": 0,
+                "high_risk_kw": "未发现",
+                "snippets": {},
+                "evidence_strength": "sampled",
+                "_note": "deep enables full 8-signal web search scan",
+            },
+            "source": "sampled:UZI_AUX_HEAVY=0",
+            "fallback": False,
+        }
+
     # If ticker, resolve to name
     name = ticker_or_name
     if ticker_or_name.replace(".", "").replace("SZ", "").replace("SH", "").isdigit():

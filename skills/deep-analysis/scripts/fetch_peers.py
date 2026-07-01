@@ -37,11 +37,32 @@ def _build_self_only_table(ti, basic: dict) -> tuple[list, list]:
 
 def main(ticker: str) -> dict:
     ti = parse_ticker(ticker)
-    basic = ds.fetch_basic(ti)
-    industry = basic.get("industry") or ""
     peers_raw: list = []
     peer_table: list = []
     peer_comparison: list = []
+
+    if os.environ.get("UZI_AUX_HEAVY") != "1" and ti.market == "A":
+        basic = {"code": ti.full, "name": ti.full}
+        industry = ""
+        peer_table, peer_comparison = _build_self_only_table(ti, basic)
+        return {
+            "ticker": ti.full,
+            "data": {
+                "industry": industry,
+                "self": basic,
+                "peer_table": peer_table,
+                "peer_comparison": peer_comparison,
+                "rank": "—",
+                "peers_top20_raw": [],
+                "fallback_reason": "medium/lite skip heavy A-share peer universe lookup; deep enables full peers",
+                "evidence_strength": "sampled",
+            },
+            "source": "self-only:UZI_AUX_HEAVY=0",
+            "fallback": True,
+        }
+
+    basic = ds.fetch_basic(ti)
+    industry = basic.get("industry") or ""
 
     # v2.5 · HK 分支：用 akshare HK valuation/scale comparison 给出 rank-in-HK-universe，
     # 没有具体同行名单（akshare 港股没有按行业列表函数；agent 可走 AASTOCKS Playwright 兜底）

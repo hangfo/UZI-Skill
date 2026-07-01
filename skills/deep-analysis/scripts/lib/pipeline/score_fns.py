@@ -647,6 +647,13 @@ def compute_investment_score(features: dict) -> dict:
     # companies can still get some valuation credit on PB/PS, but PE=0 should
     # not look cheap.
     valuation = 50.0
+    buyback_distorted_pb = (
+        market == "US"
+        and mcap >= 5_000
+        and net_margin >= 20
+        and 0 < pe <= 45
+        and pb >= 20
+    )
     if pe > 0:
         if pe <= 12: valuation += 18
         elif pe <= 25: valuation += 10
@@ -657,8 +664,10 @@ def compute_investment_score(features: dict) -> dict:
         valuation -= 10
     if pb > 0:
         if pb <= 2: valuation += 8
-        elif pb >= 20: valuation -= 18
-        elif pb >= 8: valuation -= 10
+        elif pb >= 20:
+            valuation -= 6 if buyback_distorted_pb else 18
+        elif pb >= 8:
+            valuation -= 4 if buyback_distorted_pb else 10
     if pe_q <= 30: valuation += 10
     elif pe_q >= 80: valuation -= 10
     if _num("dividend_yield") >= 3:
@@ -707,13 +716,18 @@ def compute_investment_score(features: dict) -> dict:
         score = min(score, 55)
     if axes["valuation"] < 35 and axes["risk_control"] < 35:
         score = min(score, 55)
+    falling_trend_cap = stage_num == 4 and (ytd <= -10 or max_dd <= -25)
+    if falling_trend_cap:
+        cap = 59 if axes["valuation"] >= 60 and axes["quality"] >= 80 else 56
+        score = min(score, cap)
     if axes["quality"] >= 85 and axes["risk_control"] >= 55 and axes["valuation"] >= 45:
         quality_floor = 64
         if axes["growth"] >= 45 or axes["catalyst"] >= 50:
             quality_floor = 66
         if axes["growth"] >= 55 and axes["catalyst"] >= 50:
             quality_floor = 68
-        score = max(score, quality_floor)
+        if not falling_trend_cap:
+            score = max(score, quality_floor)
 
     if score >= 78:
         rating = "强关注"
@@ -748,6 +762,8 @@ def compute_investment_score(features: dict) -> dict:
                 "speculative_quality_risk_cap": axes["quality"] < 45 and axes["risk_control"] < 35,
                 "valuation_risk_cap": axes["valuation"] < 35 and axes["risk_control"] < 35,
                 "quality_floor_eligible": axes["quality"] >= 85 and axes["risk_control"] >= 55 and axes["valuation"] >= 45,
+                "falling_trend_cap": falling_trend_cap,
+                "buyback_distorted_pb": buyback_distorted_pb,
             },
         },
     }

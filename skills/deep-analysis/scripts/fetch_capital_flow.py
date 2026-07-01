@@ -12,6 +12,7 @@
 v2.15.3 (#30) · 大宗交易 + 解禁数据走 ds.cached module-level · 避免每只股重抓全 A 数据（原每次 3+min，改后首次 3min 后续 < 1s）.
 """
 import json
+import os
 import sys
 
 import akshare as ak  # type: ignore
@@ -127,11 +128,35 @@ def main(ticker: str) -> dict:
     if ti.market != "A":
         return {"ticker": ti.full, "data": {"_note": "capital_flow only A-share / HK for now"}, "source": "skip", "fallback": False}
 
-    north = ds.fetch_northbound(ti)
+    heavy = os.environ.get("UZI_CAPITAL_FLOW_HEAVY") == "1"
+    if not heavy:
+        return {
+            "ticker": ti.full,
+            "data": {
+                "northbound": {"note": "skipped by UZI_CAPITAL_FLOW_HEAVY=0"},
+                "northbound_20d": "—",
+                "margin_recent": [],
+                "margin_trend": "sampled skip",
+                "holder_count_history": [],
+                "holders_trend": "—",
+                "main_fund_flow_20d": [],
+                "main_20d": "—",
+                "main_5d": "—",
+                "block_trades_recent": [],
+                "unlock_recent": [],
+                "unlock_schedule": [],
+                "institutional_history": {"quarters": [], "fund": [], "qfii": [], "shehui": [], "_note": "deep enables full capital-flow evidence"},
+                "evidence_strength": "sampled",
+                "_note": "medium/lite skip heavy A-share capital-flow universe calls; investment_score does not depend on this auxiliary dimension",
+            },
+            "source": "sampled:UZI_CAPITAL_FLOW_HEAVY=0",
+            "fallback": False,
+        }
+    north = ds.fetch_northbound(ti) if heavy else {"note": "skipped by UZI_CAPITAL_FLOW_HEAVY=0"}
 
     # v2.15.3 · 融资明细走 universe cache · 按 exchange 缓存全市场最新一天
     exchange = "SZ" if ti.full.endswith("SZ") else "SSE"
-    universe_margin = _universe_margin_detail(exchange)
+    universe_margin = _universe_margin_detail(exchange) if heavy else []
     # head(5) 保留原行为（展示市场层 top 5 · 非本股过滤）
     margin = universe_margin[:5] if universe_margin else []
 
@@ -147,21 +172,21 @@ def main(ticker: str) -> dict:
 
     # 大宗交易 · v2.15.3 · 走 universe cache · 只 filter 本股（原每次 3+min 重抓全 A）
     try:
-        universe_dzjy = _universe_dzjy(2026)
+        universe_dzjy = _universe_dzjy(2026) if heavy else []
         block_trades = [r for r in universe_dzjy if r.get("证券代码") == ti.code][:20]
     except Exception:
         block_trades = []
 
     # 限售股解禁 (近一年) · v2.15.3 · universe cache
     try:
-        universe_release = _universe_release_summary()
+        universe_release = _universe_release_summary() if heavy else []
         unlock = [r for r in universe_release if r.get("代码") == ti.code]
     except Exception:
         unlock = []
 
     # 解禁日历前瞻 12 个月 · v2.15.3 · universe cache
     try:
-        universe_detail = _universe_release_detail(2026)
+        universe_detail = _universe_release_detail(2026) if heavy else []
         unlock_future = [r for r in universe_detail if r.get("代码") == ti.code][:20]
     except Exception:
         unlock_future = []
@@ -188,37 +213,42 @@ def main(ticker: str) -> dict:
 
     # 机构持仓 8 季度历史 (stock_report_fund_hold_detail)
     inst_history: dict = {"quarters": [], "fund": [], "qfii": [], "shehui": []}
-    try:
-        from datetime import datetime as _dt, timedelta as _td
-        # Get last 8 quarters
-        today = _dt.now()
-        quarters = []
-        for i in range(8):
-            y = today.year
-            q = ((today.month - 1) // 3) - i
-            while q < 0:
-                q += 4
-                y -= 1
-            q_dates = ["0331", "0630", "0930", "1231"]
-            quarters.append((f"{y}{q_dates[q]}", f"{str(y)[2:]}Q{q+1}"))
-        quarters.reverse()
-        inst_history["quarters"] = [q[1] for q in quarters]
+    if not heavy:
+        inst_history["_note"] = "skipped by UZI_CAPITAL_FLOW_HEAVY=0; deep enables full 8-quarter institution history"
+    else:
+        try:
+            from datetime import datetime as _dt
+            # Get last 8 quarters. This is intentionally deep-only: akshare
+            # fetches the whole fund-holding universe per quarter and can print
+            # 800+ item progress bars for a single A-share.
+            today = _dt.now()
+            quarters = []
+            for i in range(8):
+                y = today.year
+                q = ((today.month - 1) // 3) - i
+                while q < 0:
+                    q += 4
+                    y -= 1
+                q_dates = ["0331", "0630", "0930", "1231"]
+                quarters.append((f"{y}{q_dates[q]}", f"{str(y)[2:]}Q{q+1}"))
+            quarters.reverse()
+            inst_history["quarters"] = [q[1] for q in quarters]
 
-        for q_date, q_label in quarters:
-            fund_pct = qfii_pct = shehui_pct = 0.0
-            try:
-                df_fund = ak.stock_report_fund_hold_detail(symbol="基金持仓", date=q_date)
-                if df_fund is not None and not df_fund.empty and "股票代码" in df_fund.columns:
-                    sub = df_fund[df_fund["股票代码"].astype(str) == ti.code]
-                    if not sub.empty and "占流通股比例" in sub.columns:
-                        fund_pct = float(sub["占流通股比例"].sum())
-            except Exception:
-                pass
-            inst_history["fund"].append(round(fund_pct, 2))
-            inst_history["qfii"].append(round(qfii_pct, 2))
-            inst_history["shehui"].append(round(shehui_pct, 2))
-    except Exception:
-        pass
+            for q_date, q_label in quarters:
+                fund_pct = qfii_pct = shehui_pct = 0.0
+                try:
+                    df_fund = ak.stock_report_fund_hold_detail(symbol="基金持仓", date=q_date)
+                    if df_fund is not None and not df_fund.empty and "股票代码" in df_fund.columns:
+                        sub = df_fund[df_fund["股票代码"].astype(str) == ti.code]
+                        if not sub.empty and "占流通股比例" in sub.columns:
+                            fund_pct = float(sub["占流通股比例"].sum())
+                except Exception:
+                    pass
+                inst_history["fund"].append(round(fund_pct, 2))
+                inst_history["qfii"].append(round(qfii_pct, 2))
+                inst_history["shehui"].append(round(shehui_pct, 2))
+        except Exception:
+            pass
 
     # Build summary strings for viz
     def _north_sum_20d(hist):
