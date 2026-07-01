@@ -467,6 +467,8 @@ def check_factcheck_redflags(ctx: dict) -> list[Issue]:
     ag = ctx.get("ag") or {}
     syn = ctx.get("syn") or {}
     basic = _get_dim(ctx, "0_basic")
+    ticker = str(ctx.get("ticker") or "").upper()
+    company_name = str(basic.get("name") or syn.get("name") or "").lower()
     main_business = (basic.get("main_business") or "") + str(basic.get("industry") or "")
 
     # 收集所有 commentary 文本
@@ -478,11 +480,17 @@ def check_factcheck_redflags(ctx: dict) -> list[Issue]:
 
     # 红旗关联词：如果声称 "Apple/苹果" 但 main_business 不含相关词 → 嫌疑
     REDFLAGS = [
-        ("苹果|Apple", ["光学", "镜头", "屏幕", "代工", "结构件", "精密"], "苹果产业链"),
-        ("特斯拉|Tesla", ["电池", "零部件", "车身", "锂电"], "特斯拉供应链"),
+        ("苹果|Apple", ["光学", "镜头", "屏幕", "代工", "结构件", "精密"], "苹果产业链", {"AAPL"}, ("apple inc",)),
+        ("特斯拉|Tesla", ["电池", "零部件", "车身", "锂电"], "特斯拉供应链", {"TSLA"}, ("tesla",)),
     ]
     import re
-    for claim_pattern, justify_kws, label in REDFLAGS:
+    for claim_pattern, justify_kws, label, own_tickers, own_name_markers in REDFLAGS:
+        # Mentioning Apple/Tesla in the company name of Apple/Tesla itself is
+        # identity, not a supplier-chain claim. Keep the red flag for other
+        # companies that imply supply-chain exposure without business evidence.
+        is_own_company = ticker in own_tickers or any(m in company_name for m in own_name_markers)
+        if is_own_company:
+            continue
         if re.search(claim_pattern, all_text, re.I):
             if not any(k in main_business for k in justify_kws):
                 issues.append(Issue(
