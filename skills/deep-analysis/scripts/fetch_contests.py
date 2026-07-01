@@ -23,6 +23,7 @@
 }
 """
 import json
+import os
 import re
 import sys
 import time
@@ -35,6 +36,21 @@ from lib.cache import cached
 from lib.market_router import parse_ticker
 
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+
+
+def _env_limit(name: str, default: int) -> int | None:
+    raw = str(os.environ.get(name, str(default))).strip().lower()
+    if raw in ("all", "none", "0", "-1"):
+        return None
+    try:
+        return max(1, int(raw))
+    except ValueError:
+        return default
+
+
+def _heavy_sources_enabled() -> bool:
+    raw = str(os.environ.get("UZI_CONTEST_HEAVY", "0")).strip().lower()
+    return raw in ("1", "true", "yes", "on")
 
 
 # ─────────────────────────────────────────────────────────────
@@ -225,25 +241,38 @@ def summarize(xq_cubes: list[dict], tgb: list[dict], ths: list[dict]) -> dict:
 
 def main(ticker: str) -> dict:
     ti = parse_ticker(ticker)
+    limit = _env_limit("UZI_CONTEST_LIMIT", 50)
+    limit_label = "all" if limit is None else str(limit)
+    xq_limit = limit or 50
+    heavy_enabled = _heavy_sources_enabled()
 
     # v2.7.1 · cached + new (cubes, meta) signature
     def _xq_call():
-        cubes, meta = fetch_xueqiu_cubes(ti)
+        cubes, meta = fetch_xueqiu_cubes(ti, limit=xq_limit)
         return {"cubes": cubes, "meta": meta}
 
-    xq_result = cached(ti.full, f"xq_cubes__{ti.code}", _xq_call, ttl=6 * 3600)
+    xq_result = cached(ti.full, f"xq_cubes__{ti.code}__{limit_label}", _xq_call, ttl=6 * 3600)
     xq = xq_result.get("cubes", []) if isinstance(xq_result, dict) else []
     xq_meta = xq_result.get("meta", {}) if isinstance(xq_result, dict) else {}
 
     time.sleep(0.5)
     tgb = cached(ti.full, f"tgb__{ti.code}", lambda: fetch_tgb_mentions(ti), ttl=12 * 3600)
-    time.sleep(0.5)
-    ths = cached(ti.full, f"ths_simu__{ti.code}", lambda: fetch_ths_simu(ti), ttl=12 * 3600)
-    dps = fetch_dpswang(ti)
+    if limit is not None and isinstance(tgb, list):
+        tgb = tgb[:limit]
+    if heavy_enabled:
+        time.sleep(0.5)
+        ths = cached(ti.full, f"ths_simu__{ti.code}", lambda: fetch_ths_simu(ti), ttl=12 * 3600)
+        dps = fetch_dpswang(ti)
+    else:
+        ths = [{"note": "skipped by UZI_CONTEST_HEAVY=0; set 1 or use depth=deep for heavy contest sources"}]
+        dps = [{"note": "skipped by UZI_CONTEST_HEAVY=0; set 1 or use depth=deep for heavy contest sources"}]
 
     summary = summarize(xq, tgb, ths)
     summary["xueqiu_login_required"] = bool(xq_meta.get("login_required"))
     summary["xueqiu_source"] = xq_meta.get("source", "http")
+    summary["sample_limit"] = limit_label
+    summary["heavy_sources_enabled"] = heavy_enabled
+    summary["evidence_strength"] = "full" if heavy_enabled and limit is None else "sampled"
 
     note = "雪球 cubes API 是主数据源；其余 3 站点 ≥1 失败时 Claude 用 fallback_queries 补足"
     if xq_meta.get("login_required") and not xq:

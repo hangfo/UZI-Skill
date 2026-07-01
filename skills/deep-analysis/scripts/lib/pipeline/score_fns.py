@@ -700,21 +700,28 @@ def compute_investment_score(features: dict) -> dict:
     }
     weights = {
         "quality": 0.25,
-        "growth": 0.20,
-        "catalyst": 0.20,
-        "valuation": 0.20,
+        "growth": 0.17,
+        "catalyst": 0.28,
+        "valuation": 0.15,
         "risk_control": 0.15,
     }
     score = sum(axes[k] * weights[k] for k in weights)
 
     # Guardrails: do not turn speculative, expensive, or fragile names into buy
     # ratings only because growth/catalyst is high.
-    if axes["quality"] < 45 and axes["risk_control"] < 30:
-        score = min(score, 58)
+    if axes["quality"] < 45 and axes["risk_control"] < 25:
+        score = min(score, 45)
+    elif axes["quality"] < 45 and axes["risk_control"] < 35:
+        score = min(score, 55)
     if axes["valuation"] < 35 and axes["risk_control"] < 35:
-        score = min(score, 60)
-    if axes["quality"] >= 75 and axes["risk_control"] >= 55 and axes["valuation"] >= 45:
-        score = max(score, 68)
+        score = min(score, 55)
+    if axes["quality"] >= 85 and axes["risk_control"] >= 55 and axes["valuation"] >= 45:
+        quality_floor = 64
+        if axes["growth"] >= 45 or axes["catalyst"] >= 50:
+            quality_floor = 66
+        if axes["growth"] >= 55 and axes["catalyst"] >= 50:
+            quality_floor = 68
+        score = max(score, quality_floor)
 
     if score >= 78:
         rating = "强关注"
@@ -745,6 +752,11 @@ def compute_investment_score(features: dict) -> dict:
             "volatility": vol,
             "max_drawdown": max_dd,
             "market_cap_yi": mcap,
+            "guardrails": {
+                "speculative_quality_risk_cap": axes["quality"] < 45 and axes["risk_control"] < 35,
+                "valuation_risk_cap": axes["valuation"] < 35 and axes["risk_control"] < 35,
+                "quality_floor_eligible": axes["quality"] >= 85 and axes["risk_control"] >= 55 and axes["valuation"] >= 45,
+            },
         },
     }
 

@@ -30,6 +30,7 @@ def test_parse_ticker_market_convention():
     from lib.market_router import parse_ticker
     assert parse_ticker("NOK").market == "U"
     assert parse_ticker("AAPL").market == "U"
+    assert parse_ticker("SIVE.ST").market == "G"
     assert parse_ticker("00700.HK").market == "H"
     assert parse_ticker("600519.SH").market == "A"
     assert parse_ticker("300470.SZ").market == "A"
@@ -66,6 +67,14 @@ def test_pipeline_preserves_market_hk_ticker(monkeypatch):
     run_mod.run_pipeline("00700.HK", resume=False)
     assert captured["market"] == "H"
     assert captured["full"] == "00700.HK"
+
+
+def test_pipeline_preserves_market_global_ticker(monkeypatch):
+    run_mod, captured = _patch_pipeline(monkeypatch, {"0_basic": {}})
+    run_mod.run_pipeline("SIVE.ST", resume=False)
+    assert captured["market"] == "G"
+    assert captured["code"] == "SIVE.ST"
+    assert captured["full"] == "SIVE.ST"
 
 
 def test_pipeline_a_share_still_a(monkeypatch):

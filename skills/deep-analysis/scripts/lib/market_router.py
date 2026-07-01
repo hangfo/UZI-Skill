@@ -1,4 +1,4 @@
-"""Identify market (A / H / U) from a ticker or stock name and normalize the code.
+"""Identify market (A / H / U / G) from a ticker or stock name and normalize the code.
 
 v2.9.2 · 扩展 `_a_share_suffix` 覆盖 ETF / LOF / 可转债 等非个股 6 位码
         + 增加 `classify_security_type` 识别标的类型（stock/etf/lof/cb）
@@ -9,7 +9,7 @@ import re
 from dataclasses import dataclass
 from typing import Literal
 
-Market = Literal["A", "H", "U"]
+Market = Literal["A", "H", "U", "G"]
 SecurityType = Literal["stock", "etf", "lof", "convertible_bond", "mutual_fund", "unknown"]
 
 
@@ -18,13 +18,29 @@ class TickerInfo:
     raw: str            # original user input
     code: str           # numeric/letter code without exchange suffix
     full: str           # canonical: 002273.SZ / 00700.HK / AAPL
-    market: Market      # A / H / U
+    market: Market      # A / H / U / G
 
 
 _RE_A_NUMERIC = re.compile(r"^\d{6}$")
 _RE_A_FULL = re.compile(r"^(\d{6})\.(SZ|SH|BJ)$", re.I)
 _RE_HK = re.compile(r"^(\d{4,5})(?:\.HK)?$", re.I)
 _RE_US = re.compile(r"^[A-Z][A-Z\.\-]{0,5}$")
+_GLOBAL_SUFFIXES = frozenset({
+    # First batch: route non-US listings through Yahoo/yfinance-compatible tickers.
+    # Keep A-share/HK suffixes out of this set because they have richer local paths.
+    "T", "TW", "TWO", "ST", "SW", "OL", "CO", "HE", "PA", "AS",
+    "L", "DE", "F", "MI", "MC", "TO", "V", "AX", "SI", "KS", "KQ",
+    "JK", "KL", "BK", "NZ", "SA", "MX", "JO",
+})
+_RE_GLOBAL_FULL = re.compile(
+    r"^([A-Z0-9][A-Z0-9\-]{0,11})\.(" + "|".join(sorted(_GLOBAL_SUFFIXES, key=len, reverse=True)) + r")$",
+    re.I,
+)
+
+
+def is_global_listing_symbol(raw: str) -> bool:
+    """True for Yahoo-style non-US suffixes such as SIVE.ST, 7203.T, 2330.TW."""
+    return bool(_RE_GLOBAL_FULL.match(str(raw or "").strip().upper().replace(" ", "")))
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -194,6 +210,9 @@ def parse_ticker(raw: str) -> TickerInfo:
 
     if _RE_HK.match(s) and not _RE_US.match(s):
         return TickerInfo(raw=raw, code=s.lstrip("0") or "0", full=f"{s.zfill(5)}.HK", market="H")
+
+    if _RE_GLOBAL_FULL.match(s):
+        return TickerInfo(raw=raw, code=s, full=s, market="G")
 
     if _RE_US.match(s):
         return TickerInfo(raw=raw, code=s, full=s, market="U")

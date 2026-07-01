@@ -95,14 +95,38 @@ def test_lite_profile_sets_fund_limit(monkeypatch):
     from lib.analysis_profile import apply_profile_to_env, get_profile
 
     monkeypatch.delenv("UZI_FUND_LIMIT", raising=False)
+    monkeypatch.delenv("UZI_CONTEST_LIMIT", raising=False)
+    monkeypatch.delenv("UZI_CONTEST_HEAVY", raising=False)
     apply_profile_to_env(get_profile("lite"))
     assert __import__("os").environ["UZI_FUND_LIMIT"] == "5"
+    assert __import__("os").environ["UZI_CONTEST_LIMIT"] == "20"
+    assert __import__("os").environ["UZI_CONTEST_HEAVY"] == "0"
 
+    monkeypatch.delenv("UZI_CONTEST_LIMIT", raising=False)
+    monkeypatch.delenv("UZI_CONTEST_HEAVY", raising=False)
     apply_profile_to_env(get_profile("medium"))
     assert __import__("os").environ["UZI_FUND_LIMIT"] == "100"
+    assert __import__("os").environ["UZI_CONTEST_LIMIT"] == "80"
+    assert __import__("os").environ["UZI_CONTEST_HEAVY"] == "0"
 
+    monkeypatch.delenv("UZI_CONTEST_LIMIT", raising=False)
+    monkeypatch.delenv("UZI_CONTEST_HEAVY", raising=False)
     apply_profile_to_env(get_profile("deep"))
     assert __import__("os").environ["UZI_FUND_LIMIT"] == "all"
+    assert __import__("os").environ["UZI_CONTEST_LIMIT"] == "all"
+    assert __import__("os").environ["UZI_CONTEST_HEAVY"] == "1"
+
+
+def test_global_listing_suffixes_route_without_breaking_us_classes():
+    from lib.market_router import parse_ticker
+
+    assert parse_ticker("SIVE.ST").market == "G"
+    assert parse_ticker("7203.T").market == "G"
+    assert parse_ticker("2330.TW").market == "G"
+    assert parse_ticker("2330.TWO").market == "G"
+    assert parse_ticker("BRK.B").market == "U"
+    assert parse_ticker("600519.SH").market == "A"
+    assert parse_ticker("00700.HK").market == "H"
 
 
 def test_fund_holders_env_limit_caps_lite_rows(monkeypatch):

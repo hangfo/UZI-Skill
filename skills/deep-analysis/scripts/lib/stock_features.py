@@ -13,6 +13,8 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from lib.market_router import is_global_listing_symbol
+
 
 def _f(v, default=0.0) -> float:
     """Safe float extraction."""
@@ -393,6 +395,8 @@ def extract_features(raw: dict, dims: dict) -> dict:
         f["market"] = "A"
     elif ticker_str.endswith(".HK"):
         f["market"] = "HK"
+    elif is_global_listing_symbol(ticker_str):
+        f["market"] = "G"
     else:
         f["market"] = "US"
 

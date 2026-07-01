@@ -877,6 +877,36 @@ def test_fetch_industry_respects_lite_mode():
     assert "dynamic = {}" in snippet, "lite mode 必须让 dynamic 为空"
 
 
+def test_self_review_industry_mapping_tolerates_none_fields():
+    from lib.self_review import check_industry_mapping_sanity
+
+    ctx = {
+        "market": "A",
+        "dims": {
+            "0_basic": {"data": {"industry": None}},
+            "7_industry": {"data": {"cninfo_metrics": {"industry_name_match": None}}},
+        },
+    }
+    assert check_industry_mapping_sanity(ctx) == []
+
+
+def test_self_review_metals_materials_tolerates_none_industry():
+    from lib.self_review import check_metals_materials_populated
+
+    ctx = {"market": "A", "dims": {"0_basic": {"data": {"industry": None}}}}
+    assert check_metals_materials_populated(ctx) == []
+
+
+def test_self_review_empty_dims_tolerates_none_error(monkeypatch):
+    from lib.self_review import check_empty_dims
+
+    monkeypatch.setenv("UZI_DEPTH", "lite")
+    ctx = {"dims": {"1_financials": {"data": {}, "error": None}}}
+    issues = check_empty_dims(ctx)
+    assert issues
+    assert issues[0].evidence.endswith("error=")
+
+
 if __name__ == "__main__":
     # Manual runner — no pytest required
     import inspect

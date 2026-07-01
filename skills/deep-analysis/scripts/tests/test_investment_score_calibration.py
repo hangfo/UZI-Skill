@@ -27,7 +27,7 @@ def test_investment_score_rewards_quality_a_share_without_ignoring_valuation():
         "is_safe": True,
     })
 
-    assert scorecard["score"] >= 68
+    assert scorecard["score"] >= 64
     assert scorecard["axes"]["quality"] >= 80
     assert scorecard["axes"]["risk_control"] >= 50
 
@@ -135,6 +135,7 @@ def test_investment_score_keeps_extreme_smallcap_momentum_risk_capped():
     assert scorecard["score"] <= 58
     assert scorecard["axes"]["catalyst"] >= 70
     assert scorecard["axes"]["risk_control"] < 30
+    assert scorecard["diagnostics"]["guardrails"]["speculative_quality_risk_cap"] is True
 
 
 def test_synthesis_exports_investment_score_without_blending_overall():

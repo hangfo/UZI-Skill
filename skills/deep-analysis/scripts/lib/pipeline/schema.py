@@ -120,7 +120,7 @@ class FetcherSpec:
     optional_fields: list[str] = field(default_factory=list)
     top_level_fields: list[str] = field(default_factory=list)  # 要写到 raw 顶层的字段（如 fund_managers）
     sources: list[str] = field(default_factory=list)  # 数据源 · 如 ["akshare", "mx", "ddgs"]
-    markets: tuple[str, ...] = ("A", "H", "U")
+    markets: tuple[str, ...] = ("A", "H", "U", "G")
     cache_ttl_sec: int = 3600
     depends_on: list[str] = field(default_factory=list)  # 依赖的其他 dim 先跑（如 7_industry 需要 0_basic.industry）
 
