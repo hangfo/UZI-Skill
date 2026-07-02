@@ -42,6 +42,50 @@ def test_theme_toggle_js_persists_localstorage():
     assert "prefers-color-scheme" in TEMPLATE
 
 
+def test_dark_theme_readability_tokens_are_not_low_contrast():
+    """Dark theme body and secondary text must stay readable on report cards."""
+    assert "--bg-card:     #192232" in TEMPLATE
+    assert "--bg-elevated: #243044" in TEMPLATE
+    assert "--text-main:   #eef4fb" in TEMPLATE
+    assert "--text-dim:    #aeb8c6" in TEMPLATE
+
+
+def test_dark_theme_readability_guardrail_covers_fixed_surfaces():
+    """Renderer fragments with fixed light surfaces need dark-mode overrides."""
+    assert "v3.9.2 · readability guardrail" in TEMPLATE
+    for selector in [
+        ".chat-msg.neutral .msg-bubble",
+        ".friendly-card.scenario",
+        ".seg-card",
+        ".seg-projection-table",
+        "#share-overlay > div",
+    ]:
+        assert selector in TEMPLATE, f"dark readability guardrail missing {selector}"
+
+
+def test_dark_theme_inline_color_overrides_cover_common_renderer_literals():
+    """Inline renderer colors should not become unreadable in dark mode."""
+    for literal in [
+        '[style*="color:#0f172a"]',
+        '[style*="color:#111"]',
+        '[style*="color:#1f2937"]',
+        '[style*="color:#64748b"]',
+    ]:
+        assert literal in TEMPLATE, f"inline dark text override missing {literal}"
+
+
+def test_dark_theme_inline_background_overrides_cover_common_light_tints():
+    """Inline renderer light backgrounds should not clash with dark-mode text."""
+    for literal in [
+        '[style*="background:#ffffff"]',
+        '[style*="background:#fef3c7"]',
+        '[style*="background:#cffafe"]',
+        '[style*="background:#d1fae5"]',
+        '[style*="background:rgba(8,145,178"]',
+    ]:
+        assert literal in TEMPLATE, f"inline light background override missing {literal}"
+
+
 # ─── #2 · Sticky TOC ─────────────────────────────────────
 
 def test_toc_rail_has_eight_sections():

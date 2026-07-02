@@ -44,10 +44,10 @@
 
   /* text — high contrast on white */
   --text-bright: #0f172a;   /* slate-900 */
-  --text-main:   #1e293b;   /* slate-800 */
-  --text-mid:    #475569;   /* slate-600 */
-  --text-dim:    #64748b;   /* slate-500 */
-  --text-ghost:  #94a3b8;   /* slate-400 */
+  --text-main:   #172033;   /* slate-900 tuned for dense report text */
+  --text-mid:    #334155;   /* slate-700 */
+  --text-dim:    #475569;   /* slate-600 */
+  --text-ghost:  #64748b;   /* slate-500 */
 
   /* shadows for depth */
   --shadow-sm: 0 1px 2px rgba(15,23,42,.04);
@@ -66,12 +66,12 @@
 [data-theme="dark"] {
   --bg-void:     #0a0e14;   /* obsidian */
   --bg-deep:     #0f141b;   /* canvas */
-  --bg-card:     #161b22;   /* gh-dark card */
-  --bg-elevated: #1c2128;
-  --bg-tinted:   #161b22;
-  --bg-rail:     #0a0e14;
-  --border:      #30363d;
-  --border-hot:  #484f58;
+  --bg-card:     #192232;   /* dark card with room for readable text */
+  --bg-elevated: #243044;
+  --bg-tinted:   #111827;
+  --bg-rail:     #0b111a;
+  --border:      #4b5563;
+  --border-hot:  #718096;
   --border-soft: #21262d;
   --neon-cyan:   #22d3ee;
   --neon-gold:   #facc15;
@@ -81,15 +81,15 @@
   --warning-amber: #fb923c;
   --accent-blue: #60a5fa;
   --accent-indigo: #818cf8;
-  --bull-tint:   rgba(52,211,153,.18);
-  --bear-tint:   rgba(248,113,113,.18);
-  --gold-tint:   rgba(250,204,21,.18);
-  --cyan-tint:   rgba(34,211,238,.18);
-  --text-bright: #f0f6fc;
-  --text-main:   #c9d1d9;
-  --text-mid:    #8b949e;
-  --text-dim:    #6e7681;
-  --text-ghost:  #484f58;
+  --bull-tint:   rgba(52,211,153,.28);
+  --bear-tint:   rgba(248,113,113,.28);
+  --gold-tint:   rgba(250,204,21,.28);
+  --cyan-tint:   rgba(34,211,238,.26);
+  --text-bright: #ffffff;
+  --text-main:   #eef4fb;
+  --text-mid:    #cbd5e1;
+  --text-dim:    #aeb8c6;
+  --text-ghost:  #94a3b8;
   --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
   --shadow-md: 0 4px 12px rgba(0,0,0,.5), 0 1px 3px rgba(0,0,0,.4);
   --shadow-lg: 0 12px 32px rgba(0,0,0,.6), 0 4px 12px rgba(0,0,0,.4);
@@ -103,6 +103,99 @@
 /* dark mode · 让原本固定深色背景的元素也跟随 */
 [data-theme="dark"] .punchline { background: var(--bg-card); color: var(--text-bright); }
 [data-theme="dark"] .punchline::before { color: #0a0e14; }
+
+/* v3.9.2 · readability guardrail for rendered fragments with fixed light surfaces */
+[data-theme="dark"] .fighter.bull,
+[data-theme="dark"] .fighter.bear,
+[data-theme="dark"] .chat-tab,
+[data-theme="dark"] .chat-msg.neutral .msg-bubble,
+[data-theme="dark"] .conc-content,
+[data-theme="dark"] .friendly-card.scenario,
+[data-theme="dark"] .friendly-card.similar,
+[data-theme="dark"] .friendly-card.exit,
+[data-theme="dark"] .similar-stock-pill,
+[data-theme="dark"] .exit-trigger-item,
+[data-theme="dark"] .seat-avatar,
+[data-theme="dark"] .chat-msg .msg-avatar,
+[data-theme="dark"] .fc-avatar,
+[data-theme="dark"] .seg-card,
+[data-theme="dark"] .seg-card-main,
+[data-theme="dark"] .seg-scenario-box,
+[data-theme="dark"] .seg-projection-table,
+[data-theme="dark"] .seg-assumption-row,
+[data-theme="dark"] #share-overlay > div {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border) !important;
+}
+
+[data-theme="dark"] [style*="color:#0f172a"],
+[data-theme="dark"] [style*="color: #0f172a"],
+[data-theme="dark"] [style*="color:#111"],
+[data-theme="dark"] [style*="color: #111"],
+[data-theme="dark"] [style*="color:#1f2937"],
+[data-theme="dark"] [style*="color: #1f2937"],
+[data-theme="dark"] [style*="color:#374151"],
+[data-theme="dark"] [style*="color: #374151"] {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] [style*="color:#475569"],
+[data-theme="dark"] [style*="color: #475569"],
+[data-theme="dark"] [style*="color:#64748b"],
+[data-theme="dark"] [style*="color: #64748b"],
+[data-theme="dark"] [style*="color:#6b7280"],
+[data-theme="dark"] [style*="color: #6b7280"],
+[data-theme="dark"] [style*="color:#94a3b8"],
+[data-theme="dark"] [style*="color: #94a3b8"] {
+  color: var(--text-dim) !important;
+}
+
+[data-theme="dark"] [style*="background:#ffffff"],
+[data-theme="dark"] [style*="background: #ffffff"],
+[data-theme="dark"] [style*="background:#f8fafc"],
+[data-theme="dark"] [style*="background: #f8fafc"],
+[data-theme="dark"] [style*="background:#f9fafb"],
+[data-theme="dark"] [style*="background: #f9fafb"],
+[data-theme="dark"] [style*="background:#f1f5f9"],
+[data-theme="dark"] [style*="background: #f1f5f9"],
+[data-theme="dark"] [style*="background:#f0f9ff"],
+[data-theme="dark"] [style*="background: #f0f9ff"],
+[data-theme="dark"] [style*="background:#fef2f2"],
+[data-theme="dark"] [style*="background: #fef2f2"],
+[data-theme="dark"] [style*="background:#fef3c7"],
+[data-theme="dark"] [style*="background: #fef3c7"],
+[data-theme="dark"] [style*="background:#fff7ed"],
+[data-theme="dark"] [style*="background: #fff7ed"],
+[data-theme="dark"] [style*="background:#cffafe"],
+[data-theme="dark"] [style*="background: #cffafe"],
+[data-theme="dark"] [style*="background:#d1fae5"],
+[data-theme="dark"] [style*="background: #d1fae5"],
+[data-theme="dark"] [style*="background:#fee2e2"],
+[data-theme="dark"] [style*="background: #fee2e2"],
+[data-theme="dark"] [style*="background:rgba(8,145,178"],
+[data-theme="dark"] [style*="background: rgba(8,145,178"],
+[data-theme="dark"] [style*="background:rgba(16,185,129"],
+[data-theme="dark"] [style*="background: rgba(16,185,129"],
+[data-theme="dark"] [style*="background:rgba(239,68,68"],
+[data-theme="dark"] [style*="background: rgba(239,68,68"],
+[data-theme="dark"] [style*="background:rgba(245,158,11"],
+[data-theme="dark"] [style*="background: rgba(245,158,11"] {
+  background: var(--bg-elevated) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border) !important;
+}
+
+[data-theme="dark"] .score-giant::after,
+[data-theme="dark"] .dim-mini-label,
+[data-theme="dark"] .vs-bolt .sub,
+[data-theme="dark"] .round-label {
+  color: var(--text-dim) !important;
+}
+
+[data-theme="dark"] .punchline::before {
+  color: #0f172a !important;
+}
 
 /* v3.6.0 · theme-toggle button in topbar */
 .theme-toggle {
