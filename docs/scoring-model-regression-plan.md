@@ -1,15 +1,19 @@
 # UZI scoring model regression plan
 
 Date: 2026-07-01
-Branch: `codex/windows-local-stable`
-Scope: local Windows validation in `D:\UZI-Skill`.
+Source branch: `codex/windows-local-stable`
+Mac sync branch: `codex/local-mac-stable`
+Scope: Windows local validation imported into the Mac stable branch and
+rechecked with the Mac `.venv`.
 
 ## Boundaries
 
 - Do not reinstall dependencies.
 - Do not run update scripts.
 - Do not run `--depth deep`.
-- Use `D:\UZI-Skill\.venv\Scripts\python.exe`.
+- Use the active platform's existing project virtualenv:
+  - Windows source run: `D:\UZI-Skill\.venv\Scripts\python.exe`
+  - Mac sync run: `source ~/UZI-Skill/.venv/bin/activate`
 - Treat missing data as a data gap; do not silently invent defaults.
 - Keep local validation artifacts in `local-ops/` unless they are promoted intentionally.
 

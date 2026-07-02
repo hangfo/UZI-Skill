@@ -119,6 +119,7 @@ def check_empty_dims(ctx: dict) -> list[Issue]:
     """有 key 但 data 完全空的维度 · v2.10.4 · profile-aware (lite 只查启用的维度)"""
     issues = []
     dims = ctx["dims"]
+    market = ctx.get("market")
 
     # v2.10.4 · 只检查当前 profile 启用的维度
     enabled_nums = None
@@ -149,6 +150,11 @@ def check_empty_dims(ctx: dict) -> list[Issue]:
             is_timeout = bool(v.get("_timeout"))
             err = str(v.get("error") or "")
             sev = "warning" if is_timeout or err else "critical"
+            if market == "G" and k.startswith("1_"):
+                # Yahoo-style global listings are a routing/data-quality holdout.
+                # Missing financial statements should be visible, but should not
+                # block a lite compatibility report the way it does for A/H/US.
+                sev = "warning"
             issues.append(Issue(
                 severity=sev,
                 category="data",

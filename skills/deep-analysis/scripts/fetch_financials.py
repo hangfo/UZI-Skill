@@ -21,6 +21,7 @@ Output shape (matches report viz expectations):
 from __future__ import annotations
 
 import json
+import math
 import sys
 import traceback
 
@@ -368,19 +369,60 @@ def _fetch_us(ti) -> dict:
         cf = t.cashflow
         info = t.info or {}
         out: dict = {}
+        latest_revenue = 0.0
+        latest_net_income = 0.0
         if fin is not None and not fin.empty:
             rev_row = next((r for r in ["Total Revenue", "TotalRevenue"] if r in fin.index), None)
             np_row = next((r for r in ["Net Income", "NetIncome", "Net Income Common Stockholders"] if r in fin.index), None)
+            gp_row = next((r for r in ["Gross Profit", "GrossProfit"] if r in fin.index), None)
             if rev_row:
-                out["revenue_history"] = [round(float(v) / 1e8, 2) for v in fin.loc[rev_row].tolist()[::-1]]
+                rev_vals = [float(v) for v in fin.loc[rev_row].tolist()[::-1] if _is_finite(v)]
+                out["revenue_history"] = [round(v / 1e8, 2) for v in rev_vals]
+                latest_revenue = rev_vals[-1] if rev_vals else 0.0
             if np_row:
-                out["net_profit_history"] = [round(float(v) / 1e8, 2) for v in fin.loc[np_row].tolist()[::-1]]
+                np_vals = [float(v) for v in fin.loc[np_row].tolist()[::-1] if _is_finite(v)]
+                out["net_profit_history"] = [round(v / 1e8, 2) for v in np_vals]
+                latest_net_income = np_vals[-1] if np_vals else 0.0
+            if gp_row and latest_revenue > 0:
+                gp_vals = [float(v) for v in fin.loc[gp_row].tolist()[::-1] if _is_finite(v)]
+                if gp_vals:
+                    out["gross_margin"] = f"{gp_vals[-1] / latest_revenue * 100:.1f}%"
             out["financial_years"] = [str(c)[:4] for c in fin.columns[::-1]]
         out["roe"] = f"{info.get('returnOnEquity', 0) * 100:.1f}%" if info.get("returnOnEquity") else "—"
         out["net_margin"] = f"{info.get('profitMargins', 0) * 100:.1f}%" if info.get("profitMargins") else "—"
+        if info.get("grossMargins") and not out.get("gross_margin"):
+            out["gross_margin"] = f"{info.get('grossMargins') * 100:.1f}%"
+        health = {}
+        total_debt = info.get("totalDebt") or 0
+        total_cash = info.get("totalCash") or 0
+        if latest_revenue > 0:
+            fcf = info.get("freeCashflow")
+            if _is_finite(fcf):
+                health["fcf_margin"] = round(float(fcf) / latest_revenue * 100, 1)
+        if _is_finite(total_debt):
+            health["total_debt"] = round(float(total_debt) / 1e8, 2)
+        if _is_finite(total_cash):
+            health["cash"] = round(float(total_cash) / 1e8, 2)
+        if bs is not None and not bs.empty:
+            asset_row = next((r for r in ["Total Assets", "TotalAssets"] if r in bs.index), None)
+            debt_row = next((r for r in ["Total Debt", "TotalDebt"] if r in bs.index), None)
+            if asset_row and debt_row:
+                assets = [float(v) for v in bs.loc[asset_row].tolist()[::-1] if _is_finite(v)]
+                debts = [float(v) for v in bs.loc[debt_row].tolist()[::-1] if _is_finite(v)]
+                if assets and debts and assets[-1] > 0:
+                    health["debt_ratio"] = round(debts[-1] / assets[-1] * 100, 1)
+        if health:
+            out["financial_health"] = health
         return out
     except Exception:
         return {}
+
+
+def _is_finite(v) -> bool:
+    try:
+        return math.isfinite(float(v))
+    except (TypeError, ValueError):
+        return False
 
 
 def main(ticker: str) -> dict:
@@ -388,7 +430,7 @@ def main(ticker: str) -> dict:
     try:
         if ti.market == "A":
             data = _fetch_a_share(ti)
-        elif ti.market == "U":
+        elif ti.market in ("U", "G"):
             data = _fetch_us(ti)
         elif ti.market == "H":
             data = _fetch_hk(ti)

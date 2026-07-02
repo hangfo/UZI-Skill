@@ -97,24 +97,36 @@ def test_lite_profile_sets_fund_limit(monkeypatch):
     monkeypatch.delenv("UZI_FUND_LIMIT", raising=False)
     monkeypatch.delenv("UZI_CONTEST_LIMIT", raising=False)
     monkeypatch.delenv("UZI_CONTEST_HEAVY", raising=False)
+    monkeypatch.delenv("UZI_AUX_HEAVY", raising=False)
+    monkeypatch.delenv("UZI_CAPITAL_FLOW_HEAVY", raising=False)
     apply_profile_to_env(get_profile("lite"))
     assert __import__("os").environ["UZI_FUND_LIMIT"] == "5"
     assert __import__("os").environ["UZI_CONTEST_LIMIT"] == "20"
     assert __import__("os").environ["UZI_CONTEST_HEAVY"] == "0"
+    assert __import__("os").environ["UZI_AUX_HEAVY"] == "0"
+    assert __import__("os").environ["UZI_CAPITAL_FLOW_HEAVY"] == "0"
 
     monkeypatch.delenv("UZI_CONTEST_LIMIT", raising=False)
     monkeypatch.delenv("UZI_CONTEST_HEAVY", raising=False)
+    monkeypatch.delenv("UZI_AUX_HEAVY", raising=False)
+    monkeypatch.delenv("UZI_CAPITAL_FLOW_HEAVY", raising=False)
     apply_profile_to_env(get_profile("medium"))
     assert __import__("os").environ["UZI_FUND_LIMIT"] == "100"
     assert __import__("os").environ["UZI_CONTEST_LIMIT"] == "80"
     assert __import__("os").environ["UZI_CONTEST_HEAVY"] == "0"
+    assert __import__("os").environ["UZI_AUX_HEAVY"] == "0"
+    assert __import__("os").environ["UZI_CAPITAL_FLOW_HEAVY"] == "0"
 
     monkeypatch.delenv("UZI_CONTEST_LIMIT", raising=False)
     monkeypatch.delenv("UZI_CONTEST_HEAVY", raising=False)
+    monkeypatch.delenv("UZI_AUX_HEAVY", raising=False)
+    monkeypatch.delenv("UZI_CAPITAL_FLOW_HEAVY", raising=False)
     apply_profile_to_env(get_profile("deep"))
     assert __import__("os").environ["UZI_FUND_LIMIT"] == "all"
     assert __import__("os").environ["UZI_CONTEST_LIMIT"] == "all"
     assert __import__("os").environ["UZI_CONTEST_HEAVY"] == "1"
+    assert __import__("os").environ["UZI_AUX_HEAVY"] == "1"
+    assert __import__("os").environ["UZI_CAPITAL_FLOW_HEAVY"] == "1"
 
 
 def test_global_listing_suffixes_route_without_breaking_us_classes():

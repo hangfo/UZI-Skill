@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 
 from lib import data_sources as ds
@@ -11,6 +12,32 @@ from lib.web_search import search
 
 def main(ticker: str) -> dict:
     ti = parse_ticker(ticker)
+
+    if os.environ.get("UZI_AUX_HEAVY") != "1":
+        name = ti.code
+        return {
+            "ticker": ti.full,
+            "data": {
+                "xueqiu_heat": "热度 0",
+                "thermometer_value": 0,
+                "guba_volume": "—",
+                "big_v_mentions": "—",
+                "positive_pct": "50%",
+                "sentiment_label": "中性",
+                "platform_snippets": {},
+                "platform_hits": {},
+                "total_mentions": 0,
+                "hot_trend_mentions": {"stock_name": name, "total_hits": 0, "evidence_strength": "sampled"},
+                "hot_trend_hit_count": 0,
+                "news_multi_source": {},
+                "news_sources_ok": 0,
+                "news_total_hits": 0,
+                "_note": "medium/lite skip heavy sentiment web search; deep enables full social/news scan",
+            },
+            "source": "sampled:UZI_AUX_HEAVY=0",
+            "fallback": False,
+        }
+
     basic = ds.fetch_basic(ti)
     name = basic.get("name") or ti.code
 

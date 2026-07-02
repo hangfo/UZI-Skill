@@ -907,6 +907,43 @@ def test_self_review_empty_dims_tolerates_none_error(monkeypatch):
     assert issues[0].evidence.endswith("error=")
 
 
+def test_global_listing_empty_financials_is_warning_not_blocker(monkeypatch):
+    from lib.self_review import check_empty_dims
+
+    monkeypatch.setenv("UZI_DEPTH", "lite")
+    ctx = {"market": "G", "dims": {"1_financials": {"data": {}, "error": None}}}
+    issues = check_empty_dims(ctx)
+    assert issues
+    assert issues[0].severity == "warning"
+
+
+def test_a_share_empty_financials_still_blocks(monkeypatch):
+    from lib.self_review import check_empty_dims
+
+    monkeypatch.setenv("UZI_DEPTH", "lite")
+    ctx = {"market": "A", "dims": {"1_financials": {"data": {}, "error": None}}}
+    issues = check_empty_dims(ctx)
+    assert issues
+    assert issues[0].severity == "critical"
+
+
+def test_stock_features_uses_roe_string_when_history_missing():
+    from lib.stock_features import extract_features
+
+    raw = {
+        "ticker": "AAPL",
+        "dimensions": {
+            "0_basic": {"data": {"code": "AAPL", "price": 289, "market_cap": "42499亿", "pe_ttm": 35, "pb": 40}},
+            "1_financials": {"data": {"roe": "141.5%", "net_margin": "27.2%", "gross_margin": "44.9%"}},
+        },
+    }
+    features = extract_features(raw, raw["dimensions"])
+
+    assert features["roe_latest"] == 141.5
+    assert features["roe_5y_avg"] == 141.5
+    assert features["roe_5y_min"] == 141.5
+
+
 if __name__ == "__main__":
     # Manual runner — no pytest required
     import inspect

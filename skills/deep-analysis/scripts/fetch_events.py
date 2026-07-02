@@ -247,7 +247,59 @@ def main(ticker: str) -> dict:
                 "fallback": True,
             }
     if ti.market != "A":
-        return {"ticker": ti.full, "data": {}, "source": "n/a", "fallback": True}
+        news: list[dict] = []
+        try:
+            import yfinance as yf
+            try:
+                from lib import data_sources as ds
+                basic = ds.fetch_basic(ti)
+                company_name = str(basic.get("name") or ti.code)
+            except Exception:
+                company_name = ti.code
+            name_tokens = {
+                ti.code.lower(),
+                ti.full.lower(),
+                company_name.lower(),
+            }
+            if company_name:
+                name_tokens.update(t.lower() for t in company_name.replace("(", " ").replace(")", " ").split() if len(t) >= 4)
+            ynews = yf.Ticker(ti.full if ti.market == "G" else ti.code).news or []
+            for item in ynews[:12]:
+                content = item.get("content") if isinstance(item.get("content"), dict) else {}
+                title = item.get("title") or content.get("title") or ""
+                if not title:
+                    continue
+                text = (title + " " + str(content.get("summary") or "")).lower()
+                if name_tokens and not any(tok and tok in text for tok in name_tokens):
+                    continue
+                provider = item.get("publisher") or (content.get("provider") or {}).get("displayName") or "yfinance"
+                ts = item.get("providerPublishTime") or content.get("pubDate") or ""
+                news.append({
+                    "date": str(ts)[:16],
+                    "title": str(title)[:100],
+                    "type": "yfinance_news",
+                    "source": provider,
+                    "url": item.get("link") or content.get("canonicalUrl", {}).get("url", ""),
+                })
+        except Exception:
+            news = []
+        timeline = [f"{n.get('date','—')} · {n.get('title','')[:80]}" for n in news[:10]]
+        return {
+            "ticker": ti.full,
+            "data": {
+                "event_timeline": timeline,
+                "recent_news": news[:10],
+                "recent_notices": [],
+                "disclosures_count": 0,
+                "news_count": len(news),
+                "recent_news_label": f"{len(news)} 条 Yahoo 新闻" if news else "—",
+                "catalyst": [],
+                "warnings": [],
+                "_note": "global/US/HK fallback uses yfinance news; official filings still depend on market-specific adapters",
+            },
+            "source": "yfinance:news",
+            "fallback": not bool(news),
+        }
 
     # Get company name for web search fallback
     try:

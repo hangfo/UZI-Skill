@@ -252,6 +252,10 @@ def apply_profile_to_env(profile: AnalysisProfile) -> None:
         os.environ["UZI_CONTEST_LIMIT"] = contest_limit
     if os.environ.get("UZI_CONTEST_HEAVY") is None:
         os.environ["UZI_CONTEST_HEAVY"] = "1" if profile.depth == DEPTH_DEEP else "0"
+    if os.environ.get("UZI_AUX_HEAVY") is None:
+        os.environ["UZI_AUX_HEAVY"] = "1" if profile.depth == DEPTH_DEEP else "0"
+    if os.environ.get("UZI_CAPITAL_FLOW_HEAVY") is None:
+        os.environ["UZI_CAPITAL_FLOW_HEAVY"] = "1" if profile.depth == DEPTH_DEEP else "0"
 
 
 def format_banner(profile: AnalysisProfile) -> str:
