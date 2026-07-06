@@ -301,6 +301,8 @@ def main():
     parser.add_argument("--portfolio", metavar="CSV", default=None,
                         help="v3.6.0 · 组合批量分析 · CSV 列含 ticker / weight / note · "
                              "输出排名 + 加权评分 + 健康度 · 自动 resume")
+    parser.add_argument("--score-drift", action="store_true",
+                        help="巧思 · 打印 ticker 的历史评分漂移报告（不重新分析）")
     parser.add_argument("--output-dir", metavar="DIR", default=None,
                         help="v2.11.0 · SaaS 集成：把产出（standalone html + 图 + 摘要）拷贝到该目录，并在其中生成 index.html / report.meta.json。建议配合 --no-browser 使用。")
     args = parser.parse_args()
@@ -341,6 +343,15 @@ def main():
                          "E": "中国价投", "F": "A 股游资", "G": "量化",
                          "H": "科技领袖派", "I": "Serenity · AI 卡位/瓶颈猎手"}
         print(f"🎯 已锁定 {args.school} 派视角 · {_SCHOOL_NAMES.get(args.school, args.school)} · 其他派评委 skip")
+
+    # 巧思 · 评分漂移报告（早返回，不重新分析）
+    if args.score_drift:
+        try:
+            from lib.pipeline.score_drift import report as _drift_report
+            _drift_report(args.ticker)
+        except Exception as _e:
+            print(f"❌ score-drift 失败: {_e}")
+        sys.exit(0)
 
     # v3.6.0 · 横向对比模式 · 早返回 · 不走单股分析
     if args.versus:
@@ -685,6 +696,23 @@ def main():
 
     print(f"{'━' * 50}")
     print(f"✅ 完成!")
+
+    # 巧思 · 评分漂移追踪 — 每次分析结束后静默追加历史记录
+    try:
+        import json as _json
+        from lib.pipeline.score_drift import record as _drift_record
+        from lib.market_router import parse_ticker as _parse_ticker
+        _ti = _parse_ticker(args.ticker)
+        _cache_dir = SCRIPTS_DIR / ".cache" / _ti.full
+        _synth_path = _cache_dir / "synthesis.json"
+        if _synth_path.exists():
+            _synth = _json.loads(_synth_path.read_text(encoding="utf-8"))
+            # 可选补充 panel.json (active_count / polarize_k)
+            _panel_path = _cache_dir / "panel.json"
+            _panel = _json.loads(_panel_path.read_text(encoding="utf-8")) if _panel_path.exists() else None
+            _drift_record(_ti.full, _synth, _panel)
+    except Exception as _de:
+        pass  # 追踪失败不影响主流程
 
 
 if __name__ == "__main__":

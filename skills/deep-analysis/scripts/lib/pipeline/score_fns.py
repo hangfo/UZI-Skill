@@ -104,8 +104,20 @@ def score_dimensions(raw: dict) -> dict:
                       "reasons_pass": [f"{stage}"] if "Stage 2" in stage else [],
                       "reasons_fail": [f"最大回撤 {dd:.1f}%"] if dd <= -25 else []}
 
-    # 3 · 宏观 (qualitative — give middle)
-    out["3_macro"] = {"score": 6, "weight": 3, "label": "宏观环境中性"}
+    # 3 · 宏观 (P1-A: 读取 rate_cycle / geo_risk 字段做关键词打分)
+    macro = _get("3_macro")
+    rate_cycle = str(macro.get("rate_cycle") or "").lower()
+    geo_risk   = str(macro.get("geo_risk")   or "").lower()
+    score_3 = 6  # neutral baseline
+    if any(k in rate_cycle for k in ("降息", "宽松", "easing", "cut")):   score_3 += 1
+    elif any(k in rate_cycle for k in ("加息", "收紧", "hike", "tighten")): score_3 -= 1
+    if any(k in geo_risk for k in ("低", "low", "稳定")):      score_3 += 1
+    elif any(k in geo_risk for k in ("高", "high", "危机", "war")): score_3 -= 1
+    score_3 = max(1, min(10, score_3))
+    _rc_label = macro.get("rate_cycle") or "—"
+    _gr_label = macro.get("geo_risk")   or "—"
+    _macro_label = f"利率周期：{_rc_label} · 地缘：{_gr_label}" if (rate_cycle or geo_risk) else "宏观数据待采集"
+    out["3_macro"] = {"score": score_3, "weight": 3, "label": _macro_label}
 
     # 4 · 同行
     peers = _get("4_peers")
@@ -148,8 +160,30 @@ def score_dimensions(raw: dict) -> dict:
                          "reasons_pass": [f"覆盖券商 {coverage} 家"] if coverage >= 10 else [],
                          "reasons_fail": [] if coverage else ["缺乏覆盖"]}
 
-    # 7 · 行业景气 (stub heavy qualitative)
-    out["7_industry"] = {"score": 7, "weight": 4, "label": "行业处于成长期"}
+    # 7 · 行业景气 (P1-A: 读取 growth 字段，关键词 + 数值两路判断)
+    ind_dim  = _get("7_industry")
+    ind_growth_raw = str(ind_dim.get("growth") or "")
+    ind_growth_lo  = ind_growth_raw.lower()
+    score_7 = 7  # optimistic default (行业数据不全时偏中性偏好)
+    if ind_growth_raw:
+        # 优先数值提取
+        import re as _re
+        _m7 = _re.search(r'[-+]?\d+(\.\d+)?', ind_growth_raw)
+        if _m7:
+            _g7 = float(_m7.group())
+            if _g7 >= 25:   score_7 = 9
+            elif _g7 >= 12: score_7 = 7
+            elif _g7 >= 0:  score_7 = 5
+            else:           score_7 = 3
+        else:
+            # 关键词匹配
+            if any(k in ind_growth_lo for k in ("高景气", "爆发", "boom", "rapid", "高速", "快速增长")): score_7 = 9
+            elif any(k in ind_growth_lo for k in ("成长", "增长", "growing", "strong")): score_7 = 7
+            elif any(k in ind_growth_lo for k in ("平稳", "mature", "stable", "平")): score_7 = 5
+            elif any(k in ind_growth_lo for k in ("下行", "衰退", "decline", "weak", "萎缩")): score_7 = 3
+    score_7 = max(1, min(10, score_7))
+    _ind_label = f"行业增速：{ind_growth_raw[:35]}" if ind_growth_raw else "行业景气数据待采集"
+    out["7_industry"] = {"score": score_7, "weight": 4, "label": _ind_label}
 
     # 8 · 原材料
     out["8_materials"] = {"score": 6, "weight": 3, "label": "原材料成本关注中"}
@@ -207,30 +241,87 @@ def score_dimensions(raw: dict) -> dict:
                                "reasons_pass": [f"主力资金 5 日净流入 {main_5d_label}"] if main_5d_net > 0 else [],
                                "reasons_fail": [f"主力资金 5 日净流出 {main_5d_label}"] if main_5d_net < 0 else []}
 
-    # 13 · 政策
-    out["13_policy"] = {"score": 6, "weight": 3, "label": "政策环境中性"}
+    # 13 · 政策 (P1-A: 读取 snippets.policy_dir 做情感打分)
+    policy_dim = _get("13_policy")
+    _snippets  = policy_dim.get("snippets") or {}
+    _pdir      = _snippets.get("policy_dir") or policy_dim.get("policy_dir") or ""
+    if isinstance(_pdir, list):
+        _pdir_text = " ".join(
+            (p.get("title", "") if isinstance(p, dict) else str(p)) for p in _pdir[:3]
+        )
+    else:
+        _pdir_text = str(_pdir)
+    _pdir_lo = _pdir_text.lower()
+    score_13 = 6
+    if any(k in _pdir_lo for k in ("积极", "支持", "鼓励", "补贴", "利好", "宽松", "扶持")):   score_13 = 8
+    elif any(k in _pdir_lo for k in ("收紧", "限制", "处罚", "整治", "打压", "利空", "禁止")): score_13 = 3
+    elif any(k in _pdir_lo for k in ("中性", "正常", "监管")):                                   score_13 = 5
+    _policy_verdict = "利好" if score_13 >= 8 else ("利空" if score_13 <= 3 else "中性")
+    _policy_label   = f"政策方向：{_policy_verdict}" + (f" · {_pdir_text[:40]}" if _pdir_text else "")
+    out["13_policy"] = {"score": score_13, "weight": 3, "label": _policy_label}
 
-    # 14 · 护城河
-    out["14_moat"] = {"score": 6, "weight": 3, "label": "护城河需定性评估"}
+    # 14 · 护城河 (P1-A: 读取 scores 四力评分，映射 0-40 → 1-10)
+    moat_dim    = _get("14_moat")
+    moat_scores_dim = moat_dim.get("scores") or {}
+    _m_int  = _f(moat_scores_dim.get("intangible", 0))
+    _m_sw   = _f(moat_scores_dim.get("switching",  0))
+    _m_net  = _f(moat_scores_dim.get("network",    0))
+    _m_sc   = _f(moat_scores_dim.get("scale",      0))
+    _moat_sum = _m_int + _m_sw + _m_net + _m_sc
+    if moat_scores_dim and _moat_sum > 0:
+        score_14  = max(1, min(10, round(_moat_sum / 4)))   # 0-40 → 1-10
+        label_14  = (f"护城河 {_moat_sum:.0f}/40 · "
+                     f"无形{_m_int:.0f} 转换{_m_sw:.0f} 网络{_m_net:.0f} 规模{_m_sc:.0f}")
+    else:
+        score_14 = 6
+        label_14 = "护城河待评估（_data_gap）"
+        moat_dim["_data_gap"] = True
+    out["14_moat"] = {"score": score_14, "weight": 3, "label": label_14}
 
-    # 15 · 事件
-    events = _get("15_events")
-    news = events.get("news") or []
+    # 15 · 事件 (P0-B: 修复字段名 news→recent_news; P1-C: 加负面情感折扣)
+    events  = _get("15_events")
+    # P0-B: fetcher 写入 recent_news，而非 news
+    news    = events.get("news") or events.get("recent_news") or []
     notices = events.get("recent_notices") or []
-    score_15 = 5 + min(3, len(news) // 10)
+    # P1-C: 负面关键词折扣（负面新闻不加分，反而减分）
+    _NEG_KW = {"暴雷", "违规", "处罚", "退市", "调查", "欺诈", "行贿", "造假",
+               "fraud", "lawsuit", "sec", "recall", "罚款", "立案", "强制退市"}
+    def _news_weight(item: object) -> float:
+        title = ((item.get("title") or "") if isinstance(item, dict) else str(item)).lower()
+        return -0.5 if any(k in title for k in _NEG_KW) else 1.0
+    _news_val = sum(_news_weight(n) for n in news)
+    score_15  = 5 + min(3, max(-3, int(_news_val / 10)))
+    score_15  = max(1, min(10, score_15))
     out["15_events"] = {"score": score_15, "weight": 4,
                         "label": f"近期新闻 {len(news)} 条 · 公告 {len(notices)} 份"}
 
-    # 16 · 龙虎榜
-    lhb = _get("16_lhb")
+    # 16 · 龙虎榜 (P1-B: 优先用净流向打分；fallback 才用上榜次数)
+    lhb       = _get("16_lhb")
     lhb_count = lhb.get("lhb_count_30d", 0)
-    matched = lhb.get("matched_youzi") or []
-    score_16 = 5 + min(3, lhb_count // 2)
-    if matched: score_16 += 1
-    score_16 = min(10, score_16)
+    matched   = lhb.get("matched_youzi") or []
+    inst_vs   = lhb.get("inst_vs_youzi") or {}
+    inst_net  = _f(inst_vs.get("institutional_net", 0))
+    youzi_net = _f(inst_vs.get("youzi_net", 0))
+    if inst_vs:
+        # 有净流向数据：机构净买入为正信号，游资主导为中性偏负
+        score_16 = 5
+        if inst_net > 0:                         score_16 += 3
+        elif inst_net < 0 and youzi_net > 0:     score_16 -= 1   # 游资买、机构撤
+        if inst_net > 0 and youzi_net > 0:        score_16 += 1   # 双向认可
+        if matched:                               score_16 += 1
+        _lhb_label = (f"机构净 {inst_net/1e8:+.1f}亿 · 游资净 {youzi_net/1e8:+.1f}亿 · "
+                      f"上榜 {lhb_count} 次")
+        _lhb_pass  = [f"机构净流入 {inst_net/1e8:.1f}亿"] if inst_net > 0 else []
+    else:
+        # Fallback：仅用上榜次数，但收窄上限（最多 +2，避免过度奖励频率）
+        score_16  = 5 + min(2, lhb_count // 3)
+        if matched: score_16 += 1
+        _lhb_label = f"近 30 天上榜 {lhb_count} 次 · 识别游资 {len(matched)} 位"
+        _lhb_pass  = [f"{'/'.join(matched[:3])} 席位出现"] if matched else []
+    score_16 = max(1, min(10, score_16))
     out["16_lhb"] = {"score": score_16, "weight": 4,
-                     "label": f"近 30 天上榜 {lhb_count} 次 · 识别游资 {len(matched)} 位",
-                     "reasons_pass": [f"{'/'.join(matched[:3])} 席位出现"] if matched else []}
+                     "label": _lhb_label,
+                     "reasons_pass": _lhb_pass}
 
     # 17 · 舆情
     hot = _get("17_sentiment")
@@ -426,7 +517,15 @@ def generate_panel(dims_scored: dict, raw: dict) -> dict:
     NEUTRAL_WEIGHT = 0.6
     SCORE_WEIGHT = 0.65   # score 均值权重（连续分 · 区分度）
     VOTE_WEIGHT  = 0.35   # vote 比例权重（离散投票 · 稳定性）
-    POLARIZE_K = 1.30     # 极化系数 · >1 让两端拉开 · 50 为中心
+    # P2-B: POLARIZE_K 动态自适应 — 评委分歧大时少拉，共识强时多拉
+    # stdev≈10 → K=1.30（基准不变）; stdev≈5 → K≈1.50（共识强，拉开）; stdev≈20 → K≈1.10（分歧大，保守）
+    import statistics as _stats
+    _pre_active = [m["score"] for m in investors_out if m.get("signal") != "skip"]
+    if len(_pre_active) > 1:
+        _stdev = _stats.stdev(_pre_active)
+        POLARIZE_K = max(1.10, min(1.50, 1.30 * (10 / max(_stdev, 1))))
+    else:
+        POLARIZE_K = 1.30   # 极化系数 · >1 让两端拉开 · 50 为中心
     active_count = len(investors_out) - sig_dist.get("skip", 0)
     bullish = sig_dist.get("bullish", 0)
     neutral = sig_dist.get("neutral", 0)
@@ -699,12 +798,14 @@ def compute_investment_score(features: dict) -> dict:
         "valuation": round(_clamp(valuation), 1),
         "risk_control": round(_clamp(risk), 1),
     }
+    # P2-A: 权重重新校准 — Quality 调高（0.25→0.30），Catalyst 调低（0.28→0.22）
+    # 避免 AI/题材叙事权重高于公司质量本身（五轴合计保持 1.00）
     weights = {
-        "quality": 0.25,
-        "growth": 0.17,
-        "catalyst": 0.28,
-        "valuation": 0.15,
-        "risk_control": 0.15,
+        "quality":      0.30,
+        "growth":       0.17,
+        "catalyst":     0.22,
+        "valuation":    0.15,
+        "risk_control": 0.16,
     }
     score = sum(axes[k] * weights[k] for k in weights)
 
@@ -716,7 +817,8 @@ def compute_investment_score(features: dict) -> dict:
         score = min(score, 55)
     if axes["valuation"] < 35 and axes["risk_control"] < 35:
         score = min(score, 55)
-    falling_trend_cap = stage_num == 4 and (ytd <= -10 or max_dd <= -25)
+    # P0-C: Stage 3（分配/出货）与 Stage 4 同样危险，一并触发下行保护
+    falling_trend_cap = stage_num in (3, 4) and (ytd <= -10 or max_dd <= -25)
     if falling_trend_cap:
         cap = 59 if axes["valuation"] >= 60 and axes["quality"] >= 80 else 56
         score = min(score, cap)

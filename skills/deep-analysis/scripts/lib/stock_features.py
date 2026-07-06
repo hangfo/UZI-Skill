@@ -392,8 +392,9 @@ def extract_features(raw: dict, dims: dict) -> dict:
         f["market_share"] = 0.0
     # Dividend yield from valuation/basic
     f["dividend_yield"] = _f(valuation.get("dividend_yield"), default=0)
-    # PEG
-    peg_val = f.get("pe", 0) / f.get("rev_growth_3y", 1) if f.get("rev_growth_3y", 0) > 0 else 99
+    # PEG — use canonical key (revenue_growth_3y_cagr) so it is available at this point
+    _peg_growth = f.get("revenue_growth_3y_cagr", 0)
+    peg_val = f.get("pe", 0) / _peg_growth if _peg_growth > 0 else 99
     f["peg"] = round(peg_val, 2)
     # Gross margin trend flag
     f["gross_margin_expanding"] = False  # default; could be computed from hist
@@ -587,6 +588,24 @@ def summary(features: dict) -> str:
     lines.append(f"  研报覆盖 {features.get('research_coverage')} · 买入率 {features.get('buy_rating_pct')}% · 目标涨幅 {features.get('upside_to_target'):.1f}%")
     lines.append(f"  护城河 {features.get('moat_total')}/40 · 基金经理 {features.get('fund_manager_count')} · 杀猪盘 {features.get('trap_level')}")
     return "\n".join(lines)
+
+
+# ── P0-A: Key alias bridge ───────────────────────────────────────────────────
+# investor_criteria.py 历史上用 rev_growth_3y / rev_growth_yoy 作为 feature key，
+# 而 extract_features() 输出的是 revenue_growth_3y_cagr / revenue_growth_latest。
+# 两边 key 不一致导致所有成长派规则永远取默认值 0，此处统一补充别名解决该问题。
+def _alias_keys(f: dict) -> dict:
+    f["rev_growth_3y"]  = f.get("revenue_growth_3y_cagr", 0)
+    f["rev_growth_yoy"] = f.get("revenue_growth_latest", 0)
+    return f
+
+
+_original_extract_features = extract_features
+
+
+def extract_features(raw: dict, dims: dict | None = None) -> dict:  # type: ignore[override]
+    f = _original_extract_features(raw, dims)
+    return _alias_keys(f)
 
 
 if __name__ == "__main__":
