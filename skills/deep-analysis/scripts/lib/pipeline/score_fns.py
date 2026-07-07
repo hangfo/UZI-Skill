@@ -280,15 +280,38 @@ def score_dimensions(raw: dict) -> dict:
 
     # 15 · 事件 (P0-B: 修复字段名 news→recent_news; P1-C: 加负面情感折扣)
     events  = _get("15_events")
-    # P0-B: fetcher 写入 recent_news，而非 news
-    news    = events.get("news") or events.get("recent_news") or []
+    # P0-B fix: recent_news 是 fetcher 写入的 canonical 字段，news 是历史兼容 fallback
+    #   原错误：events.get("news") 优先，导致旧缓存脏数据覆盖新字段
+    news    = events.get("recent_news") or events.get("news") or []
     notices = events.get("recent_notices") or []
-    # P1-C: 负面关键词折扣（负面新闻不加分，反而减分）
-    _NEG_KW = {"暴雷", "违规", "处罚", "退市", "调查", "欺诈", "行贿", "造假",
-               "fraud", "lawsuit", "sec", "recall", "罚款", "立案", "强制退市"}
+    # P1-C: 分层负面关键词 — 强惩罚 -1.0 / 弱惩罚 -0.5；并排除否定语境误伤
+    #   修复：去掉 "sec"（太短，命中"second"/"sector"/"秒"等无关字符串）
+    #   修复：加否定前缀窗口检测，避免"无违规"/"未发现违规"被错误判为负面
+    _NEG_KW_STRONG = {"暴雷", "造假", "欺诈", "行贿", "立案", "强制退市",
+                      "fraud", "accounting fraud"}
+    _NEG_KW_WEAK   = {"违规", "处罚", "退市", "调查", "罚款",
+                      "lawsuit", "recall", "sec charges", "sec fine", "sec action"}
+    _NEG_PREFIX    = ("无", "未", "非", "不", "没有", "否认", "撤销", "已结",
+                      "no ", "not ", "without ", "settled ", "dismissed ", "cleared ")
+
     def _news_weight(item: object) -> float:
-        title = ((item.get("title") or "") if isinstance(item, dict) else str(item)).lower()
-        return -0.5 if any(k in title for k in _NEG_KW) else 1.0
+        raw   = (item.get("title") or "") if isinstance(item, dict) else str(item)
+        title = raw.lower()
+
+        def _negated(pos: int) -> bool:
+            """检查关键词前 10 字符窗口内是否存在否定前缀"""
+            window = title[max(0, pos - 10): pos]
+            return any(p in window for p in _NEG_PREFIX)
+
+        for kw in _NEG_KW_STRONG:
+            idx = title.find(kw)
+            if idx >= 0 and not _negated(idx):
+                return -1.0
+        for kw in _NEG_KW_WEAK:
+            idx = title.find(kw)
+            if idx >= 0 and not _negated(idx):
+                return -0.5
+        return 1.0
     _news_val = sum(_news_weight(n) for n in news)
     score_15  = 5 + min(3, max(-3, int(_news_val / 10)))
     score_15  = max(1, min(10, score_15))
@@ -817,8 +840,17 @@ def compute_investment_score(features: dict) -> dict:
         score = min(score, 55)
     if axes["valuation"] < 35 and axes["risk_control"] < 35:
         score = min(score, 55)
-    # P0-C: Stage 3（分配/出货）与 Stage 4 同样危险，一并触发下行保护
-    falling_trend_cap = stage_num in (3, 4) and (ytd <= -10 or max_dd <= -25)
+    # P0-C: Stage 3/4 下行保护 — 含数据缺失兜底
+    # 修复：ytd/max_dd 缺失时默认值均为 0.0，会绕过条件判断让 Stage 4 误放行
+    # Stage 4（主跌/衰退）: 无价格数据时默认保守触发；有数据时按阈值判断
+    # Stage 3（分配/出货）: 必须有价格确认（YTD ≤ -10% 或 max_dd ≤ -25%）
+    _ytd_present   = features.get("ytd_return") not in (None, "", "—", "-")
+    _maxdd_present = features.get("max_drawdown_1y") not in (None, "", "—", "-")
+    _price_data_ok = _ytd_present or _maxdd_present
+    falling_trend_cap = (
+        (stage_num in (3, 4) and (ytd <= -10 or max_dd <= -25))
+        or (stage_num == 4 and not _price_data_ok)   # Stage 4 缺数据 → 保守兜底
+    )
     if falling_trend_cap:
         cap = 59 if axes["valuation"] >= 60 and axes["quality"] >= 80 else 56
         score = min(score, cap)

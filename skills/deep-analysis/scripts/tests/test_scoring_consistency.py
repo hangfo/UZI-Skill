@@ -1,4 +1,4 @@
-"""Scoring consistency test suite — Task #4 (v4.0)
+"""Scoring consistency test suite — Task #4 (v5.0)
 
 Covers four risk categories identified in SCORING_ANALYSIS.md:
 1. Monotonicity — axes must move in the right direction as inputs improve
@@ -526,3 +526,150 @@ def test_score_drift_record_missing_panel():
             assert e.get("polarize_k") is None
         finally:
             os.environ.pop("UZI_CACHE_DIR", None)
+
+
+# ═══════════════════════════════════════════════════════════════
+# 5 · EDGE CASE REGRESSION — covers confirmed bugs from Codex review
+# ═══════════════════════════════════════════════════════════════
+
+def test_p0b_recent_news_takes_priority_over_news():
+    """P0-B fix: recent_news must be read before news (canonical field priority)."""
+    from lib.pipeline.score_fns import score_dimensions
+
+    # Both keys present; recent_news has 20 neutral items → should score > 5
+    # news has 0 items (stale/empty cache) → would give 5 if incorrectly prioritised
+    raw = _make_raw(dims_override={
+        "15_events": {"data": {
+            "recent_news": [{"title": f"季报超预期第{i}条"} for i in range(20)],
+            "news": [],           # old key — empty, should be ignored
+            "recent_notices": [],
+        }}
+    })
+    result = score_dimensions(raw)
+    score = result["dimensions"]["15_events"]["score"]
+    assert score > 5, (
+        f"recent_news (20 items) should push dim_15 above 5, got {score}. "
+        f"Likely 'news' (empty) is still being read first."
+    )
+
+
+def test_p0c_stage4_no_price_data_triggers_cap():
+    """P0-C fix: Stage 4 with completely missing price data must trigger falling_trend_cap."""
+    f_no_data = _make_features(
+        stage_num=4, stage="Stage 4 · Decline",
+        ytd_return=0.0, max_drawdown_1y=0.0,   # default=0 mimics missing data
+    )
+    # Also remove the keys entirely to simulate genuine absence
+    f_no_data.pop("ytd_return", None)
+    f_no_data.pop("max_drawdown_1y", None)
+
+    result = _make_features(
+        stage_num=4, stage="Stage 4 · Decline",
+        ytd_return=0.0, max_drawdown_1y=0.0,
+    )
+    # The buy_score must be capped (≤ 59) regardless of otherwise decent quality
+    f = _make_features(
+        stage_num=4, stage="Stage 4 · Decline",
+        roe_5y_avg=20.0, net_margin=20.0, revenue_growth_3y_cagr=15.0,
+        # No ytd_return or max_drawdown_1y keys → simulates missing price data
+    )
+    f.pop("ytd_return", None)
+    f.pop("max_drawdown_1y", None)
+
+    from lib.pipeline.score_fns import compute_investment_score
+    r = compute_investment_score(f)
+    assert r["score"] <= 59, (
+        f"Stage 4 with no price data must be capped at ≤59, got {r['score']:.1f}. "
+        f"falling_trend_cap failed to fire on missing data."
+    )
+    guardrails = r.get("diagnostics", {}).get("guardrails", {})
+    assert guardrails.get("falling_trend_cap") is True, (
+        f"falling_trend_cap flag should be True for Stage 4 with no price data. "
+        f"diagnostics.guardrails={guardrails}"
+    )
+
+
+def test_p0c_stage3_no_price_data_does_not_auto_cap():
+    """P0-C: Stage 3 without price confirmation must NOT auto-cap (different rule than Stage 4)."""
+    from lib.pipeline.score_fns import compute_investment_score
+    f = _make_features(
+        stage_num=3, stage="Stage 3 · Distribution",
+        roe_5y_avg=20.0, net_margin=20.0, revenue_growth_3y_cagr=15.0,
+    )
+    f.pop("ytd_return", None)
+    f.pop("max_drawdown_1y", None)
+    r = compute_investment_score(f)
+    # Stage 3 with no price data: should NOT be automatically capped — price confirmation required
+    assert r.get("flags", {}).get("falling_trend_cap") is not True, (
+        "Stage 3 without price confirmation should NOT trigger falling_trend_cap automatically"
+    )
+
+
+def test_p1c_negation_prefix_not_penalised():
+    """P1-C fix: negative keywords preceded by negation (无/未/not) must score neutral."""
+    from lib.pipeline.score_fns import score_dimensions
+
+    neg_negated_items = [
+        {"title": "公司无违规记录"},
+        {"title": "未发现欺诈行为"},
+        {"title": "本次审计无异常"},
+        {"title": "settled lawsuit已和解"},
+    ]
+    raw = _make_raw(dims_override={
+        "15_events": {"data": {
+            "recent_news": neg_negated_items,
+            "recent_notices": [],
+        }}
+    })
+    result = score_dimensions(raw)
+    score = result["dimensions"]["15_events"]["score"]
+    # 4 neutral items → should be ≥ 5 (not dragged below by false negatives)
+    assert score >= 5, (
+        f"Negated negative phrases ('无违规', '未发现欺诈', 'settled lawsuit') "
+        f"should not penalise score. Got {score}, expected ≥ 5."
+    )
+
+
+def test_p1c_sec_substring_not_false_positive():
+    """P1-C fix: 'sec' as substring (second, sector, 季报sec) must not trigger penalty."""
+    from lib.pipeline.score_fns import score_dimensions
+
+    non_regulatory_sec = [
+        {"title": "公司sec季报超预期"},
+        {"title": "第二second季度业绩亮眼"},
+        {"title": "sector轮动看好科技"},
+    ]
+    raw = _make_raw(dims_override={
+        "15_events": {"data": {
+            "recent_news": non_regulatory_sec,
+            "recent_notices": [],
+        }}
+    })
+    result = score_dimensions(raw)
+    score = result["dimensions"]["15_events"]["score"]
+    assert score >= 5, (
+        f"'sec'/'second'/'sector' as non-regulatory substrings should not penalise score. "
+        f"Got {score}, expected ≥ 5."
+    )
+
+
+def test_p1c_genuine_negative_events_penalised():
+    """P1-C: Real negative events (立案/造假/fraud charges) must still reduce score."""
+    from lib.pipeline.score_fns import score_dimensions
+
+    genuine_negatives = [
+        {"title": "公司因财务造假被立案调查"},
+        {"title": "SEC charges fraud against executives"},
+    ]
+    raw = _make_raw(dims_override={
+        "15_events": {"data": {
+            "recent_news": genuine_negatives,
+            "recent_notices": [],
+        }}
+    })
+    result = score_dimensions(raw)
+    score = result["dimensions"]["15_events"]["score"]
+    # Strong negatives should push score below neutral 5
+    assert score <= 5, (
+        f"Genuine negatives (造假/立案/SEC charges) should penalise score below 5. Got {score}."
+    )
