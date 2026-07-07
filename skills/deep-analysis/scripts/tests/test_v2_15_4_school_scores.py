@@ -112,11 +112,13 @@ def test_consensus_formula_in_panel_has_mixed_components():
     # 公式定义的 SCORE_WEIGHT / VOTE_WEIGHT / POLARIZE_K 必须存在
     assert "SCORE_WEIGHT = 0.65" in src
     assert "VOTE_WEIGHT" in src and "0.35" in src
-    assert "POLARIZE_K = 1.30" in src or "POLARIZE_K=1.30" in src.replace(" ", "")
+    assert "min(1.50" in src and "max(1.10" in src
     # consensus_formula dict 必须含关键分量字段
     assert '"score_mean":' in src
     assert '"vote_weighted":' in src
     assert '"polarize_k":' in src
+    assert '"polarize_stdev":' in src
+    assert '"polarize_active_count":' in src
 
 
 def test_school_scores_in_cached_panel():

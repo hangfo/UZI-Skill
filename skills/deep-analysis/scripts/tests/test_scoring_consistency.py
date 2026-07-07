@@ -77,7 +77,7 @@ def _make_raw(dims_override: dict | None = None, ticker: str = "TEST") -> dict:
         "8_materials": _dim({}),
         "9_futures":  _dim({}),
         "10_valuation": _dim({"pe": "20", "pe_quantile": "50分位", "industry_pe": "25"}),
-        "11_governance": _dim({"pledge": [], "insider_trades_1y": True}),
+        "11_governance": _dim({"pledge": [], "insider_trades_1y": []}),
         "12_capital_flow": _dim({"main_fund_flow_20d": [], "unlock_schedule": []}),
         "13_policy":  _dim({}),
         "14_moat":    _dim({}),
@@ -94,7 +94,7 @@ def _make_raw(dims_override: dict | None = None, ticker: str = "TEST") -> dict:
 
 # ─── import the functions under test ─────────────────────────────────────────
 
-from lib.pipeline.score_fns import compute_investment_score, score_dimensions  # noqa: E402
+from lib.pipeline.score_fns import compute_investment_score, generate_panel, score_dimensions  # noqa: E402
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -553,6 +553,25 @@ def test_p0b_recent_news_takes_priority_over_news():
     )
 
 
+def test_p0b_empty_recent_news_does_not_fallback_to_stale_news():
+    """P0-B edge: present-but-empty canonical recent_news must not read stale news."""
+    from lib.pipeline.score_fns import score_dimensions
+
+    raw = _make_raw(dims_override={
+        "15_events": {"data": {
+            "recent_news": [],
+            "news": [{"title": f"stale cached item {i}"} for i in range(30)],
+            "recent_notices": [],
+        }}
+    })
+    result = score_dimensions(raw)
+    score = result["dimensions"]["15_events"]["score"]
+    assert score == 5, (
+        f"empty canonical recent_news should stay neutral instead of falling back "
+        f"to stale legacy news. Got {score}."
+    )
+
+
 def test_p0c_stage4_no_price_data_triggers_cap():
     """P0-C fix: Stage 4 with completely missing price data must trigger falling_trend_cap."""
     f_no_data = _make_features(
@@ -600,7 +619,8 @@ def test_p0c_stage3_no_price_data_does_not_auto_cap():
     f.pop("max_drawdown_1y", None)
     r = compute_investment_score(f)
     # Stage 3 with no price data: should NOT be automatically capped — price confirmation required
-    assert r.get("flags", {}).get("falling_trend_cap") is not True, (
+    guardrails = r.get("diagnostics", {}).get("guardrails", {})
+    assert guardrails.get("falling_trend_cap") is not True, (
         "Stage 3 without price confirmation should NOT trigger falling_trend_cap automatically"
     )
 
@@ -670,6 +690,33 @@ def test_p1c_genuine_negative_events_penalised():
     result = score_dimensions(raw)
     score = result["dimensions"]["15_events"]["score"]
     # Strong negatives should push score below neutral 5
-    assert score <= 5, (
+    assert score < 5, (
         f"Genuine negatives (造假/立案/SEC charges) should penalise score below 5. Got {score}."
     )
+
+
+def test_p1c_single_strong_negative_event_penalised():
+    """P1-C edge: one severe event is enough to matter; it need not appear 10 times."""
+    from lib.pipeline.score_fns import score_dimensions
+
+    raw = _make_raw(dims_override={
+        "15_events": {"data": {
+            "recent_news": [{"title": "SEC charges accounting fraud against executives"}],
+            "recent_notices": [],
+        }}
+    })
+    result = score_dimensions(raw)
+    score = result["dimensions"]["15_events"]["score"]
+    assert score < 5, f"single strong negative event should score below neutral 5, got {score}."
+
+
+def test_p2b_polarize_diagnostics_present():
+    """P2-B: dynamic polarization must expose enough diagnostics for drift review."""
+    raw = _make_raw()
+    dims = score_dimensions(raw)
+    panel = generate_panel(dims, raw)
+    formula = panel.get("consensus_formula", {})
+    assert 1.10 <= formula.get("polarize_k", 0) <= 1.50
+    assert isinstance(formula.get("polarize_active_count"), int)
+    assert isinstance(formula.get("polarize_skip_count"), int)
+    assert "polarize_stdev" in formula

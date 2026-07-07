@@ -282,7 +282,10 @@ def score_dimensions(raw: dict) -> dict:
     events  = _get("15_events")
     # P0-B fix: recent_news 是 fetcher 写入的 canonical 字段，news 是历史兼容 fallback
     #   原错误：events.get("news") 优先，导致旧缓存脏数据覆盖新字段
-    news    = events.get("recent_news") or events.get("news") or []
+    if "recent_news" in events:
+        news = events.get("recent_news") or []
+    else:
+        news = events.get("news") or []
     notices = events.get("recent_notices") or []
     # P1-C: 分层负面关键词 — 强惩罚 -1.0 / 弱惩罚 -0.5；并排除否定语境误伤
     #   修复：去掉 "sec"（太短，命中"second"/"sector"/"秒"等无关字符串）
@@ -312,8 +315,13 @@ def score_dimensions(raw: dict) -> dict:
             if idx >= 0 and not _negated(idx):
                 return -0.5
         return 1.0
-    _news_val = sum(_news_weight(n) for n in news)
-    score_15  = 5 + min(3, max(-3, int(_news_val / 10)))
+    _news_weights = [_news_weight(n) for n in news]
+    _positive_count = sum(1 for w in _news_weights if w > 0)
+    _strong_neg_count = sum(1 for w in _news_weights if w <= -1.0)
+    _weak_neg_count = sum(1 for w in _news_weights if -1.0 < w < 0)
+    _positive_bonus = min(3, _positive_count // 10)
+    _negative_penalty = min(3, _strong_neg_count + ((_weak_neg_count + 1) // 2))
+    score_15  = 5 + _positive_bonus - _negative_penalty
     score_15  = max(1, min(10, score_15))
     out["15_events"] = {"score": score_15, "weight": 4,
                         "label": f"近期新闻 {len(news)} 条 · 公告 {len(notices)} 份"}
@@ -544,6 +552,7 @@ def generate_panel(dims_scored: dict, raw: dict) -> dict:
     # stdev≈10 → K=1.30（基准不变）; stdev≈5 → K≈1.50（共识强，拉开）; stdev≈20 → K≈1.10（分歧大，保守）
     import statistics as _stats
     _pre_active = [m["score"] for m in investors_out if m.get("signal") != "skip"]
+    _stdev = None
     if len(_pre_active) > 1:
         _stdev = _stats.stdev(_pre_active)
         POLARIZE_K = max(1.10, min(1.50, 1.30 * (10 / max(_stdev, 1))))
@@ -657,6 +666,9 @@ def generate_panel(dims_scored: dict, raw: dict) -> dict:
             "vote_weight": VOTE_WEIGHT,
             "neutral_weight": NEUTRAL_WEIGHT,
             "polarize_k": POLARIZE_K,
+            "polarize_stdev": round(_stdev, 2) if _stdev is not None else None,
+            "polarize_active_count": len(_pre_active),
+            "polarize_skip_count": sig_dist.get("skip", 0),
             "score_mean": round(score_mean, 2),
             "vote_weighted": round(vote_weighted, 2),
             "consensus_raw": round(consensus_raw, 2),     # 极化前
