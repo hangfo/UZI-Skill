@@ -5,7 +5,7 @@
 
 用法（run.py 调用）:
     from lib.pipeline.score_drift import record, report
-    record(ticker, result)             # 追加记录
+    record(ticker, synthesis, panel)   # 追加记录（synthesis = synthesis.json dict，panel 可选）
     report(ticker)                     # 打印漂移表
 """
 
