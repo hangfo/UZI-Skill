@@ -67,6 +67,56 @@ def test_speculative_watch_promoted_to_buy_is_possible_regression():
     assert "speculative_promoted_to_buy" in row["flags"]
 
 
+def test_dim_score_ceiling_violation_is_possible_regression():
+    case = {
+        "ticker": "__synthetic_empty_recent_news_stale_legacy",
+        "expectation": "neutral",
+        "max_candidate_dim_scores": {"15_events": 5.0},
+    }
+    row = branch_score_compare.compare_scores(
+        case,
+        {"investment_score": 55.0, "dim_scores": {"15_events": 5}},
+        {"investment_score": 55.0, "dim_scores": {"15_events": 8}},
+    )
+    assert row["verdict"] == "possible_regression"
+    assert "15_events_above_ceiling" in row["flags"]
+
+
+def test_dim_score_floor_violation_is_possible_regression():
+    case = {
+        "ticker": "__synthetic_negated_negative_event",
+        "expectation": "neutral",
+        "min_candidate_dim_scores": {"15_events": 5.0},
+    }
+    row = branch_score_compare.compare_scores(
+        case,
+        {"investment_score": 55.0, "dim_scores": {"15_events": 5}},
+        {"investment_score": 55.0, "dim_scores": {"15_events": 4}},
+    )
+    assert row["verdict"] == "possible_regression"
+    assert "15_events_below_floor" in row["flags"]
+
+
+def test_build_payload_includes_synthetic_raw_cases():
+    payload = branch_score_compare.build_payload(
+        modes=["lite"],
+        raw_cases=[],
+        synthetic_cases=branch_score_compare.SYNTHETIC_CASES,
+    )
+    tickers = {item["case"]["ticker"] for item in payload["raw_items"]}
+    assert "__synthetic_empty_recent_news_stale_legacy" in tickers
+    assert "__synthetic_single_strong_negative_event" in tickers
+    assert "__synthetic_missing_financials_raw" in tickers
+
+
+def test_adversarial_suite_has_data_quality_cases():
+    names = {case["name"] for case in branch_score_compare.SYNTHETIC_CASES}
+    assert "stage4_missing_price_high_quality" in names
+    assert "missing_financials_theme_heat" in names
+    raw_tickers = {case["ticker"] for case in branch_score_compare.SYNTHETIC_RAW_CASES}
+    assert "__synthetic_missing_financials_raw" in raw_tickers
+
+
 if __name__ == "__main__":
     import inspect
     import sys

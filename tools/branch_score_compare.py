@@ -8,7 +8,6 @@ import os
 import subprocess
 import sys
 import tempfile
-import textwrap
 import time
 from pathlib import Path
 from typing import Any
@@ -168,6 +167,226 @@ SYNTHETIC_CASES = [
             "is_safe": True,
         },
     },
+    {
+        "name": "high_quality_stage3_confirmed_downtrend",
+        "role": "quality stock in confirmed distribution/downtrend",
+        "expectation": "speculative_watch",
+        "max_candidate_score": 64.0,
+        "features": {
+            "market": "A",
+            "market_cap_yi": 12000,
+            "roe_5y_avg": 28,
+            "roe_5y_min": 20,
+            "net_margin": 35,
+            "gross_margin": 60,
+            "revenue_growth_3y_cagr": 8,
+            "net_profit_growth_latest": 6,
+            "pe": 18,
+            "pb": 5,
+            "pe_quantile_5y": 30,
+            "stage_num": 3,
+            "ytd_return": -18,
+            "volatility_1y": 28,
+            "max_drawdown_1y": -28,
+            "debt_ratio": 20,
+            "is_safe": True,
+        },
+    },
+    {
+        "name": "stage4_missing_price_high_quality",
+        "role": "Stage 4 quality stock with missing price confirmation",
+        "expectation": "speculative_watch",
+        "max_candidate_score": 59.0,
+        "features": {
+            "market": "US",
+            "market_cap_yi": 50000,
+            "roe_5y_avg": 30,
+            "roe_5y_min": 20,
+            "net_margin": 25,
+            "gross_margin": 55,
+            "revenue_growth_3y_cagr": 10,
+            "net_profit_growth_latest": 8,
+            "pe": 20,
+            "pb": 5,
+            "pe_quantile_5y": 40,
+            "stage_num": 4,
+            "volatility_1y": 25,
+            "debt_ratio": 20,
+            "is_safe": True,
+        },
+    },
+    {
+        "name": "a_share_youzi_heat_institutional_selling",
+        "role": "A-share youzi heat with institutional selling and weak fundamentals",
+        "expectation": "risk_control",
+        "max_candidate_score": 55.0,
+        "features": {
+            "market": "A",
+            "market_cap_yi": 120,
+            "roe_5y_avg": 4,
+            "roe_5y_min": -8,
+            "net_margin": 3,
+            "gross_margin": 18,
+            "revenue_growth_3y_cagr": 3,
+            "net_profit_growth_latest": -20,
+            "pe": 80,
+            "pb": 12,
+            "pe_quantile_5y": 90,
+            "stage_num": 2,
+            "ytd_return": 160,
+            "volatility_1y": 110,
+            "max_drawdown_1y": -55,
+            "debt_ratio": 65,
+            "lhb_30d_count": 9,
+            "is_safe": False,
+        },
+    },
+    {
+        "name": "missing_financials_theme_heat",
+        "role": "missing fundamentals but high theme heat and analyst optimism",
+        "expectation": "risk_control",
+        "max_candidate_score": 55.0,
+        "features": {
+            "market": "US",
+            "market_cap_yi": 80,
+            "revenue_growth_3y_cagr": 0,
+            "net_profit_growth_latest": 0,
+            "pe": 0,
+            "pb": 20,
+            "stage_num": 2,
+            "ytd_return": 220,
+            "volatility_1y": 120,
+            "max_drawdown_1y": -60,
+            "ai_chokepoint_score": 90,
+            "has_positive_catalyst": True,
+            "buy_rating_pct": 90,
+        },
+    },
+]
+
+
+def _dim(data: dict[str, Any]) -> dict[str, Any]:
+    return {"data": data}
+
+
+def _minimal_raw(ticker: str, dims_override: dict[str, Any] | None = None) -> dict[str, Any]:
+    dims: dict[str, Any] = {
+        "0_basic": _dim({"name": ticker, "industry": "Technology", "price": 100.0, "pe_ttm": 20.0, "pb": 3.0}),
+        "1_financials": _dim(
+            {
+                "roe": 15.0,
+                "roe_history": [12, 14, 15],
+                "net_margin": 15.0,
+                "gross_margin": 40.0,
+                "revenue_history": [800, 900, 1000, 1150],
+                "financial_health": {"debt_ratio": 30.0},
+            }
+        ),
+        "2_kline": _dim(
+            {
+                "stage": "Stage 2 · Markup",
+                "ma_align": "多头排列",
+                "kline_stats": {"max_drawdown": -15.0, "ytd_return": 12.0},
+            }
+        ),
+        "3_macro": _dim({}),
+        "4_peers": _dim({}),
+        "5_chain": _dim({}),
+        "6_research": _dim({"report_count": 10, "rating_distribution": {"买入": 6}}),
+        "7_industry": _dim({}),
+        "8_materials": _dim({}),
+        "9_futures": _dim({}),
+        "10_valuation": _dim({"pe": 20.0, "pe_ttm": 20.0, "pe_quantile": 50.0, "industry_pe": 25.0}),
+        "11_governance": _dim({"pledge": [], "insider_trades_1y": []}),
+        "12_capital_flow": _dim({"main_fund_flow_20d": [], "unlock_schedule": []}),
+        "13_policy": _dim({}),
+        "14_moat": _dim({}),
+        "15_events": _dim({}),
+        "16_lhb": _dim({"lhb_count_30d": 0, "matched_youzi": []}),
+        "17_sentiment": _dim({"hot_rank": {"rank_history": []}}),
+        "18_trap": _dim({}),
+        "19_contests": _dim({"summary": {"xueqiu_cubes_total": 0, "high_return_cubes": 0}}),
+    }
+    for key, value in (dims_override or {}).items():
+        dims[key] = value
+    return {"ticker": ticker, "dimensions": dims}
+
+
+SYNTHETIC_RAW_CASES = [
+    {
+        "ticker": "__synthetic_empty_recent_news_stale_legacy",
+        "group": "synthetic_raw",
+        "role": "canonical empty recent_news must not fall back to stale legacy news",
+        "expectation": "neutral",
+        "max_candidate_dim_scores": {"15_events": 5.0},
+        "raw": _minimal_raw(
+            "__synthetic_empty_recent_news_stale_legacy",
+            {
+                "15_events": _dim(
+                    {
+                        "recent_news": [],
+                        "news": [{"title": f"stale cached positive item {i}"} for i in range(30)],
+                        "recent_notices": [],
+                    }
+                )
+            },
+        ),
+    },
+    {
+        "ticker": "__synthetic_single_strong_negative_event",
+        "group": "synthetic_raw",
+        "role": "one severe negative event must matter without requiring repetition",
+        "expectation": "negative_event",
+        "max_candidate_dim_scores": {"15_events": 4.9},
+        "raw": _minimal_raw(
+            "__synthetic_single_strong_negative_event",
+            {
+                "15_events": _dim(
+                    {
+                        "recent_news": [{"title": "SEC charges accounting fraud against executives"}],
+                        "recent_notices": [],
+                    }
+                )
+            },
+        ),
+    },
+    {
+        "ticker": "__synthetic_negated_negative_event",
+        "group": "synthetic_raw",
+        "role": "negated negative phrases should not be penalized as real events",
+        "expectation": "neutral",
+        "min_candidate_dim_scores": {"15_events": 5.0},
+        "raw": _minimal_raw(
+            "__synthetic_negated_negative_event",
+            {
+                "15_events": _dim(
+                    {
+                        "recent_news": [
+                            {"title": "公司无违规记录"},
+                            {"title": "未发现欺诈行为"},
+                            {"title": "settled lawsuit已和解"},
+                        ],
+                        "recent_notices": [],
+                    }
+                )
+            },
+        ),
+    },
+    {
+        "ticker": "__synthetic_missing_financials_raw",
+        "group": "synthetic_raw",
+        "role": "missing financials should not crash or promote a high-confidence buy",
+        "expectation": "data_gap",
+        "max_candidate_score": 65.0,
+        "raw": _minimal_raw(
+            "__synthetic_missing_financials_raw",
+            {
+                "1_financials": _dim({}),
+                "6_research": _dim({"report_count": 30, "rating_distribution": {"买入": 25}}),
+                "15_events": _dim({"recent_news": [{"title": f"positive catalyst {i}"} for i in range(25)]}),
+            },
+        ),
+    },
 ]
 
 DECISION_ORDER = {
@@ -218,6 +437,7 @@ def compare_scores(case: dict[str, Any], baseline: dict[str, Any], candidate: di
         flags.append("below_candidate_floor")
     if cand_score is not None and max_score is not None and cand_score > max_score:
         flags.append("above_candidate_ceiling")
+    _check_dim_boundaries(case, candidate, flags)
 
     if expectation == "quality_control":
         if tier_delta < 0:
@@ -236,6 +456,8 @@ def compare_scores(case: dict[str, Any], baseline: dict[str, Any], candidate: di
         "quality_control_downgrade",
         "risk_control_upgrade",
         "speculative_promoted_to_buy",
+        "15_events_below_floor",
+        "15_events_above_ceiling",
     }
     if any(flag in possible_regression_flags for flag in flags):
         verdict = "possible_regression"
@@ -265,6 +487,18 @@ def compare_scores(case: dict[str, Any], baseline: dict[str, Any], candidate: di
         "flags": flags,
         "verdict": verdict,
     }
+
+
+def _check_dim_boundaries(case: dict[str, Any], candidate: dict[str, Any], flags: list[str]) -> None:
+    dim_scores = candidate.get("dim_scores") or {}
+    for dim, floor in (case.get("min_candidate_dim_scores") or {}).items():
+        score = _float_or_none(dim_scores.get(dim))
+        if score is not None and score < float(floor):
+            flags.append(f"{dim}_below_floor")
+    for dim, ceiling in (case.get("max_candidate_dim_scores") or {}).items():
+        score = _float_or_none(dim_scores.get(dim))
+        if score is not None and score > float(ceiling):
+            flags.append(f"{dim}_above_ceiling")
 
 
 def _mode_raw(raw: dict[str, Any], mode: str) -> dict[str, Any]:
@@ -313,6 +547,14 @@ def build_payload(modes: list[str], raw_cases: list[dict[str, Any]], synthetic_c
                     "mode": mode,
                     "case": case,
                     "raw": _mode_raw(raw, mode),
+                }
+            )
+        for case in SYNTHETIC_RAW_CASES:
+            raw_items.append(
+                {
+                    "mode": mode,
+                    "case": {key: value for key, value in case.items() if key != "raw"},
+                    "raw": _mode_raw(case["raw"], mode),
                 }
             )
     return {
