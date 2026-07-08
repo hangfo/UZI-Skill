@@ -1,5 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+.gitattributes text eol=lf
 
 # Python
 *.py text eol=lf
@@ -14,6 +15,7 @@ hooks/run-hook.cmd text eol=crlf
 
 # JSON / Markdown
 *.json text eol=lf
+*.jsonl text eol=lf
 *.md text eol=lf
 
 # HTML
