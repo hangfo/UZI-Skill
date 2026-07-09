@@ -429,6 +429,30 @@ SMCI negative_event -> ready / high confidence / ~2.2s
 - 如果官方源不可达、字段缺失或证据语义不明确，状态必须是 `gap` 或 `partial`，不能用经验判断补齐。
 - 性能上，在线构建是预处理步骤；branch-vs-branch harness 仍保持离线数秒级。
 
+### Overlay-backed 分支对照
+
+冻结 overlay 通过显式开关接入 branch harness：
+
+```powershell
+D:\UZI-Skill\.venv\Scripts\python.exe tools\branch_score_compare.py `
+  --baseline codex/windows-local-stable `
+  --candidate codex/scoring-validation-guardrails `
+  --mode both `
+  --include-holdout `
+  --include-discovered-cache `
+  --include-evidence-overlays `
+  --label 20260709-overlay-backed-check
+```
+
+接入规则：
+
+- 只读取 `status=ready` 的 `uzi.evidence_overlay.v1`。
+- 当前只把 `negative_event` overlay 转为 raw-data 同链路样本。
+- `gap`、`partial`、schema 不匹配或缺少 `title/url/severity` 的 overlay 不进入对照。
+- overlay 样本的 evidence type 是 `frozen_overlay`，不冒充 `cached_raw` 或 synthetic。
+- `P0` 要求事件维度低于中性并限制总分；`P1` 主要限制高置信买入，不强制事件维度低于中性；`P2` 只作为 review 证据。
+- branch runner 仍然离线运行；overlay 是运行前冻结好的输入，不在对照过程中联网。
+
 ## 性能与“卡壳”诊断
 
 2026-07-09 复测发现，完整 branch-vs-branch harness 的等待感主要来自 A 股 lite 样本在 `generate_synthesis` 里的在线基金持仓 fallback，而不是美股/港股普遍慢：

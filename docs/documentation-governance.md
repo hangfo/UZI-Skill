@@ -20,6 +20,7 @@
 这些文件承载当前评分验证事实源，适合中文维护：
 
 - `docs/branch-score-comparison-harness.md`
+- `docs/scoring-validation-changelog.md`
 - `docs/scoring-model-regression-plan.md`
 - `SCORING_WINDOWS_FOLLOWUP_20260707.md`
 - `local-ops/notes/UZI-Skill_HANDOFF_20260708.md`

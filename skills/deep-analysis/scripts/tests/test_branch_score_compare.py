@@ -306,6 +306,73 @@ def test_discovered_cache_counts_as_cached_raw_support():
     assert branch_score_compare._evidence_type(row) == "cached_raw"
 
 
+def test_evidence_overlay_counts_as_frozen_overlay_not_cached_raw():
+    row = {"group": "evidence_overlay"}
+    assert branch_score_compare._evidence_type(row) == "frozen_overlay"
+
+
+def test_ready_negative_event_overlay_becomes_raw_case_without_cache():
+    overlay = {
+        "schema_version": "uzi.evidence_overlay.v1",
+        "ticker": "SMCI",
+        "target": "negative_event",
+        "status": "ready",
+        "evidence": [
+            {
+                "title": "SMCI 8-K Item 3.01: Notice of Delisting",
+                "url": "https://www.sec.gov/example",
+                "source": "sec_submissions",
+                "published_at": "2025-02-26",
+                "severity": "P1",
+                "event_type": "sec_8k_item",
+            }
+        ],
+    }
+    case = branch_score_compare.overlay_to_raw_case(overlay)
+    assert case is not None
+    assert case["group"] == "evidence_overlay"
+    assert case["ticker"] == "__overlay_SMCI_negative_event"
+    assert case["max_candidate_score"] == 65.0
+    assert case["max_candidate_dim_scores"]["15_events"] == 5.5
+    payload = branch_score_compare.build_payload(["lite"], [case], [])
+    assert payload["missing"] == []
+    assert payload["raw_items"][0]["case"]["overlay_source_ticker"] == "SMCI"
+
+
+def test_p0_negative_event_overlay_has_stricter_boundary_than_p1():
+    overlay = {
+        "schema_version": "uzi.evidence_overlay.v1",
+        "ticker": "BAD",
+        "target": "negative_event",
+        "status": "ready",
+        "evidence": [
+            {
+                "title": "BAD 8-K Item 4.02: Non-Reliance on Previously Issued Financial Statements",
+                "url": "https://www.sec.gov/example",
+                "source": "sec_submissions",
+                "published_at": "2025-02-26",
+                "severity": "P0",
+                "event_type": "sec_8k_item",
+            }
+        ],
+    }
+    case = branch_score_compare.overlay_to_raw_case(overlay)
+    assert case is not None
+    assert case["max_candidate_score"] == 60.0
+    assert case["max_candidate_dim_scores"]["15_events"] == 4.9
+
+
+def test_gap_overlay_is_not_promoted_to_branch_case():
+    overlay = {
+        "schema_version": "uzi.evidence_overlay.v1",
+        "ticker": "AAPL",
+        "target": "negative_event",
+        "status": "gap",
+        "evidence": [],
+    }
+    assert branch_score_compare.overlay_to_raw_case(overlay) is None
+
+
 def test_performance_warning_does_not_change_verdict():
     payload = {
         "raw_items": [

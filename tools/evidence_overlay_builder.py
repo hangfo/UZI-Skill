@@ -59,6 +59,38 @@ NEGATIVE_EVENT_TAXONOMY = {
 
 NEGATED_NEGATIVE_TERMS = ("no fraud", "no violation", "未发现", "无违规", "settled", "和解")
 
+STATUS_LABEL_ZH = {
+    "ready": "证据已冻结",
+    "partial": "证据不完整",
+    "gap": "证据缺口",
+    "error": "证据错误",
+}
+
+TARGET_LABEL_ZH = {
+    "missing_financials": "财务字段补证据",
+    "negative_event": "负面事件证据",
+}
+
+CONFIDENCE_LABEL_ZH = {
+    "high": "高",
+    "medium": "中",
+    "low": "低",
+}
+
+SEVERITY_LABEL_ZH = {
+    "P0": "P0 硬风险",
+    "P1": "P1 重大风险升级",
+    "P2": "P2 上下文风险",
+}
+
+FACTOR_LABEL_ZH = {
+    "required evidence is present and frozen": "必要证据已存在并冻结",
+    "some evidence exists but field coverage or provenance is incomplete": "已有部分证据，但字段覆盖或来源追溯不完整",
+    "evidence gap remains; do not infer missing facts": "仍存在证据缺口，不能推断缺失事实",
+    "one or more sources failed or are not implemented": "一个或多个来源失败或尚未实现",
+    "negative event is not inferred from generic news or filings": "负面事件不能从泛新闻或普通披露中推断",
+}
+
 
 def _find_repo_root() -> Path:
     for parent in Path(__file__).resolve().parents:
@@ -111,6 +143,7 @@ def build_overlay(
 
     overlay["performance"]["elapsed_sec"] = round(time.perf_counter() - started, 3)
     _finalize_confidence(overlay)
+    _attach_display_labels(overlay)
     return overlay
 
 
@@ -528,6 +561,33 @@ def _finalize_confidence(overlay: dict[str, Any]) -> None:
     overlay["confidence"] = {"level": level, "score": score, "factors": factors}
 
 
+def _attach_display_labels(overlay: dict[str, Any]) -> None:
+    status = str(overlay.get("status") or "")
+    target = str(overlay.get("target") or "")
+    confidence = overlay.get("confidence") or {}
+    level = str(confidence.get("level") or "")
+    confidence["label_zh"] = CONFIDENCE_LABEL_ZH.get(level, level)
+    confidence["factors_zh"] = [FACTOR_LABEL_ZH.get(str(item), str(item)) for item in confidence.get("factors") or []]
+    overlay["confidence"] = confidence
+    for item in overlay.get("evidence") or []:
+        if isinstance(item, dict) and item.get("severity"):
+            item["severity_label_zh"] = SEVERITY_LABEL_ZH.get(str(item["severity"]), str(item["severity"]))
+    overlay["display"] = {
+        "target_label_zh": TARGET_LABEL_ZH.get(target, target),
+        "status_label_zh": STATUS_LABEL_ZH.get(status, status),
+        "confidence_label_zh": confidence.get("label_zh", level),
+        "summary_zh": _display_summary_zh(overlay),
+    }
+
+
+def _display_summary_zh(overlay: dict[str, Any]) -> str:
+    ticker = overlay.get("ticker")
+    target = TARGET_LABEL_ZH.get(str(overlay.get("target")), str(overlay.get("target")))
+    status = STATUS_LABEL_ZH.get(str(overlay.get("status")), str(overlay.get("status")))
+    confidence = (overlay.get("confidence") or {}).get("label_zh") or overlay.get("confidence", {}).get("level")
+    return f"{ticker} {target}：{status}，置信度 {confidence}"
+
+
 def _classify_negative_text(text: str) -> dict[str, str] | None:
     lowered = text.lower()
     if any(term in lowered for term in NEGATED_NEGATIVE_TERMS):
@@ -613,7 +673,9 @@ def main(argv: list[str] | None = None) -> int:
             {
                 "ticker": overlay["ticker"],
                 "target": overlay["target"],
+                "target_label_zh": (overlay.get("display") or {}).get("target_label_zh"),
                 "status": overlay["status"],
+                "status_label_zh": (overlay.get("display") or {}).get("status_label_zh"),
                 "confidence": overlay["confidence"],
                 "elapsed_sec": overlay["performance"]["elapsed_sec"],
             },

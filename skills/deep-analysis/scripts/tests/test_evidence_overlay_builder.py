@@ -192,6 +192,27 @@ def test_overlay_schema_has_freeze_guardrails():
     assert overlay["schema_version"] == "uzi.evidence_overlay.v1"
     assert "same overlay must be reused" in " ".join(overlay["guardrails"])
     assert overlay["market"] == "A"
+    assert overlay["display"]["target_label_zh"] == "财务字段补证据"
+    assert overlay["display"]["status_label_zh"] in {"证据缺口", "证据不完整", "证据已冻结"}
+    assert overlay["target"] == "missing_financials"
+
+
+def test_negative_event_display_keeps_machine_enums():
+    overlay = {
+        "schema_version": "uzi.evidence_overlay.v1",
+        "ticker": "TEST",
+        "market": "US",
+        "target": "negative_event",
+        "status": "ready",
+        "confidence": {"level": "high", "score": 85, "factors": ["required evidence is present and frozen"]},
+        "evidence": [{"severity": "P1"}],
+    }
+    evidence_overlay_builder._attach_display_labels(overlay)
+    assert overlay["target"] == "negative_event"
+    assert overlay["status"] == "ready"
+    assert overlay["evidence"][0]["severity"] == "P1"
+    assert overlay["evidence"][0]["severity_label_zh"] == "P1 重大风险升级"
+    assert overlay["display"]["status_label_zh"] == "证据已冻结"
 
 
 if __name__ == "__main__":

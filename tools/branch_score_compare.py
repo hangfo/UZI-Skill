@@ -24,6 +24,7 @@ ROOT = _find_repo_root()
 SCRIPTS = ROOT / "skills" / "deep-analysis" / "scripts"
 CACHE = SCRIPTS / ".cache"
 OUT_DIR = ROOT / "local-ops" / "state" / "branch-score-compare"
+EVIDENCE_OVERLAY_DIR = ROOT / "local-ops" / "state" / "evidence-overlays"
 
 NEGATIVE_EVENT_TERMS = (
     "fraud",
@@ -904,6 +905,98 @@ def _selected_raw_cases(include_holdout: bool, extra_tickers: list[str]) -> list
     return cases
 
 
+def load_evidence_overlay_cases(overlay_dir: Path = EVIDENCE_OVERLAY_DIR) -> list[dict[str, Any]]:
+    cases: list[dict[str, Any]] = []
+    if not overlay_dir.exists():
+        return cases
+    for path in sorted(overlay_dir.glob("*.json")):
+        try:
+            overlay = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        case = overlay_to_raw_case(overlay, source_path=path)
+        if case:
+            cases.append(case)
+    return cases
+
+
+def overlay_to_raw_case(overlay: dict[str, Any], *, source_path: Path | None = None) -> dict[str, Any] | None:
+    if overlay.get("schema_version") != "uzi.evidence_overlay.v1":
+        return None
+    if overlay.get("status") != "ready":
+        return None
+    target = overlay.get("target")
+    if target == "negative_event":
+        return _negative_event_overlay_case(overlay, source_path=source_path)
+    return None
+
+
+def _negative_event_overlay_case(overlay: dict[str, Any], *, source_path: Path | None = None) -> dict[str, Any] | None:
+    ticker = str(overlay.get("ticker") or "").strip()
+    if not ticker:
+        return None
+    evidence = [
+        item
+        for item in overlay.get("evidence") or []
+        if isinstance(item, dict)
+        and item.get("title")
+        and item.get("url")
+        and item.get("severity") in {"P0", "P1", "P2"}
+    ]
+    if not evidence:
+        return None
+    severities = {str(item.get("severity")) for item in evidence}
+    if "P0" in severities:
+        max_dim_score = 4.9
+        max_score = 60.0
+    elif "P1" in severities:
+        max_dim_score = 5.5
+        max_score = 65.0
+    else:
+        max_dim_score = 5.5
+        max_score = 70.0
+    case_ticker = f"__overlay_{ticker}_negative_event"
+    raw = _minimal_raw(
+        case_ticker,
+        {
+            "15_events": _dim(
+                {
+                    "recent_news": [
+                        {
+                            "title": str(item.get("title") or ""),
+                            "url": str(item.get("url") or ""),
+                            "source": str(item.get("source") or "evidence_overlay"),
+                            "published_at": item.get("published_at"),
+                            "severity": item.get("severity"),
+                            "event_type": item.get("event_type"),
+                        }
+                        for item in evidence
+                    ],
+                    "evidence_overlay": {
+                        "ticker": ticker,
+                        "target": overlay.get("target"),
+                        "status": overlay.get("status"),
+                        "source_path": str(source_path) if source_path else "",
+                    },
+                }
+            )
+        },
+    )
+    return {
+        "ticker": case_ticker,
+        "group": "evidence_overlay",
+        "role": f"frozen evidence overlay negative event: {ticker}",
+        "expectation": "negative_event",
+        "max_candidate_score": max_score,
+        "max_candidate_dim_scores": {"15_events": max_dim_score},
+        "overlay_source_ticker": ticker,
+        "overlay_target": overlay.get("target"),
+        "overlay_path": str(source_path) if source_path else "",
+        "overlay_severities": sorted({str(item.get("severity")) for item in evidence}),
+        "raw": raw,
+    }
+
+
 def discover_cached_blindspot_cases(existing_tickers: set[str] | None = None) -> list[dict[str, Any]]:
     existing = set(existing_tickers or set())
     discovered: list[dict[str, Any]] = []
@@ -1158,15 +1251,18 @@ def build_payload(modes: list[str], raw_cases: list[dict[str, Any]], synthetic_c
     for mode in modes:
         for case in raw_cases:
             ticker = case["ticker"]
-            path = CACHE / ticker / "raw_data.json"
-            if not path.exists():
-                missing.append({"ticker": ticker, "mode": mode, "path": str(path)})
-                continue
-            raw = json.loads(path.read_text(encoding="utf-8"))
+            if "raw" in case:
+                raw = case["raw"]
+            else:
+                path = CACHE / ticker / "raw_data.json"
+                if not path.exists():
+                    missing.append({"ticker": ticker, "mode": mode, "path": str(path)})
+                    continue
+                raw = json.loads(path.read_text(encoding="utf-8"))
             raw_items.append(
                 {
                     "mode": mode,
-                    "case": case,
+                    "case": {key: value for key, value in case.items() if key != "raw"},
                     "raw": _mode_raw(raw, mode),
                 }
             )
@@ -1447,6 +1543,8 @@ def _evidence_type(row: dict[str, Any]) -> str:
     group = row.get("group")
     if group in {"core", "holdout", "extra", "discovered_cache"}:
         return "cached_raw"
+    if group == "evidence_overlay":
+        return "frozen_overlay"
     if group == "synthetic_raw":
         return "synthetic_raw"
     return "synthetic_feature"
@@ -1693,6 +1791,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--no-holdout", dest="include_holdout", action="store_false")
     parser.add_argument("--extra-ticker", action="append", default=[])
     parser.add_argument("--include-discovered-cache", action="store_true")
+    parser.add_argument("--include-evidence-overlays", action="store_true")
+    parser.add_argument("--overlay-dir", default=str(EVIDENCE_OVERLAY_DIR))
     parser.add_argument(
         "--audit-cache-blindspots",
         action="store_true",
@@ -1731,6 +1831,12 @@ def main(argv: list[str] | None = None) -> int:
     raw_cases = _selected_raw_cases(args.include_holdout, args.extra_ticker)
     if args.include_discovered_cache:
         raw_cases.extend(discover_cached_blindspot_cases({case["ticker"] for case in raw_cases}))
+    if args.include_evidence_overlays:
+        existing = {case["ticker"] for case in raw_cases}
+        for case in load_evidence_overlay_cases(Path(args.overlay_dir)):
+            if case["ticker"] not in existing:
+                raw_cases.append(case)
+                existing.add(case["ticker"])
     payload = build_payload(modes, raw_cases, SYNTHETIC_CASES)
 
     with tempfile.TemporaryDirectory(prefix="uzi-branch-score-") as td:
