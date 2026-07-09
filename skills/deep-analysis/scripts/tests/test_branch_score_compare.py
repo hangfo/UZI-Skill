@@ -42,6 +42,8 @@ def test_risk_control_score_drop_is_ok():
     assert row["verdict"] == "review"
     assert "large_score_drift" in row["flags"]
     assert "risk_control_upgrade" not in row["flags"]
+    assert row["explanation"]["category"] == "risk_control_reasonable_tightening"
+    assert row["explanation"]["metrics"]["nearest_boundary_distance"] == 11.0
 
 
 def test_risk_control_upgrade_is_possible_regression():
@@ -54,6 +56,8 @@ def test_risk_control_upgrade_is_possible_regression():
     assert row["verdict"] == "possible_regression"
     assert "risk_control_upgrade" in row["flags"]
     assert "above_candidate_ceiling" in row["flags"]
+    assert row["explanation"]["category"] == "risk_control_suspicious_upgrade"
+    assert row["explanation"]["metrics"]["boundary_violations"][0]["margin"] == -11.0
 
 
 def test_speculative_watch_promoted_to_buy_is_possible_regression():
@@ -65,6 +69,7 @@ def test_speculative_watch_promoted_to_buy_is_possible_regression():
     )
     assert row["verdict"] == "possible_regression"
     assert "speculative_promoted_to_buy" in row["flags"]
+    assert row["explanation"]["category"] == "speculative_promoted_to_buy"
 
 
 def test_dim_score_ceiling_violation_is_possible_regression():
@@ -80,6 +85,7 @@ def test_dim_score_ceiling_violation_is_possible_regression():
     )
     assert row["verdict"] == "possible_regression"
     assert "15_events_above_ceiling" in row["flags"]
+    assert row["explanation"]["category"] == "field_contract_violation"
 
 
 def test_dim_score_floor_violation_is_possible_regression():
@@ -95,6 +101,50 @@ def test_dim_score_floor_violation_is_possible_regression():
     )
     assert row["verdict"] == "possible_regression"
     assert "15_events_below_floor" in row["flags"]
+    assert row["explanation"]["category"] == "field_contract_violation"
+
+
+def test_near_boundary_lowers_confidence():
+    case = {"ticker": "AAPL", "expectation": "quality_control", "min_candidate_score": 60.0}
+    row = branch_score_compare.compare_scores(
+        case,
+        {"investment_score": 62.0},
+        {"investment_score": 60.5},
+    )
+    assert row["verdict"] == "ok"
+    assert row["explanation"]["confidence"]["level"] == "medium"
+    assert "候选结果距离边界 <= 1 分" in row["explanation"]["confidence"]["factors"]
+
+
+def test_stage_guardrail_tightening_has_explainable_category():
+    case = {
+        "name": "high_quality_stage3_confirmed_downtrend",
+        "role": "quality stock in confirmed distribution/downtrend",
+        "expectation": "speculative_watch",
+        "max_candidate_score": 64.0,
+    }
+    row = branch_score_compare.compare_scores(
+        case,
+        {"investment_score": 66.0},
+        {"investment_score": 59.0},
+    )
+    assert row["verdict"] == "review"
+    assert row["explanation"]["category"] == "trend_guardrail_tightening"
+    assert row["explanation"]["confidence"]["level"] == "high"
+
+
+def test_compare_outputs_includes_reason_and_confidence_summary():
+    payload = {
+        "raw_items": [
+            {"mode": "lite", "case": {"ticker": "AAPL", "expectation": "quality_control", "min_candidate_score": 60.0}}
+        ],
+        "synthetic_cases": [],
+    }
+    baseline = {"ref": "base", "raw": [{"case": "AAPL", "mode": "lite", "investment_score": 62.0}]}
+    candidate = {"ref": "cand", "raw": [{"case": "AAPL", "mode": "lite", "investment_score": 60.5}]}
+    result = branch_score_compare.compare_outputs(payload, baseline, candidate)
+    assert result["reason_summary"]["stable_no_material_change"] == 1
+    assert result["confidence_summary"]["medium"] == 1
 
 
 def test_build_payload_includes_synthetic_raw_cases():

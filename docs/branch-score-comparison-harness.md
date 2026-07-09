@@ -132,28 +132,111 @@ score_dimensions -> generate_panel -> generate_synthesis
 
 只有边界违反类标记会被判为 `possible_regression`。单纯大幅漂移但未违反边界时，只判为 `review`。
 
+## 归因与置信度
+
+Harness 现在会为每一行输出稳定的解释层：
+
+- `explanation.category`：机器可比较的归因枚举。
+- `explanation.label`：中文归因标签。
+- `explanation.rationale`：面向人工复核的一句话解释。
+- `explanation.metrics`：定量证据，包括分数漂移、档位漂移、边界余量和主要轴向变化。
+- `explanation.confidence`：本次判定的证据完整度，不是收益预测胜率。
+
+### 归因类别
+
+| 类别 | 含义 | 典型处理 |
+|---|---|---|
+| `execution_failure` | 某个分支执行失败或输出缺失。 | 先修 harness/环境，不解读分数。 |
+| `field_contract_violation` | synthetic raw-data 字段契约失败，例如 `15_events` 越界。 | 优先检查字段读取、fallback 和语义解析。 |
+| `quality_control_possible_downgrade` | 质量控制样本被降档或跌破下限。 | 检查是否误伤高质量公司。 |
+| `risk_control_suspicious_upgrade` | 风险样本被升档或越过上限。 | 检查是否放松风控或题材加分过强。 |
+| `speculative_promoted_to_buy` | 投机观察样本进入买入档。 | 检查是否把题材热度当成买点。 |
+| `risk_control_reasonable_tightening` | 风险样本分数/档位下调。 | 通常是合理变化，但仍看漂移幅度。 |
+| `trend_guardrail_tightening` | Stage 3/4 或下跌趋势样本被降档。 | 通常是趋势护栏生效。 |
+| `data_quality_uncertain` | 样本主要检验数据缺口或事件语义。 | 不直接调公式，先检查输入质量。 |
+| `material_score_drift` | 大幅分数漂移但未违反硬边界。 | 人工复核轴向变化是否合理。 |
+| `decision_tier_shift` | 买卖档位变化但未违反样本边界。 | 结合边界余量判断是否贴边。 |
+| `stable_no_material_change` | 分数和档位基本稳定。 | 可视为通过。 |
+| `neutral_or_small_change` | 小幅变化或无明确方向性边界。 | 低优先级复核。 |
+
+### 定量判定方式
+
+每行会给出以下指标：
+
+- `abs_score_delta`：候选分支相对基线的绝对分数漂移。
+- `tier_delta`：买卖档位变化，正数代表升档，负数代表降档。
+- `boundary_checks`：每个样本边界的值、阈值和余量。
+- `boundary_violations`：余量为负的边界，直接支持 `possible_regression`。
+- `nearest_boundary_distance`：候选结果距离最近边界的分数；越接近 0，越需要人工复核。
+- `top_axis_deltas`：质量、增长、催化、估值、风控等轴向的最大变化。
+
+边界余量规则：
+
+- 对 `min_candidate_score`：余量 = 候选分数 - 下限。
+- 对 `max_candidate_score`：余量 = 上限 - 候选分数。
+- 对维度上下限同理。
+- 负数表示越界；`0~1` 分表示贴边，置信度会下调。
+
+### 置信度
+
+`confidence.score` 从证据完整度角度给出 0-100 分：
+
+- `high`：`>= 75`，证据完整、离边界较远或边界违反明确。
+- `medium`：`50-74`，证据可用但存在贴边、弱预期或仅 review。
+- `low`：`< 50`，存在执行失败、分数缺失或严重数据不足。
+
+会降低置信度的因素：
+
+- 分支执行失败或缺少输出。
+- 缺少 `investment_score`。
+- 候选结果距离边界 `<= 1` 分或 `<= 3` 分。
+- 样本没有强预期方向，例如 `neutral`。
+- 样本本身是数据缺口边界，例如 `data_gap`。
+- 只触发 `review`，没有违反硬边界。
+
+因此，“不可靠”不是主观判断，而是以下情况之一：
+
+- `confidence.level == low`。
+- 存在 `execution_failure`。
+- `nearest_boundary_distance <= 1` 且只靠单个样本支持结论。
+- 样本属于 `data_quality_uncertain`，但缺少字段级证据。
+- 同一原因只在 synthetic 样本出现，真实缓存 raw data 没有交叉支持。
+
 ## 最新已知结果
 
 扩展版运行结果：
 
 ```text
-label: 20260708-expanded-core-holdout-both
+label: 20260709-explainability-core-holdout-both
 result: 29 ok / 2 review / 0 possible_regression
 ```
 
 输出文件：
 
 ```text
-local-ops/state/branch-score-compare/20260708-expanded-core-holdout-both.md
-local-ops/state/branch-score-compare/20260708-expanded-core-holdout-both.json
+local-ops/state/branch-score-compare/20260709-explainability-core-holdout-both.md
+local-ops/state/branch-score-compare/20260709-explainability-core-holdout-both.json
 ```
 
 两个 `review` 都是预期内的风险收敛，不是公式回退：
 
-- `high_quality_stage3_confirmed_downtrend`：`66.0 -> 59.0`，档位 `buy_candidate -> watch`。
-- `stage4_missing_price_high_quality`：`66.0 -> 59.0`，档位 `buy_candidate -> watch`。
+- `high_quality_stage3_confirmed_downtrend`：`66.0 -> 59.0`，档位 `buy_candidate -> watch`，归因为 `trend_guardrail_tightening`，置信度 `high(82)`。
+- `stage4_missing_price_high_quality`：`66.0 -> 59.0`，档位 `buy_candidate -> watch`，归因为 `trend_guardrail_tightening`，置信度 `medium(64)`；因为候选分数贴近上限边界，仍需人工复核但不判回退。
 
 这两个变化说明候选分支阻止了 Stage 3/4 下的质量保底误触发买入信号。
+
+归因汇总：
+
+- `stable_no_material_change`: 14
+- `risk_control_reasonable_tightening`: 11
+- `data_quality_uncertain`: 4
+- `trend_guardrail_tightening`: 2
+
+置信度汇总：
+
+- `high`: 24
+- `medium`: 7
+- `low`: 0
 
 Synthetic raw-data 检查也显示字段契约符合预期：
 

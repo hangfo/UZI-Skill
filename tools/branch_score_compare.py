@@ -397,6 +397,32 @@ DECISION_ORDER = {
     "strong_buy": 4,
 }
 
+REGRESSION_FLAGS = {
+    "execution_error",
+    "below_candidate_floor",
+    "above_candidate_ceiling",
+    "quality_control_downgrade",
+    "risk_control_upgrade",
+    "speculative_promoted_to_buy",
+    "15_events_below_floor",
+    "15_events_above_ceiling",
+}
+
+REASON_LABELS = {
+    "execution_failure": "执行失败/输出缺失",
+    "field_contract_violation": "字段契约违反",
+    "quality_control_possible_downgrade": "质量样本疑似误降级",
+    "risk_control_suspicious_upgrade": "风险样本疑似误升级",
+    "speculative_promoted_to_buy": "投机样本被推成买入",
+    "risk_control_reasonable_tightening": "风险控制合理收紧",
+    "trend_guardrail_tightening": "趋势护栏合理收紧",
+    "data_quality_uncertain": "数据质量边界需复核",
+    "material_score_drift": "大幅分数漂移",
+    "decision_tier_shift": "买卖档位变化",
+    "stable_no_material_change": "稳定无显著变化",
+    "neutral_or_small_change": "小幅变化",
+}
+
 
 def decision_tier(score: Any) -> str:
     value = _float_or_none(score)
@@ -449,22 +475,25 @@ def compare_scores(case: dict[str, Any], baseline: dict[str, Any], candidate: di
         if cand_tier in {"buy_candidate", "strong_buy"}:
             flags.append("speculative_promoted_to_buy")
 
-    possible_regression_flags = {
-        "execution_error",
-        "below_candidate_floor",
-        "above_candidate_ceiling",
-        "quality_control_downgrade",
-        "risk_control_upgrade",
-        "speculative_promoted_to_buy",
-        "15_events_below_floor",
-        "15_events_above_ceiling",
-    }
-    if any(flag in possible_regression_flags for flag in flags):
+    if any(flag in REGRESSION_FLAGS for flag in flags):
         verdict = "possible_regression"
     elif flags:
         verdict = "review"
     else:
         verdict = "ok"
+
+    explanation = explain_comparison(
+        case=case,
+        baseline=baseline,
+        candidate=candidate,
+        flags=flags,
+        verdict=verdict,
+        expectation=expectation,
+        base_score=base_score,
+        cand_score=cand_score,
+        score_delta=score_delta,
+        tier_delta=tier_delta,
+    )
 
     return {
         "case": case.get("ticker") or case.get("name"),
@@ -485,8 +514,240 @@ def compare_scores(case: dict[str, Any], baseline: dict[str, Any], candidate: di
             "candidate": cand_tier,
         },
         "flags": flags,
+        "explanation": explanation,
         "verdict": verdict,
     }
+
+
+def explain_comparison(
+    *,
+    case: dict[str, Any],
+    baseline: dict[str, Any],
+    candidate: dict[str, Any],
+    flags: list[str],
+    verdict: str,
+    expectation: str,
+    base_score: float | None,
+    cand_score: float | None,
+    score_delta: float | None,
+    tier_delta: int,
+) -> dict[str, Any]:
+    metrics = _explanation_metrics(case, baseline, candidate, score_delta, tier_delta)
+    category = _reason_category(case, flags, expectation, score_delta, tier_delta)
+    confidence = _confidence_assessment(case, baseline, candidate, flags, verdict, expectation, metrics)
+    return {
+        "category": category,
+        "label": REASON_LABELS.get(category, category),
+        "rationale": _rationale(category, flags, expectation, base_score, cand_score, score_delta, tier_delta, metrics),
+        "confidence": confidence,
+        "metrics": metrics,
+    }
+
+
+def _reason_category(
+    case: dict[str, Any],
+    flags: list[str],
+    expectation: str,
+    score_delta: float | None,
+    tier_delta: int,
+) -> str:
+    role = str(case.get("role", "")).lower()
+    case_name = str(case.get("ticker") or case.get("name") or "").lower()
+    flag_set = set(flags)
+    if "execution_error" in flag_set:
+        return "execution_failure"
+    if any(
+        (flag.endswith("_below_floor") or flag.endswith("_above_ceiling"))
+        and flag.split("_", 1)[0].isdigit()
+        for flag in flag_set
+    ):
+        return "field_contract_violation"
+    if "quality_control_downgrade" in flag_set or (
+        "below_candidate_floor" in flag_set and expectation == "quality_control"
+    ):
+        return "quality_control_possible_downgrade"
+    if "risk_control_upgrade" in flag_set or (
+        "above_candidate_ceiling" in flag_set and expectation == "risk_control"
+    ):
+        return "risk_control_suspicious_upgrade"
+    if "speculative_promoted_to_buy" in flag_set or (
+        "above_candidate_ceiling" in flag_set and expectation == "speculative_watch"
+    ):
+        return "speculative_promoted_to_buy"
+    if expectation == "risk_control" and (tier_delta < 0 or (score_delta is not None and score_delta < 0)):
+        return "risk_control_reasonable_tightening"
+    if ("stage3" in case_name or "stage4" in case_name or "downtrend" in role) and tier_delta < 0:
+        return "trend_guardrail_tightening"
+    if expectation in {"data_gap", "negative_event"} or "missing" in case_name or "data" in role:
+        return "data_quality_uncertain"
+    if "large_score_drift" in flag_set:
+        return "material_score_drift"
+    if "decision_tier_changed" in flag_set:
+        return "decision_tier_shift"
+    if not flags and (score_delta is None or abs(score_delta) < 2):
+        return "stable_no_material_change"
+    return "neutral_or_small_change"
+
+
+def _explanation_metrics(
+    case: dict[str, Any],
+    baseline: dict[str, Any],
+    candidate: dict[str, Any],
+    score_delta: float | None,
+    tier_delta: int,
+) -> dict[str, Any]:
+    boundary_checks = _boundary_checks(case, candidate)
+    violated = [item for item in boundary_checks if item["margin"] is not None and item["margin"] < 0]
+    nearest = None
+    if boundary_checks:
+        margins = [abs(item["margin"]) for item in boundary_checks if item["margin"] is not None]
+        nearest = round(min(margins), 2) if margins else None
+    axis_deltas = _axis_deltas(baseline.get("axes") or {}, candidate.get("axes") or {})
+    return {
+        "abs_score_delta": None if score_delta is None else round(abs(score_delta), 2),
+        "tier_delta": tier_delta,
+        "boundary_checks": boundary_checks,
+        "boundary_violations": violated,
+        "nearest_boundary_distance": nearest,
+        "top_axis_deltas": axis_deltas[:3],
+    }
+
+
+def _boundary_checks(case: dict[str, Any], candidate: dict[str, Any]) -> list[dict[str, Any]]:
+    checks: list[dict[str, Any]] = []
+    cand_score = _float_or_none(candidate.get("investment_score"))
+    min_score = case.get("min_candidate_score")
+    max_score = case.get("max_candidate_score")
+    if min_score is not None:
+        checks.append(_boundary_item("investment_score", "min", cand_score, float(min_score)))
+    if max_score is not None:
+        checks.append(_boundary_item("investment_score", "max", cand_score, float(max_score)))
+    dim_scores = candidate.get("dim_scores") or {}
+    for dim, floor in (case.get("min_candidate_dim_scores") or {}).items():
+        checks.append(_boundary_item(dim, "min", _float_or_none(dim_scores.get(dim)), float(floor)))
+    for dim, ceiling in (case.get("max_candidate_dim_scores") or {}).items():
+        checks.append(_boundary_item(dim, "max", _float_or_none(dim_scores.get(dim)), float(ceiling)))
+    return checks
+
+
+def _boundary_item(target: str, kind: str, value: float | None, limit: float) -> dict[str, Any]:
+    if value is None:
+        margin = None
+        violated = True
+    elif kind == "min":
+        margin = round(value - limit, 2)
+        violated = value < limit
+    else:
+        margin = round(limit - value, 2)
+        violated = value > limit
+    return {
+        "target": target,
+        "kind": kind,
+        "value": None if value is None else round(value, 2),
+        "limit": round(limit, 2),
+        "margin": margin,
+        "violated": violated,
+    }
+
+
+def _axis_deltas(baseline_axes: dict[str, Any], candidate_axes: dict[str, Any]) -> list[dict[str, Any]]:
+    rows = []
+    for axis in sorted(set(baseline_axes) | set(candidate_axes)):
+        delta = _delta(_axis_value(baseline_axes.get(axis)), _axis_value(candidate_axes.get(axis)))
+        if delta is not None and abs(delta) >= 0.5:
+            rows.append({"axis": axis, "delta": delta})
+    rows.sort(key=lambda item: abs(item["delta"]), reverse=True)
+    return rows
+
+
+def _axis_value(value: Any) -> Any:
+    if isinstance(value, dict):
+        for key in ("score", "value", "raw", "weighted"):
+            if key in value:
+                return value[key]
+    return value
+
+
+def _confidence_assessment(
+    case: dict[str, Any],
+    baseline: dict[str, Any],
+    candidate: dict[str, Any],
+    flags: list[str],
+    verdict: str,
+    expectation: str,
+    metrics: dict[str, Any],
+) -> dict[str, Any]:
+    score = 90
+    factors: list[str] = []
+    if baseline.get("error") or candidate.get("error"):
+        score -= 60
+        factors.append("分支执行或输出缺失")
+    if _float_or_none(baseline.get("investment_score")) is None or _float_or_none(candidate.get("investment_score")) is None:
+        score -= 35
+        factors.append("缺少 investment_score")
+    nearest = metrics.get("nearest_boundary_distance")
+    if nearest is not None:
+        if nearest <= 1:
+            score -= 18
+            factors.append("候选结果距离边界 <= 1 分")
+        elif nearest <= 3:
+            score -= 8
+            factors.append("候选结果距离边界 <= 3 分")
+    if expectation == "neutral":
+        score -= 8
+        factors.append("样本没有强预期方向")
+    if expectation == "data_gap":
+        score -= 10
+        factors.append("样本用于数据缺口边界，天然需要人工复核")
+    if verdict == "review" and not any(flag in REGRESSION_FLAGS for flag in flags):
+        score -= 8
+        factors.append("仅触发 review，未违反硬边界")
+    if not flags:
+        factors.append("未触发漂移或边界标记")
+    score = max(0, min(100, score))
+    if score >= 75:
+        level = "high"
+    elif score >= 50:
+        level = "medium"
+    else:
+        level = "low"
+    return {"level": level, "score": score, "factors": factors}
+
+
+def _rationale(
+    category: str,
+    flags: list[str],
+    expectation: str,
+    base_score: float | None,
+    cand_score: float | None,
+    score_delta: float | None,
+    tier_delta: int,
+    metrics: dict[str, Any],
+) -> str:
+    score_text = f"{_fmt_num(base_score)} -> {_fmt_num(cand_score)}"
+    if category == "execution_failure":
+        return "至少一个分支执行失败或缺少输出，无法做中立比较。"
+    if category == "field_contract_violation":
+        return f"候选分支违反维度分数边界；分数 {score_text}，标记：{', '.join(flags)}。"
+    if category == "quality_control_possible_downgrade":
+        return f"质量控制样本被降到预设下限或更低档位；分数 {score_text}，需要确认是否误伤好公司。"
+    if category == "risk_control_suspicious_upgrade":
+        return f"风险控制样本被升到预设上限以上或更高档位；分数 {score_text}，需要确认是否放松风控。"
+    if category == "speculative_promoted_to_buy":
+        return f"投机观察样本进入买入档或越过上限；分数 {score_text}，需要检查是否把题材热度当成买点。"
+    if category == "risk_control_reasonable_tightening":
+        return f"风险样本分数/档位下调，方向符合风控预期；分数 {score_text}。"
+    if category == "trend_guardrail_tightening":
+        return f"Stage 3/4 或下跌趋势样本被降档，方向符合趋势护栏；分数 {score_text}。"
+    if category == "data_quality_uncertain":
+        return f"样本主要检验数据缺口或事件语义；分数 {score_text}，需结合字段契约看。"
+    if category == "material_score_drift":
+        return f"分数漂移达到阈值但未违反硬边界；分数 {score_text}，变化 {score_delta:+.1f}。"
+    if category == "decision_tier_shift":
+        return f"买卖档位变化但未违反样本边界；分数 {score_text}，档位变化 {tier_delta:+d}。"
+    if category == "stable_no_material_change":
+        return f"分数和档位基本稳定；分数 {score_text}。"
+    return f"变化较小或无明确方向性边界；分数 {score_text}，预期类型 {expectation}。"
 
 
 def _check_dim_boundaries(case: dict[str, Any], candidate: dict[str, Any], flags: list[str]) -> None:
@@ -670,6 +931,8 @@ def compare_outputs(payload: dict[str, Any], baseline: dict[str, Any], candidate
         "review": sum(1 for row in all_rows if row["verdict"] == "review"),
         "possible_regression": sum(1 for row in all_rows if row["verdict"] == "possible_regression"),
     }
+    reason_counts = _count_by(all_rows, lambda row: row["explanation"]["category"])
+    confidence_counts = _count_by(all_rows, lambda row: row["explanation"]["confidence"]["level"])
     return {
         "generated_at": time.strftime("%Y-%m-%d %H:%M:%S %z"),
         "baseline_ref": baseline.get("ref"),
@@ -678,9 +941,19 @@ def compare_outputs(payload: dict[str, Any], baseline: dict[str, Any], candidate
         "candidate_error": candidate.get("error"),
         "missing_cache": payload.get("missing", []),
         "summary": counts,
+        "reason_summary": reason_counts,
+        "confidence_summary": confidence_counts,
         "raw_comparisons": rows,
         "synthetic_comparisons": synthetic_rows,
     }
+
+
+def _count_by(rows: list[dict[str, Any]], key_fn: Any) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for row in rows:
+        key = str(key_fn(row))
+        counts[key] = counts.get(key, 0) + 1
+    return dict(sorted(counts.items()))
 
 
 def write_outputs(result: dict[str, Any], label: str) -> tuple[Path, Path]:
@@ -702,6 +975,12 @@ def write_outputs(result: dict[str, Any], label: str) -> tuple[Path, Path]:
         f"- review: {result['summary']['review']}",
         f"- possible_regression: {result['summary']['possible_regression']}",
     ]
+    lines.extend(["", "## 归因汇总", ""])
+    for category, count in result.get("reason_summary", {}).items():
+        lines.append(f"- {REASON_LABELS.get(category, category)} (`{category}`): {count}")
+    lines.extend(["", "## 置信度汇总", ""])
+    for level, count in result.get("confidence_summary", {}).items():
+        lines.append(f"- {level}: {count}")
     if result.get("missing_cache"):
         lines.extend(["", "## 缺失缓存", ""])
         for item in result["missing_cache"]:
@@ -712,8 +991,8 @@ def write_outputs(result: dict[str, Any], label: str) -> tuple[Path, Path]:
             "",
             "## 缓存 Raw Data",
             "",
-            "| 判定 | 模式 | 样本 | 基线 | 候选 | 变化 | 基线档位 | 候选档位 | 标记 |",
-            "|---|---|---|---:|---:|---:|---|---|---|",
+            "| 判定 | 归因 | 置信度 | 模式 | 样本 | 基线 | 候选 | 变化 | 基线档位 | 候选档位 | 边界余量 | 标记 |",
+            "|---|---|---|---|---|---:|---:|---:|---|---|---:|---|",
         ]
     )
     for row in result["raw_comparisons"]:
@@ -724,8 +1003,8 @@ def write_outputs(result: dict[str, Any], label: str) -> tuple[Path, Path]:
             "",
             "## Synthetic 对抗样本",
             "",
-            "| 判定 | 样本 | 基线 | 候选 | 变化 | 基线档位 | 候选档位 | 标记 |",
-            "|---|---|---:|---:|---:|---|---|---|",
+            "| 判定 | 归因 | 置信度 | 样本 | 基线 | 候选 | 变化 | 基线档位 | 候选档位 | 边界余量 | 标记 |",
+            "|---|---|---|---|---:|---:|---:|---|---|---:|---|",
         ]
     )
     for row in result["synthetic_comparisons"]:
@@ -734,6 +1013,9 @@ def write_outputs(result: dict[str, Any], label: str) -> tuple[Path, Path]:
     lines.extend(["", "## 说明", ""])
     lines.append("- `review` 表示分数或档位变化值得检查，但不自动等同于回退。")
     lines.append("- `possible_regression` 表示候选分支违反了样本特定决策边界。")
+    lines.append("- `归因` 是稳定枚举，优先按执行失败、字段契约、硬边界、样本预期和漂移强度分类。")
+    lines.append("- `置信度` 不是预测胜率，而是本次判定的证据完整度；执行错误、分数缺失、贴近边界、弱预期样本会降低置信度。")
+    lines.append("- `边界余量` 为候选结果距离最近预设边界的分数；负数表示越界，越接近 0 越需要人工复核。")
     md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return json_path, md_path
 
@@ -741,8 +1023,12 @@ def write_outputs(result: dict[str, Any], label: str) -> tuple[Path, Path]:
 def _format_md_row(row: dict[str, Any], include_mode: bool = True) -> str:
     baseline = row["baseline"]
     candidate = row["candidate"]
+    explanation = row["explanation"]
+    confidence = explanation["confidence"]
     cells = [
         row["verdict"],
+        explanation["label"],
+        f"{confidence['level']}({confidence['score']})",
     ]
     if include_mode:
         cells.append(row.get("mode", ""))
@@ -754,6 +1040,7 @@ def _format_md_row(row: dict[str, Any], include_mode: bool = True) -> str:
             _fmt_num(row["delta"].get("investment_score")),
             row["decision"]["baseline"],
             row["decision"]["candidate"],
+            _fmt_num(explanation["metrics"].get("nearest_boundary_distance")),
             ", ".join(row["flags"]) or "-",
         ]
     )
