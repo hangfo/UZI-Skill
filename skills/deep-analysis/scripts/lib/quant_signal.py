@@ -20,6 +20,7 @@
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
+import os
 
 from .cache import cached, TTL_QUARTERLY
 
@@ -44,7 +45,7 @@ KNOWN_PRIVATE_QUANTS: tuple[str, ...] = (
 
 def _fetch_top_holdings(fund_code: str, top_n: int = 10) -> list[dict]:
     """带 24h cache 的前 N 大持仓抓取。失败/空 → []。NEVER raises."""
-    if not fund_code or ak is None:
+    if _offline_mode() or not fund_code or ak is None:
         return []
 
     def _do() -> list[dict]:
@@ -78,7 +79,7 @@ def _fetch_all_holding_funds(ticker_code: str, max_funds: int = 80) -> list[dict
     raw["fund_managers"] 默认只有 6 个（按 5Y 收益率 top 6）；做量化信号判定需要
     更大样本（至少 50-80）才靠谱。
     """
-    if ak is None:
+    if _offline_mode() or ak is None:
         return []
     try:
         # Avoid circular import — fetch_fund_holders is in scripts/, lib/ is its peer
@@ -172,8 +173,7 @@ def detect_quant_signal(stock_code: str, fund_managers: list[dict] | None = None
 
     # workers 默认 1 — 防 mini_racer V8 isolate crash（Py3.13）；
     # akshare.fund_portfolio_hold_em 内部用 JS 解码，多线程不安全。
-    import os as _os
-    _w = max(1, int(_os.environ.get("UZI_QUANT_WORKERS", "1")))
+    _w = max(1, int(os.environ.get("UZI_QUANT_WORKERS", "1")))
     with ThreadPoolExecutor(max_workers=_w) as pool:
         for r in pool.map(_check_one, fund_managers):
             if r is None:
@@ -192,6 +192,10 @@ def detect_quant_signal(stock_code: str, fund_managers: list[dict] | None = None
         "quant_funds_total": quant_total,
         "is_quant_factor_style": len(quant_holders) >= QUANT_FACTOR_MIN_COUNT,
     }
+
+
+def _offline_mode() -> bool:
+    return os.environ.get("UZI_SCORING_OFFLINE") == "1" or os.environ.get("UZI_QUANT_SIGNAL_OFFLINE") == "1"
 
 
 if __name__ == "__main__":

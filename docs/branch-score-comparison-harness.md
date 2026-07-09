@@ -250,16 +250,22 @@ Harness 现在会为每一行输出稳定的解释层：
 扩展版运行结果：
 
 ```text
-label: 20260709-reliability-core-holdout-both
+label: 20260709-offline-reliability-core-holdout-both
 result: 29 ok / 2 review / 0 possible_regression
 ```
 
 输出文件：
 
 ```text
-local-ops/state/branch-score-compare/20260709-reliability-core-holdout-both.md
-local-ops/state/branch-score-compare/20260709-reliability-core-holdout-both.json
+local-ops/state/branch-score-compare/20260709-offline-reliability-core-holdout-both.md
+local-ops/state/branch-score-compare/20260709-offline-reliability-core-holdout-both.json
 ```
+
+离线纯评分耗时：
+
+- baseline: `3.1s`
+- candidate: `2.6s`
+- performance warnings: `0`
 
 两个 `review` 都是预期内的风险收敛，不是公式回退：
 
@@ -319,3 +325,29 @@ Synthetic raw-data 检查也显示字段契约符合预期：
 3. **模式一致性检查**：同一 ticker 的 lite/medium 如果归因相反，应降置信度或标记 review。
 4. **轴向贡献一致性**：如果分数变化主要来自目标修复轴，例如 risk_control 或 events，解释更可信；如果来自无关轴，标记为复核。
 5. **新增 holdout 批次**：只用已有缓存或人工构造 raw-data，不运行 update；新增后先看旧结论是否仍保持，而不是按新样本调公式。
+
+## 性能与“卡壳”诊断
+
+2026-07-09 复测发现，完整 branch-vs-branch harness 的等待感主要来自 A 股 lite 样本在 `generate_synthesis` 里的在线基金持仓 fallback，而不是美股/港股普遍慢：
+
+- `600519.SH lite`：两个分支都约 80-90 秒。
+- `688017.SH lite`：两个分支都约 50-60 秒。
+- `00700.HK`、`AAPL`、`MSTR`、`CRCL`、`SIVE.ST`：通常约 0-1 秒。
+
+这和早前 medium 跑出的 `859 fund/holding` 长循环不是同一个入口，但根因同属“评分/综合阶段不该触发基金持仓在线链路”：
+
+- `859` 问题发生在采集/持仓枚举链路，属于 fetch 层性能问题。
+- 本次卡壳发生在 `generate_synthesis -> detect_style -> detect_quant_signal -> fetch_holding_funds`。
+- 二者都和 A 股基金/持仓源有关，但本次是在 branch harness 的“纯评分”阶段被意外触发。
+
+已做的非破坏性 fix：
+
+- 运行时打印分支级进度。
+- 每个 raw/synthetic 样本打印开始/结束和耗时。
+- raw 样本内部记录 `score_dimensions`、`generate_panel`、`generate_synthesis` 步骤耗时。
+- Markdown/JSON 输出记录 baseline/candidate 行级耗时。
+- 超过 30 秒的样本进入 `performance_warnings`，但不影响 `ok/review/possible_regression`。
+- branch runner 设置 `UZI_SCORING_OFFLINE=1` / `UZI_QUANT_SIGNAL_OFFLINE=1`，并 monkeypatch 量化基金在线 fallback，使 branch 对照真正只使用缓存输入。
+- `lib/quant_signal.py` 支持上述离线环境变量，避免纯评分场景偷偷访问 AkShare。
+
+修复后完整 both+holdout 对照从数分钟级降到数秒级，并且 `29 ok / 2 review / 0 possible_regression` 不变。后续如果在非 harness 的普通报告流程中还遇到 859 长循环，应单独治理 fetch 层或 fund holdings runner，不要和评分公式质量问题混在一起。

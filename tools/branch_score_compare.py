@@ -25,6 +25,23 @@ SCRIPTS = ROOT / "skills" / "deep-analysis" / "scripts"
 CACHE = SCRIPTS / ".cache"
 OUT_DIR = ROOT / "local-ops" / "state" / "branch-score-compare"
 
+NEGATIVE_EVENT_TERMS = (
+    "fraud",
+    "lawsuit",
+    "sec charges",
+    "accounting fraud",
+    "recall",
+    "default",
+    "违规",
+    "处罚",
+    "暴雷",
+    "退市",
+    "调查",
+    "立案",
+    "诉讼",
+    "亏损",
+)
+
 CORE_DIMS = {
     "0_basic",
     "1_financials",
@@ -825,6 +842,84 @@ def _selected_raw_cases(include_holdout: bool, extra_tickers: list[str]) -> list
     return cases
 
 
+def discover_cached_blindspot_cases(existing_tickers: set[str] | None = None) -> list[dict[str, Any]]:
+    existing = set(existing_tickers or set())
+    discovered: list[dict[str, Any]] = []
+    for path in sorted(CACHE.glob("*/raw_data.json")):
+        ticker = path.parent.name
+        if ticker in existing or ticker.startswith("_"):
+            continue
+        try:
+            raw = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        case = classify_cached_blindspot(ticker, raw)
+        if case:
+            discovered.append(case)
+            existing.add(ticker)
+    return discovered
+
+
+def classify_cached_blindspot(ticker: str, raw: dict[str, Any]) -> dict[str, Any] | None:
+    dims = raw.get("dimensions") or {}
+    financials = _raw_dim_data(dims, "1_financials")
+    kline = _raw_dim_data(dims, "2_kline")
+    events = _raw_dim_data(dims, "15_events")
+    lhb = _raw_dim_data(dims, "16_lhb")
+    tags: list[str] = []
+
+    stage_text = str(kline.get("stage") or kline.get("stage_num") or "")
+    if "Stage 3" in stage_text or "Stage 4" in stage_text or str(kline.get("stage_num")) in {"3", "4"}:
+        tags.append("stage3_4")
+    if _missing_financials(financials):
+        tags.append("missing_financials")
+    if _negative_event_count(events) > 0:
+        tags.append("negative_event")
+    if lhb.get("lhb_count_30d") or lhb.get("matched_youzi") or lhb.get("inst_vs_youzi"):
+        tags.append("lhb_activity")
+    if not tags:
+        return None
+
+    case: dict[str, Any] = {
+        "ticker": ticker,
+        "group": "discovered_cache",
+        "role": "auto-discovered cached blindspot: " + ", ".join(tags),
+        "expectation": "neutral",
+        "blindspot_tags": tags,
+    }
+    if "missing_financials" in tags:
+        case["expectation"] = "data_gap"
+        case["max_candidate_score"] = 65.0
+    elif "stage3_4" in tags:
+        case["expectation"] = "speculative_watch"
+        case["max_candidate_score"] = 65.0
+    elif "negative_event" in tags:
+        case["expectation"] = "negative_event"
+    return case
+
+
+def _raw_dim_data(dims: dict[str, Any], dim: str) -> dict[str, Any]:
+    value = (dims.get(dim) or {}).get("data") or {}
+    return value if isinstance(value, dict) else {}
+
+
+def _missing_financials(financials: dict[str, Any]) -> bool:
+    if not financials:
+        return True
+    keys = ("roe", "roe_history", "net_margin", "gross_margin", "revenue_history")
+    return all(financials.get(key) in (None, "", [], {}) for key in keys)
+
+
+def _negative_event_count(events: dict[str, Any]) -> int:
+    news = events.get("recent_news") or events.get("news") or []
+    count = 0
+    for item in news:
+        text = str(item.get("title") or item.get("summary") or item).lower() if isinstance(item, dict) else str(item).lower()
+        if any(term in text for term in NEGATIVE_EVENT_TERMS):
+            count += 1
+    return count
+
+
 def build_payload(modes: list[str], raw_cases: list[dict[str, Any]], synthetic_cases: list[dict[str, Any]]) -> dict[str, Any]:
     raw_items = []
     missing = []
@@ -861,6 +956,7 @@ def build_payload(modes: list[str], raw_cases: list[dict[str, Any]], synthetic_c
 def run_branch(ref: str, worktree: Path, payload: dict[str, Any], python_exe: str, timeout_sec: int) -> dict[str, Any]:
     payload_path = worktree / "_branch_score_payload.json"
     payload_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+    started = time.perf_counter()
 
     env = os.environ.copy()
     env.update(
@@ -868,6 +964,9 @@ def run_branch(ref: str, worktree: Path, payload: dict[str, Any], python_exe: st
             "PYTHONIOENCODING": "utf-8",
             "PYTHONUTF8": "1",
             "UZI_NO_UPDATE_CHECK": "1",
+            "UZI_BRANCH_COMPARE_PROGRESS": "1",
+            "UZI_SCORING_OFFLINE": "1",
+            "UZI_QUANT_SIGNAL_OFFLINE": "1",
         }
     )
     try:
@@ -878,7 +977,7 @@ def run_branch(ref: str, worktree: Path, payload: dict[str, Any], python_exe: st
             encoding="utf-8",
             errors="replace",
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stderr=None,
             env=env,
             timeout=timeout_sec,
         )
@@ -886,8 +985,9 @@ def run_branch(ref: str, worktree: Path, payload: dict[str, Any], python_exe: st
         return {
             "ref": ref,
             "error": f"branch_runner_timeout_after_{timeout_sec}s",
+            "elapsed_sec": round(time.perf_counter() - started, 3),
             "stdout": (exc.stdout or "")[-4000:] if isinstance(exc.stdout, str) else "",
-            "stderr": (exc.stderr or "")[-4000:] if isinstance(exc.stderr, str) else "",
+            "stderr": "",
             "raw": [],
             "synthetic": [],
         }
@@ -896,19 +996,23 @@ def run_branch(ref: str, worktree: Path, payload: dict[str, Any], python_exe: st
             "ref": ref,
             "error": "branch_runner_failed",
             "returncode": proc.returncode,
+            "elapsed_sec": round(time.perf_counter() - started, 3),
             "stdout": proc.stdout[-4000:],
-            "stderr": proc.stderr[-4000:],
+            "stderr": "",
             "raw": [],
             "synthetic": [],
         }
     try:
-        return json.loads(proc.stdout)
+        result = json.loads(proc.stdout)
+        result["elapsed_sec"] = round(time.perf_counter() - started, 3)
+        return result
     except json.JSONDecodeError as exc:
         return {
             "ref": ref,
             "error": f"invalid_json: {exc}",
+            "elapsed_sec": round(time.perf_counter() - started, 3),
             "stdout": proc.stdout[-4000:],
-            "stderr": proc.stderr[-4000:],
+            "stderr": "",
             "raw": [],
             "synthetic": [],
         }
@@ -965,6 +1069,7 @@ def compare_outputs(payload: dict[str, Any], baseline: dict[str, Any], candidate
         "review": sum(1 for row in all_rows if row["verdict"] == "review"),
         "possible_regression": sum(1 for row in all_rows if row["verdict"] == "possible_regression"),
     }
+    performance_warnings = _performance_warnings(all_rows)
     reason_counts = _count_by(all_rows, lambda row: row["explanation"]["category"])
     confidence_counts = _count_by(all_rows, lambda row: row["explanation"]["confidence"]["level"])
     support_counts = _count_by(all_rows, lambda row: row["explanation"]["support"]["level"])
@@ -975,15 +1080,40 @@ def compare_outputs(payload: dict[str, Any], baseline: dict[str, Any], candidate
         "candidate_ref": candidate.get("ref"),
         "baseline_error": baseline.get("error"),
         "candidate_error": candidate.get("error"),
+        "timing": {
+            "baseline_elapsed_sec": baseline.get("elapsed_sec"),
+            "candidate_elapsed_sec": candidate.get("elapsed_sec"),
+        },
         "missing_cache": payload.get("missing", []),
         "summary": counts,
         "reason_summary": reason_counts,
         "confidence_summary": confidence_counts,
         "support_summary": support_counts,
         "reliability_summary": reliability_counts,
+        "performance_warnings": performance_warnings,
         "raw_comparisons": rows,
         "synthetic_comparisons": synthetic_rows,
     }
+
+
+def _performance_warnings(rows: list[dict[str, Any]], threshold_sec: float = 30.0) -> list[dict[str, Any]]:
+    warnings: list[dict[str, Any]] = []
+    for row in rows:
+        for side in ("baseline", "candidate"):
+            elapsed = _float_or_none((row.get(side) or {}).get("elapsed_sec"))
+            if elapsed is not None and elapsed >= threshold_sec:
+                warnings.append(
+                    {
+                        "case": row["case"],
+                        "mode": row.get("mode"),
+                        "side": side,
+                        "elapsed_sec": round(elapsed, 3),
+                        "threshold_sec": threshold_sec,
+                        "timing": (row.get(side) or {}).get("timing") or {},
+                    }
+                )
+    warnings.sort(key=lambda item: item["elapsed_sec"], reverse=True)
+    return warnings
 
 
 def _attach_cross_support(rows: list[dict[str, Any]]) -> None:
@@ -1083,7 +1213,7 @@ def _cross_support_for(row: dict[str, Any], peers: list[dict[str, Any]]) -> dict
 
 def _evidence_type(row: dict[str, Any]) -> str:
     group = row.get("group")
-    if group in {"core", "holdout", "extra"}:
+    if group in {"core", "holdout", "extra", "discovered_cache"}:
         return "cached_raw"
     if group == "synthetic_raw":
         return "synthetic_raw"
@@ -1110,6 +1240,8 @@ def write_outputs(result: dict[str, Any], label: str) -> tuple[Path, Path]:
         f"基线分支：`{result['baseline_ref']}`",
         f"候选分支：`{result['candidate_ref']}`",
         f"生成时间：{result['generated_at']}",
+        f"基线耗时：`{_fmt_num(result.get('timing', {}).get('baseline_elapsed_sec'))}s`",
+        f"候选耗时：`{_fmt_num(result.get('timing', {}).get('candidate_elapsed_sec'))}s`",
         "",
         "## 汇总",
         "",
@@ -1133,14 +1265,22 @@ def write_outputs(result: dict[str, Any], label: str) -> tuple[Path, Path]:
         lines.extend(["", "## 缺失缓存", ""])
         for item in result["missing_cache"]:
             lines.append(f"- {item['mode']} {item['ticker']}: `{item['path']}`")
+    if result.get("performance_warnings"):
+        lines.extend(["", "## 性能提示", ""])
+        for item in result["performance_warnings"]:
+            mode = item.get("mode") or "-"
+            lines.append(
+                f"- {item['side']} {mode} {item['case']}: {item['elapsed_sec']:.1f}s "
+                f"(threshold {item['threshold_sec']:.0f}s)"
+            )
 
     lines.extend(
         [
             "",
             "## 缓存 Raw Data",
             "",
-            "| 判定 | 归因 | 置信度 | 交叉支持 | 可靠性 | 模式 | 样本 | 基线 | 候选 | 变化 | 基线档位 | 候选档位 | 边界余量 | 标记 |",
-            "|---|---|---|---|---|---|---|---:|---:|---:|---|---|---:|---|",
+            "| 判定 | 归因 | 置信度 | 交叉支持 | 可靠性 | 模式 | 样本 | 基线 | 候选 | 变化 | 基线秒 | 候选秒 | 基线档位 | 候选档位 | 边界余量 | 标记 |",
+            "|---|---|---|---|---|---|---|---:|---:|---:|---:|---:|---|---|---:|---|",
         ]
     )
     for row in result["raw_comparisons"]:
@@ -1151,8 +1291,8 @@ def write_outputs(result: dict[str, Any], label: str) -> tuple[Path, Path]:
             "",
             "## Synthetic 对抗样本",
             "",
-            "| 判定 | 归因 | 置信度 | 交叉支持 | 可靠性 | 样本 | 基线 | 候选 | 变化 | 基线档位 | 候选档位 | 边界余量 | 标记 |",
-            "|---|---|---|---|---|---|---:|---:|---:|---|---|---:|---|",
+            "| 判定 | 归因 | 置信度 | 交叉支持 | 可靠性 | 样本 | 基线 | 候选 | 变化 | 基线秒 | 候选秒 | 基线档位 | 候选档位 | 边界余量 | 标记 |",
+            "|---|---|---|---|---|---|---:|---:|---:|---:|---:|---|---|---:|---|",
         ]
     )
     for row in result["synthetic_comparisons"]:
@@ -1192,6 +1332,8 @@ def _format_md_row(row: dict[str, Any], include_mode: bool = True) -> str:
             _fmt_num(baseline.get("investment_score")),
             _fmt_num(candidate.get("investment_score")),
             _fmt_num(row["delta"].get("investment_score")),
+            _fmt_sec(baseline.get("elapsed_sec")),
+            _fmt_sec(candidate.get("elapsed_sec")),
             row["decision"]["baseline"],
             row["decision"]["candidate"],
             _fmt_num(explanation["metrics"].get("nearest_boundary_distance")),
@@ -1206,6 +1348,13 @@ def _fmt_num(value: Any) -> str:
     if number is None:
         return "-"
     return f"{number:.1f}"
+
+
+def _fmt_sec(value: Any) -> str:
+    number = _float_or_none(value)
+    if number is None:
+        return "-"
+    return f"{number:.3f}"
 
 
 def _float_or_none(value: Any) -> float | None:
@@ -1235,6 +1384,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--include-holdout", action="store_true", default=True)
     parser.add_argument("--no-holdout", dest="include_holdout", action="store_false")
     parser.add_argument("--extra-ticker", action="append", default=[])
+    parser.add_argument("--include-discovered-cache", action="store_true")
     parser.add_argument("--label", default=time.strftime("%Y%m%d-%H%M%S"))
     parser.add_argument("--python", default=sys.executable)
     parser.add_argument("--runner-timeout", type=int, default=300)
@@ -1247,6 +1397,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv or sys.argv[1:])
     modes = ["lite", "medium"] if args.mode == "both" else [args.mode]
     raw_cases = _selected_raw_cases(args.include_holdout, args.extra_ticker)
+    if args.include_discovered_cache:
+        raw_cases.extend(discover_cached_blindspot_cases({case["ticker"] for case in raw_cases}))
     payload = build_payload(modes, raw_cases, SYNTHETIC_CASES)
 
     with tempfile.TemporaryDirectory(prefix="uzi-branch-score-") as td:
@@ -1256,8 +1408,12 @@ def main(argv: list[str] | None = None) -> int:
         try:
             add_worktree(args.baseline, baseline_tree)
             add_worktree(args.candidate, candidate_tree)
+            print(f"running baseline {args.baseline} with {len(payload['raw_items'])} raw items and {len(payload['synthetic_cases'])} synthetic cases", flush=True)
             baseline = run_branch(args.baseline, baseline_tree, payload, args.python, args.runner_timeout)
+            print(f"finished baseline {args.baseline} in {_fmt_num(baseline.get('elapsed_sec'))}s", flush=True)
+            print(f"running candidate {args.candidate} with {len(payload['raw_items'])} raw items and {len(payload['synthetic_cases'])} synthetic cases", flush=True)
             candidate = run_branch(args.candidate, candidate_tree, payload, args.python, args.runner_timeout)
+            print(f"finished candidate {args.candidate} in {_fmt_num(candidate.get('elapsed_sec'))}s", flush=True)
         finally:
             if not args.keep_worktrees:
                 remove_worktree(baseline_tree)
@@ -1342,6 +1498,11 @@ def compact_scorecard(card):
     }
 
 
+def progress(message):
+    if os.environ.get("UZI_BRANCH_COMPARE_PROGRESS") == "1":
+        print(message, file=sys.stderr, flush=True)
+
+
 payload = json.loads(payload_path.read_text(encoding="utf-8"))
 try:
     from lib.pipeline.score_fns import (
@@ -1350,6 +1511,12 @@ try:
         generate_synthesis,
         score_dimensions,
     )
+    try:
+        from lib import quant_signal
+        quant_signal._fetch_all_holding_funds = lambda *args, **kwargs: []
+        quant_signal._fetch_top_holdings = lambda *args, **kwargs: []
+    except Exception:
+        pass
 except Exception as exc:
     print(json.dumps({"ref": ref, "error": f"import_failed: {type(exc).__name__}: {exc}", "raw": [], "synthetic": []}))
     raise SystemExit(0)
@@ -1358,12 +1525,24 @@ raw_rows = []
 for item in payload.get("raw_items", []):
     case = item["case"]["ticker"]
     mode = item["mode"]
+    start = __import__("time").perf_counter()
+    timing = {}
+    progress(f"[{ref}] raw {mode} {case} ...")
     old_depth = os.environ.get("UZI_DEPTH")
     os.environ["UZI_DEPTH"] = mode
     try:
+        step = __import__("time").perf_counter()
+        progress(f"[{ref}] raw {mode} {case} score_dimensions ...")
         dims = quiet(score_dimensions, item["raw"])
+        timing["score_dimensions_sec"] = round(__import__("time").perf_counter() - step, 3)
+        step = __import__("time").perf_counter()
+        progress(f"[{ref}] raw {mode} {case} generate_panel ...")
         panel = quiet(generate_panel, dims, item["raw"])
+        timing["generate_panel_sec"] = round(__import__("time").perf_counter() - step, 3)
+        step = __import__("time").perf_counter()
+        progress(f"[{ref}] raw {mode} {case} generate_synthesis ...")
         syn = quiet(generate_synthesis, item["raw"], dims, panel)
+        timing["generate_synthesis_sec"] = round(__import__("time").perf_counter() - step, 3)
         row = {"case": case, "mode": mode, **compact_synthesis(syn, panel, dims)}
     except Exception as exc:
         row = {"case": case, "mode": mode, "error": f"{type(exc).__name__}: {exc}"}
@@ -1372,15 +1551,22 @@ for item in payload.get("raw_items", []):
             os.environ.pop("UZI_DEPTH", None)
         else:
             os.environ["UZI_DEPTH"] = old_depth
+    row["elapsed_sec"] = round(__import__("time").perf_counter() - start, 3)
+    row["timing"] = timing
+    progress(f"[{ref}] raw {mode} {case} done in {row['elapsed_sec']}s")
     raw_rows.append(row)
 
 synthetic_rows = []
 for case in payload.get("synthetic_cases", []):
+    start = __import__("time").perf_counter()
+    progress(f"[{ref}] synthetic {case['name']} ...")
     try:
         card = quiet(compute_investment_score, case["features"])
         row = {"case": case["name"], **compact_scorecard(card)}
     except Exception as exc:
         row = {"case": case["name"], "error": f"{type(exc).__name__}: {exc}"}
+    row["elapsed_sec"] = round(__import__("time").perf_counter() - start, 3)
+    progress(f"[{ref}] synthetic {case['name']} done in {row['elapsed_sec']}s")
     synthetic_rows.append(row)
 
 print(json.dumps({"ref": ref, "raw": raw_rows, "synthetic": synthetic_rows}, ensure_ascii=False))
