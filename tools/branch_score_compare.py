@@ -690,29 +690,29 @@ def write_outputs(result: dict[str, Any], label: str) -> tuple[Path, Path]:
     json_path.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     lines = [
-        f"# Branch Score Compare - {label}",
+        f"# 分支评分对照 - {label}",
         "",
-        f"Baseline: `{result['baseline_ref']}`",
-        f"Candidate: `{result['candidate_ref']}`",
-        f"Generated: {result['generated_at']}",
+        f"基线分支：`{result['baseline_ref']}`",
+        f"候选分支：`{result['candidate_ref']}`",
+        f"生成时间：{result['generated_at']}",
         "",
-        "## Summary",
+        "## 汇总",
         "",
         f"- ok: {result['summary']['ok']}",
         f"- review: {result['summary']['review']}",
         f"- possible_regression: {result['summary']['possible_regression']}",
     ]
     if result.get("missing_cache"):
-        lines.extend(["", "## Missing Cache", ""])
+        lines.extend(["", "## 缺失缓存", ""])
         for item in result["missing_cache"]:
             lines.append(f"- {item['mode']} {item['ticker']}: `{item['path']}`")
 
     lines.extend(
         [
             "",
-            "## Cached Raw Data",
+            "## 缓存 Raw Data",
             "",
-            "| Verdict | Mode | Case | Base | Cand | Delta | Base Tier | Cand Tier | Flags |",
+            "| 判定 | 模式 | 样本 | 基线 | 候选 | 变化 | 基线档位 | 候选档位 | 标记 |",
             "|---|---|---|---:|---:|---:|---|---|---|",
         ]
     )
@@ -722,18 +722,18 @@ def write_outputs(result: dict[str, Any], label: str) -> tuple[Path, Path]:
     lines.extend(
         [
             "",
-            "## Synthetic Adversarial",
+            "## Synthetic 对抗样本",
             "",
-            "| Verdict | Case | Base | Cand | Delta | Base Tier | Cand Tier | Flags |",
+            "| 判定 | 样本 | 基线 | 候选 | 变化 | 基线档位 | 候选档位 | 标记 |",
             "|---|---|---:|---:|---:|---|---|---|",
         ]
     )
     for row in result["synthetic_comparisons"]:
         lines.append(_format_md_row(row, include_mode=False))
 
-    lines.extend(["", "## Notes", ""])
-    lines.append("- `review` means score or tier changed enough to inspect; it is not automatically a regression.")
-    lines.append("- `possible_regression` means the change violated a case-specific decision boundary.")
+    lines.extend(["", "## 说明", ""])
+    lines.append("- `review` 表示分数或档位变化值得检查，但不自动等同于回退。")
+    lines.append("- `possible_regression` 表示候选分支违反了样本特定决策边界。")
     md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return json_path, md_path
 

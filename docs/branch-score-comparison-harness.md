@@ -1,23 +1,28 @@
-# Branch Score Comparison Harness
+# 分支评分对照 Harness
 
-Date: 2026-07-08
+日期：2026-07-08
 
-## Purpose
+## 目标
 
-This harness compares two git refs with the same cached inputs before any
-scoring formula change is accepted. It is intentionally neutral: it does not
-fetch new data, does not run deep analysis, and does not tune weights.
+这个 harness 用同一批缓存输入，对比两个 git ref 的评分输出。它必须在任何评分公式改动被接受之前运行。
 
-The primary question is:
+它的定位是中立裁判：
 
-> Did the candidate branch change a buy/sell decision in a way that violates
-> the case's decision boundary?
+- 不重新抓行情数据。
+- 不跑 deep。
+- 不调权重。
+- 不改评分公式。
+- 只比较同一批 `raw_data.json` 在两个分支上的买卖决策是否发生回退。
 
-## Current Baseline
+核心问题是：
 
-- Baseline ref: `codex/windows-local-stable`
-- Candidate ref: `codex/scoring-validation-guardrails`
-- Default command:
+> 候选分支是否把某个样本的买卖决策改到了违反边界的位置？
+
+## 当前基线
+
+- 基线分支：`codex/windows-local-stable`
+- 候选分支：`codex/scoring-validation-guardrails`
+- 默认命令：
 
 ```powershell
 D:\UZI-Skill\.venv\Scripts\python.exe tools\branch_score_compare.py `
@@ -29,92 +34,83 @@ D:\UZI-Skill\.venv\Scripts\python.exe tools\branch_score_compare.py `
   --runner-timeout 600
 ```
 
-Outputs are local validation artifacts under:
+输出是本地验证产物，位于：
 
 ```text
 local-ops/state/branch-score-compare/
 ```
 
-`local-ops/` is intentionally local on this Windows machine. The reusable tool
-and tests live in tracked paths:
+`local-ops/` 在这台 Windows 机器上按本地操作目录处理。可复用工具和测试放在仓库跟踪路径：
 
 - `tools/branch_score_compare.py`
 - `skills/deep-analysis/scripts/tests/test_branch_score_compare.py`
 
-## Boundaries
+## 边界
 
-- Do not reinstall dependencies.
-- Do not run update scripts.
-- Do not run `--depth deep`.
-- Do not fetch fresh market data for this comparison.
-- Prefer cached `raw_data.json` and pure scoring functions.
-- Do not push to upstream `wbh604/UZI-Skill`; push only to the fork
-  `hangfo/UZI-Skill`.
-- Do not tune scoring formulas unless this harness or a similarly neutral test
-  proves a decision-quality failure.
+- 不重新安装依赖。
+- 不运行 update 脚本。
+- 不运行 `--depth deep`。
+- 本对照不重新抓市场数据。
+- 优先使用缓存 `raw_data.json` 和纯评分函数。
+- 不推送到上游 `wbh604/UZI-Skill`；只推送到个人 fork `hangfo/UZI-Skill`。
+- 除非这个 harness 或同等中立测试证明存在交易决策质量问题，否则不要调评分公式。
 
-## Case Layers
+## 样本分层
 
-### Cached Raw Data
+### 缓存 Raw Data
 
-The cached basket uses real local `.cache/<ticker>/raw_data.json` snapshots.
+缓存篮子使用本机真实 `.cache/<ticker>/raw_data.json` 快照。
 
-Core:
+核心样本：
 
-- `600519.SH`: A-share quality/value control.
-- `00700.HK`: HK platform quality control.
-- `AAPL`: US profitable mega-cap with valuation constraint.
-- `MSTR`: crypto treasury / volatility risk control.
-- `AXTI`: speculative small-cap adversarial control.
+- `600519.SH`：A 股质量/价值控制样本。
+- `00700.HK`：港股平台型质量控制样本。
+- `AAPL`：美股盈利巨头，带估值约束。
+- `MSTR`：加密资产财务杠杆/高波动风控样本。
+- `AXTI`：投机小盘股对抗样本。
 
-Holdout:
+Holdout 样本：
 
-- `CRCL`: stablecoin / IPO volatility / regulatory catalyst.
-- `SIVE.ST`: Swedish market compatibility, loss/high-valuation holdout.
-- `688017.SH`: robotics reducer growth with valuation pressure.
+- `CRCL`：稳定币、IPO 波动、监管催化样本。
+- `SIVE.ST`：瑞典市场兼容性、亏损/高估值样本。
+- `688017.SH`：机器人减速器成长股，高估值压力样本。
 
-### Synthetic Feature Cases
+### Synthetic Feature 样本
 
-These cases call `compute_investment_score()` directly. They are designed to
-stress decision boundaries without relying on network data.
+这些样本直接调用 `compute_investment_score()`，用于在不依赖网络数据的情况下压测决策边界。
 
-- `theme_only_microcap`: hot theme, weak quality, extreme risk.
-- `quality_compounder_no_momentum`: durable quality but weak trend/growth.
-- `expensive_profitable_platform`: high quality, valuation pressure.
-- `high_quality_stage3_confirmed_downtrend`: quality stock in confirmed Stage 3
-  distribution/downtrend.
-- `stage4_missing_price_high_quality`: Stage 4 quality stock with missing price
-  confirmation.
-- `a_share_youzi_heat_institutional_selling`: A-share youzi heat with weak
-  fundamentals.
-- `missing_financials_theme_heat`: missing fundamentals but high theme heat.
+- `theme_only_microcap`：题材很热，但质量弱、风险极高。
+- `quality_compounder_no_momentum`：质量耐久，但趋势和增长偏弱。
+- `expensive_profitable_platform`：高质量平台，但估值压力大。
+- `high_quality_stage3_confirmed_downtrend`：高质量公司，但处于确认下跌的 Stage 3 出货/分配阶段。
+- `stage4_missing_price_high_quality`：高质量公司，但 Stage 4 且缺少价格确认数据。
+- `a_share_youzi_heat_institutional_selling`：A 股游资热度高，但基本面弱。
+- `missing_financials_theme_heat`：财务数据缺失，但题材热度和分析师乐观度高。
 
-### Synthetic Raw Data Cases
+### Synthetic Raw Data 样本
 
-These cases call the same `score_dimensions -> generate_panel ->
-generate_synthesis` path as cached raw data. They cover field contracts and
-data-quality boundaries that feature-only tests cannot see.
+这些样本走和缓存 raw data 相同的链路：
 
-- `__synthetic_empty_recent_news_stale_legacy`: present-but-empty
-  `recent_news` must not fall back to stale legacy `news`.
-- `__synthetic_single_strong_negative_event`: one severe negative event must
-  lower `15_events`.
-- `__synthetic_negated_negative_event`: negated negative phrases such as
-  "无违规" or "settled lawsuit" should not be penalized.
-- `__synthetic_missing_financials_raw`: missing financials should not crash or
-  promote a high-confidence buy.
+```text
+score_dimensions -> generate_panel -> generate_synthesis
+```
 
-## Verdicts
+它们覆盖 feature-only 测试看不到的字段契约和数据质量边界：
 
-- `ok`: no decision boundary was violated.
-- `review`: score drift or tier movement is large enough to inspect, but is not
-  automatically a regression.
-- `possible_regression`: the candidate branch violated a case-specific
-  boundary, such as risk cases being upgraded or event hygiene failing.
+- `__synthetic_empty_recent_news_stale_legacy`：`recent_news` 存在但为空时，不能回退到旧字段 `news` 的过期内容。
+- `__synthetic_single_strong_negative_event`：单条严重负面事件也必须影响 `15_events`，不能要求重复出现很多次才扣分。
+- `__synthetic_negated_negative_event`：`无违规`、`未发现欺诈`、`settled lawsuit` 这类否定语境不能被误罚。
+- `__synthetic_missing_financials_raw`：财务数据缺失时不能崩溃，也不能被题材热度推成高置信买入。
 
-Decision tiers:
+## 判定
 
-| Tier | Score Range |
+- `ok`：没有违反决策边界。
+- `review`：分数漂移或档位变化值得人工查看，但不自动判定为回退。
+- `possible_regression`：候选分支违反了样本的特定边界，例如风险样本被升级，或事件字段契约失败。
+
+决策档位：
+
+| 档位 | 分数区间 |
 |---|---:|
 | `avoid` | `< 40` |
 | `cautious` | `40 <= score < 55` |
@@ -122,58 +118,48 @@ Decision tiers:
 | `buy_candidate` | `65 <= score < 80` |
 | `strong_buy` | `>= 80` |
 
-## Regression Flags
+## 回退标记
 
-Important flags include:
+重要标记包括：
 
-- `quality_control_downgrade`: quality control was downgraded by tier.
-- `risk_control_upgrade`: risk control was upgraded by tier.
-- `speculative_promoted_to_buy`: speculative watch case became buy/strong buy.
-- `below_candidate_floor` / `above_candidate_ceiling`: candidate score crossed
-  a case boundary.
-- `15_events_below_floor` / `15_events_above_ceiling`: event dimension violated
-  a synthetic raw-data contract.
-- `large_score_drift`: absolute score delta is at least 8 points.
-- `decision_tier_changed`: decision tier changed.
+- `quality_control_downgrade`：质量控制样本被降档。
+- `risk_control_upgrade`：风险控制样本被升档。
+- `speculative_promoted_to_buy`：投机观察样本被推成买入或强买。
+- `below_candidate_floor` / `above_candidate_ceiling`：候选分数越过样本边界。
+- `15_events_below_floor` / `15_events_above_ceiling`：事件维度违反 synthetic raw-data 字段契约。
+- `large_score_drift`：绝对分数漂移达到 8 分或以上。
+- `decision_tier_changed`：买卖档位发生变化。
 
-Only the first group of boundary violations is treated as
-`possible_regression`. Large drift without a boundary violation is `review`.
+只有边界违反类标记会被判为 `possible_regression`。单纯大幅漂移但未违反边界时，只判为 `review`。
 
-## Last Known Result
+## 最新已知结果
 
-Expanded run:
+扩展版运行结果：
 
 ```text
 label: 20260708-expanded-core-holdout-both
 result: 29 ok / 2 review / 0 possible_regression
 ```
 
-Output files:
+输出文件：
 
 ```text
 local-ops/state/branch-score-compare/20260708-expanded-core-holdout-both.md
 local-ops/state/branch-score-compare/20260708-expanded-core-holdout-both.json
 ```
 
-The two `review` rows are expected risk-convergence changes, not formula
-regressions:
+两个 `review` 都是预期内的风险收敛，不是公式回退：
 
-- `high_quality_stage3_confirmed_downtrend`: `66.0 -> 59.0`, tier
-  `buy_candidate -> watch`.
-- `stage4_missing_price_high_quality`: `66.0 -> 59.0`, tier
-  `buy_candidate -> watch`.
+- `high_quality_stage3_confirmed_downtrend`：`66.0 -> 59.0`，档位 `buy_candidate -> watch`。
+- `stage4_missing_price_high_quality`：`66.0 -> 59.0`，档位 `buy_candidate -> watch`。
 
-Both represent the candidate branch preventing Stage 3/4 quality-floor style
-false buy signals.
+这两个变化说明候选分支阻止了 Stage 3/4 下的质量保底误触发买入信号。
 
-Synthetic raw-data checks also show the intended field-contract behavior:
+Synthetic raw-data 检查也显示字段契约符合预期：
 
-- Empty canonical `recent_news` with stale legacy `news`: baseline
-  `15_events=8`, candidate `15_events=5`.
-- Single strong negative event: baseline `15_events=5`, candidate
-  `15_events=4`.
-- Negated negative event: baseline `15_events=5`, candidate `15_events=5`.
-- Missing financials raw case: candidate stays `cautious`, not buy.
+- 空 `recent_news` + 旧 `news`：基线 `15_events=8`，候选分支 `15_events=5`。
+- 单条强负面事件：基线 `15_events=5`，候选分支 `15_events=4`。
+- 否定负面事件：基线 `15_events=5`，候选分支 `15_events=5`。
+- 财务缺失 raw 样本：候选分支保持 `cautious`，没有变成买入。
 
-If future runs produce nonzero `possible_regression`, inspect the exact case
-before changing any formula.
+以后如果出现非零 `possible_regression`，先检查具体样本证据，再决定是否修改评分公式。

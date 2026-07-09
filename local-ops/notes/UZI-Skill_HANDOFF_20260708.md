@@ -1,75 +1,74 @@
-# UZI-Skill Handoff - 2026-07-08
+# UZI-Skill 交接记录 - 2026-07-08
 
-## Current Windows State
+## 当前 Windows 状态
 
-- Repo: `D:\UZI-Skill`
-- Branch: `codex/scoring-validation-guardrails`
-- HEAD: `5cf86467f72211c6337688aae0e9502a871c35aa`
-- Remote: `origin/codex/scoring-validation-guardrails`
-- Working tree: clean as of 2026-07-08
+- 仓库：`D:\UZI-Skill`
+- 分支：`codex/scoring-validation-guardrails`
+- 交接时 HEAD：`5cf86467f72211c6337688aae0e9502a871c35aa`
+- 远端：`origin/codex/scoring-validation-guardrails`
+- 工作区：截至 2026-07-08 为 clean
 
-## What Was Completed
+## 已完成事项
 
-Replit HEAD scoring fixes were imported into Windows, then hardened with extra
-edge-case tests.
+已把 Replit HEAD 的评分修复导入 Windows，并额外加固边界测试。
 
-Included commits after `codex/windows-local-stable`:
+相对 `codex/windows-local-stable` 的后续提交包括：
 
-1. `dc3ef4c` - P0/P1/P2 scoring fixes and score drift tracker
-2. `32a0bc2` - score drift schema fix and scoring consistency tests
-3. `59f3a53` - comprehensive scoring consistency tests and score pipeline enhancements
-4. `5cf8646` - Windows follow-up hardening for edge-case regression tests
+1. `dc3ef4c`：P0/P1/P2 评分修复与 score drift tracker。
+2. `32a0bc2`：score drift schema 修复与评分一致性测试。
+3. `59f3a53`：更完整的评分一致性测试与评分管道增强。
+4. `5cf8646`：Windows 侧边界回归测试加固。
 
-Key behavior now covered:
+当前覆盖的关键行为：
 
-- `recent_news` is canonical. If present but empty, it does not fall back to stale legacy `news`.
-- Severe negative events can lower event score even if only one item appears.
-- Dynamic `POLARIZE_K` formula is unchanged, but diagnostics now expose:
+- `recent_news` 是 canonical 字段。如果它存在但为空，不回退到过期旧字段 `news`。
+- 严重负面事件即使只有一条，也可以压低事件分。
+- 动态 `POLARIZE_K` 公式未改，但诊断现在暴露：
   - `polarize_stdev`
   - `polarize_active_count`
   - `polarize_skip_count`
-- Stage 3 no-price cap test now checks the real guardrail path.
-- Old fixed-K smoke test now validates dynamic-K behavior.
-- Replit zip attachment noise was removed from final tree.
+- Stage 3 无价格测试现在检查真实护栏路径。
+- 旧的固定 K 烟测现在验证动态 K 行为。
+- Replit zip 附件噪声已从最终树移除。
 
-## Validation Already Done On Windows
+## Windows 已完成验证
 
-- `py_compile`: pass
-- `test_scoring_consistency.py` direct harness: 26 passed, 0 failed
-- `test_v2_15_4_school_scores.py` direct harness: 9 passed, 0 failed
-- `local-ops/tools/scoring_regression_basket.py`: pass
+- `py_compile`：通过
+- `test_scoring_consistency.py` direct harness：26 passed，0 failed
+- `test_v2_15_4_school_scores.py` direct harness：9 passed，0 failed
+- `local-ops/tools/scoring_regression_basket.py`：通过
 
-Adversarial probes:
+对抗探针：
 
 | case | dim_15 score |
 |---|---:|
-| two strong negative events | 4 |
-| single strong negative event | 4 |
-| empty canonical news with stale legacy news | 5 |
-| 20 positive canonical news items | 7 |
-| negated negative context | 5 |
+| 两条强负面事件 | 4 |
+| 单条强负面事件 | 4 |
+| canonical news 为空但旧 news 有过期内容 | 5 |
+| 20 条正面 canonical news | 7 |
+| 否定负面语境 | 5 |
 
-Core basket:
+核心篮子：
 
-| ticker | buy_score | read |
+| ticker | buy_score | 解读 |
 |---|---:|---|
-| AAPL | 68 | strong quality, valuation constrained |
-| 600519.SH | 59 | high quality, buy point constrained |
-| 00700.HK | 59 | high quality, trend/drawdown constrained |
-| MSTR | 34-36 | risk/quality guardrails active |
-| AXTI | 32 | speculative small-cap constrained |
+| AAPL | 68 | 质量强，估值受约束 |
+| 600519.SH | 59 | 高质量，买点受约束 |
+| 00700.HK | 59 | 高质量，趋势/回撤受约束 |
+| MSTR | 34-36 | 风险/质量护栏生效 |
+| AXTI | 32 | 投机小盘受约束 |
 
-Holdout:
+Holdout：
 
-| ticker | buy_score | read |
+| ticker | buy_score | 解读 |
 |---|---:|---|
-| CRCL | 33-35 | avoid |
-| SIVE.ST | 36 | avoid |
-| 688017.SH | 55-58 | cautious observation |
+| CRCL | 33-35 | 回避 |
+| SIVE.ST | 36 | 回避 |
+| 688017.SH | 55-58 | 谨慎观察 |
 
-## Mac Sync Prompt
+## Mac 同步提示词
 
-Use this on Mac Codex App:
+在 Mac Codex App 中使用：
 
 ```text
 Continue UZI-Skill. Sync remote branch:
@@ -97,33 +96,28 @@ Expected HEAD:
 5cf86467f72211c6337688aae0e9502a871c35aa
 ```
 
-## Recommended Next Priority
+## 建议的下一优先级
 
-Do not tune scoring weights next unless a neutral validation harness shows a
-decision-quality regression.
+除非中立验证 harness 证明存在决策质量回退，否则不要继续调评分权重。
 
-Recommended order:
+建议顺序：
 
-1. Build a neutral model-comparison harness that compares baseline branch
-   `codex/windows-local-stable` against current branch
-   `codex/scoring-validation-guardrails` on the same cached raw inputs.
-2. Extend holdout coverage with frozen examples across A/H/US/EU/JP/TW if cache
-   exists or with small synthetic fixtures when cache is missing.
-3. Add data-quality coefficient design behind tests, but do not merge it into
-   scoring until comparison shows improved decision behavior.
-4. Improve HTML readability after scoring validation is stable.
-5. Only then consider formula/weight tuning.
+1. 建立中立模型对比 harness：用同一批缓存 raw input，对比基线分支 `codex/windows-local-stable` 与当前分支 `codex/scoring-validation-guardrails`。
+2. 扩展 holdout 覆盖：优先用 A/H/US/EU/JP/TW 的冻结缓存；缓存缺失时用小型 synthetic fixture。
+3. 在测试后面设计数据质量系数，但在对照证明能改善决策行为前，不合入评分。
+4. 评分验证稳定后，再改善 HTML 可读性。
+5. 最后才考虑公式或权重调参。
 
-## Boundary Rules For Next Session
+## 下一轮边界规则
 
-- No reinstall.
-- No deep run unless explicitly requested.
-- No update script.
-- Keep Windows/Mac compatibility.
-- Prefer cached raw data and pure scoring tests before any new network fetch.
-- Every formula change needs:
-  - monotonic test
-  - adversarial test
-  - branch-vs-branch comparison
-  - lite/medium basket check
-  - holdout check
+- 不重新安装。
+- 除非明确要求，不跑 deep。
+- 不运行 update 脚本。
+- 保持 Windows/Mac 兼容。
+- 新网络抓取前，优先使用缓存 raw data 和纯评分测试。
+- 每次公式变更都需要：
+  - 单调性测试
+  - 对抗测试
+  - branch-vs-branch 对照
+  - lite/medium 篮子检查
+  - holdout 检查

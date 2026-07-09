@@ -1,161 +1,157 @@
-# UZI scoring model regression plan
+# UZI 评分模型回归验证计划
 
-Date: 2026-07-01
-Source branch: `codex/windows-local-stable`
-Mac sync branch: `codex/local-mac-stable`
-Scope: Windows local validation imported into the Mac stable branch and
-rechecked with the Mac `.venv`.
+日期：2026-07-01
 
-## Boundaries
+来源分支：`codex/windows-local-stable`
 
-- Do not reinstall dependencies.
-- Do not run update scripts.
-- Do not run `--depth deep`.
-- Use the active platform's existing project virtualenv:
-  - Windows source run: `D:\UZI-Skill\.venv\Scripts\python.exe`
-  - Mac sync run: `source ~/UZI-Skill/.venv/bin/activate`
-- Treat missing data as a data gap; do not silently invent defaults.
-- Keep local validation artifacts in `local-ops/` unless they are promoted intentionally.
+Mac 同步分支：`codex/local-mac-stable`
 
-## First-principles objective
+范围：把 Windows 本地验证导入 Mac 稳定分支，并用 Mac `.venv` 重新校验。
 
-The score being tuned is `investment_score`, not the legacy panel-driven
-`overall_score`.
+## 边界
 
-`investment_score` should answer: is this stock attractive enough, at today's
-quality, growth, catalyst, valuation, and risk profile, to enter formal research
-or a buy/watch candidate list?
+- 不重新安装依赖。
+- 不运行 update 脚本。
+- 不运行 `--depth deep`。
+- 使用当前平台已有的项目虚拟环境：
+  - Windows 源端：`D:\UZI-Skill\.venv\Scripts\python.exe`
+  - Mac 同步端：`source ~/UZI-Skill/.venv/bin/activate`
+- 缺失数据要作为数据缺口处理，不能静默编造默认值。
+- 本地验证产物默认放在 `local-ops/`，除非明确决定提升为仓库文档。
 
-It should not merely measure report completeness, theme heat, or how many
-investors are mechanically bullish.
+## 第一性原理目标
 
-## Current model contract
+当前要校验的是 `investment_score`，不是旧的评委驱动 `overall_score`。
 
-Five axes:
+`investment_score` 要回答的问题是：
 
-- Quality: durable profitability, margins, moat, FCF, balance sheet.
-- Growth: revenue/profit growth and confirmed technical momentum.
-- Catalyst: policy, analyst support, AI or industry catalyst, event path.
-- Valuation: current odds after PE/PB/quantile/dividend context.
-- Risk control: debt, drawdown, volatility, crowding, scam/promotion flags.
+> 这只股票在当前质量、增长、催化、估值和风险画像下，是否值得进入正式研究、买入候选或观察名单？
 
-Current weights:
+它不应该只是衡量报告完整度、题材热度，或机械看多的评委数量。
 
-- Quality: 25%
-- Growth: 17%
-- Catalyst: 28%
-- Valuation: 15%
-- Risk control: 15%
+## 当前模型契约
 
-Risk is also a gate. A weak company with weak risk control must not become a
-high-ranked idea just because the theme is hot.
+五个轴：
 
-## Regression structure
+- 质量：盈利耐久性、利润率、护城河、自由现金流、资产负债表。
+- 增长：收入/利润增长，以及被确认的技术趋势。
+- 催化：政策、分析师支持、AI 或行业催化、事件路径。
+- 估值：PE/PB/分位数/股息背景下的当前赔率。
+- 风控：负债、回撤、波动、拥挤度、杀猪盘/推广风险。
 
-Core basket:
+当时权重：
 
-- `600519.SH`: A-share quality/value control.
-- `00700.HK`: HK platform quality control.
-- `AAPL`: US profitable mega-cap with valuation constraint.
-- `MSTR`: crypto treasury / volatility risk control.
-- `AXTI`: speculative small-cap adversarial control.
+- 质量：25%
+- 增长：17%
+- 催化：28%
+- 估值：15%
+- 风控：15%
 
-Holdout candidates:
+风险也是门槛。质量弱、风控弱的公司，不能只因为题材热就变成高排名想法。
 
-- `CRCL`: stablecoin / regulatory catalyst / IPO volatility.
-- `688017.SH`: Leader Harmonious Drive, robotics reducer / high valuation / A-share technology manufacturing.
-- `SIVE.ST`: Sivers Semiconductors, Swedish market compatibility probe first.
+## 回归结构
 
-Synthetic adversarial cases:
+核心篮子：
 
-- Theme-only microcap with negative margins and extreme YTD.
-- Quality compounder with weak momentum.
-- Expensive profitable platform with strong quality but valuation pressure.
+- `600519.SH`：A 股质量/价值控制样本。
+- `00700.HK`：港股平台质量控制样本。
+- `AAPL`：美股盈利巨头，带估值约束。
+- `MSTR`：加密资产财务杠杆/高波动风控样本。
+- `AXTI`：投机小盘股对抗样本。
 
-## Convergence criteria
+Holdout 候选：
 
-The model is considered converged for this local pass when:
+- `CRCL`：稳定币、监管催化、IPO 波动。
+- `688017.SH`：绿的谐波，机器人减速器、高估值、A 股科技制造。
+- `SIVE.ST`：Sivers Semiconductors，先作为瑞典市场兼容性探针。
 
-- Core basket passes on both lite and medium views.
-- Holdout results do not force a contradiction in the core basket.
-- AXTI-like speculative names remain capped below quality mega-cap controls.
-- Quality compounders are not forced into high-conviction buy ratings without growth or catalyst support.
-- Small weight perturbations do not materially change tier ordering.
-- Any failure is explained as either model logic, source data quality, or market-routing coverage.
+Synthetic 对抗样本：
 
-## Quantitative optimization plan
+- 题材型小盘股：负利润率、极端 YTD 涨幅。
+- 高质量复利股：动量较弱。
+- 高质量盈利平台：估值压力明显。
 
-Use a constrained grid, not manual percentage guessing:
+## 收敛标准
 
-- Keep quality between 20% and 30%.
-- Keep growth between 12% and 24%.
-- Keep catalyst between 18% and 32%.
-- Keep valuation between 12% and 24%.
-- Keep risk control between 12% and 24%.
-- Normalize each candidate to 100%.
+本地这一轮如果满足以下条件，可以认为模型阶段性收敛：
 
-Score candidate weight sets by:
+- 核心篮子的 lite 和 medium 视图都通过。
+- Holdout 结果不强迫推翻核心篮子的解释。
+- AXTI 这类投机样本必须低于高质量巨头控制样本。
+- 高质量复利股不能在缺少增长或催化确认时被强行推成高置信买入。
+- 小幅权重扰动不能实质改变档位排序。
+- 每个失败都能归因到模型逻辑、数据源质量或市场路由覆盖，而不是含糊处理。
 
-- Core basket pass/fail count.
-- Tier-ordering violations.
-- Holdout sanity violations.
-- Adversarial failure count.
-- Score dispersion: enough separation without unstable extremes.
+## 量化优化计划
 
-Human judgment is only needed for coarse labels such as "formal research",
-"watch", or "avoid". If human judgment is unavailable, use external proxy
-standards: 6-12 month excess return, drawdown-adjusted return, profitability
-durability, estimate revisions, valuation percentile, and known risk events.
+使用受约束网格，而不是手动猜百分比：
 
-## Next tasks
+- 质量保持在 20% 到 30%。
+- 增长保持在 12% 到 24%。
+- 催化保持在 18% 到 32%。
+- 估值保持在 12% 到 24%。
+- 风控保持在 12% 到 24%。
+- 每个候选权重组合归一化到 100%。
 
-1. Preserve the current core baseline and after-change output. Done locally in `local-ops/state/scoring-regression/`.
-2. Add a weight sensitivity runner over the core basket. Done locally in `local-ops/tools/scoring_weight_sensitivity.py`.
-3. Run `CRCL` and `688017.SH` as holdout lite/medium tests. Done on 2026-07-01.
-4. Probe `SIVE.ST` routing before using it as a scoring sample. Done on 2026-07-01; route global suffixes through `G` / yfinance first, then include scoring only after data quality is confirmed.
-5. Add clear guardrail diagnostics to the scoring output. Done for `compute_investment_score`.
-6. Promote only stable, cross-sample improvements into tracked code.
+候选权重按以下维度打分：
 
-## 2026-07-01 holdout results
+- 核心篮子通过/失败数量。
+- 档位排序违反数量。
+- Holdout 合理性违反数量。
+- 对抗样本失败数量。
+- 分数离散度：要有足够区分度，但不能极端不稳定。
 
-CRCL:
+人工判断只用于粗粒度标签，例如“正式研究”“观察”“回避”。如果没有人工判断，就使用外部代理标准：6-12 个月超额收益、回撤调整收益、盈利耐久性、预期修正、估值分位和已知风险事件。
 
-- Lite and medium both completed quickly.
-- `investment_score` stayed near 39-40.
-- Guardrail fired because quality is weak and risk control is poor.
-- Interpretation: current model does not over-reward stablecoin/IPO/regulatory narrative.
+## 下一步任务
 
-688017.SH:
+1. 保存当前核心基线和改动后输出。已在 `local-ops/state/scoring-regression/` 本地完成。
+2. 增加核心篮子的权重敏感性 runner。已在 `local-ops/tools/scoring_weight_sensitivity.py` 本地完成。
+3. 跑 `CRCL` 和 `688017.SH` 的 holdout lite/medium。已于 2026-07-01 完成。
+4. 在把 `SIVE.ST` 纳入评分样本前，先探测路由。已于 2026-07-01 完成；`.ST`、`.T`、`.TW` 等全球后缀优先走 `G` / yfinance 路由。
+5. 给评分输出增加清晰的护栏诊断。已在 `compute_investment_score` 完成。
+6. 只把跨样本稳定的改进提升到跟踪代码中。
 
-- Lite completed but was slow for a lite run because `0_basic` took about 64 seconds.
-- Medium completed in about 577 seconds.
-- Medium triggered a long `19_contests` loop over 859 items; this is a collection performance issue, not a scoring issue.
-- Medium `investment_score` was about 58, with high growth but valuation compressed by PE/PB pressure.
-- Interpretation: current model treats robotics reducer exposure as a watchlist/speculative growth case, not a high-conviction buy.
+## 2026-07-01 Holdout 结果
 
-SIVE / SIVE.ST:
+### CRCL
 
-- `SIVE` routes like a US ticker.
-- `SIVE.ST` originally misclassified as A-share style because `.ST` was not a supported market suffix.
-- Current fix: route `.ST`, `.T`, `.TW`, `.TWO` and other Yahoo-style non-US suffixes as `G`, using yfinance-compatible data paths first.
-- Interpretation: Sivers should remain a data-quality compatibility holdout before it becomes a scoring holdout.
+- Lite 和 medium 都较快完成。
+- `investment_score` 维持在约 39-40。
+- 护栏触发，因为质量弱且风控差。
+- 解释：当前模型没有过度奖励稳定币、IPO、监管叙事。
 
-Contest-source limiting:
+### 688017.SH
 
-- `19_contests` is an auxiliary sentiment/crowding signal, not a core quality or valuation input.
-- The 859-item loop observed on `688017.SH` came from A-share contest/portfolio style sources where the stock has many public holder/search rows. US/foreign names often have little or no comparable Chinese contest coverage, so CRCL did not hit the same path.
-- Medium now samples cheap contest evidence and skips heavy contest sources by default; deep can still run full/heavy evidence.
-- Scoring interpretation: limiting should not materially change a buy/sell conclusion. If it does, the model is over-weighting noisy sentiment and should be fixed at the scoring layer, not by forcing every collection run to scrape hundreds of rows.
+- Lite 完成，但由于 `0_basic` 花费约 64 秒，对 lite 来说偏慢。
+- Medium 完成约 577 秒。
+- Medium 触发了 `19_contests` 的 859 项长循环；这是采集性能问题，不是评分问题。
+- Medium `investment_score` 约 58，增长高，但估值被 PE/PB 压力压缩。
+- 解释：当前模型把机器人减速器暴露视为观察/投机成长，不是高置信买入。
 
-Temporary ideas evaluated:
+### SIVE / SIVE.ST
 
-- More conservative quality+risk-heavy weights produced better core dispersion, but also pushed 688017.SH lower. Keep as a candidate, not a production change, until more holdout samples are available.
-- Fixing self-review `None` handling is feasible and low risk; promote it because it removes noisy warning crashes observed on 688017.SH without changing score math.
+- `SIVE` 会按美股 ticker 路由。
+- `SIVE.ST` 最初被误判成 A 股风格，因为 `.ST` 当时不是支持的市场后缀。
+- 当前修复：`.ST`、`.T`、`.TW`、`.TWO` 和其他 Yahoo 风格非美后缀路由为 `G`，优先使用 yfinance 兼容数据路径。
+- 解释：Sivers 应先作为数据质量兼容性 holdout，再进入评分 holdout。
 
-Priority backlog after this pass:
+## Contest 源限制
 
-1. Confirm `19_contests` medium limiting on a fresh A-share cache when time allows.
-2. Run a lite/medium data-quality pass for `SIVE.ST` after global routing.
-3. Add Japan/Taiwan/Sweden local-provider enrichments only if yfinance leaves decision-relevant gaps.
-4. Add more holdout samples before changing weights again.
-5. Only then revisit whether current 25/17/28/15/15 should move toward a more quality+risk-heavy mix.
+- `19_contests` 是辅助情绪/拥挤度信号，不是核心质量或估值输入。
+- `688017.SH` 上观察到的 859 项循环，来自 A 股组合/持仓风格源；该股票有很多公开持仓或搜索行。美股/海外股票通常没有同等中文 contest 覆盖，所以 CRCL 没触发同样路径。
+- Medium 现在只采样廉价 contest 证据，默认跳过重型 contest 源；deep 仍可跑完整证据。
+- 评分解释：限制 contest 源不应实质改变买卖结论。如果会改变，说明模型过度依赖噪声情绪，应在评分层修，而不是强迫采集跑几百行。
+
+## 已评估的临时想法
+
+- 更保守的质量+风控权重让核心样本离散度更好，但也压低了 `688017.SH`。先保留为候选，不作为生产改动，直到有更多 holdout 样本。
+- 修复 self-review 的 `None` 处理是可行且低风险的；它能去掉 `688017.SH` 上观察到的噪声 warning crash，且不改变评分数学。
+
+## 这一轮之后的优先级
+
+1. 有时间时，用新 A 股缓存确认 `19_contests` medium 限制。
+2. 在全局路由后，对 `SIVE.ST` 做 lite/medium 数据质量验证。
+3. 只有当 yfinance 留下决策相关缺口时，再补日本、台湾、瑞典本地 provider 增强。
+4. 在再次调权重前，增加更多 holdout 样本。
+5. 只有到那时，才重新讨论当前 `25/17/28/15/15` 是否应偏向更高质量和风控权重。
