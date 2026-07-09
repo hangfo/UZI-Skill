@@ -147,6 +147,9 @@ def test_compare_outputs_includes_reason_and_confidence_summary():
     assert result["reason_summary"]["stable_no_material_change"] == 1
     assert result["confidence_summary"]["medium"] == 1
     assert result["support_summary"]["isolated"] == 1
+    assert result["reliability_summary"]["low"] == 1
+    row = result["raw_comparisons"][0]
+    assert row["explanation"]["reliability"]["level"] == "low"
 
 
 def test_cross_support_is_strong_when_cached_synthetic_and_modes_agree():
@@ -199,8 +202,10 @@ def test_cross_support_is_strong_when_cached_synthetic_and_modes_agree():
     }
     result = branch_score_compare.compare_outputs(payload, baseline, candidate)
     assert result["support_summary"]["strong"] == 4
+    assert result["reliability_summary"]["high"] == 4
     for row in result["raw_comparisons"] + result["synthetic_comparisons"]:
         assert row["explanation"]["support"]["level"] == "strong"
+        assert row["explanation"]["reliability"]["level"] == "high"
 
 
 def test_cross_support_is_limited_for_synthetic_only_repeated_category():
@@ -240,6 +245,7 @@ def test_cross_support_is_limited_for_synthetic_only_repeated_category():
     result = branch_score_compare.compare_outputs(payload, baseline, candidate)
     assert result["support_summary"]["limited"] == 2
     assert {row["explanation"]["support"]["level"] for row in result["synthetic_comparisons"]} == {"limited"}
+    assert result["reliability_summary"] == {"medium": 2}
 
 
 def test_build_payload_includes_synthetic_raw_cases():

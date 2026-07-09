@@ -430,6 +430,12 @@ SUPPORT_LABELS = {
     "isolated": "孤立证据",
 }
 
+RELIABILITY_LABELS = {
+    "high": "高可靠",
+    "medium": "中等可靠",
+    "low": "低可靠",
+}
+
 
 def decision_tier(score: Any) -> str:
     value = _float_or_none(score)
@@ -962,6 +968,7 @@ def compare_outputs(payload: dict[str, Any], baseline: dict[str, Any], candidate
     reason_counts = _count_by(all_rows, lambda row: row["explanation"]["category"])
     confidence_counts = _count_by(all_rows, lambda row: row["explanation"]["confidence"]["level"])
     support_counts = _count_by(all_rows, lambda row: row["explanation"]["support"]["level"])
+    reliability_counts = _count_by(all_rows, lambda row: row["explanation"]["reliability"]["level"])
     return {
         "generated_at": time.strftime("%Y-%m-%d %H:%M:%S %z"),
         "baseline_ref": baseline.get("ref"),
@@ -973,6 +980,7 @@ def compare_outputs(payload: dict[str, Any], baseline: dict[str, Any], candidate
         "reason_summary": reason_counts,
         "confidence_summary": confidence_counts,
         "support_summary": support_counts,
+        "reliability_summary": reliability_counts,
         "raw_comparisons": rows,
         "synthetic_comparisons": synthetic_rows,
     }
@@ -988,6 +996,58 @@ def _attach_cross_support(rows: list[dict[str, Any]]) -> None:
         peers = by_category.get(category, [])
         support = _cross_support_for(row, peers)
         row["explanation"]["support"] = support
+        row["explanation"]["reliability"] = _reliability_for(row)
+
+
+def _reliability_for(row: dict[str, Any]) -> dict[str, Any]:
+    explanation = row["explanation"]
+    confidence = explanation["confidence"]
+    support = explanation["support"]
+    sensitivity = (explanation["metrics"].get("threshold_sensitivity") or {}).get("level")
+    score = int(confidence["score"])
+    factors: list[str] = []
+
+    support_penalty = {
+        "strong": 0,
+        "moderate": 5,
+        "limited": 12,
+        "isolated": 25,
+    }.get(support["level"], 15)
+    if support_penalty:
+        score -= support_penalty
+        factors.append(f"交叉支持为 {support['level']}")
+
+    sensitivity_penalty = {
+        "stable": 0,
+        "low": 3,
+        "medium": 6,
+        "high": 12,
+        "not_applicable": 0,
+    }.get(str(sensitivity), 0)
+    if sensitivity_penalty:
+        score -= sensitivity_penalty
+        factors.append(f"阈值敏感性为 {sensitivity}")
+
+    if row["verdict"] == "possible_regression":
+        factors.append("硬边界违反，仍需优先处理")
+    elif row["verdict"] == "review":
+        factors.append("review 结论需要人工复核")
+
+    score = max(0, min(100, score))
+    if score >= 75:
+        level = "high"
+    elif score >= 50:
+        level = "medium"
+    else:
+        level = "low"
+    if not factors:
+        factors.append("单行置信度、交叉支持和阈值敏感性均稳定")
+    return {
+        "level": level,
+        "label": RELIABILITY_LABELS[level],
+        "score": score,
+        "factors": factors,
+    }
 
 
 def _cross_support_for(row: dict[str, Any], peers: list[dict[str, Any]]) -> dict[str, Any]:
@@ -1066,6 +1126,9 @@ def write_outputs(result: dict[str, Any], label: str) -> tuple[Path, Path]:
     lines.extend(["", "## 交叉支持汇总", ""])
     for level, count in result.get("support_summary", {}).items():
         lines.append(f"- {SUPPORT_LABELS.get(level, level)} (`{level}`): {count}")
+    lines.extend(["", "## 可靠性汇总", ""])
+    for level, count in result.get("reliability_summary", {}).items():
+        lines.append(f"- {RELIABILITY_LABELS.get(level, level)} (`{level}`): {count}")
     if result.get("missing_cache"):
         lines.extend(["", "## 缺失缓存", ""])
         for item in result["missing_cache"]:
@@ -1076,8 +1139,8 @@ def write_outputs(result: dict[str, Any], label: str) -> tuple[Path, Path]:
             "",
             "## 缓存 Raw Data",
             "",
-            "| 判定 | 归因 | 置信度 | 交叉支持 | 模式 | 样本 | 基线 | 候选 | 变化 | 基线档位 | 候选档位 | 边界余量 | 标记 |",
-            "|---|---|---|---|---|---|---:|---:|---:|---|---|---:|---|",
+            "| 判定 | 归因 | 置信度 | 交叉支持 | 可靠性 | 模式 | 样本 | 基线 | 候选 | 变化 | 基线档位 | 候选档位 | 边界余量 | 标记 |",
+            "|---|---|---|---|---|---|---|---:|---:|---:|---|---|---:|---|",
         ]
     )
     for row in result["raw_comparisons"]:
@@ -1088,8 +1151,8 @@ def write_outputs(result: dict[str, Any], label: str) -> tuple[Path, Path]:
             "",
             "## Synthetic 对抗样本",
             "",
-            "| 判定 | 归因 | 置信度 | 交叉支持 | 样本 | 基线 | 候选 | 变化 | 基线档位 | 候选档位 | 边界余量 | 标记 |",
-            "|---|---|---|---|---|---:|---:|---:|---|---|---:|---|",
+            "| 判定 | 归因 | 置信度 | 交叉支持 | 可靠性 | 样本 | 基线 | 候选 | 变化 | 基线档位 | 候选档位 | 边界余量 | 标记 |",
+            "|---|---|---|---|---|---|---:|---:|---:|---|---|---:|---|",
         ]
     )
     for row in result["synthetic_comparisons"]:
@@ -1101,6 +1164,7 @@ def write_outputs(result: dict[str, Any], label: str) -> tuple[Path, Path]:
     lines.append("- `归因` 是稳定枚举，优先按执行失败、字段契约、硬边界、样本预期和漂移强度分类。")
     lines.append("- `置信度` 不是预测胜率，而是本次判定的证据完整度；执行错误、分数缺失、贴近边界、弱预期样本会降低置信度。")
     lines.append("- `交叉支持` 衡量同类归因是否被不同样本来源和 lite/medium 模式共同支持；它不改变判定，只用于识别过拟合风险。")
+    lines.append("- `可靠性` 综合置信度、交叉支持和阈值敏感性；它不改变判定，只决定结论能说多满。")
     lines.append("- `边界余量` 为候选结果距离最近预设边界的分数；负数表示越界，越接近 0 越需要人工复核。")
     md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return json_path, md_path
@@ -1112,11 +1176,13 @@ def _format_md_row(row: dict[str, Any], include_mode: bool = True) -> str:
     explanation = row["explanation"]
     confidence = explanation["confidence"]
     support = explanation["support"]
+    reliability = explanation["reliability"]
     cells = [
         row["verdict"],
         explanation["label"],
         f"{confidence['level']}({confidence['score']})",
         support["label"],
+        f"{reliability['level']}({reliability['score']})",
     ]
     if include_mode:
         cells.append(row.get("mode", ""))

@@ -142,6 +142,7 @@ Harness 现在会为每一行输出稳定的解释层：
 - `explanation.metrics`：定量证据，包括分数漂移、档位漂移、边界余量和主要轴向变化。
 - `explanation.confidence`：本次判定的证据完整度，不是收益预测胜率。
 - `explanation.support`：同类归因的交叉支持强度，用于识别过拟合风险。
+- `explanation.reliability`：综合置信度、交叉支持和阈值敏感性的整体可靠性。
 
 ### 归因类别
 
@@ -230,26 +231,40 @@ Harness 现在会为每一行输出稳定的解释层：
 - 阈值如 55/65/8 分漂移是工程护栏，不是统计显著性结论。
 - 如果未来新增样本后归因分布大幅改变，应优先扩样本和复核边界，而不是调公式迎合旧结果。
 
+### 可靠性
+
+`confidence` 只看单行证据完整度，`support` 只看同类归因的交叉来源，`reliability` 把两者和阈值敏感性合并。
+
+这能避免一个常见误读：
+
+> 单个 synthetic 样本可能 `confidence=high`，因为字段齐全、边界明确；但如果 `support=limited` 且贴近边界，`reliability` 会被降到 `medium/low`。
+
+可靠性不改变回退判定，只决定结论能说多满：
+
+- `high`：可以作为当前 harness 的稳定证据。
+- `medium`：方向可信，但需要更多真实缓存样本或边界复核。
+- `low`：只能作为提示，不应外推，也不应据此调公式。
+
 ## 最新已知结果
 
 扩展版运行结果：
 
 ```text
-label: 20260709-cross-support-core-holdout-both
+label: 20260709-reliability-core-holdout-both
 result: 29 ok / 2 review / 0 possible_regression
 ```
 
 输出文件：
 
 ```text
-local-ops/state/branch-score-compare/20260709-cross-support-core-holdout-both.md
-local-ops/state/branch-score-compare/20260709-cross-support-core-holdout-both.json
+local-ops/state/branch-score-compare/20260709-reliability-core-holdout-both.md
+local-ops/state/branch-score-compare/20260709-reliability-core-holdout-both.json
 ```
 
 两个 `review` 都是预期内的风险收敛，不是公式回退：
 
 - `high_quality_stage3_confirmed_downtrend`：`66.0 -> 59.0`，档位 `buy_candidate -> watch`，归因为 `trend_guardrail_tightening`，置信度 `high(82)`，交叉支持 `limited`。
-- `stage4_missing_price_high_quality`：`66.0 -> 59.0`，档位 `buy_candidate -> watch`，归因为 `trend_guardrail_tightening`，置信度 `medium(64)`，交叉支持 `limited`；因为候选分数贴近上限边界，仍需人工复核但不判回退。
+- `stage4_missing_price_high_quality`：`66.0 -> 59.0`，档位 `buy_candidate -> watch`，归因为 `trend_guardrail_tightening`，置信度 `medium(64)`，交叉支持 `limited`，可靠性 `low(40)`；因为候选分数贴近上限边界，仍需人工复核但不判回退。
 
 这两个变化说明候选分支阻止了 Stage 3/4 下的质量保底误触发买入信号；但由于目前主要由 synthetic 样本支持，结论应表述为“方向合理、需要真实缓存样本继续交叉验证”，不能过度外推。
 
@@ -270,6 +285,19 @@ local-ops/state/branch-score-compare/20260709-cross-support-core-holdout-both.js
 
 - `strong`: 25
 - `limited`: 6
+
+可靠性汇总：
+
+- `high`: 21
+- `medium`: 7
+- `low`: 3
+
+低可靠项集中在 synthetic-only 且贴边的边界样本：
+
+- `__synthetic_single_strong_negative_event` 的 lite/medium 两行：数据质量归因，单条负面事件边界余量只有 `0.9`。
+- `stage4_missing_price_high_quality`：趋势护栏归因，但交叉支持仍是 `limited`，且边界余量为 `0.0`。
+
+这些低可靠项不推翻 `0 possible_regression`，但限制了结论外推范围：它们只能说明当前字段契约/边界行为符合预期，不能证明真实市场分布里已经充分覆盖。
 
 `limited` 主要集中在数据质量 synthetic raw 样本和 Stage 3/4 趋势护栏 synthetic 样本。它们适合证明字段契约和边界行为，但还不能单独证明真实市场分布中的普遍性。
 
