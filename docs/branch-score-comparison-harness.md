@@ -373,6 +373,43 @@ D:\UZI-Skill\.venv\Scripts\python.exe tools\branch_score_compare.py `
 - 新在线样本先作为冻结证据进入 holdout，不直接推动公式调整。
 - 如果某结论只来自 synthetic，即使单行 confidence 高，也只能给 limited support。
 
+### Evidence Overlay 构建器
+
+2026-07-09 新增最小闭环工具：
+
+```powershell
+D:\UZI-Skill\.venv\Scripts\python.exe tools\evidence_overlay_builder.py `
+  --ticker AAPL `
+  --target missing_financials `
+  --max-items 2
+```
+
+输出默认写入：
+
+```text
+local-ops/state/evidence-overlays/<ticker>-<target>.json
+```
+
+当前支持：
+
+- `missing_financials`：美股走 SEC `company_tickers.json` + `companyfacts`，只做字段映射，不生成投资分数。
+- `negative_event`：只接受已有缓存中带 `title/url/source` 的明确负面事件；没有官方 enforcement adapter 前，在线路径保持 `gap`，不靠关键词或常识推断。
+- `--no-network`：只读本地缓存，用于测试和离线复跑。
+- `--no-write`：只打印状态，不落地 overlay。
+
+实际验证：
+
+```text
+AAPL missing_financials -> ready / high confidence / ~5.8s
+```
+
+解释边界：
+
+- overlay 是“事实证据冻结层”，不是评分层。
+- overlay 可以补足真实信息，但只有冻结后才能作为同一份输入喂给 baseline/candidate。
+- 如果官方源不可达、字段缺失或证据语义不明确，状态必须是 `gap` 或 `partial`，不能用经验判断补齐。
+- 性能上，在线构建是预处理步骤；branch-vs-branch harness 仍保持离线数秒级。
+
 ## 性能与“卡壳”诊断
 
 2026-07-09 复测发现，完整 branch-vs-branch harness 的等待感主要来自 A 股 lite 样本在 `generate_synthesis` 里的在线基金持仓 fallback，而不是美股/港股普遍慢：
