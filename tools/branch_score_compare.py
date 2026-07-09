@@ -423,6 +423,13 @@ REASON_LABELS = {
     "neutral_or_small_change": "小幅变化",
 }
 
+SUPPORT_LABELS = {
+    "strong": "强交叉支持",
+    "moderate": "中等交叉支持",
+    "limited": "有限交叉支持",
+    "isolated": "孤立证据",
+}
+
 
 def decision_tier(score: Any) -> str:
     value = _float_or_none(score)
@@ -609,7 +616,27 @@ def _explanation_metrics(
         "boundary_checks": boundary_checks,
         "boundary_violations": violated,
         "nearest_boundary_distance": nearest,
+        "threshold_sensitivity": _threshold_sensitivity(nearest),
         "top_axis_deltas": axis_deltas[:3],
+    }
+
+
+def _threshold_sensitivity(nearest_boundary_distance: float | None) -> dict[str, Any]:
+    if nearest_boundary_distance is None:
+        return {"level": "not_applicable", "stable_within": []}
+    stable_within = [band for band in (1, 3, 5) if nearest_boundary_distance > band]
+    if nearest_boundary_distance <= 1:
+        level = "high"
+    elif nearest_boundary_distance <= 3:
+        level = "medium"
+    elif nearest_boundary_distance <= 5:
+        level = "low"
+    else:
+        level = "stable"
+    return {
+        "level": level,
+        "stable_within": stable_within,
+        "nearest_boundary_distance": nearest_boundary_distance,
     }
 
 
@@ -926,6 +953,7 @@ def compare_outputs(payload: dict[str, Any], baseline: dict[str, Any], candidate
         synthetic_rows.append(compare_scores(case, base, cand))
 
     all_rows = rows + synthetic_rows
+    _attach_cross_support(all_rows)
     counts = {
         "ok": sum(1 for row in all_rows if row["verdict"] == "ok"),
         "review": sum(1 for row in all_rows if row["verdict"] == "review"),
@@ -933,6 +961,7 @@ def compare_outputs(payload: dict[str, Any], baseline: dict[str, Any], candidate
     }
     reason_counts = _count_by(all_rows, lambda row: row["explanation"]["category"])
     confidence_counts = _count_by(all_rows, lambda row: row["explanation"]["confidence"]["level"])
+    support_counts = _count_by(all_rows, lambda row: row["explanation"]["support"]["level"])
     return {
         "generated_at": time.strftime("%Y-%m-%d %H:%M:%S %z"),
         "baseline_ref": baseline.get("ref"),
@@ -943,9 +972,62 @@ def compare_outputs(payload: dict[str, Any], baseline: dict[str, Any], candidate
         "summary": counts,
         "reason_summary": reason_counts,
         "confidence_summary": confidence_counts,
+        "support_summary": support_counts,
         "raw_comparisons": rows,
         "synthetic_comparisons": synthetic_rows,
     }
+
+
+def _attach_cross_support(rows: list[dict[str, Any]]) -> None:
+    by_category: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        category = row["explanation"]["category"]
+        by_category.setdefault(category, []).append(row)
+    for row in rows:
+        category = row["explanation"]["category"]
+        peers = by_category.get(category, [])
+        support = _cross_support_for(row, peers)
+        row["explanation"]["support"] = support
+
+
+def _cross_support_for(row: dict[str, Any], peers: list[dict[str, Any]]) -> dict[str, Any]:
+    evidence_types = sorted({_evidence_type(peer) for peer in peers})
+    groups = sorted({str(peer.get("group", "unknown")) for peer in peers})
+    modes = sorted({str(peer.get("mode")) for peer in peers if peer.get("mode")})
+    has_cached_raw = any(_evidence_type(peer) == "cached_raw" for peer in peers)
+    has_synthetic = any(_evidence_type(peer).startswith("synthetic") for peer in peers)
+    has_both_modes = {"lite", "medium"}.issubset(set(modes))
+    count = len(peers)
+    if count >= 4 and has_cached_raw and has_synthetic and has_both_modes:
+        level = "strong"
+        rationale = "同类归因同时出现在真实缓存、synthetic 样本和 lite/medium 模式中。"
+    elif count >= 2 and ((has_cached_raw and has_both_modes) or (has_cached_raw and has_synthetic) or len(evidence_types) >= 2):
+        level = "moderate"
+        rationale = "同类归因有多条或多来源证据，但覆盖面还不完整。"
+    elif count >= 2:
+        level = "limited"
+        rationale = "同类归因有重复样本支持，但来源类型较单一。"
+    else:
+        level = "isolated"
+        rationale = "该归因目前只由单个样本支持，不能单独外推。"
+    return {
+        "level": level,
+        "label": SUPPORT_LABELS[level],
+        "rationale": rationale,
+        "same_category_count": count,
+        "evidence_types": evidence_types,
+        "groups": groups,
+        "modes": modes,
+    }
+
+
+def _evidence_type(row: dict[str, Any]) -> str:
+    group = row.get("group")
+    if group in {"core", "holdout", "extra"}:
+        return "cached_raw"
+    if group == "synthetic_raw":
+        return "synthetic_raw"
+    return "synthetic_feature"
 
 
 def _count_by(rows: list[dict[str, Any]], key_fn: Any) -> dict[str, int]:
@@ -981,6 +1063,9 @@ def write_outputs(result: dict[str, Any], label: str) -> tuple[Path, Path]:
     lines.extend(["", "## 置信度汇总", ""])
     for level, count in result.get("confidence_summary", {}).items():
         lines.append(f"- {level}: {count}")
+    lines.extend(["", "## 交叉支持汇总", ""])
+    for level, count in result.get("support_summary", {}).items():
+        lines.append(f"- {SUPPORT_LABELS.get(level, level)} (`{level}`): {count}")
     if result.get("missing_cache"):
         lines.extend(["", "## 缺失缓存", ""])
         for item in result["missing_cache"]:
@@ -991,8 +1076,8 @@ def write_outputs(result: dict[str, Any], label: str) -> tuple[Path, Path]:
             "",
             "## 缓存 Raw Data",
             "",
-            "| 判定 | 归因 | 置信度 | 模式 | 样本 | 基线 | 候选 | 变化 | 基线档位 | 候选档位 | 边界余量 | 标记 |",
-            "|---|---|---|---|---|---:|---:|---:|---|---|---:|---|",
+            "| 判定 | 归因 | 置信度 | 交叉支持 | 模式 | 样本 | 基线 | 候选 | 变化 | 基线档位 | 候选档位 | 边界余量 | 标记 |",
+            "|---|---|---|---|---|---|---:|---:|---:|---|---|---:|---|",
         ]
     )
     for row in result["raw_comparisons"]:
@@ -1003,8 +1088,8 @@ def write_outputs(result: dict[str, Any], label: str) -> tuple[Path, Path]:
             "",
             "## Synthetic 对抗样本",
             "",
-            "| 判定 | 归因 | 置信度 | 样本 | 基线 | 候选 | 变化 | 基线档位 | 候选档位 | 边界余量 | 标记 |",
-            "|---|---|---|---|---:|---:|---:|---|---|---:|---|",
+            "| 判定 | 归因 | 置信度 | 交叉支持 | 样本 | 基线 | 候选 | 变化 | 基线档位 | 候选档位 | 边界余量 | 标记 |",
+            "|---|---|---|---|---|---:|---:|---:|---|---|---:|---|",
         ]
     )
     for row in result["synthetic_comparisons"]:
@@ -1015,6 +1100,7 @@ def write_outputs(result: dict[str, Any], label: str) -> tuple[Path, Path]:
     lines.append("- `possible_regression` 表示候选分支违反了样本特定决策边界。")
     lines.append("- `归因` 是稳定枚举，优先按执行失败、字段契约、硬边界、样本预期和漂移强度分类。")
     lines.append("- `置信度` 不是预测胜率，而是本次判定的证据完整度；执行错误、分数缺失、贴近边界、弱预期样本会降低置信度。")
+    lines.append("- `交叉支持` 衡量同类归因是否被不同样本来源和 lite/medium 模式共同支持；它不改变判定，只用于识别过拟合风险。")
     lines.append("- `边界余量` 为候选结果距离最近预设边界的分数；负数表示越界，越接近 0 越需要人工复核。")
     md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return json_path, md_path
@@ -1025,10 +1111,12 @@ def _format_md_row(row: dict[str, Any], include_mode: bool = True) -> str:
     candidate = row["candidate"]
     explanation = row["explanation"]
     confidence = explanation["confidence"]
+    support = explanation["support"]
     cells = [
         row["verdict"],
         explanation["label"],
         f"{confidence['level']}({confidence['score']})",
+        support["label"],
     ]
     if include_mode:
         cells.append(row.get("mode", ""))

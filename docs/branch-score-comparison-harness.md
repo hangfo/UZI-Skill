@@ -141,6 +141,7 @@ Harness 现在会为每一行输出稳定的解释层：
 - `explanation.rationale`：面向人工复核的一句话解释。
 - `explanation.metrics`：定量证据，包括分数漂移、档位漂移、边界余量和主要轴向变化。
 - `explanation.confidence`：本次判定的证据完整度，不是收益预测胜率。
+- `explanation.support`：同类归因的交叉支持强度，用于识别过拟合风险。
 
 ### 归因类别
 
@@ -168,6 +169,7 @@ Harness 现在会为每一行输出稳定的解释层：
 - `boundary_checks`：每个样本边界的值、阈值和余量。
 - `boundary_violations`：余量为负的边界，直接支持 `possible_regression`。
 - `nearest_boundary_distance`：候选结果距离最近边界的分数；越接近 0，越需要人工复核。
+- `threshold_sensitivity`：只做报告层敏感性，不改阈值；显示结论是否容易被 1/3/5 分边界扰动影响。
 - `top_axis_deltas`：质量、增长、催化、估值、风控等轴向的最大变化。
 
 边界余量规则：
@@ -202,28 +204,54 @@ Harness 现在会为每一行输出稳定的解释层：
 - 样本属于 `data_quality_uncertain`，但缺少字段级证据。
 - 同一原因只在 synthetic 样本出现，真实缓存 raw data 没有交叉支持。
 
+### 交叉支持
+
+交叉支持不改变 `ok/review/possible_regression`，只衡量某个归因是否可能过拟合当前样本。
+
+| 支持等级 | 判定方式 | 含义 |
+|---|---|---|
+| `strong` | 同类归因至少 4 条，且同时覆盖真实缓存、synthetic 样本和 lite/medium 模式。 | 证据来源相对独立，过拟合风险较低。 |
+| `moderate` | 同类归因至少 2 条，并覆盖多来源或真实缓存的 lite/medium。 | 有交叉证据，但覆盖还不完整。 |
+| `limited` | 同类归因至少 2 条，但来源类型单一。 | 可作为提示，不能单独外推。 |
+| `isolated` | 同类归因只有 1 条。 | 只说明这个样本，不说明普遍规律。 |
+
+理论依据：
+
+- **同输入对照**：两个分支只比较同一批冻结输入，减少数据刷新造成的混杂变量。
+- **分层样本**：真实缓存 raw data、synthetic feature、synthetic raw-data 分别覆盖现实分布、极端边界和字段契约。
+- **留出样本**：core basket 与 holdout 分开，避免只在已知样本上解释得漂亮。
+- **硬边界优先**：只有越过预设边界才判 `possible_regression`，解释层不能单独制造回退结论。
+- **交叉支持约束**：同类归因必须跨来源或跨模式重复出现，才提高解释可信度。
+
+仍需防范的过拟合：
+
+- Synthetic 样本是人为构造的，适合检查边界，不代表真实市场频率。
+- 当前缓存 raw data 数量有限，不能证明公式“更好”，只能证明未触发已定义边界回退。
+- 阈值如 55/65/8 分漂移是工程护栏，不是统计显著性结论。
+- 如果未来新增样本后归因分布大幅改变，应优先扩样本和复核边界，而不是调公式迎合旧结果。
+
 ## 最新已知结果
 
 扩展版运行结果：
 
 ```text
-label: 20260709-explainability-core-holdout-both
+label: 20260709-cross-support-core-holdout-both
 result: 29 ok / 2 review / 0 possible_regression
 ```
 
 输出文件：
 
 ```text
-local-ops/state/branch-score-compare/20260709-explainability-core-holdout-both.md
-local-ops/state/branch-score-compare/20260709-explainability-core-holdout-both.json
+local-ops/state/branch-score-compare/20260709-cross-support-core-holdout-both.md
+local-ops/state/branch-score-compare/20260709-cross-support-core-holdout-both.json
 ```
 
 两个 `review` 都是预期内的风险收敛，不是公式回退：
 
-- `high_quality_stage3_confirmed_downtrend`：`66.0 -> 59.0`，档位 `buy_candidate -> watch`，归因为 `trend_guardrail_tightening`，置信度 `high(82)`。
-- `stage4_missing_price_high_quality`：`66.0 -> 59.0`，档位 `buy_candidate -> watch`，归因为 `trend_guardrail_tightening`，置信度 `medium(64)`；因为候选分数贴近上限边界，仍需人工复核但不判回退。
+- `high_quality_stage3_confirmed_downtrend`：`66.0 -> 59.0`，档位 `buy_candidate -> watch`，归因为 `trend_guardrail_tightening`，置信度 `high(82)`，交叉支持 `limited`。
+- `stage4_missing_price_high_quality`：`66.0 -> 59.0`，档位 `buy_candidate -> watch`，归因为 `trend_guardrail_tightening`，置信度 `medium(64)`，交叉支持 `limited`；因为候选分数贴近上限边界，仍需人工复核但不判回退。
 
-这两个变化说明候选分支阻止了 Stage 3/4 下的质量保底误触发买入信号。
+这两个变化说明候选分支阻止了 Stage 3/4 下的质量保底误触发买入信号；但由于目前主要由 synthetic 样本支持，结论应表述为“方向合理、需要真实缓存样本继续交叉验证”，不能过度外推。
 
 归因汇总：
 
@@ -238,6 +266,13 @@ local-ops/state/branch-score-compare/20260709-explainability-core-holdout-both.j
 - `medium`: 7
 - `low`: 0
 
+交叉支持汇总：
+
+- `strong`: 25
+- `limited`: 6
+
+`limited` 主要集中在数据质量 synthetic raw 样本和 Stage 3/4 趋势护栏 synthetic 样本。它们适合证明字段契约和边界行为，但还不能单独证明真实市场分布中的普遍性。
+
 Synthetic raw-data 检查也显示字段契约符合预期：
 
 - 空 `recent_news` + 旧 `news`：基线 `15_events=8`，候选分支 `15_events=5`。
@@ -246,3 +281,13 @@ Synthetic raw-data 检查也显示字段契约符合预期：
 - 财务缺失 raw 样本：候选分支保持 `cautious`，没有变成买入。
 
 以后如果出现非零 `possible_regression`，先检查具体样本证据，再决定是否修改评分公式。
+
+## 后续非破坏性优化
+
+在不调公式、不抓新数据的前提下，后续可继续增强以下验证层：
+
+1. **真实缓存补盲**：优先寻找已有缓存中 Stage 3/4、财务缺失、单条负面事件等真实样本，把 currently `limited` 的归因提升到 `moderate/strong`。
+2. **阈值敏感性检查**：不改阈值，只在报告里计算“如果边界上下浮动 1/3/5 分，判定是否改变”，用于发现贴边结论。
+3. **模式一致性检查**：同一 ticker 的 lite/medium 如果归因相反，应降置信度或标记 review。
+4. **轴向贡献一致性**：如果分数变化主要来自目标修复轴，例如 risk_control 或 events，解释更可信；如果来自无关轴，标记为复核。
+5. **新增 holdout 批次**：只用已有缓存或人工构造 raw-data，不运行 update；新增后先看旧结论是否仍保持，而不是按新样本调公式。

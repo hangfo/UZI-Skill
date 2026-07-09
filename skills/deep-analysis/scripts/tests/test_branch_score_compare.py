@@ -114,6 +114,7 @@ def test_near_boundary_lowers_confidence():
     assert row["verdict"] == "ok"
     assert row["explanation"]["confidence"]["level"] == "medium"
     assert "候选结果距离边界 <= 1 分" in row["explanation"]["confidence"]["factors"]
+    assert row["explanation"]["metrics"]["threshold_sensitivity"]["level"] == "high"
 
 
 def test_stage_guardrail_tightening_has_explainable_category():
@@ -145,6 +146,100 @@ def test_compare_outputs_includes_reason_and_confidence_summary():
     result = branch_score_compare.compare_outputs(payload, baseline, candidate)
     assert result["reason_summary"]["stable_no_material_change"] == 1
     assert result["confidence_summary"]["medium"] == 1
+    assert result["support_summary"]["isolated"] == 1
+
+
+def test_cross_support_is_strong_when_cached_synthetic_and_modes_agree():
+    payload = {
+        "raw_items": [
+            {
+                "mode": "lite",
+                "case": {"ticker": "MSTR", "group": "core", "expectation": "risk_control", "max_candidate_score": 45.0},
+            },
+            {
+                "mode": "medium",
+                "case": {"ticker": "MSTR", "group": "core", "expectation": "risk_control", "max_candidate_score": 45.0},
+            },
+            {
+                "mode": "lite",
+                "case": {
+                    "ticker": "__synthetic_missing_financials_raw",
+                    "group": "synthetic_raw",
+                    "expectation": "risk_control",
+                    "max_candidate_score": 65.0,
+                },
+            },
+        ],
+        "synthetic_cases": [
+            {
+                "name": "theme_only_microcap",
+                "expectation": "risk_control",
+                "features": {},
+                "max_candidate_score": 58.0,
+            }
+        ],
+    }
+    baseline = {
+        "ref": "base",
+        "raw": [
+            {"case": "MSTR", "mode": "lite", "investment_score": 43.0},
+            {"case": "MSTR", "mode": "medium", "investment_score": 43.0},
+            {"case": "__synthetic_missing_financials_raw", "mode": "lite", "investment_score": 58.0},
+        ],
+        "synthetic": [{"case": "theme_only_microcap", "investment_score": 50.0}],
+    }
+    candidate = {
+        "ref": "cand",
+        "raw": [
+            {"case": "MSTR", "mode": "lite", "investment_score": 34.0},
+            {"case": "MSTR", "mode": "medium", "investment_score": 34.0},
+            {"case": "__synthetic_missing_financials_raw", "mode": "lite", "investment_score": 54.0},
+        ],
+        "synthetic": [{"case": "theme_only_microcap", "investment_score": 42.0}],
+    }
+    result = branch_score_compare.compare_outputs(payload, baseline, candidate)
+    assert result["support_summary"]["strong"] == 4
+    for row in result["raw_comparisons"] + result["synthetic_comparisons"]:
+        assert row["explanation"]["support"]["level"] == "strong"
+
+
+def test_cross_support_is_limited_for_synthetic_only_repeated_category():
+    payload = {
+        "raw_items": [],
+        "synthetic_cases": [
+            {
+                "name": "high_quality_stage3_confirmed_downtrend",
+                "role": "quality stock in confirmed distribution/downtrend",
+                "expectation": "speculative_watch",
+                "features": {},
+                "max_candidate_score": 64.0,
+            },
+            {
+                "name": "stage4_missing_price_high_quality",
+                "role": "Stage 4 quality stock with missing price confirmation",
+                "expectation": "speculative_watch",
+                "features": {},
+                "max_candidate_score": 64.0,
+            },
+        ],
+    }
+    baseline = {
+        "ref": "base",
+        "synthetic": [
+            {"case": "high_quality_stage3_confirmed_downtrend", "investment_score": 66.0},
+            {"case": "stage4_missing_price_high_quality", "investment_score": 66.0},
+        ],
+    }
+    candidate = {
+        "ref": "cand",
+        "synthetic": [
+            {"case": "high_quality_stage3_confirmed_downtrend", "investment_score": 59.0},
+            {"case": "stage4_missing_price_high_quality", "investment_score": 59.0},
+        ],
+    }
+    result = branch_score_compare.compare_outputs(payload, baseline, candidate)
+    assert result["support_summary"]["limited"] == 2
+    assert {row["explanation"]["support"]["level"] for row in result["synthetic_comparisons"]} == {"limited"}
 
 
 def test_build_payload_includes_synthetic_raw_cases():
