@@ -342,6 +342,53 @@ def test_quant_signal_offline_mode_does_not_autofetch():
             os.environ["UZI_SCORING_OFFLINE"] = old_env
 
 
+def test_market_for_ticker_is_cross_market_and_deterministic():
+    assert branch_score_compare.market_for_ticker("600519.SH") == "A"
+    assert branch_score_compare.market_for_ticker("00700.HK") == "HK"
+    assert branch_score_compare.market_for_ticker("AAPL") == "US"
+    assert branch_score_compare.market_for_ticker("2330.TW") == "TW"
+    assert branch_score_compare.market_for_ticker("7203.T") == "JP"
+    assert branch_score_compare.market_for_ticker("SIVE.ST") == "EU"
+
+
+def test_cache_blindspot_audit_reports_real_cache_gaps_without_synthetic_credit():
+    cases = [
+        {
+            "ticker": "600519.SH",
+            "market": "A",
+            "group": "discovered_cache",
+            "expectation": "speculative_watch",
+            "blindspot_tags": ["stage3_4"],
+        },
+        {
+            "ticker": "AAPL",
+            "market": "US",
+            "group": "synthetic_raw",
+            "expectation": "negative_event",
+            "blindspot_tags": ["negative_event"],
+        },
+    ]
+    audit = branch_score_compare.build_cache_blindspot_audit(cases)
+    by_target = {row["target"]: row for row in audit["coverage"]}
+    assert by_target["stage3_4"]["cached_raw_count"] == 1
+    assert by_target["stage3_4"]["status"] == "gap"
+    assert by_target["negative_event"]["cached_raw_count"] == 0
+    assert by_target["negative_event"]["status"] == "gap"
+    assert by_target["negative_event"]["missing_cases"] == 2
+    assert "online_backfill_plan" in by_target["negative_event"]
+
+
+def test_online_backfill_plan_is_source_first_and_frozen():
+    audit = branch_score_compare.build_cache_blindspot_audit([])
+    by_target = {row["target"]: row for row in audit["coverage"]}
+    plan = by_target["negative_event"]["online_backfill_plan"][0]
+    assert "official" in plan["selection_rule"]
+    assert "score changed" in plan["selection_rule"]
+    assert plan["freeze_output"].endswith("evidence-overlays/<ticker>.json")
+    assert "do not infer" in plan["rejection_rule"]
+    assert any("frozen" in item.lower() for item in audit["online_offline_balance"]["promotion_gate"])
+
+
 if __name__ == "__main__":
     import inspect
     import sys

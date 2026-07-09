@@ -326,6 +326,53 @@ Synthetic raw-data 检查也显示字段契约符合预期：
 4. **轴向贡献一致性**：如果分数变化主要来自目标修复轴，例如 risk_control 或 events，解释更可信；如果来自无关轴，标记为复核。
 5. **新增 holdout 批次**：只用已有缓存或人工构造 raw-data，不运行 update；新增后先看旧结论是否仍保持，而不是按新样本调公式。
 
+## 真实缓存补盲与在线证据冻结
+
+2026-07-09 增加了独立审计入口：
+
+```powershell
+D:\UZI-Skill\.venv\Scripts\python.exe tools\branch_score_compare.py `
+  --audit-cache-blindspots `
+  --label 20260709-real-cache-blindspot-plan
+```
+
+这个入口只做样本覆盖审计和补盲计划，不运行分支对照，也不改评分公式。最新审计结果：
+
+| 盲点目标 | 状态 | 真实缓存覆盖 | 市场覆盖 | 结论 |
+|---|---|---:|---:|---|
+| `negative_event` | gap | 0/2 | 0/2 | 缺少真实缓存负面事件样本；不能用 synthetic 结果外推。 |
+| `missing_financials` | gap | 0/2 | 0/2 | 缺少真实财务缺失样本；当前只能证明字段契约和风控边界。 |
+| `stage3_4` | satisfied | 4/4 | 3/3 | Stage 3/4 趋势护栏已有真实缓存交叉支持。 |
+| `lhb_activity` | satisfied | 2/1 | 1/1 | A 股龙虎榜/游资热度已有真实缓存覆盖。 |
+
+审计工具的约束：
+
+- 只把 `core`、`holdout`、`extra`、`discovered_cache` 计入真实缓存覆盖。
+- `synthetic_feature` 和 `synthetic_raw` 只能证明边界与字段契约，不能冒充真实市场覆盖。
+- 真实缓存缺口不会导致自动调公式；它只降低结论外推强度。
+
+在线补证据的最佳方案不是在 branch comparison 运行时临时联网，而是分两步：
+
+1. **在线证据构建**：按官方来源优先、日期排序、固定 universe 的方式检索，写入冻结 overlay，例如 `local-ops/state/evidence-overlays/<ticker>.json`。每条证据必须包含 source、url、title、published_at/fetched_at、字段映射和失败原因；拿不到就记录缺口，不能补经验判断。
+2. **离线分支对照**：只读取已经冻结的 raw data 或 overlay，用同一份输入分别跑 baseline/candidate。运行时继续设置 `UZI_SCORING_OFFLINE=1` 和 `UZI_QUANT_SIGNAL_OFFLINE=1`，避免性能和输入漂移。
+
+按市场的来源优先级：
+
+- A 股负面事件：巨潮公告、交易所纪律处分、证监会处罚、公司公告。
+- A 股财务缺失：巨潮年报/中报、交易所披露、东财财务表；字段级补齐，不整体替换原源。
+- 港股负面事件：HKEXnews、SFC enforcement、公司公告。
+- 港股财务缺失：HKEXnews 年报/中报、公司 IR。
+- 美股负面事件：SEC EDGAR 8-K/10-K 风险事件、SEC litigation releases、公司 IR。
+- 美股财务缺失：SEC EDGAR 10-K/10-Q/XBRL、公司 IR。
+
+防过拟合原则：
+
+- 先冻结候选 universe，再看分支分数变化。
+- 按盲点缺口选样，不按“能证明候选分支更好”的方向选样。
+- 优先从官方列表按日期取前 N 个可映射 ticker；检索失败也进入审计记录。
+- 新在线样本先作为冻结证据进入 holdout，不直接推动公式调整。
+- 如果某结论只来自 synthetic，即使单行 confidence 高，也只能给 limited support。
+
 ## 性能与“卡壳”诊断
 
 2026-07-09 复测发现，完整 branch-vs-branch harness 的等待感主要来自 A 股 lite 样本在 `generate_synthesis` 里的在线基金持仓 fallback，而不是美股/港股普遍慢：

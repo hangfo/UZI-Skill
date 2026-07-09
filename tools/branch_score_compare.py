@@ -52,6 +52,68 @@ CORE_DIMS = {
     "16_lhb",
 }
 
+BLINDSPOT_TARGETS = {
+    "negative_event": {
+        "label": "negative event",
+        "min_cached_raw": 2,
+        "min_markets": 2,
+        "preferred_markets": ["A", "US", "HK"],
+        "source_standard": "official disclosure or two independent dated sources",
+        "priority": "high",
+    },
+    "missing_financials": {
+        "label": "missing financials",
+        "min_cached_raw": 2,
+        "min_markets": 2,
+        "preferred_markets": ["A", "US", "HK"],
+        "source_standard": "field-level data gap from raw_data plus source provenance",
+        "priority": "high",
+    },
+    "stage3_4": {
+        "label": "Stage 3/4 trend guardrail",
+        "min_cached_raw": 4,
+        "min_markets": 3,
+        "preferred_markets": ["A", "US", "HK", "TW", "JP", "EU"],
+        "source_standard": "cached kline-derived stage with no online refresh during comparison",
+        "priority": "medium",
+    },
+    "lhb_activity": {
+        "label": "A-share LHB / hot-money activity",
+        "min_cached_raw": 1,
+        "min_markets": 1,
+        "preferred_markets": ["A"],
+        "source_standard": "cached LHB source with matched youzi or institution-vs-youzi evidence",
+        "priority": "medium",
+    },
+}
+
+ONLINE_EVIDENCE_POLICY = {
+    "A": {
+        "negative_event": ["cninfo", "exchange disciplinary notices", "CSRC enforcement", "company announcements"],
+        "missing_financials": ["cninfo annual/interim reports", "exchange filings", "eastmoney financial tables"],
+        "stage3_4": ["cached kline only; refresh outside branch harness"],
+        "lhb_activity": ["eastmoney LHB", "exchange trading disclosures"],
+    },
+    "HK": {
+        "negative_event": ["HKEXnews", "SFC enforcement", "company announcements"],
+        "missing_financials": ["HKEXnews annual/interim reports", "company IR"],
+        "stage3_4": ["cached kline only; refresh outside branch harness"],
+        "lhb_activity": ["not applicable"],
+    },
+    "US": {
+        "negative_event": ["SEC EDGAR 8-K/10-K risk events", "SEC litigation releases", "company IR"],
+        "missing_financials": ["SEC EDGAR 10-K/10-Q/XBRL", "company IR"],
+        "stage3_4": ["cached kline only; refresh outside branch harness"],
+        "lhb_activity": ["not applicable"],
+    },
+    "GLOBAL": {
+        "negative_event": ["primary exchange filings", "regulator enforcement pages", "company IR"],
+        "missing_financials": ["primary exchange filings", "company IR"],
+        "stage3_4": ["cached kline only; refresh outside branch harness"],
+        "lhb_activity": ["not applicable"],
+    },
+}
+
 RAW_CASES = [
     {
         "ticker": "600519.SH",
@@ -845,9 +907,20 @@ def _selected_raw_cases(include_holdout: bool, extra_tickers: list[str]) -> list
 def discover_cached_blindspot_cases(existing_tickers: set[str] | None = None) -> list[dict[str, Any]]:
     existing = set(existing_tickers or set())
     discovered: list[dict[str, Any]] = []
+    for case in scan_cached_blindspot_cases():
+        ticker = case["ticker"]
+        if ticker in existing:
+            continue
+        discovered.append(case)
+        existing.add(ticker)
+    return discovered
+
+
+def scan_cached_blindspot_cases() -> list[dict[str, Any]]:
+    cases: list[dict[str, Any]] = []
     for path in sorted(CACHE.glob("*/raw_data.json")):
         ticker = path.parent.name
-        if ticker in existing or ticker.startswith("_"):
+        if ticker.startswith("_"):
             continue
         try:
             raw = json.loads(path.read_text(encoding="utf-8"))
@@ -855,9 +928,8 @@ def discover_cached_blindspot_cases(existing_tickers: set[str] | None = None) ->
             continue
         case = classify_cached_blindspot(ticker, raw)
         if case:
-            discovered.append(case)
-            existing.add(ticker)
-    return discovered
+            cases.append(case)
+    return cases
 
 
 def classify_cached_blindspot(ticker: str, raw: dict[str, Any]) -> dict[str, Any] | None:
@@ -886,6 +958,7 @@ def classify_cached_blindspot(ticker: str, raw: dict[str, Any]) -> dict[str, Any
         "role": "auto-discovered cached blindspot: " + ", ".join(tags),
         "expectation": "neutral",
         "blindspot_tags": tags,
+        "market": market_for_ticker(ticker),
     }
     if "missing_financials" in tags:
         case["expectation"] = "data_gap"
@@ -896,6 +969,165 @@ def classify_cached_blindspot(ticker: str, raw: dict[str, Any]) -> dict[str, Any
     elif "negative_event" in tags:
         case["expectation"] = "negative_event"
     return case
+
+
+def build_cache_blindspot_audit(cases: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    cases = [case for case in list(cases if cases is not None else scan_cached_blindspot_cases()) if _is_real_cache_case(case)]
+    inventory = _blindspot_inventory(cases)
+    coverage = []
+    for target_id, target in BLINDSPOT_TARGETS.items():
+        bucket = inventory.get(target_id, {"cached_raw_cases": [], "markets": []})
+        cached_count = len(bucket["cached_raw_cases"])
+        market_count = len(bucket["markets"])
+        min_cached = int(target["min_cached_raw"])
+        min_markets = int(target["min_markets"])
+        missing_cases = max(0, min_cached - cached_count)
+        missing_markets = max(0, min_markets - market_count)
+        status = "satisfied" if missing_cases == 0 and missing_markets == 0 else "gap"
+        coverage.append(
+            {
+                "target": target_id,
+                "label": target["label"],
+                "status": status,
+                "priority": target["priority"],
+                "cached_raw_count": cached_count,
+                "required_cached_raw_count": min_cached,
+                "market_count": market_count,
+                "required_market_count": min_markets,
+                "markets": bucket["markets"],
+                "cached_raw_cases": bucket["cached_raw_cases"],
+                "missing_cases": missing_cases,
+                "missing_markets": missing_markets,
+                "source_standard": target["source_standard"],
+                "online_backfill_plan": _online_backfill_plan(target_id, target, bucket),
+            }
+        )
+    return {
+        "generated_at": time.strftime("%Y-%m-%d %H:%M:%S %z"),
+        "cache_root": str(CACHE),
+        "cached_blindspot_cases": cases,
+        "inventory": inventory,
+        "coverage": coverage,
+        "online_offline_balance": online_offline_balance_policy(),
+        "anti_overfit_rules": anti_overfit_rules(),
+        "effect_limits": [
+            "This audit can raise or lower evidence reliability, but it must not tune scoring weights.",
+            "Online evidence may create frozen overlays or new cached raw fixtures, but branch comparison must consume frozen inputs only.",
+            "Failed online lookups must be recorded as evidence gaps, not silently replaced with assumptions.",
+        ],
+    }
+
+
+def _blindspot_inventory(cases: list[dict[str, Any]]) -> dict[str, Any]:
+    inventory: dict[str, Any] = {}
+    for case in cases:
+        market = case.get("market") or market_for_ticker(str(case.get("ticker", "")))
+        for tag in case.get("blindspot_tags") or []:
+            bucket = inventory.setdefault(tag, {"cached_raw_cases": [], "markets": []})
+            bucket["cached_raw_cases"].append(case["ticker"])
+            if market not in bucket["markets"]:
+                bucket["markets"].append(market)
+    for bucket in inventory.values():
+        bucket["cached_raw_cases"] = sorted(set(bucket["cached_raw_cases"]))
+        bucket["markets"] = sorted(set(bucket["markets"]))
+    return dict(sorted(inventory.items()))
+
+
+def _is_real_cache_case(case: dict[str, Any]) -> bool:
+    return case.get("group") in {"core", "holdout", "extra", "discovered_cache"}
+
+
+def _online_backfill_plan(target_id: str, target: dict[str, Any], bucket: dict[str, Any]) -> list[dict[str, Any]]:
+    present_markets = set(bucket.get("markets") or [])
+    preferred = list(target.get("preferred_markets") or [])
+    missing_markets = [market for market in preferred if market not in present_markets]
+    if not missing_markets:
+        missing_markets = preferred[:1]
+    plans = []
+    for market in missing_markets:
+        market_policy = ONLINE_EVIDENCE_POLICY.get(market) or ONLINE_EVIDENCE_POLICY["GLOBAL"]
+        sources = market_policy.get(target_id) or ONLINE_EVIDENCE_POLICY["GLOBAL"].get(target_id) or []
+        plans.append(
+            {
+                "market": market,
+                "target": target_id,
+                "source_order": sources,
+                "selection_rule": _selection_rule(target_id, market),
+                "freeze_output": "local-ops/state/evidence-overlays/<ticker>.json",
+                "acceptance_rule": "official dated source, or two independent dated sources, with URL/title/date stored",
+                "rejection_rule": "record unavailable/ambiguous evidence; do not infer missing facts",
+            }
+        )
+    return plans
+
+
+def _selection_rule(target_id: str, market: str) -> str:
+    if target_id == "negative_event":
+        return (
+            f"{market}: scan official enforcement/disclosure indexes by date, take the first N ticker-mapped issuers; "
+            "do not choose tickers because their score changed."
+        )
+    if target_id == "missing_financials":
+        return (
+            f"{market}: scan the frozen candidate universe for missing required fields first; "
+            "then fetch official filings only for those deterministic gaps."
+        )
+    if target_id == "stage3_4":
+        return (
+            f"{market}: derive from a frozen kline cache snapshot; online price refresh belongs to a separate cache build, "
+            "not the comparison run."
+        )
+    if target_id == "lhb_activity":
+        return "A: scan recent cached or official LHB lists by date, include all first N ticker-mapped entries."
+    return f"{market}: deterministic source-first scan with all misses recorded."
+
+
+def online_offline_balance_policy() -> dict[str, Any]:
+    return {
+        "offline_branch_compare": [
+            "Default and CI-safe path.",
+            "Consumes only raw_data.json, synthetic fixtures, and frozen evidence overlays.",
+            "Must set UZI_SCORING_OFFLINE=1 and UZI_QUANT_SIGNAL_OFFLINE=1.",
+        ],
+        "online_evidence_build": [
+            "Separate preparatory step, never interleaved with branch-vs-branch scoring.",
+            "Uses source-first retrieval and writes immutable evidence overlays with URL/title/date/source/fetched_at.",
+            "Does not create a scoring conclusion unless the evidence can be mapped into raw_data fields.",
+        ],
+        "promotion_gate": [
+            "A new online-sourced case enters the harness only after its overlay is frozen and reviewed.",
+            "The same frozen overlay must be reused for baseline and candidate refs.",
+            "If evidence is unavailable, the row remains a data gap and confidence is lowered.",
+        ],
+    }
+
+
+def anti_overfit_rules() -> list[str]:
+    return [
+        "Freeze the candidate universe before looking at branch score deltas.",
+        "Fill blindspot categories by target deficits, not by examples that flatter the candidate branch.",
+        "Use source-first sampling: official lists by date, deterministic ticker mapping, all failures logged.",
+        "Keep core, holdout, synthetic raw, and online-frozen evidence as separate evidence types.",
+        "Require cross-market or cross-mode support before upgrading a conclusion from limited to strong.",
+        "Never turn a qualitative web summary into a numeric field without a schema rule and source provenance.",
+    ]
+
+
+def market_for_ticker(ticker: str) -> str:
+    value = ticker.upper()
+    if value.startswith("HK_") or value.endswith(".HK"):
+        return "HK"
+    if value.endswith(".SH") or value.endswith(".SZ") or value.endswith(".BJ"):
+        return "A"
+    if value.endswith(".TW"):
+        return "TW"
+    if value.endswith(".T"):
+        return "JP"
+    if value.endswith(".ST") or value.endswith(".SS"):
+        return "EU"
+    if "." not in value and any(ch.isalpha() for ch in value):
+        return "US"
+    return "GLOBAL"
 
 
 def _raw_dim_data(dims: dict[str, Any], dim: str) -> dict[str, Any]:
@@ -1310,6 +1542,82 @@ def write_outputs(result: dict[str, Any], label: str) -> tuple[Path, Path]:
     return json_path, md_path
 
 
+def write_blindspot_audit(audit: dict[str, Any], label: str) -> tuple[Path, Path]:
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    json_path = OUT_DIR / f"{label}-blindspot-audit.json"
+    md_path = OUT_DIR / f"{label}-blindspot-audit.md"
+    json_path.write_text(json.dumps(audit, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    lines = [
+        f"# 真实缓存样本补盲审计 - {label}",
+        "",
+        f"生成时间：{audit['generated_at']}",
+        f"缓存目录：`{audit['cache_root']}`",
+        "",
+        "## 覆盖结论",
+        "",
+        "| 目标 | 状态 | 优先级 | 真实缓存 | 市场覆盖 | 缺口 | 来源标准 |",
+        "|---|---|---|---:|---:|---|---|",
+    ]
+    for row in audit["coverage"]:
+        gap = f"缺 {row['missing_cases']} 个样本 / {row['missing_markets']} 个市场"
+        lines.append(
+            "| "
+            + " | ".join(
+                [
+                    f"{row['label']} (`{row['target']}`)",
+                    row["status"],
+                    row["priority"],
+                    f"{row['cached_raw_count']}/{row['required_cached_raw_count']}",
+                    f"{row['market_count']}/{row['required_market_count']} ({', '.join(row['markets']) or '-'})",
+                    gap,
+                    row["source_standard"],
+                ]
+            )
+            + " |"
+        )
+
+    lines.extend(["", "## 已发现真实缓存样本", ""])
+    if audit["cached_blindspot_cases"]:
+        for case in audit["cached_blindspot_cases"]:
+            lines.append(
+                f"- `{case['ticker']}` [{case.get('market', '-')}] "
+                f"{', '.join(case.get('blindspot_tags') or [])}；expectation=`{case.get('expectation')}`"
+            )
+    else:
+        lines.append("- 暂无真实缓存盲点样本。")
+
+    lines.extend(["", "## 在线补证据方案", ""])
+    for row in audit["coverage"]:
+        if row["status"] == "satisfied":
+            continue
+        lines.append(f"### {row['label']} (`{row['target']}`)")
+        for plan in row["online_backfill_plan"]:
+            lines.append(f"- 市场：`{plan['market']}`")
+            lines.append(f"  来源顺序：{', '.join(plan['source_order'])}")
+            lines.append(f"  选样规则：{plan['selection_rule']}")
+            lines.append(f"  冻结产物：`{plan['freeze_output']}`")
+            lines.append(f"  接受规则：{plan['acceptance_rule']}")
+            lines.append(f"  拒绝规则：{plan['rejection_rule']}")
+
+    lines.extend(["", "## 在线/离线平衡", ""])
+    for key, items in audit["online_offline_balance"].items():
+        lines.append(f"### {key}")
+        for item in items:
+            lines.append(f"- {item}")
+
+    lines.extend(["", "## 防过拟合规则", ""])
+    for item in audit["anti_overfit_rules"]:
+        lines.append(f"- {item}")
+
+    lines.extend(["", "## 解释边界", ""])
+    for item in audit["effect_limits"]:
+        lines.append(f"- {item}")
+
+    md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return json_path, md_path
+
+
 def _format_md_row(row: dict[str, Any], include_mode: bool = True) -> str:
     baseline = row["baseline"]
     candidate = row["candidate"]
@@ -1385,6 +1693,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--no-holdout", dest="include_holdout", action="store_false")
     parser.add_argument("--extra-ticker", action="append", default=[])
     parser.add_argument("--include-discovered-cache", action="store_true")
+    parser.add_argument(
+        "--audit-cache-blindspots",
+        action="store_true",
+        help="Only audit real cached blindspot coverage and online backfill plan; do not run branch comparison.",
+    )
     parser.add_argument("--label", default=time.strftime("%Y%m%d-%H%M%S"))
     parser.add_argument("--python", default=sys.executable)
     parser.add_argument("--runner-timeout", type=int, default=300)
@@ -1395,6 +1708,25 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv or sys.argv[1:])
+    if args.audit_cache_blindspots:
+        audit = build_cache_blindspot_audit()
+        if not args.no_write:
+            json_path, md_path = write_blindspot_audit(audit, args.label)
+            print(f"wrote {json_path}")
+            print(f"wrote {md_path}")
+        summary = {
+            row["target"]: {
+                "status": row["status"],
+                "cached_raw_count": row["cached_raw_count"],
+                "market_count": row["market_count"],
+                "missing_cases": row["missing_cases"],
+                "missing_markets": row["missing_markets"],
+            }
+            for row in audit["coverage"]
+        }
+        print(json.dumps(summary, ensure_ascii=False))
+        return 0
+
     modes = ["lite", "medium"] if args.mode == "both" else [args.mode]
     raw_cases = _selected_raw_cases(args.include_holdout, args.extra_ticker)
     if args.include_discovered_cache:
