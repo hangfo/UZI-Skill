@@ -59,11 +59,16 @@
 - `docs/DATA-PROVIDERS.md`
 - `docs/TEST-PLAN-v2.10.3.md`
 - `docs/BUGS-LOG.md`
-- `CHANGELOG-LOCAL.md`
-- `PROJECT-SUMMARY.md`
 - `PROJECT_SUMMARY.md`
-- `IMPLEMENTATION_PLAN.md`
 - `INSTALL-HERMES.md`
+
+### 已归档历史文档
+
+这些文件保留追溯价值，但不再作为当前开发入口：
+
+- `docs/archive/PROJECT-SUMMARY-20260701.md`
+- `docs/archive/SCORING_IMPLEMENTATION_PLAN_20260706.md`
+- `docs/archive/CHANGELOG-LOCAL-20260629-20260701.md`
 
 ## 修改守则
 
@@ -77,7 +82,7 @@
 
 评分公式继续冻结。下一步优先做文档事实源收敛：
 
-1. 合并或明确区分 `PROJECT_SUMMARY.md` 与 `PROJECT-SUMMARY.md`。
-2. 确认 `docs/DATA-PROVIDERS.md` 和 `docs/TEST-PLAN-v2.10.3.md` 是否仍是有效事实源。
-3. 如果仍有效，再逐份中文化；如果已经过期，则移动到归档说明或在顶部标注“历史参考”。
-4. 文档治理完成后，再继续扩大 branch-vs-branch harness 的样本，而不是调评分公式。
+1. 继续保持 `PROJECT_SUMMARY.md` 作为当前项目摘要，不再恢复根目录 `PROJECT-SUMMARY.md`。
+2. `docs/DATA-PROVIDERS.md` 只作为数据缺口排查参考，不作为当前安装计划。
+3. `docs/TEST-PLAN-v2.10.3.md` 只作为历史测试方案，不作为当前执行计划。
+4. 文档事实源收敛后，继续扩大 branch-vs-branch harness 的样本和阈值解释，而不是调评分公式。

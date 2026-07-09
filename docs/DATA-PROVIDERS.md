@@ -1,5 +1,9 @@
 # 数据源 Providers 指南
 
+> 扩展参考（2026-07-09 标注）：本文档用于理解 UZI-Skill 可接入的数据源和 failover 方向。
+> 当前评分对照阶段不按本文安装新 provider，不重新抓数据，也不运行 update。
+> 当前验证入口见 `docs/branch-score-comparison-harness.md`；只有当 harness 暴露明确数据缺口时，再回到本文选择补充数据源。
+
 UZI-Skill 采用多数据源 + 自动 failover 架构 (v2.10.3 起)。本文档列出**所有能接入**的 providers 及配置方法。
 
 **v2.10.6**：providers chain 正式被 `data_sources._kline_a_share_chain` 调用（此前 0 采用）。诊断工具：

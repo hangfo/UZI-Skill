@@ -1,5 +1,9 @@
 # v2.10.3 测试方案 · 给 Codex 执行
 
+> 历史参考（2026-07-09 标注）：本文档对应 v2.10.3 的完整环境验证方案，包含 clone、安装依赖和较长测试路径。
+> 当前 `codex/scoring-validation-guardrails` 分支的评分验证不使用本文作为执行计划；当前边界是“不重新安装、不跑 deep、不运行 update，优先使用缓存 raw_data 和 branch-vs-branch harness”。
+> 当前执行入口见 `docs/branch-score-comparison-harness.md` 与 `docs/scoring-model-regression-plan.md`。
+
 > **目的**：验证 v2.10.3 的 6 大改动在 Codex 环境下工作正常，特别是**三档深度 + 多源 failover + 网络韧性**。
 >
 > **执行者**：Codex agent（或任何能跑 bash + pytest 的环境）
