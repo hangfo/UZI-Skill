@@ -15,6 +15,7 @@ SCHEMA_VERSION = "uzi.evidence_overlay.v1"
 DEFAULT_TIMEOUT_SEC = 12
 SEC_TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"
 SEC_COMPANYFACTS_URL = "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json"
+SEC_SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik}.json"
 
 SUPPORTED_TARGETS = ("missing_financials", "negative_event")
 SEC_FINANCIAL_CONCEPTS = {
@@ -24,6 +25,39 @@ SEC_FINANCIAL_CONCEPTS = {
     "liabilities": ("Liabilities",),
     "equity": ("StockholdersEquity", "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest"),
 }
+
+NEGATIVE_EVENT_TAXONOMY = {
+    "P0": {
+        "label": "hard stop / financial statement trust risk",
+        "decision_use": "must cap or downgrade until resolved",
+        "sec_8k_items": {
+            "1.03": "Bankruptcy or Receivership",
+            "4.02": "Non-Reliance on Previously Issued Financial Statements or Audit Report",
+        },
+        "keywords": ("sec charges", "accounting fraud", "fraud", "bankruptcy", "receivership", "立案", "欺诈"),
+    },
+    "P1": {
+        "label": "material risk escalation",
+        "decision_use": "requires risk review and usually prevents high-confidence buy",
+        "sec_8k_items": {
+            "1.05": "Material Cybersecurity Incidents",
+            "2.04": "Triggering Events That Accelerate or Increase a Direct Financial Obligation",
+            "2.05": "Costs Associated with Exit or Disposal Activities",
+            "2.06": "Material Impairments",
+            "3.01": "Notice of Delisting or Failure to Satisfy a Continued Listing Rule",
+            "4.01": "Changes in Registrant's Certifying Accountant",
+        },
+        "keywords": ("default", "delisting", "material impairment", "auditor resignation", "重大减值", "退市", "处罚"),
+    },
+    "P2": {
+        "label": "context-dependent operating or legal risk",
+        "decision_use": "evidence for review only; not enough for automatic hard downgrade",
+        "sec_8k_items": {},
+        "keywords": ("lawsuit", "recall", "investigation", "诉讼", "调查", "召回"),
+    },
+}
+
+NEGATED_NEGATIVE_TERMS = ("no fraud", "no violation", "未发现", "无违规", "settled", "和解")
 
 
 def _find_repo_root() -> Path:
@@ -73,7 +107,7 @@ def build_overlay(
     if target == "missing_financials":
         _fill_missing_financials_overlay(overlay, network=network, timeout_sec=timeout_sec, max_items=max_items)
     elif target == "negative_event":
-        _fill_negative_event_overlay(overlay, network=network)
+        _fill_negative_event_overlay(overlay, network=network, timeout_sec=timeout_sec, max_items=max_items)
 
     overlay["performance"]["elapsed_sec"] = round(time.perf_counter() - started, 3)
     _finalize_confidence(overlay)
@@ -138,26 +172,67 @@ def _fill_missing_financials_overlay(
         overlay["status"] = "gap"
 
 
-def _fill_negative_event_overlay(overlay: dict[str, Any], *, network: bool) -> None:
+def _fill_negative_event_overlay(
+    overlay: dict[str, Any],
+    *,
+    network: bool,
+    timeout_sec: int,
+    max_items: int,
+) -> None:
     ticker = overlay["ticker"]
+    market = overlay["market"]
     cache_events = _negative_events_from_cache(ticker)
     if cache_events:
         overlay["field_mapping"]["cache_events"] = {"events": cache_events}
         overlay["evidence"].extend(cache_events)
 
-    if network:
+    if market == "US" and network:
+        try:
+            cik, company_name = sec_cik_for_ticker(ticker, timeout_sec=timeout_sec)
+            submissions = fetch_sec_submissions(cik, timeout_sec=timeout_sec)
+            sec_events = extract_sec_negative_events(
+                submissions,
+                cik=cik,
+                ticker=ticker,
+                company_name=company_name,
+                max_items=max_items,
+            )
+            if sec_events:
+                overlay["field_mapping"]["sec_submissions"] = {
+                    "events": [
+                        {
+                            "severity": item.get("severity"),
+                            "event_type": item.get("event_type"),
+                            "filing_date": item.get("published_at"),
+                            "form": item.get("form"),
+                            "accession": item.get("accession"),
+                        }
+                        for item in sec_events
+                    ]
+                }
+                overlay["evidence"].extend(sec_events)
+        except Exception as exc:  # noqa: BLE001 - evidence builder records errors instead of failing the run
+            overlay["errors"].append({"source": "sec_submissions", "error": str(exc)[:300]})
+    elif market == "US" and not network:
+        overlay["errors"].append({"source": "sec_submissions", "error": "network disabled"})
+    elif network:
         overlay["errors"].append(
             {
                 "source": "negative_event_online",
-                "error": "no automatic official enforcement adapter is enabled; keep as gap unless official dated evidence is frozen",
+                "error": f"no implemented official negative-event adapter for market {market}",
             }
         )
     else:
         overlay["errors"].append({"source": "negative_event_online", "error": "network disabled"})
 
-    if cache_events and all(item.get("url") and item.get("title") for item in cache_events):
+    traceable_events = [
+        item
+        for item in overlay["evidence"]
+        if item.get("url") and item.get("title") and item.get("severity") in {"P0", "P1", "P2", None}
+    ]
+    if any(item.get("severity") in {"P0", "P1"} for item in traceable_events):
         overlay["status"] = "ready"
-    elif cache_events:
+    elif traceable_events:
         overlay["status"] = "partial"
     else:
         overlay["status"] = "gap"
@@ -174,6 +249,10 @@ def sec_cik_for_ticker(ticker: str, *, timeout_sec: int = DEFAULT_TIMEOUT_SEC) -
 
 def fetch_sec_companyfacts(cik: int, *, timeout_sec: int = DEFAULT_TIMEOUT_SEC) -> dict[str, Any]:
     return _fetch_json(SEC_COMPANYFACTS_URL.format(cik=f"{cik:010d}"), timeout_sec=timeout_sec)
+
+
+def fetch_sec_submissions(cik: int, *, timeout_sec: int = DEFAULT_TIMEOUT_SEC) -> dict[str, Any]:
+    return _fetch_json(SEC_SUBMISSIONS_URL.format(cik=f"{cik:010d}"), timeout_sec=timeout_sec)
 
 
 def extract_sec_financial_fields(companyfacts: dict[str, Any], *, max_items: int = 5) -> dict[str, Any]:
@@ -195,6 +274,80 @@ def extract_sec_financial_fields(companyfacts: dict[str, Any], *, max_items: int
                 }
                 break
     return out
+
+
+def extract_sec_negative_events(
+    submissions: dict[str, Any],
+    *,
+    cik: int,
+    ticker: str,
+    company_name: str,
+    max_items: int = 5,
+) -> list[dict[str, Any]]:
+    recent = ((submissions.get("filings") or {}).get("recent") or {})
+    forms = recent.get("form") or []
+    items = recent.get("items") or []
+    filing_dates = recent.get("filingDate") or []
+    accession_numbers = recent.get("accessionNumber") or []
+    primary_docs = recent.get("primaryDocument") or []
+    rows: list[dict[str, Any]] = []
+    for idx, form in enumerate(forms):
+        form_text = str(form or "")
+        if form_text != "8-K":
+            continue
+        item_text = str(_at(items, idx) or "")
+        matched = _classify_sec_8k_items(item_text)
+        if not matched:
+            continue
+        filing_date = _at(filing_dates, idx)
+        accession = str(_at(accession_numbers, idx) or "")
+        primary_doc = str(_at(primary_docs, idx) or "")
+        for event in matched:
+            rows.append(
+                {
+                    "source": "sec_submissions",
+                    "url": _sec_archive_url(cik, accession, primary_doc),
+                    "title": f"{company_name} ({ticker}) 8-K Item {event['item_code']}: {event['item_label']}",
+                    "published_at": filing_date,
+                    "fetched_at": _now_utc(),
+                    "fields": ["15_events.recent_news", "sec_submissions.recent.items"],
+                    "severity": event["severity"],
+                    "event_type": event["event_type"],
+                    "form": form_text,
+                    "accession": accession,
+                    "item_code": event["item_code"],
+                }
+            )
+            if len(rows) >= max_items:
+                return rows
+    rows.sort(key=lambda item: str(item.get("published_at") or ""), reverse=True)
+    return rows[:max_items]
+
+
+def _classify_sec_8k_items(item_text: str) -> list[dict[str, str]]:
+    tokens = {token.strip() for token in item_text.replace(";", ",").split(",") if token.strip()}
+    matched: list[dict[str, str]] = []
+    for severity, payload in NEGATIVE_EVENT_TAXONOMY.items():
+        item_map = payload.get("sec_8k_items") or {}
+        for code, label in item_map.items():
+            if code in tokens:
+                matched.append(
+                    {
+                        "severity": severity,
+                        "event_type": "sec_8k_item",
+                        "item_code": code,
+                        "item_label": str(label),
+                    }
+                )
+    matched.sort(key=lambda item: item["severity"])
+    return matched
+
+
+def _sec_archive_url(cik: int, accession: str, primary_doc: str) -> str:
+    if not accession or not primary_doc:
+        return SEC_SUBMISSIONS_URL.format(cik=f"{cik:010d}")
+    accession_path = accession.replace("-", "")
+    return f"https://www.sec.gov/Archives/edgar/data/{int(cik)}/{accession_path}/{primary_doc}"
 
 
 def source_plan_for(market: str, target: str) -> list[dict[str, str]]:
@@ -295,17 +448,18 @@ def _negative_events_from_cache(ticker: str) -> list[dict[str, Any]]:
         if not isinstance(item, dict):
             continue
         title = str(item.get("title") or "")
-        if not _looks_negative(title):
+        classified = _classify_negative_text(title)
+        if not classified:
             continue
-        out.append(
-            _evidence_item(
-                source=str(item.get("source") or item.get("type") or "cached_news"),
-                url=str(item.get("url") or ""),
-                title=title,
-                published_at=item.get("published_at") or item.get("date"),
-                fields=["15_events.recent_news"],
-            )
+        evidence = _evidence_item(
+            source=str(item.get("source") or item.get("type") or "cached_news"),
+            url=str(item.get("url") or ""),
+            title=title,
+            published_at=item.get("published_at") or item.get("date"),
+            fields=["15_events.recent_news"],
         )
+        evidence.update(classified)
+        out.append(evidence)
     return out
 
 
@@ -374,25 +528,30 @@ def _finalize_confidence(overlay: dict[str, Any]) -> None:
     overlay["confidence"] = {"level": level, "score": score, "factors": factors}
 
 
-def _looks_negative(text: str) -> bool:
+def _classify_negative_text(text: str) -> dict[str, str] | None:
     lowered = text.lower()
-    negative_terms = (
-        "fraud",
-        "lawsuit",
-        "sec charges",
-        "accounting fraud",
-        "recall",
-        "default",
-        "违规",
-        "处罚",
-        "暴雷",
-        "退市",
-        "调查",
-        "立案",
-        "诉讼",
-    )
-    negated_terms = ("no fraud", "no violation", "未发现", "无违规", "settled")
-    return any(term in lowered for term in negative_terms) and not any(term in lowered for term in negated_terms)
+    if any(term in lowered for term in NEGATED_NEGATIVE_TERMS):
+        return None
+    for severity, payload in NEGATIVE_EVENT_TAXONOMY.items():
+        for term in payload.get("keywords") or ():
+            if str(term).lower() in lowered:
+                return {
+                    "severity": severity,
+                    "event_type": "text_negative_event",
+                    "item_code": "",
+                    "item_label": str(payload["label"]),
+                }
+    return None
+
+
+def _looks_negative(text: str) -> bool:
+    return _classify_negative_text(text) is not None
+
+
+def _at(values: Any, idx: int) -> Any:
+    if isinstance(values, list) and 0 <= idx < len(values):
+        return values[idx]
+    return None
 
 
 def market_for_ticker(ticker: str) -> str:

@@ -393,15 +393,34 @@ local-ops/state/evidence-overlays/<ticker>-<target>.json
 当前支持：
 
 - `missing_financials`：美股走 SEC `company_tickers.json` + `companyfacts`，只做字段映射，不生成投资分数。
-- `negative_event`：只接受已有缓存中带 `title/url/source` 的明确负面事件；没有官方 enforcement adapter 前，在线路径保持 `gap`，不靠关键词或常识推断。
+- `negative_event`：美股优先走 SEC `submissions` 的 8-K item code；缓存新闻只在带 `title/url/source` 且命中明确负面 taxonomy 时作为冻结证据；不靠泛新闻情绪或常识推断。
 - `--no-network`：只读本地缓存，用于测试和离线复跑。
 - `--no-write`：只打印状态，不落地 overlay。
+
+负面事件优先级：
+
+| 级别 | 定义 | 当前 SEC 8-K 映射 | 用途 |
+|---|---|---|---|
+| `P0` | 财报可信度或持续经营硬风险 | `1.03` 破产/接管、`4.02` 财报不可依赖 | 必须触发最高优先级复核，通常应限制买入信号。 |
+| `P1` | 重大风险升级 | `1.05` 重大网络安全、`2.04` 债务触发、`2.05` 退出/处置成本、`2.06` 重大减值、`3.01` 退市通知、`4.01` 审计师变更 | 阻止高置信买入，进入风险复核。 |
+| `P2` | 需要上下文的经营/法律风险 | 目前不从 SEC item 自动判定；只接受明确可追溯标题/来源 | 只作为 review 证据，不单独硬降级。 |
+
+扩展原则：
+
+- 先接“一个 adapter 覆盖一类市场”的官方结构化源，例如 SEC submissions，而不是按个股或新闻站点逐个接。
+- 每个 adapter 必须输出同一 overlay schema：`source/url/title/published_at/fields/severity/event_type`。
+- 新 adapter 先只进入 overlay，不直接进入评分公式；接入 branch harness 后仍然复用同一份冻结输入。
+- 没有明确官方字段或可追溯标题时，状态保持 `gap/partial`，不能为了覆盖率提高而扩大关键词。
 
 实际验证：
 
 ```text
 AAPL missing_financials -> ready / high confidence / ~5.8s
+AAPL negative_event -> gap / low confidence / ~2.3s
+SMCI negative_event -> ready / high confidence / ~2.2s
 ```
+
+`SMCI negative_event` 的真实命中来自 SEC submissions 中的 8-K Item `3.01`，即退市或持续上市规则不满足通知，属于 `P1`。这说明 adapter 能捕捉官方结构化负面事件；`AAPL negative_event` 保持 `gap` 则说明它不会在无 P0/P1 证据时为了覆盖率而误报。
 
 解释边界：
 

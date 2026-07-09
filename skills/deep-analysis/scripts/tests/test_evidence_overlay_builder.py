@@ -44,6 +44,52 @@ def test_sec_financial_fact_extraction_is_field_mapped_not_scored():
     assert "investment_score" not in json.dumps(fields)
 
 
+def test_sec_negative_event_extraction_uses_8k_item_taxonomy():
+    payload = {
+        "filings": {
+            "recent": {
+                "form": ["8-K", "8-K", "10-Q"],
+                "items": ["4.02,9.01", "2.02,9.01", ""],
+                "filingDate": ["2026-04-01", "2026-03-01", "2026-02-01"],
+                "accessionNumber": ["0000000000-26-000001", "0000000000-26-000002", "0000000000-26-000003"],
+                "primaryDocument": ["bad.htm", "earnings.htm", "10q.htm"],
+            }
+        }
+    }
+    events = evidence_overlay_builder.extract_sec_negative_events(
+        payload,
+        cik=1,
+        ticker="TEST",
+        company_name="Test Inc.",
+        max_items=5,
+    )
+    assert len(events) == 1
+    assert events[0]["severity"] == "P0"
+    assert events[0]["item_code"] == "4.02"
+    assert "bad.htm" in events[0]["url"]
+
+
+def test_sec_negative_event_extraction_ignores_context_free_8k_items():
+    payload = {
+        "filings": {
+            "recent": {
+                "form": ["8-K"],
+                "items": ["2.02,9.01"],
+                "filingDate": ["2026-03-01"],
+                "accessionNumber": ["0000000000-26-000002"],
+                "primaryDocument": ["earnings.htm"],
+            }
+        }
+    }
+    events = evidence_overlay_builder.extract_sec_negative_events(
+        payload,
+        cik=1,
+        ticker="TEST",
+        company_name="Test Inc.",
+    )
+    assert events == []
+
+
 def test_missing_financials_overlay_no_network_keeps_gap_without_cache():
     old_cache = evidence_overlay_builder.CACHE
     with tempfile.TemporaryDirectory() as td:
@@ -102,6 +148,7 @@ def test_negative_event_cache_requires_traceable_title_and_url():
         finally:
             evidence_overlay_builder.CACHE = old_cache
     assert overlay["status"] == "ready"
+    assert overlay["evidence"][0]["severity"] == "P0"
     assert overlay["evidence"][0]["url"].startswith("https://www.sec.gov/")
 
 
