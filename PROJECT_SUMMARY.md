@@ -6,6 +6,18 @@
 
 ---
 
+## 当前事实源
+
+- 文档中文化与治理准则：`docs/documentation-governance.md`
+- 分支评分对照 harness：`docs/branch-score-comparison-harness.md`
+- 评分模型回归验证计划：`docs/scoring-model-regression-plan.md`
+- Windows 后续验证记录：`SCORING_WINDOWS_FOLLOWUP_20260707.md`
+- 本地交接记录：`local-ops/notes/UZI-Skill_HANDOFF_20260708.md`
+
+当前原则：评分公式先冻结；先用同一批缓存 raw data 做旧分支 vs 新分支的中立对照。英文入口、agent 指令、命令模板和 schema 契约不做机械翻译，避免改变工具行为。
+
+---
+
 ## 改动总览
 
 | 类别 | 项目 | 文件 | 状态 |
