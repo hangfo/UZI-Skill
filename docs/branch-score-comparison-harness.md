@@ -545,6 +545,44 @@ SFC 在线构建单 ticker 扫描最近 40 条 enforcement 正文时约 13-20 �
 
 注意：这里的能力评分 `8.8/10` 与事件维度 `15_events=4/10` 含义不同。后者是 P1 风险存在时的风险分，不应为了能力评分好看而提高。
 
+### 2026-07-13 官方解决态生命周期与真实数据复验
+
+解决态不是事件行可以自行声明的布尔值。当前消费契约要求同时满足：
+
+- 解决记录晚于原事件，且不晚于冻结样本的 `as_of`；
+- 官方 URL、`entity_match=exact`、`entity_scope=issuer`；
+- `linked_event_id` 精确指向当前 canonical event，source record 与 URL 均不能自引用；
+- `lifecycle_topic` 完全相同；
+- SEC archive 的原事件与解决记录必须解析到同一 EDGAR CIK。
+
+builder 当前只自动识别 Nasdaq Rule `5250(c)(1)` 周期报告合规主题。理由是该主题存在可机械验证的官方终态组合：后续 8-K 同时声明公司已经合规且 matter closed。以下情况不得扩张为“已解决”：临时 exception、延期、提交整改计划、预计未来合规、泛化 remediation、处罚缴清、欺诈调查、财报不可依赖、审计师变更。
+
+真实冻结输入来自 SEC 官方页面，不以 mock 或搜索摘要得出效果结论：
+
+| 发行人 | 官方记录 | 生命周期结论 |
+|---|---|---|
+| SMCI | 2024-09-20、2024-11-20 Item 3.01 | 明确不符合 Rule 5250(c)(1)，active P1。 |
+| SMCI | 2024-12-06 Item 3.01 | Nasdaq 给出临时 exception，仍 active。 |
+| SMCI | 2025-02-26 Item 3.01 | 明确 now complies 且 matter is now closed，精确关闭前述 3 条。 |
+| SMCI | 2024-10-30、2024-11-18 Item 4.01 | 不属于同一窄主题，继续 active P1。 |
+| HUBG | 最新窗口内官方 8-K | 有 P0/P1，但没有 Rule 5250(c)(1) 终态匹配，`no_match`。 |
+| AAPL | 最新窗口内官方层 | 无 eligible P0/P1，保持 `gap`，不从缺失推断安全或解决。 |
+
+混合 overlay 会生成四个 raw case：原样 active、市场匹配 active 反事实、拆出的 verified-resolution 影子、市场匹配 resolution 反事实。这样可以同时证明风险仍被消费，以及解决态没有对当前交易结论造成惩罚或奖励。
+
+最终报告为 `local-ops/state/branch-score-compare/20260713-real-event-lifecycle-final.md`：`64 raw + 7 synthetic = 71` 项，lite/medium 全部运行，结果 `71 ok / 0 review / 0 possible_regression`。所有 score delta 与 tier delta 为 0。正式报告单次 baseline/candidate 为 `1.697s/1.807s`；同一正式 commit 三次中位数为 `1.697s/1.696s`，单次差异在 `-5.8%` 到 `+6.5%` 间反向波动，均无性能告警，因此只判定无回退。
+
+关键真实反事实：
+
+| 样本 | investment / tier | `15_events` | 解释 |
+|---|---:|---:|---|
+| SMCI active+resolved 原样 | `64.4 / watch` | 4 | 两个未解决 Item 4.01 仍保留 P1。 |
+| SMCI active 事件注入 AAPL | `64.9 / watch` | 4 | 未解决 P1 仍阻止高置信买入。 |
+| SMCI verified-resolution 影子 | `64.4 / watch` | 5 | 事件维度不再受历史 3.01 惩罚；总分来自最小 raw 其他维度。 |
+| SMCI resolution 注入 AAPL | `68 / buy_candidate` | 5 | 与无当前事件的 AAPL 基线相同，不误伤也不奖励。 |
+
+合成用例仍保留，但用途只限于无法安全在线制造的攻击边界，例如跨 CIK、同 URL 自引用、未来解决记录和伪造官方字段；它们不替代上述真实数据效果验证。
+
 ### 在线、离线与 Agent 分工
 
 最佳结构不是“来源越多越好”，而是“每个独立权威层至少一个稳定主源，镜像只增强溯源、不重复加权”：

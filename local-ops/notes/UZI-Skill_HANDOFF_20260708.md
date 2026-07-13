@@ -1,5 +1,13 @@
 # UZI-Skill 交接记录 - 2026-07-08
 
+## 2026-07-13 官方事件解决态闭环
+
+- 实现检查点 `f8f235b`；真实 SEC 生命周期把 SMCI 2024 年 3 条 Nasdaq Rule `5250(c)(1)` 记录关联到 2025-02-26 官方 closed 记录，两个 Item 4.01 仍 active。
+- 同 CIK/同主题/后续日期/canonical link 防伪、12 个冻结官方 overlay、`138/138` direct tests 和 `71/71` 分支对照均已完成；`0 possible_regression`，评分公式和阈值未改。
+- 报告：`local-ops/state/branch-score-compare/20260713-real-event-lifecycle-final.md`。正式单次 `1.697s -> 1.807s`，三次中位数 `1.697s -> 1.696s`，均无性能告警。
+- 真实决策边界：仅已关闭 3.01 注入 AAPL 为 `68/buy_candidate`、事件维度 5；未解决 4.01 注入 AAPL 为 `64.9/watch`、事件维度 4。
+- 下一步不再修本轮代码；若扩展 A/HK 或其他 SEC 事件族，继续先 shadow 后消费。推荐 `GPT-5.6 Sol`、`高推理`。
+
 ## 2026-07-13 upstream fce996c 正式合回完成
 
 - 正式分支：`codex/scoring-validation-guardrails`；代码检查点：`98b14c7`。它由稳定点 `120a6c9` 对隔离分支执行 `--ff-only` 得到，保留 `71be11f` 的 upstream 双亲 ancestry。

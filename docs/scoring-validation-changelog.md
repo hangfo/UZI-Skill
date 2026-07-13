@@ -4,6 +4,21 @@
 
 ## 2026-07-13
 
+### `f8f235b` · 官方事件解决态闭环与真实 SEC 生命周期复验
+
+- 将 `resolution_status` 从可自报字段收紧为可验证证明：必须存在更晚的官方记录、精确 issuer、同一窄生命周期主题、不同 source record、匹配 canonical event、非未来日期；SEC archive 还必须解析到同一 EDGAR CIK。自引用、同 URL、跨 CIK、伪造、未来和无证明的解决声明全部继续按 active 风险处理。
+- builder 只对高精度的 Nasdaq Listing Rule `5250(c)(1)` 周期报告合规生命周期自动关联；明确要求后续 8-K 同时出现“now complies”与“matter is now closed”。延期、补交计划、临时 exception 仍是 active；处罚、欺诈、财报不可依赖、审计师变更和泛化 remediation 不自动关闭。
+- 真实在线复验以 `as_of=2026-07-13`、`lookback_days=730` 顺序抓取 SEC 官方页并冻结：
+  - SMCI 2024-09-20/2024-11-20 的 Rule 5250(c)(1) 不合规通知及 2024-12-06 临时 exception，被 2025-02-26 后续 8-K 精确关闭，共关联 3 条；两个 Item 4.01 审计师变更仍为 active P1。
+  - HUBG 为 `ready/high` 但该窄主题 `no_match`；AAPL 为 `gap/low`，未从无证据推断事件或解决态。
+  - 12 个公开官方 overlay 现作为可复现冻结输入跟踪入库；不含 key、cookie、authorization 或其他凭据。
+- branch harness 对混合 active/resolved overlay 新增两类影子：原样风险样本继续检验未解决事件，拆出的 verified-resolution 样本只检验“不误伤”，不会因历史事件获得正向奖励。
+- 最终对照：baseline=`d187f54`，candidate=`f8f235b` 对应代码树；core + holdout + discovered cache + frozen overlays + synthetic adversarial，`64 raw + 7 synthetic = 71`，lite/medium 均跑。结果 `71 ok / 0 review / 0 possible_regression`，所有评分漂移与档位变化为 0。
+- 真实 SMCI 反事实：仅已关闭 3.01 注入 AAPL 时为 `68/buy_candidate`、事件维度 `5`；保留未解决 4.01 时为 `64.9/watch`、事件维度 `4`。SMCI 最小原样为 `64.4/watch`；其 resolved-only 影子事件维度回到 `5`。这证明“解决态不误伤”和“未解决风险仍阻止高置信买入”同时成立。
+- 验证：scoring consistency `36/36`、branch harness `35/35`、overlay builder `28/28`、flow `15/15`、registry `6/6`、fund renderer `9/9`、school scores `9/9`，共 `138/138`；`py_compile`、`git diff --check`、lite/medium 缓存篮子通过。venv 无 pytest，未重装、未跑 deep、未运行 update。
+- 性能：正式报告单次为 `1.697s -> 1.807s`（候选慢 `6.5%`）；同一正式 commit 连跑三次的中位数为 `1.697s -> 1.696s`（约 `-0.1%`），单次方向在 `-5.8%` 到 `+6.5%` 间波动，三次均 `0` performance warning。中立结论是无可测性能回退，也没有可宣称的稳定优化收益。
+- 公正评分 `9.4/10`：真实官方输入、同一冻结输入、身份/时间/主题防伪和交易非伤害均闭环。剩余风险是当前自动生命周期只覆盖一个高精度 SEC 规则主题，A/HK 和 Item 4.01 等必须先找到同样明确的官方终态语句后再 shadow 扩展，不能泛化关键词。
+
 ### `98b14c7` · upstream 集成正式合回评分分支并关闭零值 OCF 边界
 
 - `codex/scoring-validation-guardrails` 已从 `120a6c9` 以 `--ff-only` 快进到隔离集成提交 `98b14c7`；原 merge commit `71be11f` 的双亲 ancestry 保持不变，没有重演冲突或 cherry-pick。
