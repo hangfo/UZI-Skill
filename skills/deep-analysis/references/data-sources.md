@@ -46,7 +46,8 @@ viz 需要的字段 → 来源：
 | `dividend_yields` 股息率 | 自算: `dividend / price_at_year_end * 100` | 基于 kline 收盘价 |
 | `financial_health.current_ratio` | `stock_financial_analysis_indicator` → `流动比率` | |
 | `financial_health.debt_ratio` | `stock_financial_analysis_indicator` → `资产负债率(%)` | |
-| `financial_health.fcf_margin` | 自算: `经营现金流 / 净利润 * 100` from `stock_cash_flow_sheet_by_report_em` | |
+| `ocf` / `ocf_history` | `stock_cash_flow_sheet_by_report_em` → `经营活动产生的现金流量净额` | 单位亿元；不是扣除资本开支后的 FCF |
+| `ocf_to_net_income_ratio` | 自算: `经营现金流 / 净利润` | 同步写入 `financial_health.ocf_to_net_income_ratio`，不得别名成 `fcf_margin` |
 | `financial_health.roic` | `stock_financial_analysis_indicator` → `总资产净利率(%)` | 近似 |
 
 **港股 fallback**: `stock_hk_financial_abstract`
