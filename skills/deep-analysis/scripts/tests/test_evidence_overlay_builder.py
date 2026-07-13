@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import datetime as dt
 import json
 import tempfile
 from pathlib import Path
@@ -213,6 +214,251 @@ def test_negative_event_display_keeps_machine_enums():
     assert overlay["evidence"][0]["severity"] == "P1"
     assert overlay["evidence"][0]["severity_label_zh"] == "P1 重大风险升级"
     assert overlay["display"]["status_label_zh"] == "证据已冻结"
+
+
+def test_cninfo_title_taxonomy_excludes_question_replies_and_keeps_enforcement():
+    assert evidence_overlay_builder.classify_cninfo_title("关于回复年报问询函的公告") is None
+    assert evidence_overlay_builder.classify_cninfo_title("关于收到交易所关注函的公告") is None
+    assert evidence_overlay_builder.classify_cninfo_title("关于收到行政处罚决定书的公告")["severity"] == "P1"
+    assert evidence_overlay_builder.classify_cninfo_title("关于财务造假行政处罚决定书的公告")["severity"] == "P0"
+
+
+def test_cninfo_fetch_uses_dynamic_org_id_and_exact_security_code():
+    old_get = evidence_overlay_builder._fetch_json
+    old_request = evidence_overlay_builder._fetch_json_request
+    captured = {}
+
+    def fake_get(url, *, timeout_sec, headers=None):
+        assert url == evidence_overlay_builder.CNINFO_STOCK_MAP_URL
+        return {"stockList": [{"code": "002038", "orgId": "gssz0002038", "zwjc": "双鹭药业"}]}
+
+    def fake_request(url, *, timeout_sec, data=None, headers=None):
+        captured.update(dict(item.split("=", 1) for item in data.decode("utf-8").split("&")))
+        return {
+            "announcements": [
+                {
+                    "secCode": "002038",
+                    "announcementTitle": "关于收到行政处罚决定书的公告",
+                    "announcementTime": 1777478400000,
+                    "adjunctUrl": "finalpage/2026-04-30/example.PDF",
+                },
+                {
+                    "secCode": "002039",
+                    "announcementTitle": "关于收到行政处罚决定书的公告",
+                    "announcementTime": 1777478400000,
+                    "adjunctUrl": "finalpage/2026-04-30/wrong.PDF",
+                },
+            ]
+        }
+
+    try:
+        evidence_overlay_builder._fetch_json = fake_get
+        evidence_overlay_builder._fetch_json_request = fake_request
+        events, scanned = evidence_overlay_builder.fetch_cninfo_negative_events(
+            "002038.SZ", as_of=dt.date(2026, 7, 13)
+        )
+    finally:
+        evidence_overlay_builder._fetch_json = old_get
+        evidence_overlay_builder._fetch_json_request = old_request
+    decoded_stock = __import__("urllib.parse", fromlist=["unquote_plus"]).unquote_plus(captured["stock"])
+    assert decoded_stock == "002038,gssz0002038"
+    assert scanned == 2
+    assert len(events) == 1
+    assert events[0]["entity_match"] == "exact"
+
+
+def test_sse_action_taxonomy_does_not_promote_work_letters():
+    assert evidence_overlay_builder.classify_sse_action("公开谴责")["severity"] == "P1"
+    assert evidence_overlay_builder.classify_sse_action("监管关注")["severity"] == "P2"
+    assert evidence_overlay_builder.classify_sse_action("监管工作函") is None
+
+
+def test_szse_rows_separate_issuer_discipline_from_related_person_only():
+    issuer = evidence_overlay_builder._szse_row_to_event(
+        {
+            "xx_gsdm": "002038",
+            "xx_fwrq": "2026-04-29",
+            "xx_cflb": "公开谴责",
+            "xx_bt": "关于对北京双鹭药业股份有限公司及相关当事人给予纪律处分的决定",
+            "ck": "<a encode-open='/UpFiles/example.pdf'>查看</a>",
+        },
+        code="002038",
+        kind="discipline",
+    )
+    person = evidence_overlay_builder._szse_row_to_event(
+        {
+            "xx_gsdm": "002038",
+            "xx_fwrq": "2026-04-29",
+            "xx_cflb": "通报批评",
+            "xx_bt": "关于对张三、李四给予通报批评处分的决定",
+            "ck": "<a encode-open='/UpFiles/person.pdf'>查看</a>",
+        },
+        code="002038",
+        kind="discipline",
+    )
+    assert issuer["severity"] == "P1" and issuer["entity_scope"] == "issuer"
+    assert person["severity"] == "P2" and person["entity_scope"] == "related_person"
+
+
+def test_hkex_code_match_is_exact_and_former_director_is_review_only():
+    page = """
+    <a href='/News/Regulatory-Announcements/2026/260709news?sc_lang=en'>
+      Exchange's Disciplinary Action against Example Holdings Limited (Stock Code: 700)
+    </a>
+    <a href='/News/Regulatory-Announcements/2026/260708news?sc_lang=en'>
+      Exchange's Disciplinary Action against Other Limited (Stock Code: 1700)
+    </a>
+    <a href='/News/Regulatory-Announcements/2026/260706news?sc_lang=en'>
+      Exchange's Disciplinary Action against a Former Director of Example Limited (Stock Code: 171)
+    </a>
+    """
+    events, scanned = evidence_overlay_builder.extract_hkex_negative_events(page, ticker="00700.HK")
+    director_events, _ = evidence_overlay_builder.extract_hkex_negative_events(page, ticker="00171.HK")
+    assert scanned == 3
+    assert len(events) == 1 and events[0]["severity"] == "P1"
+    assert director_events[0]["severity"] == "P2"
+    assert director_events[0]["entity_scope"] == "related_person"
+
+
+def test_sfc_requires_exact_stock_code_and_caps_related_person_action():
+    assert evidence_overlay_builder._extract_sfc_stock_codes("(Stock code: 06161)") == {"6161"}
+    assert "6161" not in evidence_overlay_builder._extract_sfc_stock_codes("(Stock code: 16161)")
+    related = evidence_overlay_builder.classify_sfc_enforcement(
+        "SFC seeks order against former chairman of Example Holdings Limited",
+        "Example Holdings Limited (Stock code: 6161)",
+    )
+    issuer = evidence_overlay_builder.classify_sfc_enforcement(
+        "SFC commences proceedings against Example Holdings Limited",
+        "Example Holdings Limited (Stock code: 6161)",
+    )
+    assert related["severity"] == "P2" and related["entity_scope"] == "related_person"
+    assert issuer["severity"] == "P1" and issuer["entity_scope"] == "issuer"
+
+
+def test_sfc_company_tokens_must_match_target_code_context():
+    title_tokens = evidence_overlay_builder._sfc_company_tokens(
+        "SFC commences proceedings against Target Insurance (Holdings) Limited"
+    )
+    matching = evidence_overlay_builder._sfc_stock_code_contexts(
+        "Target Insurance (Holdings) Limited (Stock code: 6161)", "6161"
+    )
+    unrelated = evidence_overlay_builder._sfc_stock_code_contexts(
+        "Other Company Limited (Stock code: 6161)", "6161"
+    )
+    assert any(any(token in context.lower() for token in title_tokens) for context in matching)
+    assert not any(any(token in context.lower() for token in title_tokens) for context in unrelated)
+
+
+def test_negative_event_recency_boundary_is_inclusive_and_future_is_rejected():
+    base = {
+        "source": "sec_submissions",
+        "url": "https://www.sec.gov/example",
+        "title": "Official event",
+        "severity": "P1",
+        "event_type": "test",
+        "official_source": True,
+        "entity_match": "exact",
+    }
+    rows = [
+        {**base, "published_at": "2024-07-13"},
+        {**base, "url": "https://www.sec.gov/stale", "published_at": "2024-07-12"},
+        {**base, "url": "https://www.sec.gov/future", "published_at": "2026-07-14"},
+    ]
+    finalized = evidence_overlay_builder._finalize_negative_events(
+        rows, as_of=dt.date(2026, 7, 13), lookback_days=730, max_items=5
+    )
+    assert [item["url"] for item in finalized] == ["https://www.sec.gov/example"]
+    assert finalized[0]["age_days"] == 730
+
+
+def test_negative_event_dedupe_keeps_stricter_severity_for_same_official_url():
+    rows = [
+        {
+            "source": "szse_discipline",
+            "url": "https://www.szse.cn/UpFiles/same.pdf",
+            "title": "同一处分决定",
+            "published_at": "2026-04-29",
+            "severity": severity,
+            "event_type": "test",
+            "official_source": True,
+            "entity_match": "exact",
+        }
+        for severity in ("P2", "P1")
+    ]
+    finalized = evidence_overlay_builder._finalize_negative_events(
+        rows, as_of=dt.date(2026, 7, 13), lookback_days=730, max_items=5
+    )
+    assert len(finalized) == 1
+    assert finalized[0]["severity"] == "P1"
+
+
+def test_cninfo_exchange_mirror_is_merged_without_losing_provenance():
+    rows = [
+        {
+            "source": "cninfo_company_announcement",
+            "url": "https://static.cninfo.com.cn/mirror.pdf",
+            "title": "关于收到深圳证券交易所纪律处分决定的公告",
+            "published_at": "2026-05-05",
+            "severity": "P1",
+            "event_type": "cninfo_enforcement_disclosure",
+            "official_source": True,
+            "entity_match": "exact",
+        },
+        {
+            "source": "szse_discipline",
+            "url": "https://www.szse.cn/UpFiles/direct.pdf",
+            "title": "关于对某公司给予纪律处分的决定",
+            "published_at": "2026-04-29",
+            "severity": "P1",
+            "event_type": "szse_disciplinary_action",
+            "official_source": True,
+            "entity_match": "exact",
+        },
+    ]
+    finalized = evidence_overlay_builder._finalize_negative_events(
+        rows, as_of=dt.date(2026, 7, 13), lookback_days=730, max_items=5
+    )
+    assert len(finalized) == 1
+    assert finalized[0]["source"] == "szse_discipline"
+    assert finalized[0]["corroborating_sources"] == ["cninfo_company_announcement"]
+
+
+def test_unofficial_cached_negative_event_cannot_become_ready_overlay():
+    old_cache = evidence_overlay_builder.CACHE
+    with tempfile.TemporaryDirectory() as td:
+        root = Path(td)
+        cache_dir = root / "TEST"
+        cache_dir.mkdir(parents=True)
+        (cache_dir / "raw_data.json").write_text(
+            json.dumps(
+                {
+                    "dimensions": {
+                        "15_events": {
+                            "data": {
+                                "recent_news": [
+                                    {
+                                        "title": "Company received a material fraud penalty",
+                                        "url": "https://example.com/unverified",
+                                        "source": "unknown",
+                                        "published_at": "2026-01-01",
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            ),
+            encoding="utf-8",
+        )
+        try:
+            evidence_overlay_builder.CACHE = root
+            overlay = evidence_overlay_builder.build_overlay(
+                "TEST", "negative_event", network=False, as_of="2026-07-13"
+            )
+        finally:
+            evidence_overlay_builder.CACHE = old_cache
+    assert overlay["status"] == "gap"
+    assert overlay["evidence"][0]["official_source"] is False
 
 
 if __name__ == "__main__":

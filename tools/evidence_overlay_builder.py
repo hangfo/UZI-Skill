@@ -1,21 +1,52 @@
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
+import datetime as dt
+import html
 import json
 import os
+import re
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
+from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
 
 
 SCHEMA_VERSION = "uzi.evidence_overlay.v1"
 DEFAULT_TIMEOUT_SEC = 12
+DEFAULT_EVENT_LOOKBACK_DAYS = 730
+DEFAULT_SOURCE_RECORD_LIMIT = 60
 SEC_TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"
 SEC_COMPANYFACTS_URL = "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json"
 SEC_SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik}.json"
+CNINFO_STOCK_MAP_URL = "https://www.cninfo.com.cn/new/data/szse_stock.json"
+CNINFO_ANNOUNCEMENTS_URL = "https://www.cninfo.com.cn/new/hisAnnouncement/query"
+CNINFO_DOCUMENT_BASE_URL = "https://static.cninfo.com.cn/"
+SSE_DISCIPLINE_URL = "https://query.sse.com.cn/commonSoaQuery.do"
+SSE_DISCIPLINE_PAGE_URL = "https://www.sse.com.cn/regulation/supervision/measures/"
+SZSE_REPORT_URL = "https://www.szse.cn/api/report/ShowReport/data"
+SZSE_DISCIPLINE_PAGE_URL = "https://www.szse.cn/disclosure/supervision/measure/pushish/index.html"
+SZSE_MEASURE_PAGE_URL = "https://www.szse.cn/disclosure/supervision/measure/measure/index.html"
+HKEX_DISCIPLINE_URL = "https://www.hkex.com.hk/Listing/Disciplinary-and-Enforcement/Overview?sc_lang=en"
+SFC_NEWS_SEARCH_URL = "https://apps.sfc.hk/edistributionWeb/api/news/search"
+SFC_NEWS_CONTENT_URL = "https://apps.sfc.hk/edistributionWeb/api/news/content?lang=EN&refNo={ref_no}"
+SFC_NEWS_DOCUMENT_URL = (
+    "https://apps.sfc.hk/edistributionWeb/gateway/EN/news-and-announcements/news/doc?refNo={ref_no}"
+)
+
+OFFICIAL_EVENT_HOST_SUFFIXES = (
+    "sec.gov",
+    "cninfo.com.cn",
+    "sse.com.cn",
+    "szse.cn",
+    "hkex.com.hk",
+    "sfc.hk",
+)
 
 SUPPORTED_TARGETS = ("missing_financials", "negative_event")
 SEC_FINANCIAL_CONCEPTS = {
@@ -34,7 +65,7 @@ NEGATIVE_EVENT_TAXONOMY = {
             "1.03": "Bankruptcy or Receivership",
             "4.02": "Non-Reliance on Previously Issued Financial Statements or Audit Report",
         },
-        "keywords": ("sec charges", "accounting fraud", "fraud", "bankruptcy", "receivership", "立案", "欺诈"),
+        "keywords": ("sec charges", "accounting fraud", "fraud", "bankruptcy", "receivership", "财务造假", "欺诈发行"),
     },
     "P1": {
         "label": "material risk escalation",
@@ -47,7 +78,18 @@ NEGATIVE_EVENT_TAXONOMY = {
             "3.01": "Notice of Delisting or Failure to Satisfy a Continued Listing Rule",
             "4.01": "Changes in Registrant's Certifying Accountant",
         },
-        "keywords": ("default", "delisting", "material impairment", "auditor resignation", "重大减值", "退市", "处罚"),
+        "keywords": (
+            "default",
+            "delisting",
+            "material impairment",
+            "auditor resignation",
+            "重大减值",
+            "退市",
+            "处罚",
+            "立案",
+            "公开谴责",
+            "纪律处分",
+        ),
     },
     "P2": {
         "label": "context-dependent operating or legal risk",
@@ -57,7 +99,43 @@ NEGATIVE_EVENT_TAXONOMY = {
     },
 }
 
-NEGATED_NEGATIVE_TERMS = ("no fraud", "no violation", "未发现", "无违规", "settled", "和解")
+NEGATED_NEGATIVE_TERMS = (
+    "no fraud",
+    "no violation",
+    "未发现",
+    "无违规",
+    "不涉及处罚",
+    "撤销处罚",
+    "settled",
+    "和解",
+)
+
+CNINFO_REPLY_TERMS = ("回复问询函", "问询函回复", "回复关注函", "关注函回复", "回复监管函", "监管函回复")
+CNINFO_P0_TERMS = ("财务造假", "欺诈发行", "重大违法强制退市", "虚假财务报表")
+CNINFO_P1_TERMS = (
+    "行政处罚决定书",
+    "行政监管措施决定书",
+    "立案告知书",
+    "立案调查",
+    "公开谴责",
+    "纪律处分",
+    "警示函",
+    "责令改正",
+)
+CNINFO_P2_TERMS = ("监管函",)
+
+SFC_P0_TERMS = ("fraud", "false financial statements", "false accounting", "misappropriation")
+SFC_P1_TERMS = (
+    "commences proceedings",
+    "seeks order against",
+    "obtains order against",
+    "reprimands",
+    "fines",
+    "convicted",
+    "market misconduct",
+    "insider dealing",
+    "delisting",
+)
 
 STATUS_LABEL_ZH = {
     "ready": "证据已冻结",
@@ -111,11 +189,19 @@ def build_overlay(
     network: bool = True,
     timeout_sec: int = DEFAULT_TIMEOUT_SEC,
     max_items: int = 5,
+    lookback_days: int = DEFAULT_EVENT_LOOKBACK_DAYS,
+    source_record_limit: int = DEFAULT_SOURCE_RECORD_LIMIT,
+    as_of: str | None = None,
 ) -> dict[str, Any]:
     if target not in SUPPORTED_TARGETS:
         raise ValueError(f"unsupported target: {target}")
     started = time.perf_counter()
     market = market_for_ticker(ticker)
+    as_of_date = _parse_iso_date(as_of) if as_of else dt.date.today()
+    if lookback_days < 1:
+        raise ValueError("lookback_days must be positive")
+    if source_record_limit < 1:
+        raise ValueError("source_record_limit must be positive")
     overlay: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "ticker": ticker,
@@ -126,8 +212,11 @@ def build_overlay(
         "evidence": [],
         "field_mapping": {},
         "source_plan": source_plan_for(market, target),
+        "source_coverage": [],
         "errors": [],
         "fetched_at": _now_utc(),
+        "as_of": as_of_date.isoformat(),
+        "lookback_days": lookback_days,
         "performance": {},
         "guardrails": [
             "online evidence is frozen before branch comparison",
@@ -139,7 +228,15 @@ def build_overlay(
     if target == "missing_financials":
         _fill_missing_financials_overlay(overlay, network=network, timeout_sec=timeout_sec, max_items=max_items)
     elif target == "negative_event":
-        _fill_negative_event_overlay(overlay, network=network, timeout_sec=timeout_sec, max_items=max_items)
+        _fill_negative_event_overlay(
+            overlay,
+            network=network,
+            timeout_sec=timeout_sec,
+            max_items=max_items,
+            lookback_days=lookback_days,
+            source_record_limit=source_record_limit,
+            as_of=as_of_date,
+        )
 
     overlay["performance"]["elapsed_sec"] = round(time.perf_counter() - started, 3)
     _finalize_confidence(overlay)
@@ -211,6 +308,9 @@ def _fill_negative_event_overlay(
     network: bool,
     timeout_sec: int,
     max_items: int,
+    lookback_days: int,
+    source_record_limit: int,
+    as_of: dt.date,
 ) -> None:
     ticker = overlay["ticker"]
     market = overlay["market"]
@@ -244,10 +344,32 @@ def _fill_negative_event_overlay(
                     ]
                 }
                 overlay["evidence"].extend(sec_events)
+            _record_source_coverage(overlay, "sec_submissions", "ok", matched=len(sec_events))
         except Exception as exc:  # noqa: BLE001 - evidence builder records errors instead of failing the run
-            overlay["errors"].append({"source": "sec_submissions", "error": str(exc)[:300]})
+            _record_source_error(overlay, "sec_submissions", exc)
+    elif market == "A" and network:
+        _collect_a_share_negative_events(
+            overlay,
+            timeout_sec=timeout_sec,
+            max_items=max_items,
+            lookback_days=lookback_days,
+            source_record_limit=source_record_limit,
+            as_of=as_of,
+        )
+    elif market == "HK" and network:
+        _collect_hk_negative_events(
+            overlay,
+            timeout_sec=timeout_sec,
+            max_items=max_items,
+            lookback_days=lookback_days,
+            source_record_limit=source_record_limit,
+            as_of=as_of,
+        )
     elif market == "US" and not network:
-        overlay["errors"].append({"source": "sec_submissions", "error": "network disabled"})
+        _record_source_error(overlay, "sec_submissions", "network disabled")
+    elif market in {"A", "HK"} and not network:
+        for source in ("cninfo", "exchange_discipline") if market == "A" else ("hkex_discipline", "sfc_enforcement"):
+            _record_source_error(overlay, source, "network disabled")
     elif network:
         overlay["errors"].append(
             {
@@ -258,10 +380,21 @@ def _fill_negative_event_overlay(
     else:
         overlay["errors"].append({"source": "negative_event_online", "error": "network disabled"})
 
+    overlay["evidence"] = _finalize_negative_events(
+        overlay["evidence"],
+        as_of=as_of,
+        lookback_days=lookback_days,
+        max_items=max_items,
+    )
+    _reconcile_source_coverage(overlay)
     traceable_events = [
         item
         for item in overlay["evidence"]
-        if item.get("url") and item.get("title") and item.get("severity") in {"P0", "P1", "P2", None}
+        if item.get("url")
+        and item.get("title")
+        and item.get("official_source") is True
+        and item.get("entity_match") == "exact"
+        and item.get("severity") in {"P0", "P1", "P2"}
     ]
     if any(item.get("severity") in {"P0", "P1"} for item in traceable_events):
         overlay["status"] = "ready"
@@ -269,6 +402,580 @@ def _fill_negative_event_overlay(
         overlay["status"] = "partial"
     else:
         overlay["status"] = "gap"
+
+
+def _collect_a_share_negative_events(
+    overlay: dict[str, Any],
+    *,
+    timeout_sec: int,
+    max_items: int,
+    lookback_days: int,
+    source_record_limit: int,
+    as_of: dt.date,
+) -> None:
+    ticker = str(overlay["ticker"])
+    adapters: list[tuple[str, Any]] = [
+        (
+            "cninfo",
+            lambda: fetch_cninfo_negative_events(
+                ticker,
+                timeout_sec=timeout_sec,
+                max_items=max_items,
+                lookback_days=lookback_days,
+                source_record_limit=source_record_limit,
+                as_of=as_of,
+            ),
+        )
+    ]
+    upper = ticker.upper()
+    if upper.endswith(".SH"):
+        adapters.append(
+            (
+                "sse_discipline",
+                lambda: fetch_sse_negative_events(ticker, timeout_sec=timeout_sec, max_items=max_items),
+            )
+        )
+    elif upper.endswith(".SZ"):
+        adapters.append(
+            (
+                "szse_discipline",
+                lambda: fetch_szse_negative_events(
+                    ticker,
+                    timeout_sec=timeout_sec,
+                    max_items=max_items,
+                    lookback_days=lookback_days,
+                    as_of=as_of,
+                ),
+            )
+        )
+    else:
+        _record_source_error(overlay, "exchange_discipline", f"unsupported A-share exchange suffix: {ticker}")
+
+    for source, adapter in adapters:
+        try:
+            result = adapter()
+            events, scanned = result[:2]
+            failed = int(result[2]) if len(result) > 2 else 0
+            _add_adapter_events(overlay, source, events)
+            status = "partial" if failed else "ok"
+            _record_source_coverage(
+                overlay,
+                source,
+                status,
+                matched=len(events),
+                scanned=scanned,
+                failed=failed,
+            )
+            if failed:
+                overlay["errors"].append(
+                    {"source": source, "error": f"{failed} source records failed; usable records were preserved"}
+                )
+        except Exception as exc:  # noqa: BLE001 - each official source fails independently
+            _record_source_error(overlay, source, exc)
+
+
+def _collect_hk_negative_events(
+    overlay: dict[str, Any],
+    *,
+    timeout_sec: int,
+    max_items: int,
+    lookback_days: int,
+    source_record_limit: int,
+    as_of: dt.date,
+) -> None:
+    ticker = str(overlay["ticker"])
+    adapters: list[tuple[str, Any]] = [
+        (
+            "hkex_discipline",
+            lambda: fetch_hkex_negative_events(ticker, timeout_sec=timeout_sec, max_items=max_items),
+        ),
+        (
+            "sfc_enforcement",
+            lambda: fetch_sfc_negative_events(
+                ticker,
+                timeout_sec=timeout_sec,
+                max_items=max_items,
+                lookback_days=lookback_days,
+                source_record_limit=source_record_limit,
+                as_of=as_of,
+            ),
+        ),
+    ]
+    for source, adapter in adapters:
+        try:
+            result = adapter()
+            events, scanned = result[:2]
+            failed = int(result[2]) if len(result) > 2 else 0
+            _add_adapter_events(overlay, source, events)
+            status = "partial" if failed else "ok"
+            _record_source_coverage(
+                overlay,
+                source,
+                status,
+                matched=len(events),
+                scanned=scanned,
+                failed=failed,
+            )
+            if failed:
+                overlay["errors"].append(
+                    {"source": source, "error": f"{failed} source records failed; usable records were preserved"}
+                )
+        except Exception as exc:  # noqa: BLE001 - each official source fails independently
+            _record_source_error(overlay, source, exc)
+
+
+def fetch_cninfo_negative_events(
+    ticker: str,
+    *,
+    timeout_sec: int = DEFAULT_TIMEOUT_SEC,
+    max_items: int = 5,
+    lookback_days: int = DEFAULT_EVENT_LOOKBACK_DAYS,
+    source_record_limit: int = DEFAULT_SOURCE_RECORD_LIMIT,
+    as_of: dt.date | None = None,
+) -> tuple[list[dict[str, Any]], int]:
+    code = _a_share_code(ticker)
+    as_of = as_of or dt.date.today()
+    mapping = _fetch_json(CNINFO_STOCK_MAP_URL, timeout_sec=timeout_sec)
+    identity = next((row for row in mapping.get("stockList") or [] if str(row.get("code")) == code), None)
+    if not identity or not identity.get("orgId"):
+        raise ValueError(f"CNINFO orgId mapping not found for {ticker}")
+    is_sh = ticker.upper().endswith(".SH")
+    body = urllib.parse.urlencode(
+        {
+            "pageNum": "1",
+            "pageSize": str(min(100, source_record_limit)),
+            "column": "sse" if is_sh else "szse",
+            "tabName": "fulltext",
+            "plate": "sh" if is_sh else "sz",
+            "stock": f"{code},{identity['orgId']}",
+            "searchkey": "",
+            "secid": "",
+            "category": "",
+            "trade": "",
+            "seDate": f"{(as_of - dt.timedelta(days=lookback_days)).isoformat()}~{as_of.isoformat()}",
+            "sortName": "",
+            "sortType": "",
+            "isHLtitle": "true",
+        }
+    ).encode("utf-8")
+    payload = _fetch_json_request(
+        CNINFO_ANNOUNCEMENTS_URL,
+        timeout_sec=timeout_sec,
+        data=body,
+        headers={
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "Referer": "https://www.cninfo.com.cn/",
+            "X-Requested-With": "XMLHttpRequest",
+        },
+    )
+    rows = payload.get("announcements") or []
+    events: list[dict[str, Any]] = []
+    for row in rows:
+        if str(row.get("secCode") or "").zfill(6) != code:
+            continue
+        title = html.unescape(str(row.get("announcementTitle") or "")).strip()
+        classified = classify_cninfo_title(title)
+        if not classified:
+            continue
+        adjunct = str(row.get("adjunctUrl") or "").lstrip("/")
+        if not adjunct:
+            continue
+        events.append(
+            _official_event_item(
+                source="cninfo_company_announcement",
+                url=urllib.parse.urljoin(CNINFO_DOCUMENT_BASE_URL, adjunct),
+                title=title,
+                published_at=_timestamp_ms_to_date(row.get("announcementTime")),
+                severity=classified["severity"],
+                event_type=classified["event_type"],
+                entity_scope="issuer",
+                match_method="secCode+orgId",
+                source_record_id=str(row.get("announcementId") or adjunct),
+            )
+        )
+        if len(events) >= max_items:
+            break
+    return events, len(rows)
+
+
+def classify_cninfo_title(title: str) -> dict[str, str] | None:
+    compact = re.sub(r"\s+", "", html.unescape(title))
+    if not compact or any(term in compact for term in CNINFO_REPLY_TERMS):
+        return None
+    if "问询函" in compact or "关注函" in compact:
+        return None
+    if any(term in compact for term in CNINFO_P0_TERMS):
+        return {"severity": "P0", "event_type": "cninfo_severe_enforcement"}
+    if any(term in compact for term in CNINFO_P1_TERMS):
+        return {"severity": "P1", "event_type": "cninfo_enforcement_disclosure"}
+    if any(term in compact for term in CNINFO_P2_TERMS):
+        return {"severity": "P2", "event_type": "cninfo_regulatory_letter"}
+    return None
+
+
+def fetch_sse_negative_events(
+    ticker: str,
+    *,
+    timeout_sec: int = DEFAULT_TIMEOUT_SEC,
+    max_items: int = 5,
+) -> tuple[list[dict[str, Any]], int]:
+    code = _a_share_code(ticker)
+    params = {
+        "isPagination": "true",
+        "pageHelp.pageSize": "50",
+        "pageHelp.pageNo": "1",
+        "pageHelp.beginPage": "1",
+        "pageHelp.cacheSize": "1",
+        "pageHelp.endPage": "1",
+        "sqlId": "BS_KCB_GGLL_NEW",
+        "siteId": "28",
+        "channelId": "10007,10008,10009,10010",
+        "type": "",
+        "stockcode": code,
+        "extTeacher": "",
+        "extWTFL": "",
+        "createTime": "",
+        "createTimeEnd": "",
+        "order": "createTime|desc,stockcode|asc",
+    }
+    payload = _fetch_json(
+        f"{SSE_DISCIPLINE_URL}?{urllib.parse.urlencode(params)}",
+        timeout_sec=timeout_sec,
+        headers={"Referer": SSE_DISCIPLINE_PAGE_URL},
+    )
+    rows = payload.get("result") or (payload.get("pageHelp") or {}).get("data") or []
+    events: list[dict[str, Any]] = []
+    for row in rows:
+        row_code = str(row.get("extSECURITY_CODE") or row.get("stockcode") or "").zfill(6)
+        if row_code != code:
+            continue
+        classified = classify_sse_action(str(row.get("extWTFL") or row.get("extTYPE") or ""))
+        if not classified:
+            continue
+        raw_url = str(row.get("docURL") or "").strip()
+        if raw_url and not raw_url.startswith(("http://", "https://")):
+            raw_url = "https://" + raw_url.lstrip("/")
+        events.append(
+            _official_event_item(
+                source="sse_discipline",
+                url=raw_url,
+                title=str(row.get("docTitle") or "").strip(),
+                published_at=str(row.get("createTime") or "")[:10],
+                severity=classified["severity"],
+                event_type=classified["event_type"],
+                entity_scope="issuer" if str(row.get("extDWDM")) == "0" else "related_person",
+                match_method="extSECURITY_CODE",
+                source_record_id=str(row.get("docId") or raw_url),
+            )
+        )
+        if len(events) >= max_items:
+            break
+    return events, len(rows)
+
+
+def classify_sse_action(action: str) -> dict[str, str] | None:
+    compact = re.sub(r"\s+", "", action)
+    if any(term in compact for term in ("公开谴责", "通报批评", "公开认定")):
+        return {"severity": "P1", "event_type": "sse_disciplinary_action"}
+    if any(term in compact for term in ("监管警示", "监管关注")):
+        return {"severity": "P2", "event_type": "sse_regulatory_measure"}
+    return None
+
+
+def fetch_szse_negative_events(
+    ticker: str,
+    *,
+    timeout_sec: int = DEFAULT_TIMEOUT_SEC,
+    max_items: int = 5,
+    lookback_days: int = DEFAULT_EVENT_LOOKBACK_DAYS,
+    as_of: dt.date | None = None,
+) -> tuple[list[dict[str, Any]], int]:
+    code = _a_share_code(ticker)
+    as_of = as_of or dt.date.today()
+    start = (as_of - dt.timedelta(days=lookback_days)).isoformat()
+    specs = (
+        (
+            "1800_jgxxgk_cf",
+            "tab2",
+            SZSE_DISCIPLINE_PAGE_URL,
+            {"selectGsbk": "0", "txtBj": "", "txtDMorJC": code, "selectCflb": "", "txtStartDate": start, "txtEndDate": as_of.isoformat()},
+            "discipline",
+        ),
+        (
+            "1800_jgxxgk",
+            "tab1",
+            SZSE_MEASURE_PAGE_URL,
+            {"txtZqdm": code, "selectBkmc": "0", "txtjgsy": "", "txtDate": start, "txtEnd": as_of.isoformat()},
+            "measure",
+        ),
+    )
+    events: list[dict[str, Any]] = []
+    scanned = 0
+    for catalog, tab, referer, query, kind in specs:
+        params = {"SHOWTYPE": "JSON", "CATALOGID": catalog, "TABKEY": tab, "PAGENO": "1", **query}
+        payload = _fetch_json(
+            f"{SZSE_REPORT_URL}?{urllib.parse.urlencode(params)}",
+            timeout_sec=timeout_sec,
+            headers={"Referer": referer},
+        )
+        block = payload[0] if isinstance(payload, list) and payload else {}
+        rows = block.get("data") or []
+        scanned += len(rows)
+        for row in rows:
+            event = _szse_row_to_event(row, code=code, kind=kind)
+            if event:
+                events.append(event)
+    events.sort(key=lambda item: str(item.get("published_at") or ""), reverse=True)
+    return events[:max_items], scanned
+
+
+def _szse_row_to_event(row: dict[str, Any], *, code: str, kind: str) -> dict[str, Any] | None:
+    row_code = str(row.get("xx_gsdm") or row.get("gkxx_gsdm") or "").zfill(6)
+    if row_code != code:
+        return None
+    if kind == "discipline":
+        title = str(row.get("xx_bt") or "").strip()
+        action = str(row.get("xx_cflb") or "").strip()
+        issuer_named = "股份有限公司" in title or "上市公司" in title
+        severity = "P1" if issuer_named else "P2"
+        event_type = "szse_disciplinary_action" if issuer_named else "szse_related_person_discipline"
+        published_at = row.get("xx_fwrq")
+        link_html = str(row.get("ck") or "")
+        entity_scope = "issuer" if issuer_named else "related_person"
+    else:
+        title = f"深圳证券交易所{row.get('gkxx_jgcs') or '监管措施'}：{row.get('gkxx_gsjc') or code}"
+        action = str(row.get("gkxx_jgcs") or "").strip()
+        if "监管函" not in action and "警示" not in action:
+            return None
+        severity = "P2"
+        event_type = "szse_regulatory_measure"
+        published_at = row.get("gkxx_gdrq")
+        link_html = str(row.get("hjnr") or "")
+        entity_scope = "issuer" if "上市公司" in str(row.get("gkxx_sjdx") or "") else "related_person"
+    path_match = re.search(r"encode-open=['\"]([^'\"]+)", html.unescape(link_html), flags=re.IGNORECASE)
+    if not path_match:
+        return None
+    path = path_match.group(1).strip()
+    url = urllib.parse.urljoin("https://www.szse.cn/", path)
+    return _official_event_item(
+        source="szse_discipline" if kind == "discipline" else "szse_regulatory_measure",
+        url=url,
+        title=title or action,
+        published_at=published_at,
+        severity=severity,
+        event_type=event_type,
+        entity_scope=entity_scope,
+        match_method="exchange_company_code",
+        source_record_id=path,
+    )
+
+
+class _AnchorCollector(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.anchors: list[tuple[str, str]] = []
+        self._href: str | None = None
+        self._text: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag.lower() == "a":
+            self._href = dict(attrs).get("href")
+            self._text = []
+
+    def handle_data(self, data: str) -> None:
+        if self._href is not None:
+            self._text.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag.lower() == "a" and self._href is not None:
+            self.anchors.append((self._href.strip(), re.sub(r"\s+", " ", " ".join(self._text)).strip()))
+            self._href = None
+            self._text = []
+
+
+def fetch_hkex_negative_events(
+    ticker: str,
+    *,
+    timeout_sec: int = DEFAULT_TIMEOUT_SEC,
+    max_items: int = 5,
+) -> tuple[list[dict[str, Any]], int]:
+    page = _fetch_text(HKEX_DISCIPLINE_URL, timeout_sec=timeout_sec)
+    return extract_hkex_negative_events(page, ticker=ticker, max_items=max_items)
+
+
+def extract_hkex_negative_events(
+    page: str,
+    *,
+    ticker: str,
+    max_items: int = 5,
+) -> tuple[list[dict[str, Any]], int]:
+    target_code = _hk_numeric_code(ticker)
+    parser = _AnchorCollector()
+    parser.feed(page)
+    relevant = [(href, title) for href, title in parser.anchors if "Stock Code:" in title]
+    events: list[dict[str, Any]] = []
+    for href, title in relevant:
+        code_match = re.search(r"Stock Code:\s*0*(\d+)\s*\)", title, flags=re.IGNORECASE)
+        if not code_match or str(int(code_match.group(1))) != target_code:
+            continue
+        related_only = bool(re.search(r"against\s+(?:a\s+)?(?:former\s+)?director\s+of", title, flags=re.IGNORECASE))
+        published_at = _date_from_hkex_url(href)
+        events.append(
+            _official_event_item(
+                source="hkex_disciplinary_action",
+                url=urllib.parse.urljoin(HKEX_DISCIPLINE_URL, href),
+                title=title,
+                published_at=published_at,
+                severity="P2" if related_only else "P1",
+                event_type="hkex_related_person_discipline" if related_only else "hkex_issuer_discipline",
+                entity_scope="related_person" if related_only else "issuer",
+                match_method="title_stock_code",
+                source_record_id=href,
+            )
+        )
+        if len(events) >= max_items:
+            break
+    return events, len(relevant)
+
+
+def fetch_sfc_negative_events(
+    ticker: str,
+    *,
+    timeout_sec: int = DEFAULT_TIMEOUT_SEC,
+    max_items: int = 5,
+    lookback_days: int = DEFAULT_EVENT_LOOKBACK_DAYS,
+    source_record_limit: int = DEFAULT_SOURCE_RECORD_LIMIT,
+    as_of: dt.date | None = None,
+) -> tuple[list[dict[str, Any]], int, int]:
+    target_code = _hk_numeric_code(ticker)
+    as_of = as_of or dt.date.today()
+    start_year = (as_of - dt.timedelta(days=lookback_days)).year
+    records: list[dict[str, Any]] = []
+    for year in range(as_of.year, start_year - 1, -1):
+        page_no = 0
+        while len(records) < source_record_limit:
+            query = {
+                "lang": "EN",
+                "category": "enforcement",
+                "year": str(year),
+                "month": "all",
+                "pageNo": page_no,
+                "pageSize": 20,
+                "isLoading": True,
+                "errors": None,
+                "items": None,
+                "total": -1,
+            }
+            payload = _post_json(SFC_NEWS_SEARCH_URL, query, timeout_sec=timeout_sec)
+            items = payload.get("items") or []
+            records.extend(items[: max(0, source_record_limit - len(records))])
+            if not items or (page_no + 1) * 20 >= int(payload.get("total") or 0):
+                break
+            page_no += 1
+        if len(records) >= source_record_limit:
+            break
+
+    def fetch_one(record: dict[str, Any]) -> tuple[dict[str, Any] | None, bool]:
+        try:
+            ref_no = str(record.get("newsRefNo") or "").strip()
+            if not ref_no:
+                return None, False
+            content = _fetch_json(
+                SFC_NEWS_CONTENT_URL.format(ref_no=urllib.parse.quote(ref_no)), timeout_sec=timeout_sec
+            )
+            plain = _strip_html(str(content.get("html") or ""))
+            contexts = _sfc_stock_code_contexts(plain, target_code)
+            if not contexts:
+                return None, False
+            title = html.unescape(str(content.get("title") or record.get("title") or "")).strip()
+            company_tokens = _sfc_company_tokens(title)
+            if company_tokens and not any(
+                any(token in context.lower() for token in company_tokens) for context in contexts
+            ):
+                return None, False
+            classified = classify_sfc_enforcement(title, plain)
+            if not classified:
+                return None, False
+            return (
+                _official_event_item(
+                    source="sfc_enforcement",
+                    url=SFC_NEWS_DOCUMENT_URL.format(ref_no=urllib.parse.quote(ref_no)),
+                    title=title,
+                    published_at=str(record.get("issueDate") or "")[:10],
+                    severity=classified["severity"],
+                    event_type=classified["event_type"],
+                    entity_scope=classified["entity_scope"],
+                    match_method="body_stock_code+title_company_context",
+                    source_record_id=ref_no,
+                ),
+                False,
+            )
+        except Exception:  # noqa: BLE001 - one bad SFC article must not discard the entire frozen source batch
+            return None, True
+
+    events: list[dict[str, Any]] = []
+    failed = 0
+    workers = min(6, max(1, len(records)))
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
+        for event, did_fail in executor.map(fetch_one, records):
+            failed += int(did_fail)
+            if event:
+                events.append(event)
+    events.sort(key=lambda item: str(item.get("published_at") or ""), reverse=True)
+    return events[:max_items], len(records), failed
+
+
+def _extract_sfc_stock_codes(text: str) -> set[str]:
+    return {str(int(value)) for value in re.findall(r"stock\s+code\s*[:：]\s*0*(\d+)", text, flags=re.IGNORECASE)}
+
+
+def _sfc_stock_code_contexts(text: str, target_code: str) -> list[str]:
+    contexts = []
+    pattern = re.compile(r"stock\s+code\s*[:：]\s*0*(\d+)", flags=re.IGNORECASE)
+    for match in pattern.finditer(text):
+        if str(int(match.group(1))) == target_code:
+            contexts.append(text[max(0, match.start() - 240) : min(len(text), match.end() + 120)])
+    return contexts
+
+
+def _sfc_company_tokens(title: str) -> set[str]:
+    stop = {
+        "against",
+        "chairman",
+        "chief",
+        "commences",
+        "company",
+        "director",
+        "enforcement",
+        "former",
+        "group",
+        "holdings",
+        "limited",
+        "obtains",
+        "order",
+        "proceedings",
+        "seeks",
+        "share",
+        "sfc",
+    }
+    return {word for word in re.findall(r"[a-z]{4,}", title.lower()) if word not in stop}
+
+
+def classify_sfc_enforcement(title: str, body: str) -> dict[str, str] | None:
+    lowered_title = title.lower()
+    lowered = f"{title} {body}".lower()
+    related_only = bool(
+        re.search(r"\bformer\s+(?:chairman|director|chief executive|officer)\b", lowered_title)
+        or re.search(r"\bdirector\s+of\b", lowered_title)
+    )
+    if related_only:
+        return {"severity": "P2", "event_type": "sfc_related_person_enforcement", "entity_scope": "related_person"}
+    issuer_named = any(term in lowered_title for term in (" limited", " holdings", " company", " corporation"))
+    if issuer_named and any(term in lowered for term in SFC_P0_TERMS):
+        return {"severity": "P0", "event_type": "sfc_severe_issuer_enforcement", "entity_scope": "issuer"}
+    if issuer_named and any(term in lowered for term in SFC_P1_TERMS):
+        return {"severity": "P1", "event_type": "sfc_issuer_enforcement", "entity_scope": "issuer"}
+    return None
 
 
 def sec_cik_for_ticker(ticker: str, *, timeout_sec: int = DEFAULT_TIMEOUT_SEC) -> tuple[int, str]:
@@ -349,6 +1056,11 @@ def extract_sec_negative_events(
                     "form": form_text,
                     "accession": accession,
                     "item_code": event["item_code"],
+                    "official_source": True,
+                    "entity_match": "exact",
+                    "entity_scope": "issuer",
+                    "match_method": "SEC CIK+ticker",
+                    "source_record_id": accession,
                 }
             )
             if len(rows) >= max_items:
@@ -409,28 +1121,73 @@ def source_plan_for(market: str, target: str) -> list[dict[str, str]]:
             ]
         if market == "A":
             return [
-                {"source": "cninfo", "role": "company announcements"},
-                {"source": "csrc", "role": "regulator enforcement"},
-                {"source": "exchange_discipline", "role": "exchange discipline"},
+                {"source": "cninfo", "role": "official company announcements and regulator decisions"},
+                {"source": "sse_discipline", "role": "SSE discipline and regulatory measures for .SH"},
+                {"source": "szse_discipline", "role": "SZSE discipline and regulatory measures for .SZ"},
             ]
         if market == "HK":
             return [
-                {"source": "hkexnews", "role": "official announcements"},
+                {"source": "hkex_discipline", "role": "HKEX issuer and related-person disciplinary actions"},
                 {"source": "sfc_enforcement", "role": "regulator enforcement"},
             ]
     return [{"source": "manual_official_source", "role": "official dated evidence required"}]
 
 
-def _fetch_json(url: str, *, timeout_sec: int) -> dict[str, Any]:
+def _fetch_json(
+    url: str,
+    *,
+    timeout_sec: int,
+    headers: dict[str, str] | None = None,
+) -> Any:
+    return _fetch_json_request(url, timeout_sec=timeout_sec, headers=headers)
+
+
+def _fetch_json_request(
+    url: str,
+    *,
+    timeout_sec: int,
+    data: bytes | None = None,
+    headers: dict[str, str] | None = None,
+) -> Any:
     headers = {
         "User-Agent": os.environ.get("UZI_SEC_USER_AGENT", "UZI-Skill evidence overlay builder contact@example.com"),
         "Accept": "application/json",
+        **(headers or {}),
     }
-    req = urllib.request.Request(url, headers=headers)
+    req = urllib.request.Request(url, data=data, headers=headers)
     try:
         with urllib.request.urlopen(req, timeout=timeout_sec) as resp:
             charset = resp.headers.get_content_charset() or "utf-8"
             return json.loads(resp.read().decode(charset, errors="replace"))
+    except urllib.error.HTTPError as exc:
+        raise RuntimeError(f"HTTP {exc.code} from {url}") from exc
+    except urllib.error.URLError as exc:
+        raise RuntimeError(f"network error from {url}: {exc.reason}") from exc
+
+
+def _post_json(url: str, payload: dict[str, Any], *, timeout_sec: int) -> dict[str, Any]:
+    return _fetch_json_request(
+        url,
+        timeout_sec=timeout_sec,
+        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+    )
+
+
+def _fetch_text(url: str, *, timeout_sec: int, headers: dict[str, str] | None = None) -> str:
+    request_headers = {
+        "User-Agent": os.environ.get("UZI_SEC_USER_AGENT", "UZI-Skill evidence overlay builder contact@example.com"),
+        "Accept": "text/html,application/xhtml+xml",
+        **(headers or {}),
+    }
+    req = urllib.request.Request(url, headers=request_headers)
+    try:
+        with urllib.request.urlopen(req, timeout=timeout_sec) as resp:
+            raw = resp.read()
+            declared = resp.headers.get_content_charset()
+            if declared:
+                return raw.decode(declared, errors="replace")
+            return raw.decode("utf-8", errors="replace")
     except urllib.error.HTTPError as exc:
         raise RuntimeError(f"HTTP {exc.code} from {url}") from exc
     except urllib.error.URLError as exc:
@@ -492,6 +1249,10 @@ def _negative_events_from_cache(ticker: str) -> list[dict[str, Any]]:
             fields=["15_events.recent_news"],
         )
         evidence.update(classified)
+        evidence["official_source"] = _is_official_event_url(evidence["url"])
+        evidence["entity_match"] = "exact" if evidence["official_source"] else "unverified"
+        evidence["entity_scope"] = "issuer"
+        evidence["match_method"] = "cached_ticker_scope"
         out.append(evidence)
     return out
 
@@ -539,6 +1300,273 @@ def _evidence_item(
         "fetched_at": _now_utc(),
         "fields": fields,
     }
+
+
+def _official_event_item(
+    *,
+    source: str,
+    url: str,
+    title: str,
+    published_at: Any,
+    severity: str,
+    event_type: str,
+    entity_scope: str,
+    match_method: str,
+    source_record_id: str,
+) -> dict[str, Any]:
+    item = _evidence_item(
+        source=source,
+        url=url,
+        title=title,
+        published_at=published_at,
+        fields=["15_events.recent_news"],
+    )
+    item.update(
+        {
+            "severity": severity,
+            "event_type": event_type,
+            "official_source": _is_official_event_url(url),
+            "entity_match": "exact",
+            "entity_scope": entity_scope,
+            "match_method": match_method,
+            "source_record_id": source_record_id,
+        }
+    )
+    return item
+
+
+def _add_adapter_events(overlay: dict[str, Any], source: str, events: list[dict[str, Any]]) -> None:
+    overlay["field_mapping"][source] = {
+        "events": [
+            {
+                "severity": item.get("severity"),
+                "event_type": item.get("event_type"),
+                "published_at": item.get("published_at"),
+                "source_record_id": item.get("source_record_id"),
+                "entity_scope": item.get("entity_scope"),
+            }
+            for item in events
+        ]
+    }
+    overlay["evidence"].extend(events)
+
+
+def _record_source_coverage(
+    overlay: dict[str, Any],
+    source: str,
+    status: str,
+    *,
+    matched: int = 0,
+    scanned: int = 0,
+    failed: int = 0,
+) -> None:
+    overlay["source_coverage"].append(
+        {
+            "source": source,
+            "status": status,
+            "scanned": int(scanned),
+            "matched": int(matched),
+            "failed": int(failed),
+        }
+    )
+
+
+def _record_source_error(overlay: dict[str, Any], source: str, error: Exception | str) -> None:
+    message = str(error)[:300]
+    overlay["errors"].append({"source": source, "error": message})
+    _record_source_coverage(overlay, source, "error")
+
+
+def _reconcile_source_coverage(overlay: dict[str, Any]) -> None:
+    aliases = {
+        "cninfo": {"cninfo_company_announcement"},
+        "sse_discipline": {"sse_discipline"},
+        "szse_discipline": {"szse_discipline", "szse_regulatory_measure"},
+        "hkex_discipline": {"hkex_disciplinary_action"},
+        "sfc_enforcement": {"sfc_enforcement"},
+        "sec_submissions": {"sec_submissions"},
+    }
+    evidence = overlay.get("evidence") or []
+    for row in overlay.get("source_coverage") or []:
+        sources = aliases.get(str(row.get("source")), {str(row.get("source"))})
+        row["eligible"] = sum(1 for item in evidence if str(item.get("source")) in sources)
+
+
+def _finalize_negative_events(
+    evidence: list[dict[str, Any]],
+    *,
+    as_of: dt.date,
+    lookback_days: int,
+    max_items: int,
+) -> list[dict[str, Any]]:
+    by_key: dict[str, dict[str, Any]] = {}
+    severity_rank = {"P0": 0, "P1": 1, "P2": 2}
+    for original in evidence:
+        if not isinstance(original, dict):
+            continue
+        item = dict(original)
+        published = _coerce_date(item.get("published_at"))
+        if not published:
+            continue
+        age_days = (as_of - published).days
+        if age_days < 0 or age_days > lookback_days:
+            continue
+        url = str(item.get("url") or "").strip()
+        title = str(item.get("title") or "").strip()
+        severity = str(item.get("severity") or "")
+        if not url or not title or severity not in severity_rank:
+            continue
+        item["url"] = url
+        item["title"] = title
+        item["published_at"] = published.isoformat()
+        item["age_days"] = age_days
+        item["official_source"] = bool(item.get("official_source")) and _is_official_event_url(url)
+        if item.get("entity_match") not in {"exact", "unverified"}:
+            item["entity_match"] = "unverified"
+        key = _canonical_event_key(item)
+        previous = by_key.get(key)
+        if previous is None or severity_rank[severity] < severity_rank[str(previous.get("severity"))]:
+            by_key[key] = item
+    rows = _merge_exchange_mirrors(list(by_key.values()), severity_rank=severity_rank)
+    rows.sort(
+        key=lambda item: (
+            str(item.get("published_at") or ""),
+            -severity_rank[str(item.get("severity"))],
+            str(item.get("url") or ""),
+        ),
+        reverse=True,
+    )
+    return rows[:max_items]
+
+
+def _merge_exchange_mirrors(
+    rows: list[dict[str, Any]],
+    *,
+    severity_rank: dict[str, int],
+) -> list[dict[str, Any]]:
+    direct_by_authority = {
+        "sse": [item for item in rows if item.get("source") == "sse_discipline"],
+        "szse": [
+            item
+            for item in rows
+            if item.get("source") in {"szse_discipline", "szse_regulatory_measure"}
+        ],
+    }
+    kept: list[dict[str, Any]] = []
+    for item in rows:
+        if item.get("source") != "cninfo_company_announcement":
+            kept.append(item)
+            continue
+        title = str(item.get("title") or "")
+        authority = "szse" if "深圳证券交易所" in title else "sse" if "上海证券交易所" in title else None
+        if not authority:
+            kept.append(item)
+            continue
+        item_date = _coerce_date(item.get("published_at"))
+        candidate = None
+        for direct in direct_by_authority[authority]:
+            direct_date = _coerce_date(direct.get("published_at"))
+            if not item_date or not direct_date or abs((item_date - direct_date).days) > 10:
+                continue
+            if severity_rank[str(item.get("severity"))] < severity_rank[str(direct.get("severity"))]:
+                continue
+            candidate = direct
+            break
+        if candidate is None:
+            kept.append(item)
+            continue
+        candidate.setdefault("corroborating_sources", []).append(str(item.get("source")))
+        candidate.setdefault("corroborating_urls", []).append(str(item.get("url")))
+    return kept
+
+
+def _canonical_event_key(item: dict[str, Any]) -> str:
+    parsed = urllib.parse.urlsplit(str(item.get("url") or ""))
+    canonical_url = urllib.parse.urlunsplit((parsed.scheme.lower(), parsed.netloc.lower(), parsed.path, "", ""))
+    if canonical_url:
+        return canonical_url
+    title = re.sub(r"\W+", "", str(item.get("title") or "").lower())
+    return f"{item.get('published_at')}|{title}"
+
+
+def _is_official_event_url(url: str) -> bool:
+    try:
+        host = (urllib.parse.urlsplit(url).hostname or "").lower()
+    except ValueError:
+        return False
+    return any(host == suffix or host.endswith("." + suffix) for suffix in OFFICIAL_EVENT_HOST_SUFFIXES)
+
+
+def _parse_iso_date(value: str) -> dt.date:
+    try:
+        return dt.date.fromisoformat(str(value)[:10])
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"invalid ISO date: {value}") from exc
+
+
+def _coerce_date(value: Any) -> dt.date | None:
+    if value is None or value == "":
+        return None
+    if isinstance(value, dt.datetime):
+        return value.date()
+    if isinstance(value, dt.date):
+        return value
+    if isinstance(value, (int, float)):
+        try:
+            return dt.datetime.fromtimestamp(float(value) / 1000, tz=dt.timezone.utc).date()
+        except (OverflowError, OSError, ValueError):
+            return None
+    try:
+        return dt.date.fromisoformat(str(value).strip()[:10])
+    except ValueError:
+        return None
+
+
+def _timestamp_ms_to_date(value: Any) -> str | None:
+    parsed = _coerce_date(value)
+    return parsed.isoformat() if parsed else None
+
+
+def _a_share_code(ticker: str) -> str:
+    match = re.search(r"(^|[^0-9])(\d{6})(?:\.(?:SH|SZ|BJ))?$", ticker.upper())
+    if not match:
+        raise ValueError(f"invalid A-share ticker: {ticker}")
+    return match.group(2)
+
+
+def _hk_numeric_code(ticker: str) -> str:
+    value = ticker.upper().removeprefix("HK_").removesuffix(".HK")
+    if not value.isdigit():
+        raise ValueError(f"invalid HK ticker: {ticker}")
+    return str(int(value))
+
+
+def _date_from_hkex_url(url: str) -> str | None:
+    match = re.search(r"/(20\d{2})/(\d{2})(\d{2})(\d{2})news", url)
+    if not match:
+        return None
+    year = int(match.group(1))
+    if int(match.group(2)) != year % 100:
+        return None
+    try:
+        return dt.date(year, int(match.group(3)), int(match.group(4))).isoformat()
+    except ValueError:
+        return None
+
+
+class _TextCollector(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.parts: list[str] = []
+
+    def handle_data(self, data: str) -> None:
+        self.parts.append(data)
+
+
+def _strip_html(value: str) -> str:
+    parser = _TextCollector()
+    parser.feed(value)
+    return re.sub(r"\s+", " ", " ".join(parser.parts)).strip()
 
 
 def _finalize_confidence(overlay: dict[str, Any]) -> None:
@@ -651,6 +1679,9 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--output-dir", default=str(DEFAULT_OUT_DIR))
     parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_SEC)
     parser.add_argument("--max-items", type=int, default=5)
+    parser.add_argument("--lookback-days", type=int, default=DEFAULT_EVENT_LOOKBACK_DAYS)
+    parser.add_argument("--source-record-limit", type=int, default=DEFAULT_SOURCE_RECORD_LIMIT)
+    parser.add_argument("--as-of", help="Freeze recency relative to this YYYY-MM-DD date; defaults to today.")
     parser.add_argument("--no-network", action="store_true")
     parser.add_argument("--no-write", action="store_true")
     return parser.parse_args(argv)
@@ -664,6 +1695,9 @@ def main(argv: list[str] | None = None) -> int:
         network=not args.no_network,
         timeout_sec=args.timeout,
         max_items=args.max_items,
+        lookback_days=args.lookback_days,
+        source_record_limit=args.source_record_limit,
+        as_of=args.as_of,
     )
     if not args.no_write:
         path = write_overlay(overlay, Path(args.output_dir))

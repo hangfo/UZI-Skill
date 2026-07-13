@@ -393,9 +393,15 @@ local-ops/state/evidence-overlays/<ticker>-<target>.json
 当前支持：
 
 - `missing_financials`：美股走 SEC `company_tickers.json` + `companyfacts`，只做字段映射，不生成投资分数。
-- `negative_event`：美股优先走 SEC `submissions` 的 8-K item code；缓存新闻只在带 `title/url/source` 且命中明确负面 taxonomy 时作为冻结证据；不靠泛新闻情绪或常识推断。
+- `negative_event / US`：SEC `submissions` 的 8-K item code。
+- `negative_event / A`：巨潮动态 `orgId` 映射后的公司公告；`.SH` 直连上交所监管措施；`.SZ` 直连深交所监管措施与纪律处分。
+- `negative_event / HK`：HKEX disciplinary overview 的精确 `Stock Code`；SFC enforcement 列表与正文中的精确 `stock code`。
+- 缓存新闻只有在 URL 属于已知官方域名、ticker 归属可精确确认、标题命中明确 taxonomy 时才可成为正式证据；不靠泛新闻情绪或常识推断。
 - `--no-network`：只读本地缓存，用于测试和离线复跑。
 - `--no-write`：只打印状态，不落地 overlay。
+- `--as-of YYYY-MM-DD`：冻结时效判断基准，确保跨分支、跨机器复跑一致。
+- `--lookback-days`：统一时效窗口，默认 730 天，边界日计入，未来日期和无日期记录剔除。
+- `--source-record-limit`：限制 SFC 等列表正文扫描数量，默认 60；它是性能边界，不代表历史全集。
 
 负面事件优先级：
 
@@ -411,6 +417,11 @@ local-ops/state/evidence-overlays/<ticker>-<target>.json
 - 每个 adapter 必须输出同一 overlay schema：`source/url/title/published_at/fields/severity/event_type`。
 - 新 adapter 先只进入 overlay，不直接进入评分公式；接入 branch harness 后仍然复用同一份冻结输入。
 - 没有明确官方字段或可追溯标题时，状态保持 `gap/partial`，不能为了覆盖率提高而扩大关键词。
+- 实体归属优先使用官方证券代码；`700` 不得匹配 `1700`，名称只能作为辅助，不允许模糊子串直接进入评分输入。
+- 公司/发行人直接受罚可进入 `P0/P1`；仅前董事、前主席或其他关联人受罚降为 `P2`，不能单独生成 `ready`。
+- 问询函、关注函及其回复不是处罚证据；监管工作函也不自动升级为负面事件。
+- 同一交易所决定若同时出现在交易所原文和巨潮公司公告，优先保留交易所原文，并把巨潮 URL 记录为 corroborating provenance，避免重复加权。
+- `status=ready` 仍需官方域名、精确实体匹配、有效日期和至少一条 `P0/P1`；手工把 `P2` 标成 ready 也会被 harness 拒绝。
 
 实际验证：
 
@@ -452,6 +463,45 @@ D:\UZI-Skill\.venv\Scripts\python.exe tools\branch_score_compare.py `
 - overlay 样本的 evidence type 是 `frozen_overlay`，不冒充 `cached_raw` 或 synthetic。
 - `P0` 要求事件维度低于中性并限制总分；`P1` 主要限制高置信买入，不强制事件维度低于中性；`P2` 只作为 review 证据。
 - branch runner 仍然离线运行；overlay 是运行前冻结好的输入，不在对照过程中联网。
+
+### 2026-07-13 三市场官方负面事件验证
+
+冻结基准统一为 `as_of=2026-07-13`、`lookback_days=730`。在线构建只发生在对照前；branch runner 仍完全离线。
+
+| 市场 | 样本 | 官方命中 | 冻结状态 | 用途 |
+|---|---|---|---|---|
+| US | `SMCI` | SEC 8-K `3.01`、`4.01` | `ready/P1` | issuer 级真实正例 |
+| A / SZSE | `002038.SZ` | 巨潮公司公告、深交所纪律处分/监管函 | `ready/P1+P2` | 多源交叉正例与镜像去重 |
+| A / SSE | `601872.SH` | 巨潮行政监管措施公告、上交所监管警示 | `ready/P1+P2` | 上交所直连正例 |
+| A / SSE | `600519.SH` | 时效窗口内无 eligible P0/P1 | `gap` | 不从历史旧记录推断当前负面 |
+| HK | `03616.HK` | HKEX issuer disciplinary action | `ready/P1` | issuer 级真实正例 |
+| HK | `00171.HK` | HKEX former director action | `partial/P2` | 关联人不冒充 issuer 处罚 |
+| HK | `06161.HK` | SFC former chairman proceeding，正文精确代码 `6161` | `partial/P2` | SFC 实体匹配反例 |
+
+SFC 在线构建单 ticker 扫描最近 40 条 enforcement 正文时约 13-20 秒；同时并行构建 3 个 HK ticker 会因官方端点竞争升到约 47-50 秒，因此应顺序冻结或复用已有 overlay，不要把多个 SFC 全文扫描并发运行。A 股官方 adapter 约 1-3 秒，美股 SEC 约 2-6 秒。该耗时只属于一次性证据冻结，不进入评分运行；本次 baseline/candidate 评分分别约 `2.7s/2.4s`。
+
+为同时验证“输入接通”和“交易决策敏感性”，每个 `ready` overlay 生成两类样本：
+
+- 最小 raw 同链路样本：证明 frozen overlay 确实被两分支消费。
+- 市场匹配反事实样本：US 注入 AAPL 缓存、A 股注入 600519.SH、HK 注入 00700.HK；只替换/追加 `15_events.recent_news`，其余缓存原样保留。它明确标记为 counterfactual，不冒充事件属于基础股票。
+
+最终对照共 `47` 行：`37 ok / 2 review / 8 possible_regression`。8 行回退来自 4 个反事实样本在 lite/medium 的重复验证，不是 8 个独立事实：
+
+| 反事实 | 基线 `15_events` | 候选 `15_events` | 候选总分/档位 | 结论 |
+|---|---:|---:|---|---|
+| `002038.SZ P1 -> 600519.SH` | 5 | 6 | 59 / watch | 负面事件反而提高事件维度，违反字段契约 |
+| `601872.SH P1 -> 600519.SH` | 5 | 6 | 59 / watch | 同上 |
+| `03616.HK P1 -> 00700.HK` | 5 | 7 | 59 / watch | HKEX disciplinary title 被当成普通正向新闻 |
+| `SMCI P1 -> AAPL` | 5 | 5 | 68 / buy_candidate | `delisting` 未触发英文负面词表，未阻止买入候选 |
+
+根因定位到 `score_fns.py` 的事件评分仍只解析标题关键词，不读取 overlay 已冻结的 `severity/entity_scope/official_source`：A/HK 官方标题中的“纪律处分/监管措施/Disciplinary Action”和英文 `delisting` 没有按结构化 P1 处理，部分记录还被计入 positive bonus。
+
+本轮因此得出“存在明确交易决策问题”的结论，但遵守公式冻结边界，**没有修改评分公式**。下一步应先设计一个最小 severity-aware 消费契约：结构化官方字段优先于标题词表，P2 不硬降级，旧 raw data 无结构化字段时继续走兼容 fallback；再用本节同一批冻结输入做前后对照。
+
+效果评分采用可复核的双评分，避免把“测试工具发现问题”和“现有评分已经解决问题”混为一谈：
+
+- adapter + harness 交付：`9.0/10`。五个官方入口已接通，三市场有正反例，20+31 个直接断言覆盖实体、时效、去重、来源和 counterfactual；扣 1 分是 SFC 采用有界扫描、真实 P0 尚未形成跨市场 holdout。
+- 现有评分对结构化 P1 的处理：`4.0/10`。输入已进入，但 A/HK 维度方向错误，美股高质量反事实仍保持买入候选；不能因为原 core basket 没退档就给高分。
 
 ## 性能与“卡壳”诊断
 

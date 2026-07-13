@@ -2,6 +2,41 @@
 
 > 当前文档记录 `codex/scoring-validation-guardrails` 分支上的评分验证、branch-vs-branch harness、证据冻结与文档治理改动。它是开发追溯文档，不是 agent 指令入口；影响 agent 行为的规则仍以 `AGENTS.md` 和相关 harness 文档为准。
 
+## 2026-07-13
+
+### 三市场官方负面事件 adapters 与反事实对照
+
+- `tools/evidence_overlay_builder.py` 新增 A/HK 官方 adapter：
+  - 巨潮：动态读取 `orgId`，按证券代码查询公司公告。
+  - 上交所：按证券代码查询监管措施/纪律处分官方接口。
+  - 深交所：接入监管措施和纪律处分两个官方 report catalog。
+  - HKEX：从 disciplinary overview 精确提取 `Stock Code`。
+  - SFC：读取 enforcement 列表与正文，只有正文精确 stock code 匹配才归属公司。
+- 保留并复验美股 SEC submissions adapter，形成 US/A/HK 同一 overlay schema。
+- 增加统一 guardrails：
+  - 默认 730 天时效窗口；边界日计入，未来/无日期证据剔除。
+  - 官方域名 + 精确实体匹配 + P0/P1 才能生成 `ready`。
+  - 前董事/前主席等关联人事件降为 P2，不能单独进入 branch 对照。
+  - 问询函、关注函、回复函、监管工作函不自动认定为处罚。
+  - 巨潮镜像与交易所原文合并，保留 corroborating provenance，不重复加权。
+- `tools/branch_score_compare.py` 增加市场匹配反事实样本：
+  - US overlay 注入 AAPL 缓存。
+  - A 股 overlay 注入 600519.SH 缓存。
+  - HK overlay 注入 00700.HK 缓存。
+  - 反事实只追加事件字段，其余 raw data 不变，并明确标记，不冒充真实归属。
+- 真实冻结样本：
+  - `SMCI`、`002038.SZ`、`601872.SH`、`03616.HK` 为 ready/P1 正例。
+  - `600519.SH` 为时效窗口 gap 控制。
+  - `00171.HK`、`06161.HK` 为 related-person P2 控制。
+- 性能边界：SFC 单 ticker 40 条正文扫描约 13-20 秒；三个 HK ticker 并行会因端点竞争升至约 47-50 秒，正式流程应顺序冻结或直接复用 overlay。branch runner 仍为约 2-3 秒。
+- 测试：builder direct runner `20/20`，branch harness direct runner `31/31`；`py_compile`、`git diff --check` 通过。项目 venv 没有 pytest，遵守“不重新安装”边界。
+- branch-vs-branch：40 个 raw-mode 项 + 7 个 synthetic，共 `37 ok / 2 review / 8 possible_regression`；8 行是 4 个 counterfactual 在 lite/medium 的重复。
+- 明确发现但未在本轮修公式：
+  - A/HK P1 注入后候选 `15_events` 从 5 升到 6/7。
+  - SMCI P1 注入 AAPL 后仍为 68 分 `buy_candidate`。
+  - 根因是评分函数读取标题词表而不读取结构化 `severity`，且缺少部分中英文官方处罚语义。
+- 本轮效果评分：adapter+harness `9.0/10`；现有评分处理结构化 P1 `4.0/10`。公式保持冻结，下一步只设计 severity-aware 消费契约并复用同一冻结输入验证。
+
 ## 2026-07-09
 
 ### 本轮 · Frozen overlay 接入 branch harness
@@ -97,9 +132,7 @@
 
 ## 后续计划
 
-1. 把 `status=ready` 的 frozen overlay 通过显式开关接入 branch harness。
-2. 用 overlay-backed holdout 验证真实官方负面事件是否影响 `15_events` 和最终买卖档位。
-3. 继续扩展官方结构化 adapter，而不是按个股或新闻站点零散接入：
-   - A 股：巨潮公告、交易所纪律处分、证监会处罚。
-   - 港股：HKEXnews、SFC enforcement。
-4. 保持评分公式冻结；只有 neutral branch comparison 证明存在明确交易决策问题时，才讨论公式修改。
+1. 冻结本轮 overlay 和 counterfactual 输入，不再扩大关键词或继续挑样本。
+2. 设计最小 severity-aware 消费契约：官方结构化 `severity/entity_scope` 优先，P2 只 review，旧 raw data 继续走标题 fallback。
+3. 先补纯函数测试和同输入 branch-vs-branch，再决定是否修改公式；目标是修复已证明的方向错误，不提高其他样本分数。
+4. 增加真实 P0 issuer holdout 和 SFC issuer 级 P1/P0 正例；仍按固定时间窗口和官方列表顺序选样，避免事后挑选。

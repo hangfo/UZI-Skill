@@ -373,6 +373,144 @@ def test_gap_overlay_is_not_promoted_to_branch_case():
     assert branch_score_compare.overlay_to_raw_case(overlay) is None
 
 
+def test_unofficial_overlay_url_is_rejected_even_when_marked_ready():
+    overlay = {
+        "schema_version": "uzi.evidence_overlay.v1",
+        "ticker": "BAD",
+        "target": "negative_event",
+        "status": "ready",
+        "evidence": [
+            {
+                "title": "Unverified penalty",
+                "url": "https://example.com/penalty",
+                "severity": "P1",
+                "official_source": True,
+                "entity_match": "exact",
+            }
+        ],
+    }
+    assert branch_score_compare.overlay_to_raw_case(overlay) is None
+
+
+def test_p2_only_overlay_cannot_enter_branch_comparison_even_if_status_is_wrong():
+    overlay = {
+        "schema_version": "uzi.evidence_overlay.v1",
+        "ticker": "00171.HK",
+        "market": "HK",
+        "target": "negative_event",
+        "status": "ready",
+        "evidence": [
+            {
+                "title": "HKEX action against a former director",
+                "url": "https://www.hkex.com.hk/example",
+                "severity": "P2",
+                "official_source": True,
+                "entity_match": "exact",
+                "entity_scope": "related_person",
+            }
+        ],
+    }
+    assert branch_score_compare.overlay_to_raw_case(overlay) is None
+
+
+def test_a_and_hk_official_overlays_preserve_market_and_entity_metadata():
+    for ticker, market, url in (
+        ("002038.SZ", "A", "https://www.szse.cn/UpFiles/example.pdf"),
+        ("03616.HK", "HK", "https://www.hkex.com.hk/News/example"),
+    ):
+        overlay = {
+            "schema_version": "uzi.evidence_overlay.v1",
+            "ticker": ticker,
+            "market": market,
+            "target": "negative_event",
+            "status": "ready",
+            "as_of": "2026-07-13",
+            "lookback_days": 730,
+            "evidence": [
+                {
+                    "title": "Official issuer disciplinary action",
+                    "url": url,
+                    "source": "official_adapter",
+                    "published_at": "2026-04-29",
+                    "severity": "P1",
+                    "event_type": "issuer_discipline",
+                    "official_source": True,
+                    "entity_match": "exact",
+                    "entity_scope": "issuer",
+                    "match_method": "stock_code",
+                    "age_days": 75,
+                }
+            ],
+        }
+        case = branch_score_compare.overlay_to_raw_case(overlay)
+        assert case is not None
+        assert case["overlay_market"] == market
+        event = case["raw"]["dimensions"]["15_events"]["data"]["recent_news"][0]
+        assert event["entity_scope"] == "issuer"
+        assert event["match_method"] == "stock_code"
+
+
+def test_duplicate_official_overlay_urls_only_enter_once():
+    overlay = {
+        "schema_version": "uzi.evidence_overlay.v1",
+        "ticker": "002038.SZ",
+        "market": "A",
+        "target": "negative_event",
+        "status": "ready",
+        "evidence": [
+            {
+                "title": "Same decision",
+                "url": "https://www.szse.cn/UpFiles/same.pdf",
+                "severity": severity,
+                "official_source": True,
+                "entity_match": "exact",
+            }
+            for severity in ("P2", "P1")
+        ],
+    }
+    case = branch_score_compare.overlay_to_raw_case(overlay)
+    assert case is not None
+    news = case["raw"]["dimensions"]["15_events"]["data"]["recent_news"]
+    assert len(news) == 1
+    assert news[0]["severity"] == "P1"
+
+
+def test_ready_overlay_adds_market_matched_counterfactual_without_mutating_cached_raw():
+    overlay = {
+        "schema_version": "uzi.evidence_overlay.v1",
+        "ticker": "SMCI",
+        "market": "US",
+        "target": "negative_event",
+        "status": "ready",
+        "as_of": "2026-07-13",
+        "lookback_days": 730,
+        "evidence": [
+            {
+                "title": "SMCI 8-K Item 3.01: Notice of Delisting",
+                "url": "https://www.sec.gov/example",
+                "source": "sec_submissions",
+                "published_at": "2025-02-26",
+                "severity": "P1",
+                "event_type": "sec_8k_item",
+                "official_source": True,
+                "entity_match": "exact",
+                "entity_scope": "issuer",
+            }
+        ],
+    }
+    cached_path = branch_score_compare.CACHE / "AAPL" / "raw_data.json"
+    before = cached_path.read_bytes()
+    cases = branch_score_compare.overlay_to_raw_cases(overlay)
+    assert len(cases) == 2
+    counterfactual = next(case for case in cases if case.get("counterfactual_base_ticker") == "AAPL")
+    assert counterfactual["max_candidate_score"] == 64.9
+    assert "1_financials" in counterfactual["raw"]["dimensions"]
+    event_data = counterfactual["raw"]["dimensions"]["15_events"]["data"]
+    assert any("Notice of Delisting" in item.get("title", "") for item in event_data["recent_news"])
+    assert event_data["evidence_overlay"]["counterfactual_base"] == "AAPL"
+    assert cached_path.read_bytes() == before
+
+
 def test_performance_warning_does_not_change_verdict():
     payload = {
         "raw_items": [

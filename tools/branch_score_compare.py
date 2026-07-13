@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import contextlib
 import io
 import json
@@ -9,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import urllib.parse
 from pathlib import Path
 from typing import Any
 
@@ -25,6 +27,8 @@ SCRIPTS = ROOT / "skills" / "deep-analysis" / "scripts"
 CACHE = SCRIPTS / ".cache"
 OUT_DIR = ROOT / "local-ops" / "state" / "branch-score-compare"
 EVIDENCE_OVERLAY_DIR = ROOT / "local-ops" / "state" / "evidence-overlays"
+OFFICIAL_OVERLAY_HOST_SUFFIXES = ("sec.gov", "cninfo.com.cn", "sse.com.cn", "szse.cn", "hkex.com.hk", "sfc.hk")
+OVERLAY_COUNTERFACTUAL_BASE = {"US": "AAPL", "A": "600519.SH", "HK": "00700.HK"}
 
 NEGATIVE_EVENT_TERMS = (
     "fraud",
@@ -914,9 +918,18 @@ def load_evidence_overlay_cases(overlay_dir: Path = EVIDENCE_OVERLAY_DIR) -> lis
             overlay = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             continue
-        case = overlay_to_raw_case(overlay, source_path=path)
-        if case:
-            cases.append(case)
+        cases.extend(overlay_to_raw_cases(overlay, source_path=path))
+    return cases
+
+
+def overlay_to_raw_cases(overlay: dict[str, Any], *, source_path: Path | None = None) -> list[dict[str, Any]]:
+    primary = overlay_to_raw_case(overlay, source_path=source_path)
+    if not primary:
+        return []
+    cases = [primary]
+    counterfactual = _negative_event_counterfactual_case(overlay, primary, source_path=source_path)
+    if counterfactual:
+        cases.append(counterfactual)
     return cases
 
 
@@ -935,15 +948,26 @@ def _negative_event_overlay_case(overlay: dict[str, Any], *, source_path: Path |
     ticker = str(overlay.get("ticker") or "").strip()
     if not ticker:
         return None
-    evidence = [
-        item
-        for item in overlay.get("evidence") or []
-        if isinstance(item, dict)
-        and item.get("title")
-        and item.get("url")
-        and item.get("severity") in {"P0", "P1", "P2"}
-    ]
-    if not evidence:
+    evidence_by_url: dict[str, dict[str, Any]] = {}
+    severity_rank = {"P0": 0, "P1": 1, "P2": 2}
+    for item in overlay.get("evidence") or []:
+        if not isinstance(item, dict):
+            continue
+        url = str(item.get("url") or "").strip()
+        severity = str(item.get("severity") or "")
+        if not item.get("title") or not _is_official_overlay_url(url) or severity not in severity_rank:
+            continue
+        if item.get("official_source") is False or item.get("entity_match") not in {None, "exact"}:
+            continue
+        previous = evidence_by_url.get(url)
+        if previous is None or severity_rank[severity] < severity_rank[str(previous.get("severity"))]:
+            evidence_by_url[url] = item
+    evidence = sorted(
+        evidence_by_url.values(),
+        key=lambda item: (str(item.get("published_at") or ""), str(item.get("url") or "")),
+        reverse=True,
+    )
+    if not evidence or not any(item.get("severity") in {"P0", "P1"} for item in evidence):
         return None
     severities = {str(item.get("severity")) for item in evidence}
     if "P0" in severities:
@@ -969,6 +993,9 @@ def _negative_event_overlay_case(overlay: dict[str, Any], *, source_path: Path |
                             "published_at": item.get("published_at"),
                             "severity": item.get("severity"),
                             "event_type": item.get("event_type"),
+                            "entity_scope": item.get("entity_scope"),
+                            "match_method": item.get("match_method"),
+                            "age_days": item.get("age_days"),
                         }
                         for item in evidence
                     ],
@@ -976,6 +1003,9 @@ def _negative_event_overlay_case(overlay: dict[str, Any], *, source_path: Path |
                         "ticker": ticker,
                         "target": overlay.get("target"),
                         "status": overlay.get("status"),
+                        "market": overlay.get("market"),
+                        "as_of": overlay.get("as_of"),
+                        "lookback_days": overlay.get("lookback_days"),
                         "source_path": str(source_path) if source_path else "",
                     },
                 }
@@ -991,8 +1021,80 @@ def _negative_event_overlay_case(overlay: dict[str, Any], *, source_path: Path |
         "max_candidate_dim_scores": {"15_events": max_dim_score},
         "overlay_source_ticker": ticker,
         "overlay_target": overlay.get("target"),
+        "overlay_market": overlay.get("market"),
         "overlay_path": str(source_path) if source_path else "",
         "overlay_severities": sorted({str(item.get("severity")) for item in evidence}),
+        "raw": raw,
+    }
+
+
+def _is_official_overlay_url(url: str) -> bool:
+    try:
+        host = (urllib.parse.urlsplit(url).hostname or "").lower()
+    except ValueError:
+        return False
+    return any(host == suffix or host.endswith("." + suffix) for suffix in OFFICIAL_OVERLAY_HOST_SUFFIXES)
+
+
+def _negative_event_counterfactual_case(
+    overlay: dict[str, Any],
+    primary: dict[str, Any],
+    *,
+    source_path: Path | None = None,
+) -> dict[str, Any] | None:
+    market = str(overlay.get("market") or "")
+    base_ticker = OVERLAY_COUNTERFACTUAL_BASE.get(market)
+    if not base_ticker:
+        return None
+    base_path = CACHE / base_ticker / "raw_data.json"
+    if not base_path.exists():
+        return None
+    try:
+        raw = json.loads(base_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    raw = copy.deepcopy(raw)
+    dims = raw.setdefault("dimensions", {})
+    event_dim = dims.setdefault("15_events", {})
+    event_data = event_dim.setdefault("data", {})
+    overlay_news = copy.deepcopy(
+        primary["raw"]["dimensions"]["15_events"]["data"].get("recent_news") or []
+    )
+    existing_news = event_data.get("recent_news") or []
+    if not isinstance(existing_news, list):
+        existing_news = []
+    event_data["recent_news"] = existing_news + overlay_news
+    event_data["evidence_overlay"] = {
+        "ticker": overlay.get("ticker"),
+        "target": overlay.get("target"),
+        "status": overlay.get("status"),
+        "market": market,
+        "as_of": overlay.get("as_of"),
+        "lookback_days": overlay.get("lookback_days"),
+        "counterfactual_base": base_ticker,
+        "source_path": str(source_path) if source_path else "",
+    }
+    severities = set(primary.get("overlay_severities") or [])
+    if "P0" in severities:
+        max_score = 59.9
+        max_dim_score = 4.9
+    else:
+        max_score = 64.9
+        max_dim_score = 5.5
+    source_ticker = str(overlay.get("ticker") or "")
+    return {
+        "ticker": f"__overlaycf_{source_ticker}_on_{base_ticker}_negative_event",
+        "group": "evidence_overlay",
+        "role": f"market-matched counterfactual: {source_ticker} official event injected into {base_ticker}",
+        "expectation": "negative_event",
+        "max_candidate_score": max_score,
+        "max_candidate_dim_scores": {"15_events": max_dim_score},
+        "overlay_source_ticker": source_ticker,
+        "overlay_target": overlay.get("target"),
+        "overlay_market": market,
+        "overlay_path": str(source_path) if source_path else "",
+        "overlay_severities": sorted(severities),
+        "counterfactual_base_ticker": base_ticker,
         "raw": raw,
     }
 
