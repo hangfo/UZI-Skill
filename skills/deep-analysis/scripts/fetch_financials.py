@@ -55,8 +55,16 @@ def _apply_operating_cash_flow(out: dict, df_cf) -> None:
     if df_cf is None or df_cf.empty or "经营活动产生的现金流量净额" not in df_cf.columns:
         return
 
-    ocf_history = [_to_yi(v) for v in df_cf["经营活动产生的现金流量净额"].tolist()]
-    ocf_history = [v for v in ocf_history if v != 0]
+    ocf_history = []
+    for raw_value in df_cf["经营活动产生的现金流量净额"].tolist():
+        try:
+            value = float(str(raw_value).replace(",", "").replace("%", ""))
+        except (TypeError, ValueError):
+            continue
+        if math.isfinite(value):
+            # Zero is a valid cash-flow observation. Dropping it would shift an
+            # older period into the "latest" slot and manufacture stale OCF.
+            ocf_history.append(round(value / 1e8, 2))
     if not ocf_history:
         return
 

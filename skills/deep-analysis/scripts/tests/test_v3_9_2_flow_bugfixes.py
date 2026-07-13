@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib.util
 import sys
+import webbrowser
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -77,6 +78,110 @@ def test_cloudflare_tunnel_does_not_auto_install_without_opt_in(monkeypatch):
     assert calls == []
 
 
+def test_no_open_report_suppresses_browser_even_when_available(monkeypatch, tmp_path):
+    """--no-open-report is a hard local/remote browser boundary."""
+    mod = _load_root_run_module()
+    report = tmp_path / "report.html"
+    report.write_text("<html>report</html>", encoding="utf-8")
+    args = SimpleNamespace(
+        output_dir=None,
+        no_open_report=True,
+        no_browser=False,
+        remote=False,
+        ticker="TEST",
+        depth="lite",
+    )
+    opened = []
+    monkeypatch.setattr(webbrowser, "open", lambda url: opened.append(url))
+
+    mod._post_process_report(args, {"has_browser": True}, tmp_path, report)
+
+    assert opened == []
+
+
+def test_remote_shutdown_always_cleans_server_and_tunnel(monkeypatch):
+    """Ctrl+C must close the HTTP server and reap the tunnel process."""
+    mod = _load_root_run_module()
+
+    class InterruptingEvent:
+        def wait(self):
+            raise KeyboardInterrupt
+
+    class FakeServer:
+        shutdown_called = False
+        close_called = False
+
+        def shutdown(self):
+            self.shutdown_called = True
+
+        def server_close(self):
+            self.close_called = True
+
+    class FakeTunnel:
+        terminate_called = False
+        wait_timeout = None
+
+        def poll(self):
+            return None
+
+        def terminate(self):
+            self.terminate_called = True
+
+        def wait(self, timeout):
+            self.wait_timeout = timeout
+
+    server = FakeServer()
+    tunnel = FakeTunnel()
+    monkeypatch.setattr(mod.threading, "Event", lambda: InterruptingEvent())
+
+    mod.wait_for_remote_shutdown(server, tunnel)
+
+    assert server.shutdown_called is True
+    assert server.close_called is True
+    assert tunnel.terminate_called is True
+    assert tunnel.wait_timeout == 5
+
+
+def test_remote_post_process_forwards_install_opt_in(monkeypatch, tmp_path):
+    """Remote post-processing must forward opt-in and hand cleanup the same objects."""
+    mod = _load_root_run_module()
+    report = tmp_path / "report.html"
+    report.write_text("<html>report</html>", encoding="utf-8")
+    args = SimpleNamespace(
+        output_dir=None,
+        no_open_report=True,
+        no_browser=True,
+        remote=True,
+        ticker="TEST",
+        depth="lite",
+        port=8976,
+        install_cloudflared=True,
+    )
+    server = object()
+    tunnel = object()
+    seen = {}
+    monkeypatch.setattr(mod, "serve_report", lambda standalone, port: server)
+
+    def fake_tunnel(port, install=False):
+        seen["tunnel_args"] = (port, install)
+        return "https://example.trycloudflare.com", tunnel
+
+    monkeypatch.setattr(mod, "start_cloudflare_tunnel", fake_tunnel)
+    monkeypatch.setattr(
+        mod,
+        "wait_for_remote_shutdown",
+        lambda got_server, got_tunnel=None: seen.update(
+            server=got_server, tunnel=got_tunnel
+        ),
+    )
+
+    mod._post_process_report(args, {"has_browser": False}, tmp_path, report)
+
+    assert seen["tunnel_args"] == (8976, True)
+    assert seen["server"] is server
+    assert seen["tunnel"] is tunnel
+
+
 def test_agent_analysis_errors_fall_back_to_script_stub():
     """Structural agent_analysis errors must be discarded before synthesis merge."""
     import run_real_test as rrt
@@ -106,6 +211,21 @@ def test_financials_exposes_ocf_fields():
     assert "fcf_margin" not in out["financial_health"]
 
 
+def test_financials_preserves_zero_as_latest_ocf():
+    """A real zero OCF must not be replaced by an older non-zero period."""
+    import fetch_financials as ff
+
+    out = {"net_profit_history": [10.0]}
+    df_cf = pd.DataFrame({"经营活动产生的现金流量净额": [0, "—", 8e8]})
+
+    ff._apply_operating_cash_flow(out, df_cf)
+
+    assert out["ocf"] == "0.0亿"
+    assert out["operating_cash_flow_yi"] == 0.0
+    assert out["ocf_history"] == [0.0, 8.0]
+    assert out["ocf_to_net_income_ratio"] == 0.0
+
+
 def test_stock_features_reads_ocf_to_net_income_ratio():
     from lib.stock_features import extract_features
 
@@ -126,6 +246,33 @@ def test_stock_features_reads_ocf_to_net_income_ratio():
     features = extract_features(raw, raw["dimensions"])
 
     assert features["ocf_to_net_income_ratio"] == 0.42
+
+
+def test_stock_features_preserves_canonical_zero_ocf_ratio():
+    """A top-level zero ratio must win over a stale nested fallback value."""
+    from lib.stock_features import extract_features
+
+    raw = {
+        "ticker": "TEST",
+        "market": "A",
+        "dimensions": {
+            "0_basic": {"data": {"name": "测试", "price": 10, "market_cap_yi": 100}},
+            "1_financials": {"data": {
+                "net_profit_history": [10.0],
+                "revenue_history": [100.0],
+                "ocf_to_net_income_ratio": 0.0,
+                "financial_health": {
+                    "debt_ratio": 20,
+                    "current_ratio": 2,
+                    "ocf_to_net_income_ratio": 1.2,
+                },
+            }},
+        },
+    }
+
+    features = extract_features(raw, raw["dimensions"])
+
+    assert features["ocf_to_net_income_ratio"] == 0.0
 
 
 def test_peers_self_only_fallback_when_industry_missing(monkeypatch):
