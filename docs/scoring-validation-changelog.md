@@ -4,6 +4,18 @@
 
 ## 2026-07-13
 
+### `98b14c7` · upstream 集成正式合回评分分支并关闭零值 OCF 边界
+
+- `codex/scoring-validation-guardrails` 已从 `120a6c9` 以 `--ff-only` 快进到隔离集成提交 `98b14c7`；原 merge commit `71be11f` 的双亲 ancestry 保持不变，没有重演冲突或 cherry-pick。
+- 合回前的第一性原理审计发现并修复一个有效零值边界：最新 OCF 为 `0` 时不得过滤并错把旧期当最新期；顶层 canonical `ocf_to_net_income_ratio=0.0` 不得被嵌套旧值覆盖。未修改评分公式、权重或事件阈值。
+- 新增 direct report / remote 控制流测试：`--no-open-report` 硬阻止浏览器；remote 显式安装 opt-in 正确透传；Ctrl+C 后 HTTP server 与 tunnel 均清理。基金 runner 另以 mock pipeline 验证二次确认、逐股失败不中断和汇总链接，没有触发真实 859 长循环。
+- 正式分支验证：`py_compile`；flow/data-contract `15/15`；fund runner `7/7`；scoring consistency + branch harness + overlay builder + school scores `99/99`，总计 `121/121`；lite/medium 缓存篮子通过。
+- 最终 merge gate：baseline=`120a6c9`，candidate=`98b14c7`，core + holdout + discovered cache + frozen overlays + synthetic adversarial 共 `60 raw + 7 synthetic = 67` 项，结果 `67 ok / 0 review / 0 possible_regression`。
+- 所有 investment / overall / fundamental / panel 分数变化为 `0`，档位变化为 `0`。P0/P1 仍阻止不合理买入；P2、resolved、伪造、过期事件仍不误伤。
+- 纯评分耗时本次观测为 `2.118s -> 1.932s`，候选约快 `8.8%`，`0` performance warning；该幅度按短进程噪声处理，只下结论“无性能回退”。
+- 最终效果评分 `9.4/10`：上游修复已值得在正式评分分支吸收，且新增零值/清理对抗边界；剩余扣分仅是本轮安全边界内未运行真实网络 OCF/估值、真实基金 859 和真实 Cloudflare tunnel 端到端。
+- 下一主线仍是官方事件解决态的 shadow overlay 关联，不继续调权重或扩标题关键词；建议模型 `GPT-5.6 Sol`，`高推理`。
+
 ### `71be11f` · 隔离吸收 upstream `fce996c` 并保持评分零漂移
 
 - 从稳定检查点 `120a6c9` 创建 `codex/scoring-validation-upstream-fce996c`，以 merge 方式吸收 upstream `fce996c`，保留双亲 ancestry；未修改 `codex/scoring-validation-guardrails` 或 `codex/windows-local-stable`。

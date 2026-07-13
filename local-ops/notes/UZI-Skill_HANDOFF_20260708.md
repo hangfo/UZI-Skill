@@ -1,5 +1,16 @@
 # UZI-Skill 交接记录 - 2026-07-08
 
+## 2026-07-13 upstream fce996c 正式合回完成
+
+- 正式分支：`codex/scoring-validation-guardrails`；代码检查点：`98b14c7`。它由稳定点 `120a6c9` 对隔离分支执行 `--ff-only` 得到，保留 `71be11f` 的 upstream 双亲 ancestry。
+- 隔离分支 `codex/scoring-validation-upstream-fce996c` 已先推送到个人 origin；正式分支推送目标仅为个人 `origin/codex/scoring-validation-guardrails`。`codex/windows-local-stable` 未修改，upstream push 仍为 `DISABLED`，未创建原作者 PR。
+- 合回前额外修复：合法最新 OCF `0` 不再被过滤成旧期；canonical 顶层 OCF/净利比 `0.0` 不再回退到嵌套旧值。评分公式、权重、结构化事件 P0/P1 阈值均未改。
+- 正式分支专项：flow/data-contract `15/15`、fund runner `7/7`、既有 direct runner `99/99`，总计 `121/121`；`py_compile` 与 lite/medium 缓存篮子通过。
+- 最终对照：`local-ops/state/branch-score-compare/20260713-upstream-fce996c-final-merge-gate.md`，`67 ok / 0 review / 0 possible_regression`；所有分数和档位变化为 0。
+- 性能：`2.118s -> 1.932s`，本次约快 `8.8%`，无告警；只判定无回退，不把短时差异解释为确定优化收益。
+- 公正评分：正式集成 `9.4/10`。确定性测试已覆盖 fund 二次确认/部分失败、report no-open、remote opt-in 和清理；真实网络 OCF/估值、真实 859 基金与真实 Cloudflare tunnel 仍是外部端到端残余风险。
+- 下一项：只做官方 resolution/remediation/closed 的 shadow overlay 生命周期关联，再用同一冻结输入验证；不扩关键词、不改权重。建议 `GPT-5.6 Sol`，`高推理`。
+
 ## 2026-07-13 upstream fce996c 隔离集成
 
 - 隔离分支：`codex/scoring-validation-upstream-fce996c`；merge commit：`71be11f1ebb6058faf03429b1208dfc0b11388a0`，双亲为稳定检查点 `120a6c9` 与 upstream `fce996c`。
