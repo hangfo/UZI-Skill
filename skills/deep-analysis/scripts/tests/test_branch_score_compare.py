@@ -343,6 +343,189 @@ def test_ready_negative_event_overlay_becomes_raw_case_without_cache():
     assert payload["raw_items"][0]["case"]["overlay_source_ticker"] == "SMCI"
 
 
+def test_verified_resolved_overlay_is_non_harm_control_not_active_risk():
+    event_id = "sec_submissions:active"
+    overlay = {
+        "schema_version": "uzi.evidence_overlay.v1",
+        "ticker": "SMCI",
+        "market": "US",
+        "target": "negative_event",
+        "status": "ready",
+        "evidence": [
+            {
+                "title": "SMCI Item 3.01 prior noncompliance",
+                "url": "https://www.sec.gov/Archives/edgar/data/1375365/active.htm",
+                "source": "sec_submissions",
+                "published_at": "2024-09-20",
+                "severity": "P1",
+                "event_type": "sec_8k_item",
+                "official_source": True,
+                "entity_match": "exact",
+                "entity_scope": "issuer",
+                "source_record_id": "active",
+                "canonical_event_id": event_id,
+                "resolution_status": "closed",
+                "lifecycle_topic": "nasdaq_periodic_reporting_rule_5250_c_1",
+                "resolution_evidence": {
+                    "resolution_status": "closed",
+                    "official_source": True,
+                    "entity_match": "exact",
+                    "entity_scope": "issuer",
+                    "url": "https://www.sec.gov/Archives/edgar/data/1375365/closed.htm",
+                    "published_at": "2025-02-26",
+                    "source_record_id": "closed",
+                    "linked_event_id": event_id,
+                    "lifecycle_topic": "nasdaq_periodic_reporting_rule_5250_c_1",
+                },
+            }
+        ],
+    }
+
+    case = branch_score_compare.overlay_to_raw_case(overlay)
+
+    assert case is not None
+    assert case["expectation"] == "resolved_negative_event"
+    assert case["overlay_active_severities"] == []
+    assert case["overlay_resolved_severities"] == ["P1"]
+    assert case["min_candidate_dim_scores"]["15_events"] == 5.0
+
+
+def test_cross_issuer_official_resolution_stays_active_overlay_risk():
+    event_id = "sec_submissions:active"
+    overlay = {
+        "schema_version": "uzi.evidence_overlay.v1",
+        "ticker": "SMCI",
+        "market": "US",
+        "target": "negative_event",
+        "status": "ready",
+        "evidence": [
+            {
+                "title": "SMCI Item 3.01 prior noncompliance",
+                "url": "https://www.sec.gov/Archives/edgar/data/1375365/active.htm",
+                "published_at": "2024-09-20",
+                "severity": "P1",
+                "official_source": True,
+                "entity_match": "exact",
+                "entity_scope": "issuer",
+                "source_record_id": "active",
+                "canonical_event_id": event_id,
+                "resolution_status": "closed",
+                "lifecycle_topic": "nasdaq_periodic_reporting_rule_5250_c_1",
+                "resolution_evidence": {
+                    "resolution_status": "closed",
+                    "official_source": True,
+                    "entity_match": "exact",
+                    "entity_scope": "issuer",
+                    "url": "https://www.sec.gov/Archives/edgar/data/320193/closed.htm",
+                    "published_at": "2025-02-26",
+                    "source_record_id": "closed",
+                    "linked_event_id": event_id,
+                    "lifecycle_topic": "nasdaq_periodic_reporting_rule_5250_c_1",
+                },
+            }
+        ],
+    }
+
+    case = branch_score_compare.overlay_to_raw_case(overlay)
+
+    assert case is not None
+    assert case["expectation"] == "negative_event"
+    assert case["overlay_active_severities"] == ["P1"]
+
+
+def test_unverified_resolution_claim_remains_active_overlay_risk():
+    overlay = {
+        "schema_version": "uzi.evidence_overlay.v1",
+        "ticker": "SMCI",
+        "market": "US",
+        "target": "negative_event",
+        "status": "ready",
+        "evidence": [
+            {
+                "title": "SMCI Item 3.01 prior noncompliance",
+                "url": "https://www.sec.gov/Archives/active.htm",
+                "published_at": "2024-09-20",
+                "severity": "P1",
+                "official_source": True,
+                "entity_match": "exact",
+                "entity_scope": "issuer",
+                "source_record_id": "active",
+                "canonical_event_id": "sec_submissions:active",
+                "resolution_status": "closed",
+            }
+        ],
+    }
+
+    case = branch_score_compare.overlay_to_raw_case(overlay)
+
+    assert case is not None
+    assert case["expectation"] == "negative_event"
+    assert case["overlay_active_severities"] == ["P1"]
+    assert case["max_candidate_score"] == 65.0
+
+
+def test_mixed_active_and_resolved_overlay_adds_realistic_resolution_shadow_cases():
+    event_id = "sec_submissions:resolved-event"
+    resolved = {
+        "title": "Prior Nasdaq periodic-report noncompliance",
+        "url": "https://www.sec.gov/Archives/edgar/data/1375365/resolved-event.htm",
+        "published_at": "2024-09-20",
+        "severity": "P1",
+        "official_source": True,
+        "entity_match": "exact",
+        "entity_scope": "issuer",
+        "source_record_id": "resolved-event",
+        "canonical_event_id": event_id,
+        "resolution_status": "closed",
+        "lifecycle_topic": "nasdaq_periodic_reporting_rule_5250_c_1",
+        "age_days": 661,
+        "resolution_evidence": {
+            "resolution_status": "closed",
+            "official_source": True,
+            "entity_match": "exact",
+            "entity_scope": "issuer",
+            "url": "https://www.sec.gov/Archives/edgar/data/1375365/resolution.htm",
+            "published_at": "2025-02-26",
+            "source_record_id": "resolution",
+            "linked_event_id": event_id,
+            "lifecycle_topic": "nasdaq_periodic_reporting_rule_5250_c_1",
+        },
+    }
+    active = {
+        "title": "Unresolved auditor resignation",
+        "url": "https://www.sec.gov/Archives/active-auditor.htm",
+        "published_at": "2024-11-18",
+        "severity": "P1",
+        "official_source": True,
+        "entity_match": "exact",
+        "entity_scope": "issuer",
+        "source_record_id": "active-auditor",
+        "canonical_event_id": "sec_submissions:active-auditor",
+        "resolution_status": "unknown",
+        "age_days": 602,
+    }
+    overlay = {
+        "schema_version": "uzi.evidence_overlay.v1",
+        "ticker": "SMCI",
+        "market": "US",
+        "target": "negative_event",
+        "status": "ready",
+        "as_of": "2026-07-13",
+        "evidence": [active, resolved],
+    }
+
+    cases = branch_score_compare.overlay_to_raw_cases(overlay)
+    by_expectation = {}
+    for case in cases:
+        by_expectation.setdefault(case["expectation"], []).append(case)
+
+    assert len(cases) == 4
+    assert len(by_expectation["negative_event"]) == 2
+    assert len(by_expectation["resolved_negative_event"]) == 2
+    assert any(case["ticker"] == "__overlayres_SMCI_negative_event" for case in cases)
+    assert any(case["ticker"].endswith("_resolution") for case in cases)
+
+
 def test_p0_negative_event_overlay_has_stricter_boundary_than_p1():
     overlay = {
         "schema_version": "uzi.evidence_overlay.v1",

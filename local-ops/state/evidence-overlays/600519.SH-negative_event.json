@@ -1,0 +1,102 @@
+{
+  "schema_version": "uzi.evidence_overlay.v1",
+  "ticker": "600519.SH",
+  "market": "A",
+  "target": "negative_event",
+  "status": "gap",
+  "confidence": {
+    "level": "low",
+    "score": 20,
+    "factors": [
+      "evidence gap remains; do not infer missing facts",
+      "negative event is not inferred from generic news or filings"
+    ],
+    "label_zh": "低",
+    "factors_zh": [
+      "仍存在证据缺口，不能推断缺失事实",
+      "负面事件不能从泛新闻或普通披露中推断"
+    ]
+  },
+  "evidence": [],
+  "field_mapping": {
+    "cninfo": {
+      "events": []
+    },
+    "csrc_penalties": {
+      "events": []
+    },
+    "sse_discipline": {
+      "events": [
+        {
+          "severity": "P2",
+          "event_type": "sse_regulatory_measure",
+          "published_at": "2020-12-31",
+          "source_record_id": "5294304_28_10007",
+          "entity_scope": "related_person"
+        }
+      ]
+    }
+  },
+  "source_plan": [
+    {
+      "source": "cninfo",
+      "role": "official company announcements and regulator decisions"
+    },
+    {
+      "source": "csrc_penalties",
+      "role": "central regulator penalty decisions"
+    },
+    {
+      "source": "sse_discipline",
+      "role": "SSE discipline and regulatory measures for .SH"
+    },
+    {
+      "source": "szse_discipline",
+      "role": "SZSE discipline and regulatory measures for .SZ"
+    }
+  ],
+  "source_coverage": [
+    {
+      "source": "cninfo",
+      "status": "ok",
+      "scanned": 20,
+      "matched": 0,
+      "failed": 0,
+      "eligible": 0
+    },
+    {
+      "source": "csrc_penalties",
+      "status": "ok",
+      "scanned": 20,
+      "matched": 0,
+      "failed": 0,
+      "eligible": 0
+    },
+    {
+      "source": "sse_discipline",
+      "status": "ok",
+      "scanned": 4,
+      "matched": 1,
+      "failed": 0,
+      "eligible": 0
+    }
+  ],
+  "errors": [],
+  "fetched_at": "2026-07-13T08:20:19Z",
+  "as_of": "2026-07-13",
+  "lookback_days": 730,
+  "performance": {
+    "elapsed_sec": 4.322
+  },
+  "guardrails": [
+    "online evidence is frozen before branch comparison",
+    "missing evidence stays a gap; do not infer facts",
+    "same overlay must be reused for baseline and candidate refs"
+  ],
+  "display": {
+    "target_label_zh": "负面事件证据",
+    "status_label_zh": "证据缺口",
+    "confidence_label_zh": "低",
+    "summary_zh": "600519.SH 负面事件证据：证据缺口，置信度 低"
+  }
+}

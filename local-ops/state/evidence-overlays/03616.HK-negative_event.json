@@ -1,0 +1,118 @@
+{
+  "schema_version": "uzi.evidence_overlay.v1",
+  "ticker": "03616.HK",
+  "market": "HK",
+  "target": "negative_event",
+  "status": "ready",
+  "confidence": {
+    "level": "high",
+    "score": 85,
+    "factors": [
+      "required evidence is present and frozen"
+    ],
+    "label_zh": "高",
+    "factors_zh": [
+      "必要证据已存在并冻结"
+    ]
+  },
+  "evidence": [
+    {
+      "source": "hkex_disciplinary_action",
+      "url": "https://www.hkex.com.hk/News/Regulatory-Announcements/2026/260709news?sc_lang=en",
+      "title": "Exchange’s Disciplinary Action against Ever Reach Group (Holdings) Company Limited (Stock Code: 3616), Four Directors and Five Senior Management Members",
+      "published_at": "2026-07-09",
+      "fetched_at": "2026-07-13T08:19:59Z",
+      "fields": [
+        "15_events.recent_news"
+      ],
+      "severity": "P1",
+      "event_type": "hkex_issuer_discipline",
+      "official_source": true,
+      "entity_match": "exact",
+      "entity_scope": "issuer",
+      "match_method": "title_stock_code",
+      "source_record_id": "https://www.hkex.com.hk/News/Regulatory-Announcements/2026/260709news?sc_lang=en",
+      "canonical_event_id": "hkex_disciplinary_action:https://www.hkex.com.hk/News/Regulatory-Announcements/2026/260709news?sc_lang=en",
+      "resolution_status": "unknown",
+      "age_days": 4,
+      "severity_label_zh": "P1 重大风险升级"
+    }
+  ],
+  "field_mapping": {
+    "hkex_discipline": {
+      "events": [
+        {
+          "severity": "P1",
+          "event_type": "hkex_issuer_discipline",
+          "published_at": "2026-07-09",
+          "source_record_id": "https://www.hkex.com.hk/News/Regulatory-Announcements/2026/260709news?sc_lang=en",
+          "entity_scope": "issuer"
+        }
+      ]
+    },
+    "hkex_critical_filings": {
+      "events": []
+    },
+    "sfc_enforcement": {
+      "events": []
+    }
+  },
+  "source_plan": [
+    {
+      "source": "hkex_discipline",
+      "role": "HKEX issuer and related-person disciplinary actions"
+    },
+    {
+      "source": "hkex_critical_filings",
+      "role": "issuer-filed suspension and solvency events"
+    },
+    {
+      "source": "sfc_enforcement",
+      "role": "regulator enforcement"
+    }
+  ],
+  "source_coverage": [
+    {
+      "source": "hkex_discipline",
+      "status": "ok",
+      "scanned": 3,
+      "matched": 1,
+      "failed": 0,
+      "eligible": 1
+    },
+    {
+      "source": "hkex_critical_filings",
+      "status": "ok",
+      "scanned": 55,
+      "matched": 0,
+      "failed": 0,
+      "eligible": 0
+    },
+    {
+      "source": "sfc_enforcement",
+      "status": "ok",
+      "scanned": 20,
+      "matched": 0,
+      "failed": 0,
+      "eligible": 0
+    }
+  ],
+  "errors": [],
+  "fetched_at": "2026-07-13T08:19:53Z",
+  "as_of": "2026-07-13",
+  "lookback_days": 730,
+  "performance": {
+    "elapsed_sec": 12.572
+  },
+  "guardrails": [
+    "online evidence is frozen before branch comparison",
+    "missing evidence stays a gap; do not infer facts",
+    "same overlay must be reused for baseline and candidate refs"
+  ],
+  "display": {
+    "target_label_zh": "负面事件证据",
+    "status_label_zh": "证据已冻结",
+    "confidence_label_zh": "高",
+    "summary_zh": "03616.HK 负面事件证据：证据已冻结，置信度 高"
+  }
+}

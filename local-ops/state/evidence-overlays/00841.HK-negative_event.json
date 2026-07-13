@@ -1,0 +1,118 @@
+{
+  "schema_version": "uzi.evidence_overlay.v1",
+  "ticker": "00841.HK",
+  "market": "HK",
+  "target": "negative_event",
+  "status": "ready",
+  "confidence": {
+    "level": "high",
+    "score": 85,
+    "factors": [
+      "required evidence is present and frozen"
+    ],
+    "label_zh": "高",
+    "factors_zh": [
+      "必要证据已存在并冻结"
+    ]
+  },
+  "evidence": [
+    {
+      "source": "hkex_issuer_critical_filing",
+      "url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0713/2026071300009.pdf",
+      "title": "SUPPLEMENTAL ANNOUNCEMENT - INSIDER INFORMATION: (1) DELAY IN PUBLICATION OF ANNUAL RESULTS AND (2) SUSPENSION OF TRADING",
+      "published_at": "2026-07-13",
+      "fetched_at": "2026-07-13T08:19:16Z",
+      "fields": [
+        "15_events.recent_news"
+      ],
+      "severity": "P1",
+      "event_type": "hkex_issuer_suspension_risk",
+      "official_source": true,
+      "entity_match": "exact",
+      "entity_scope": "issuer",
+      "match_method": "predefined_document_stock_code",
+      "source_record_id": "/listedco/listconews/sehk/2026/0713/2026071300009.pdf",
+      "canonical_event_id": "hkex_issuer_critical_filing:/listedco/listconews/sehk/2026/0713/2026071300009.pdf",
+      "resolution_status": "unknown",
+      "age_days": 0,
+      "severity_label_zh": "P1 重大风险升级"
+    }
+  ],
+  "field_mapping": {
+    "hkex_discipline": {
+      "events": []
+    },
+    "hkex_critical_filings": {
+      "events": [
+        {
+          "severity": "P1",
+          "event_type": "hkex_issuer_suspension_risk",
+          "published_at": "2026-07-13",
+          "source_record_id": "/listedco/listconews/sehk/2026/0713/2026071300009.pdf",
+          "entity_scope": "issuer"
+        }
+      ]
+    },
+    "sfc_enforcement": {
+      "events": []
+    }
+  },
+  "source_plan": [
+    {
+      "source": "hkex_discipline",
+      "role": "HKEX issuer and related-person disciplinary actions"
+    },
+    {
+      "source": "hkex_critical_filings",
+      "role": "issuer-filed suspension and solvency events"
+    },
+    {
+      "source": "sfc_enforcement",
+      "role": "regulator enforcement"
+    }
+  ],
+  "source_coverage": [
+    {
+      "source": "hkex_discipline",
+      "status": "ok",
+      "scanned": 3,
+      "matched": 0,
+      "failed": 0,
+      "eligible": 0
+    },
+    {
+      "source": "hkex_critical_filings",
+      "status": "ok",
+      "scanned": 55,
+      "matched": 1,
+      "failed": 0,
+      "eligible": 1
+    },
+    {
+      "source": "sfc_enforcement",
+      "status": "ok",
+      "scanned": 20,
+      "matched": 0,
+      "failed": 0,
+      "eligible": 0
+    }
+  ],
+  "errors": [],
+  "fetched_at": "2026-07-13T08:19:06Z",
+  "as_of": "2026-07-13",
+  "lookback_days": 730,
+  "performance": {
+    "elapsed_sec": 13.592
+  },
+  "guardrails": [
+    "online evidence is frozen before branch comparison",
+    "missing evidence stays a gap; do not infer facts",
+    "same overlay must be reused for baseline and candidate refs"
+  ],
+  "display": {
+    "target_label_zh": "负面事件证据",
+    "status_label_zh": "证据已冻结",
+    "confidence_label_zh": "高",
+    "summary_zh": "00841.HK 负面事件证据：证据已冻结，置信度 高"
+  }
+}

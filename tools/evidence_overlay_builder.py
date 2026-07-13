@@ -341,6 +341,15 @@ def _fill_negative_event_overlay(
 ) -> None:
     ticker = overlay["ticker"]
     market = overlay["market"]
+    overlay["lifecycle"] = {
+        "status": "not_evaluated",
+        "links": [],
+        "policy": [
+            "resolution requires a later exact-issuer official record",
+            "resolution must match the same narrow event family and rule topic",
+            "penalties, fraud, non-reliance and generic remediation stay unresolved",
+        ],
+    }
     cache_events = _negative_events_from_cache(ticker)
     if cache_events:
         overlay["field_mapping"]["cache_events"] = {"events": cache_events}
@@ -351,6 +360,8 @@ def _fill_negative_event_overlay(
             overlay,
             timeout_sec=timeout_sec,
             max_items=max_items,
+            lookback_days=lookback_days,
+            as_of=as_of,
         )
     elif market == "A" and network:
         _collect_a_share_negative_events(
@@ -419,6 +430,8 @@ def _collect_us_negative_events(
     *,
     timeout_sec: int,
     max_items: int,
+    lookback_days: int,
+    as_of: dt.date,
 ) -> None:
     ticker = str(overlay["ticker"])
     try:
@@ -428,20 +441,41 @@ def _collect_us_negative_events(
             _record_source_error(overlay, source, exc)
         return
 
-    adapters: list[tuple[str, Any]] = [
-        (
+    try:
+        events = extract_sec_negative_events(
+            fetch_sec_submissions(cik, timeout_sec=timeout_sec),
+            cik=cik,
+            ticker=ticker,
+            company_name=company_name,
+            # A resolving 3.01 filing is removed from negative evidence after
+            # content review, so scan beyond the display limit first.
+            max_items=max(max_items * 2, max_items + 3),
+        )
+        events, links, lifecycle_scanned, lifecycle_errors = enrich_sec_listing_lifecycle(
+            events,
+            timeout_sec=timeout_sec,
+            lookback_days=lookback_days,
+            as_of=as_of,
+        )
+        overlay["lifecycle"]["links"].extend(links)
+        overlay["lifecycle"]["status"] = (
+            "linked" if links else "partial" if lifecycle_errors else "no_match"
+        )
+        overlay["lifecycle"]["scanned"] = lifecycle_scanned
+        if lifecycle_errors:
+            overlay["lifecycle"]["errors"] = lifecycle_errors
+        _add_adapter_events(overlay, "sec_submissions", events)
+        _record_source_coverage(
+            overlay,
             "sec_submissions",
-            lambda: (
-                extract_sec_negative_events(
-                    fetch_sec_submissions(cik, timeout_sec=timeout_sec),
-                    cik=cik,
-                    ticker=ticker,
-                    company_name=company_name,
-                    max_items=max_items,
-                ),
-                1,
-            ),
-        ),
+            "partial" if lifecycle_errors else "ok",
+            matched=len(events),
+            scanned=1,
+        )
+    except Exception as exc:  # noqa: BLE001 - other authority layers remain usable
+        _record_source_error(overlay, "sec_submissions", exc)
+
+    adapters: list[tuple[str, Any]] = [
         (
             "sec_litigation_releases",
             lambda: fetch_sec_release_negative_events(
@@ -1403,12 +1437,183 @@ def extract_sec_negative_events(
                     "entity_scope": "issuer",
                     "match_method": "SEC CIK+ticker",
                     "source_record_id": accession,
+                    "canonical_event_id": f"sec_submissions:{accession}",
+                    "resolution_status": "unknown",
                 }
             )
             if len(rows) >= max_items:
                 return rows
     rows.sort(key=lambda item: str(item.get("published_at") or ""), reverse=True)
     return rows[:max_items]
+
+
+def classify_sec_listing_lifecycle(text: str) -> dict[str, str] | None:
+    """Classify only high-precision Nasdaq periodic-report compliance lifecycle text.
+
+    Item 3.01 covers many unrelated listing rules.  We intentionally support
+    only Rule 5250(c)(1), where a later issuer filing can explicitly say the
+    company now complies and the matter is closed.  Extensions, plans and
+    expected future compliance are not resolutions.
+    """
+    normalized = re.sub(r"\s+", " ", html.unescape(text)).lower()
+    if "5250(c)(1)" not in normalized:
+        return None
+    topic = "nasdaq_periodic_reporting_rule_5250_c_1"
+    lifecycle_key = "sec:nasdaq:5250(c)(1):periodic_reporting"
+    resolved = (
+        "now complies with nasdaq listing rule 5250(c)(1)" in normalized
+        and "matter is now closed" in normalized
+    )
+    if resolved:
+        return {
+            "phase": "resolved",
+            "resolution_status": "closed",
+            "lifecycle_topic": topic,
+            "lifecycle_key": lifecycle_key,
+            "resolution_signal": "now_complies_and_matter_closed",
+        }
+    if "not in compliance with nasdaq listing rule 5250(c)(1)" in normalized:
+        return {
+            "phase": "active",
+            "resolution_status": "unknown",
+            "lifecycle_topic": topic,
+            "lifecycle_key": lifecycle_key,
+            "resolution_signal": "explicit_noncompliance",
+        }
+    if (
+        "nasdaq has granted" in normalized
+        and "exception" in normalized
+        and "listing rule 5250(c)(1)" in normalized
+    ):
+        return {
+            "phase": "active",
+            "resolution_status": "unknown",
+            "lifecycle_topic": topic,
+            "lifecycle_key": lifecycle_key,
+            "resolution_signal": "temporary_exception_pending_filings",
+        }
+    return None
+
+
+def apply_sec_listing_lifecycle(
+    events: list[dict[str, Any]],
+    classifications: dict[str, dict[str, str]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Link later verified resolution filings to earlier events of the same topic."""
+    rows = [dict(item) for item in events]
+    for row in rows:
+        classified = classifications.get(str(row.get("source_record_id") or ""))
+        if classified:
+            row.update(classified)
+
+    active_rows = [row for row in rows if row.get("phase") == "active"]
+    resolutions = [row for row in rows if row.get("phase") == "resolved"]
+    links: list[dict[str, Any]] = []
+    resolving_ids: set[str] = set()
+    for resolution in resolutions:
+        resolved_date = _coerce_date(resolution.get("published_at"))
+        if not resolved_date:
+            continue
+        resolution_id = str(resolution.get("source_record_id") or "")
+        # A filing that explicitly says the matter is closed is never a fresh
+        # negative event, even when the earlier notice fell outside this scan.
+        resolving_ids.add(resolution_id)
+        matched: list[dict[str, Any]] = []
+        for event in active_rows:
+            event_date = _coerce_date(event.get("published_at"))
+            if (
+                not event_date
+                or event_date >= resolved_date
+                or event.get("lifecycle_key") != resolution.get("lifecycle_key")
+            ):
+                continue
+            matched.append(event)
+        if not matched:
+            continue
+        matched_ids: list[str] = []
+        for event in matched:
+            event_id = str(
+                event.get("canonical_event_id")
+                or event.get("source_record_id")
+                or event.get("url")
+            )
+            matched_ids.append(event_id)
+            event["resolution_status"] = str(resolution.get("resolution_status") or "closed")
+            event["resolved_at"] = resolved_date.isoformat()
+            event["resolution_evidence"] = {
+                "resolution_status": event["resolution_status"],
+                "official_source": True,
+                "entity_match": "exact",
+                "entity_scope": "issuer",
+                "url": str(resolution.get("url") or ""),
+                "published_at": resolved_date.isoformat(),
+                "source_record_id": resolution_id,
+                "linked_event_id": event_id,
+                "lifecycle_topic": event.get("lifecycle_topic"),
+                "match_method": "SEC CIK+ticker+Item3.01+Nasdaq Rule 5250(c)(1)",
+                "resolution_signal": resolution.get("resolution_signal"),
+            }
+        links.append(
+            {
+                "resolution_status": str(resolution.get("resolution_status") or "closed"),
+                "official_source": True,
+                "entity_match": "exact",
+                "entity_scope": "issuer",
+                "url": str(resolution.get("url") or ""),
+                "title": str(resolution.get("title") or ""),
+                "published_at": resolved_date.isoformat(),
+                "source_record_id": resolution_id,
+                "lifecycle_topic": resolution.get("lifecycle_topic"),
+                "matched_event_ids": sorted(matched_ids),
+                "match_method": "SEC CIK+ticker+Item3.01+Nasdaq Rule 5250(c)(1)",
+                "resolution_signal": resolution.get("resolution_signal"),
+            }
+        )
+
+    # A filing that explicitly closes the matter is lifecycle evidence, not a
+    # fresh negative P1 event. Keep it in overlay.lifecycle.links only.
+    kept = [
+        row
+        for row in rows
+        if not (
+            row.get("phase") == "resolved"
+            and str(row.get("source_record_id") or "") in resolving_ids
+        )
+    ]
+    return kept, links
+
+
+def enrich_sec_listing_lifecycle(
+    events: list[dict[str, Any]],
+    *,
+    timeout_sec: int = DEFAULT_TIMEOUT_SEC,
+    lookback_days: int = DEFAULT_EVENT_LOOKBACK_DAYS,
+    as_of: dt.date | None = None,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], int, list[dict[str, str]]]:
+    """Fetch official Item 3.01 filings and apply fail-closed lifecycle linking."""
+    classifications: dict[str, dict[str, str]] = {}
+    errors: list[dict[str, str]] = []
+    scanned = 0
+    as_of = as_of or dt.date.today()
+    for event in events:
+        if event.get("item_code") != "3.01" or not _is_official_event_url(str(event.get("url") or "")):
+            continue
+        event_date = _coerce_date(event.get("published_at"))
+        if not event_date or not (0 <= (as_of - event_date).days <= lookback_days):
+            continue
+        source_record_id = str(event.get("source_record_id") or "")
+        try:
+            filing_text = _strip_html(
+                _fetch_text(str(event["url"]), timeout_sec=timeout_sec)
+            )
+            scanned += 1
+            classified = classify_sec_listing_lifecycle(filing_text)
+            if classified:
+                classifications[source_record_id] = classified
+        except Exception as exc:  # noqa: BLE001 - unresolved is safer than a guessed resolution
+            errors.append({"source_record_id": source_record_id, "error": str(exc)[:240]})
+    linked_events, links = apply_sec_listing_lifecycle(events, classifications)
+    return linked_events, links, scanned, errors
 
 
 def _classify_sec_8k_items(item_text: str) -> list[dict[str, str]]:

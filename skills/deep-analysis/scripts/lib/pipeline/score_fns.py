@@ -20,6 +20,7 @@ rrt.py 仍 re-export 这些函数 (from lib.pipeline.score_fns import *)· 所�
 """
 from __future__ import annotations
 
+import datetime as dt
 import json
 import os
 import sys
@@ -71,6 +72,84 @@ def _is_official_event_url(url: object) -> bool:
     return any(host == suffix or host.endswith("." + suffix) for suffix in _OFFICIAL_EVENT_HOST_SUFFIXES)
 
 
+def _sec_archive_cik(url: object) -> str | None:
+    """Return the normalized EDGAR issuer id embedded in an archive URL."""
+    try:
+        parsed = urlsplit(str(url or ""))
+    except ValueError:
+        return None
+    host = (parsed.hostname or "").lower()
+    if host != "sec.gov" and not host.endswith(".sec.gov"):
+        return None
+    parts = [part for part in parsed.path.split("/") if part]
+    for index in range(len(parts) - 1):
+        if parts[index].lower() == "data" and parts[index + 1].isdigit():
+            return str(int(parts[index + 1]))
+    return None
+
+
+def _same_resolution_entity(event_url: object, resolution_url: object) -> bool:
+    """For SEC lifecycle claims, require both records to encode the same CIK."""
+    event_cik = _sec_archive_cik(event_url)
+    resolution_cik = _sec_archive_cik(resolution_url)
+    try:
+        hosts = {
+            (urlsplit(str(value or "")).hostname or "").lower()
+            for value in (event_url, resolution_url)
+        }
+    except ValueError:
+        return False
+    if any(host == "sec.gov" or host.endswith(".sec.gov") for host in hosts):
+        return bool(event_cik) and event_cik == resolution_cik
+    return True
+
+
+def _event_date(value: object) -> dt.date | None:
+    try:
+        return dt.date.fromisoformat(str(value or "")[:10])
+    except ValueError:
+        return None
+
+
+def _verified_resolution_evidence(item: dict, resolution: str) -> bool:
+    """Require a later, official, same-topic record before deactivating risk."""
+    evidence = item.get("resolution_evidence")
+    if not isinstance(evidence, dict) or resolution not in _RESOLVED_EVENT_STATES:
+        return False
+    if str(evidence.get("resolution_status") or "").strip().lower() != resolution:
+        return False
+    if evidence.get("official_source") is not True or evidence.get("entity_match") != "exact":
+        return False
+    resolution_url = evidence.get("url")
+    event_url = item.get("url")
+    if evidence.get("entity_scope") != "issuer" or not _is_official_event_url(resolution_url):
+        return False
+    if str(resolution_url or "") == str(event_url or "") or not _same_resolution_entity(event_url, resolution_url):
+        return False
+    event_id = str(item.get("canonical_event_id") or item.get("source_record_id") or item.get("url") or "")
+    if not event_id or str(evidence.get("linked_event_id") or "") != event_id:
+        return False
+    resolution_record_id = str(evidence.get("source_record_id") or "")
+    if not resolution_record_id or resolution_record_id == str(item.get("source_record_id") or ""):
+        return False
+    event_date = _event_date(item.get("published_at"))
+    resolution_date = _event_date(evidence.get("published_at"))
+    if not event_date or not resolution_date or resolution_date <= event_date:
+        return False
+    age_days = item.get("age_days")
+    if age_days is not None:
+        try:
+            as_of = event_date + dt.timedelta(days=int(age_days))
+        except (TypeError, ValueError, OverflowError):
+            return False
+        if resolution_date > as_of:
+            return False
+    topic = str(item.get("lifecycle_topic") or "")
+    if not topic or str(evidence.get("lifecycle_topic") or "") != topic:
+        return False
+    return True
+
+
 def _verified_structured_event(item: object) -> dict | None:
     """Return a scoring-safe official event, or None for legacy/untrusted rows."""
     if not isinstance(item, dict):
@@ -94,11 +173,15 @@ def _verified_structured_event(item: object) -> dict | None:
         if age_days < 0 or age_days > 730:
             return None
     resolution = str(item.get("resolution_status") or "").strip().lower()
+    resolution_claimed = resolution in _RESOLVED_EVENT_STATES
+    resolution_verified = _verified_resolution_evidence(item, resolution)
     row = dict(item)
     if age_days is not None:
         row["age_days"] = age_days
     row["resolution_status"] = resolution or "unknown"
-    row["decision_active"] = resolution not in _RESOLVED_EVENT_STATES
+    row["resolution_verified"] = resolution_verified
+    row["resolution_claim_rejected"] = resolution_claimed and not resolution_verified
+    row["decision_active"] = not resolution_verified
     return row
 
 
@@ -135,6 +218,10 @@ def _structured_event_risk(news: list[object]) -> dict:
         "active_issuer_count": len(issuer_active),
         "review_only_count": review_only,
         "rejected_structured_count": rejected,
+        "verified_resolution_count": sum(1 for row in unique.values() if row.get("resolution_verified")),
+        "rejected_resolution_claim_count": sum(
+            1 for row in unique.values() if row.get("resolution_claim_rejected")
+        ),
         "score_ceiling": score_ceiling,
         "buy_score_cap": buy_score_cap,
         "verified_keys": sorted(unique),

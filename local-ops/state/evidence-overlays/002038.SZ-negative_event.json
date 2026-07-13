@@ -1,0 +1,199 @@
+{
+  "schema_version": "uzi.evidence_overlay.v1",
+  "ticker": "002038.SZ",
+  "market": "A",
+  "target": "negative_event",
+  "status": "ready",
+  "confidence": {
+    "level": "high",
+    "score": 85,
+    "factors": [
+      "required evidence is present and frozen"
+    ],
+    "label_zh": "高",
+    "factors_zh": [
+      "必要证据已存在并冻结"
+    ]
+  },
+  "evidence": [
+    {
+      "source": "szse_discipline",
+      "url": "https://www.szse.cn/UpFiles/zqjghj/sup_jghj_00019DD98DC4E73FE145C32AECEE793F.pdf",
+      "title": "关于对北京双鹭药业股份有限公司及相关当事人给予纪律处分的决定",
+      "published_at": "2026-04-29",
+      "fetched_at": "2026-07-13T08:19:47Z",
+      "fields": [
+        "15_events.recent_news"
+      ],
+      "severity": "P1",
+      "event_type": "szse_disciplinary_action",
+      "official_source": true,
+      "entity_match": "exact",
+      "entity_scope": "issuer",
+      "match_method": "exchange_company_code",
+      "source_record_id": "/UpFiles/zqjghj/sup_jghj_00019DD98DC4E73FE145C32AECEE793F.pdf",
+      "canonical_event_id": "szse_discipline:/UpFiles/zqjghj/sup_jghj_00019DD98DC4E73FE145C32AECEE793F.pdf",
+      "resolution_status": "unknown",
+      "age_days": 75,
+      "corroborating_sources": [
+        "cninfo_company_announcement"
+      ],
+      "corroborating_urls": [
+        "https://static.cninfo.com.cn/finalpage/2026-05-06/1225272578.PDF"
+      ],
+      "severity_label_zh": "P1 重大风险升级"
+    },
+    {
+      "source": "cninfo_company_announcement",
+      "url": "https://static.cninfo.com.cn/finalpage/2026-04-30/1225257798.PDF",
+      "title": "关于公司及相关责任人收到北京证监局行政监管措施决定书的公告",
+      "published_at": "2026-04-29",
+      "fetched_at": "2026-07-13T08:19:42Z",
+      "fields": [
+        "15_events.recent_news"
+      ],
+      "severity": "P1",
+      "event_type": "cninfo_enforcement_disclosure",
+      "official_source": true,
+      "entity_match": "exact",
+      "entity_scope": "issuer",
+      "match_method": "secCode+orgId",
+      "source_record_id": "1225257798",
+      "canonical_event_id": "cninfo_company_announcement:1225257798",
+      "resolution_status": "unknown",
+      "age_days": 75,
+      "severity_label_zh": "P1 重大风险升级"
+    },
+    {
+      "source": "szse_regulatory_measure",
+      "url": "https://www.szse.cn/UpFiles/zqjghj/sup_jghj_00019DD992559E3FD1B0DC9B15F4763F.pdf",
+      "title": "深圳证券交易所监管函：双鹭药业",
+      "published_at": "2026-04-29",
+      "fetched_at": "2026-07-13T08:19:48Z",
+      "fields": [
+        "15_events.recent_news"
+      ],
+      "severity": "P2",
+      "event_type": "szse_regulatory_measure",
+      "official_source": true,
+      "entity_match": "exact",
+      "entity_scope": "issuer",
+      "match_method": "exchange_company_code",
+      "source_record_id": "/UpFiles/zqjghj/sup_jghj_00019DD992559E3FD1B0DC9B15F4763F.pdf",
+      "canonical_event_id": "szse_regulatory_measure:/UpFiles/zqjghj/sup_jghj_00019DD992559E3FD1B0DC9B15F4763F.pdf",
+      "resolution_status": "unknown",
+      "age_days": 75,
+      "severity_label_zh": "P2 上下文风险"
+    }
+  ],
+  "field_mapping": {
+    "cninfo": {
+      "events": [
+        {
+          "severity": "P1",
+          "event_type": "cninfo_enforcement_disclosure",
+          "published_at": "2026-05-05",
+          "source_record_id": "1225272578",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P1",
+          "event_type": "cninfo_enforcement_disclosure",
+          "published_at": "2026-04-29",
+          "source_record_id": "1225257798",
+          "entity_scope": "issuer"
+        }
+      ]
+    },
+    "csrc_penalties": {
+      "events": []
+    },
+    "szse_discipline": {
+      "events": [
+        {
+          "severity": "P1",
+          "event_type": "szse_disciplinary_action",
+          "published_at": "2026-04-29",
+          "source_record_id": "/UpFiles/zqjghj/sup_jghj_00019DD98DC4E73FE145C32AECEE793F.pdf",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P1",
+          "event_type": "szse_disciplinary_action",
+          "published_at": "2026-04-29",
+          "source_record_id": "/UpFiles/zqjghj/sup_jghj_00019DD98DC4E73FE145C32AECEE793F.pdf",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P2",
+          "event_type": "szse_regulatory_measure",
+          "published_at": "2026-04-29",
+          "source_record_id": "/UpFiles/zqjghj/sup_jghj_00019DD992559E3FD1B0DC9B15F4763F.pdf",
+          "entity_scope": "issuer"
+        }
+      ]
+    }
+  },
+  "source_plan": [
+    {
+      "source": "cninfo",
+      "role": "official company announcements and regulator decisions"
+    },
+    {
+      "source": "csrc_penalties",
+      "role": "central regulator penalty decisions"
+    },
+    {
+      "source": "sse_discipline",
+      "role": "SSE discipline and regulatory measures for .SH"
+    },
+    {
+      "source": "szse_discipline",
+      "role": "SZSE discipline and regulatory measures for .SZ"
+    }
+  ],
+  "source_coverage": [
+    {
+      "source": "cninfo",
+      "status": "ok",
+      "scanned": 20,
+      "matched": 2,
+      "failed": 0,
+      "eligible": 1
+    },
+    {
+      "source": "csrc_penalties",
+      "status": "ok",
+      "scanned": 20,
+      "matched": 0,
+      "failed": 0,
+      "eligible": 0
+    },
+    {
+      "source": "szse_discipline",
+      "status": "ok",
+      "scanned": 3,
+      "matched": 3,
+      "failed": 0,
+      "eligible": 2
+    }
+  ],
+  "errors": [],
+  "fetched_at": "2026-07-13T08:19:41Z",
+  "as_of": "2026-07-13",
+  "lookback_days": 730,
+  "performance": {
+    "elapsed_sec": 6.813
+  },
+  "guardrails": [
+    "online evidence is frozen before branch comparison",
+    "missing evidence stays a gap; do not infer facts",
+    "same overlay must be reused for baseline and candidate refs"
+  ],
+  "display": {
+    "target_label_zh": "负面事件证据",
+    "status_label_zh": "证据已冻结",
+    "confidence_label_zh": "高",
+    "summary_zh": "002038.SZ 负面事件证据：证据已冻结，置信度 高"
+  }
+}

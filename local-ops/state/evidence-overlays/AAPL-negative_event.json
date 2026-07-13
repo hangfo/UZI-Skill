@@ -1,0 +1,100 @@
+{
+  "schema_version": "uzi.evidence_overlay.v1",
+  "ticker": "AAPL",
+  "market": "US",
+  "target": "negative_event",
+  "status": "gap",
+  "confidence": {
+    "level": "low",
+    "score": 20,
+    "factors": [
+      "evidence gap remains; do not infer missing facts",
+      "negative event is not inferred from generic news or filings"
+    ],
+    "label_zh": "低",
+    "factors_zh": [
+      "仍存在证据缺口，不能推断缺失事实",
+      "负面事件不能从泛新闻或普通披露中推断"
+    ]
+  },
+  "evidence": [],
+  "field_mapping": {
+    "sec_submissions": {
+      "events": []
+    },
+    "sec_litigation_releases": {
+      "events": []
+    },
+    "sec_trading_suspensions": {
+      "events": []
+    }
+  },
+  "source_plan": [
+    {
+      "source": "sec_litigation_releases",
+      "role": "official enforcement"
+    },
+    {
+      "source": "sec_trading_suspensions",
+      "role": "official regulator trading suspension"
+    },
+    {
+      "source": "sec_submissions",
+      "role": "company filed events"
+    }
+  ],
+  "source_coverage": [
+    {
+      "source": "sec_submissions",
+      "status": "ok",
+      "scanned": 1,
+      "matched": 0,
+      "failed": 0,
+      "eligible": 0
+    },
+    {
+      "source": "sec_litigation_releases",
+      "status": "ok",
+      "scanned": 100,
+      "matched": 0,
+      "failed": 0,
+      "eligible": 0
+    },
+    {
+      "source": "sec_trading_suspensions",
+      "status": "ok",
+      "scanned": 100,
+      "matched": 0,
+      "failed": 0,
+      "eligible": 0
+    }
+  ],
+  "errors": [],
+  "fetched_at": "2026-07-13T10:05:10Z",
+  "as_of": "2026-07-13",
+  "lookback_days": 730,
+  "performance": {
+    "elapsed_sec": 4.952
+  },
+  "guardrails": [
+    "online evidence is frozen before branch comparison",
+    "missing evidence stays a gap; do not infer facts",
+    "same overlay must be reused for baseline and candidate refs"
+  ],
+  "lifecycle": {
+    "status": "no_match",
+    "links": [],
+    "policy": [
+      "resolution requires a later exact-issuer official record",
+      "resolution must match the same narrow event family and rule topic",
+      "penalties, fraud, non-reliance and generic remediation stay unresolved"
+    ],
+    "scanned": 0
+  },
+  "display": {
+    "target_label_zh": "负面事件证据",
+    "status_label_zh": "证据缺口",
+    "confidence_label_zh": "低",
+    "summary_zh": "AAPL 负面事件证据：证据缺口，置信度 低"
+  }
+}

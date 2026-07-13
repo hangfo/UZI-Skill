@@ -1,0 +1,232 @@
+{
+  "schema_version": "uzi.evidence_overlay.v1",
+  "ticker": "HUBG",
+  "market": "US",
+  "target": "negative_event",
+  "status": "ready",
+  "confidence": {
+    "level": "high",
+    "score": 85,
+    "factors": [
+      "required evidence is present and frozen"
+    ],
+    "label_zh": "高",
+    "factors_zh": [
+      "必要证据已存在并冻结"
+    ]
+  },
+  "evidence": [
+    {
+      "source": "sec_submissions",
+      "url": "https://www.sec.gov/Archives/edgar/data/940942/000119312526218141/d146211d8k.htm",
+      "title": "Hub Group, Inc. (HUBG) 8-K Item 4.02: Non-Reliance on Previously Issued Financial Statements or Audit Report",
+      "published_at": "2026-05-12",
+      "fetched_at": "2026-07-13T10:05:13Z",
+      "fields": [
+        "15_events.recent_news",
+        "sec_submissions.recent.items"
+      ],
+      "severity": "P0",
+      "event_type": "sec_8k_item",
+      "form": "8-K",
+      "accession": "0001193125-26-218141",
+      "item_code": "4.02",
+      "official_source": true,
+      "entity_match": "exact",
+      "entity_scope": "issuer",
+      "match_method": "SEC CIK+ticker",
+      "source_record_id": "0001193125-26-218141",
+      "canonical_event_id": "sec_submissions:0001193125-26-218141",
+      "resolution_status": "unknown",
+      "age_days": 62,
+      "severity_label_zh": "P0 硬风险"
+    },
+    {
+      "source": "sec_submissions",
+      "url": "https://www.sec.gov/Archives/edgar/data/940942/000119312526039396/d77454d8k.htm",
+      "title": "Hub Group, Inc. (HUBG) 8-K Item 4.02: Non-Reliance on Previously Issued Financial Statements or Audit Report",
+      "published_at": "2026-02-05",
+      "fetched_at": "2026-07-13T10:05:13Z",
+      "fields": [
+        "15_events.recent_news",
+        "sec_submissions.recent.items"
+      ],
+      "severity": "P0",
+      "event_type": "sec_8k_item",
+      "form": "8-K",
+      "accession": "0001193125-26-039396",
+      "item_code": "4.02",
+      "official_source": true,
+      "entity_match": "exact",
+      "entity_scope": "issuer",
+      "match_method": "SEC CIK+ticker",
+      "source_record_id": "0001193125-26-039396",
+      "canonical_event_id": "sec_submissions:0001193125-26-039396",
+      "resolution_status": "unknown",
+      "age_days": 158,
+      "severity_label_zh": "P0 硬风险"
+    },
+    {
+      "source": "sec_submissions",
+      "url": "https://www.sec.gov/Archives/edgar/data/940942/000119312526234605/d70242d8k.htm",
+      "title": "Hub Group, Inc. (HUBG) 8-K Item 3.01: Notice of Delisting or Failure to Satisfy a Continued Listing Rule",
+      "published_at": "2026-05-21",
+      "fetched_at": "2026-07-13T10:05:13Z",
+      "fields": [
+        "15_events.recent_news",
+        "sec_submissions.recent.items"
+      ],
+      "severity": "P1",
+      "event_type": "sec_8k_item",
+      "form": "8-K",
+      "accession": "0001193125-26-234605",
+      "item_code": "3.01",
+      "official_source": true,
+      "entity_match": "exact",
+      "entity_scope": "issuer",
+      "match_method": "SEC CIK+ticker",
+      "source_record_id": "0001193125-26-234605",
+      "canonical_event_id": "sec_submissions:0001193125-26-234605",
+      "resolution_status": "unknown",
+      "phase": "active",
+      "lifecycle_topic": "nasdaq_periodic_reporting_rule_5250_c_1",
+      "lifecycle_key": "sec:nasdaq:5250(c)(1):periodic_reporting",
+      "resolution_signal": "explicit_noncompliance",
+      "age_days": 53,
+      "severity_label_zh": "P1 重大风险升级"
+    },
+    {
+      "source": "sec_submissions",
+      "url": "https://www.sec.gov/Archives/edgar/data/940942/000119312526121851/d92097d8k.htm",
+      "title": "Hub Group, Inc. (HUBG) 8-K Item 3.01: Notice of Delisting or Failure to Satisfy a Continued Listing Rule",
+      "published_at": "2026-03-24",
+      "fetched_at": "2026-07-13T10:05:13Z",
+      "fields": [
+        "15_events.recent_news",
+        "sec_submissions.recent.items"
+      ],
+      "severity": "P1",
+      "event_type": "sec_8k_item",
+      "form": "8-K",
+      "accession": "0001193125-26-121851",
+      "item_code": "3.01",
+      "official_source": true,
+      "entity_match": "exact",
+      "entity_scope": "issuer",
+      "match_method": "SEC CIK+ticker",
+      "source_record_id": "0001193125-26-121851",
+      "canonical_event_id": "sec_submissions:0001193125-26-121851",
+      "resolution_status": "unknown",
+      "age_days": 111,
+      "severity_label_zh": "P1 重大风险升级"
+    }
+  ],
+  "field_mapping": {
+    "sec_submissions": {
+      "events": [
+        {
+          "severity": "P1",
+          "event_type": "sec_8k_item",
+          "published_at": "2026-05-21",
+          "source_record_id": "0001193125-26-234605",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P0",
+          "event_type": "sec_8k_item",
+          "published_at": "2026-05-12",
+          "source_record_id": "0001193125-26-218141",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P1",
+          "event_type": "sec_8k_item",
+          "published_at": "2026-03-24",
+          "source_record_id": "0001193125-26-121851",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P0",
+          "event_type": "sec_8k_item",
+          "published_at": "2026-02-05",
+          "source_record_id": "0001193125-26-039396",
+          "entity_scope": "issuer"
+        }
+      ]
+    },
+    "sec_litigation_releases": {
+      "events": []
+    },
+    "sec_trading_suspensions": {
+      "events": []
+    }
+  },
+  "source_plan": [
+    {
+      "source": "sec_litigation_releases",
+      "role": "official enforcement"
+    },
+    {
+      "source": "sec_trading_suspensions",
+      "role": "official regulator trading suspension"
+    },
+    {
+      "source": "sec_submissions",
+      "role": "company filed events"
+    }
+  ],
+  "source_coverage": [
+    {
+      "source": "sec_submissions",
+      "status": "ok",
+      "scanned": 1,
+      "matched": 4,
+      "failed": 0,
+      "eligible": 4
+    },
+    {
+      "source": "sec_litigation_releases",
+      "status": "ok",
+      "scanned": 100,
+      "matched": 0,
+      "failed": 0,
+      "eligible": 0
+    },
+    {
+      "source": "sec_trading_suspensions",
+      "status": "ok",
+      "scanned": 100,
+      "matched": 0,
+      "failed": 0,
+      "eligible": 0
+    }
+  ],
+  "errors": [],
+  "fetched_at": "2026-07-13T10:05:10Z",
+  "as_of": "2026-07-13",
+  "lookback_days": 730,
+  "performance": {
+    "elapsed_sec": 6.539
+  },
+  "guardrails": [
+    "online evidence is frozen before branch comparison",
+    "missing evidence stays a gap; do not infer facts",
+    "same overlay must be reused for baseline and candidate refs"
+  ],
+  "lifecycle": {
+    "status": "no_match",
+    "links": [],
+    "policy": [
+      "resolution requires a later exact-issuer official record",
+      "resolution must match the same narrow event family and rule topic",
+      "penalties, fraud, non-reliance and generic remediation stay unresolved"
+    ],
+    "scanned": 2
+  },
+  "display": {
+    "target_label_zh": "负面事件证据",
+    "status_label_zh": "证据已冻结",
+    "confidence_label_zh": "高",
+    "summary_zh": "HUBG 负面事件证据：证据已冻结，置信度 高"
+  }
+}

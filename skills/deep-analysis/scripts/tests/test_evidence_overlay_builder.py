@@ -563,6 +563,82 @@ def test_negative_event_source_plans_cover_three_independent_authority_layers():
     assert {"hkex_discipline", "hkex_critical_filings", "sfc_enforcement"} <= hk
 
 
+def test_real_smci_sec_excerpts_classify_active_then_closed():
+    active_excerpt = """
+    The Company received a notification letter from Nasdaq indicating that the
+    Company is not in compliance with Nasdaq Listing Rule 5250(c)(1), as a
+    result of the Company's delay in filing its Annual Report on Form 10-K.
+    """
+    closed_excerpt = """
+    The Company received a notification letter from Nasdaq indicating that the
+    Company now complies with Nasdaq listing rule 5250(c)(1), which requires
+    timely filing of reports with the SEC, and the matter is now closed.
+    """
+    exception_excerpt = """
+    Nasdaq has granted the Company's request for an exception to Nasdaq's
+    Listing Rule 5250(c)(1) through February 25, 2025. The exception gives the
+    Company until February 25, 2025 to file its required periodic reports.
+    """
+
+    active = evidence_overlay_builder.classify_sec_listing_lifecycle(active_excerpt)
+    closed = evidence_overlay_builder.classify_sec_listing_lifecycle(closed_excerpt)
+    exception = evidence_overlay_builder.classify_sec_listing_lifecycle(exception_excerpt)
+
+    assert active["phase"] == "active"
+    assert closed["phase"] == "resolved"
+    assert exception["phase"] == "active"
+    assert exception["resolution_signal"] == "temporary_exception_pending_filings"
+    assert active["lifecycle_key"] == closed["lifecycle_key"]
+
+
+def test_sec_resolution_links_only_earlier_same_rule_event():
+    active = {
+        "source": "sec_submissions",
+        "url": "https://www.sec.gov/Archives/active.htm",
+        "title": "SMCI Item 3.01 active filing",
+        "published_at": "2024-09-20",
+        "severity": "P1",
+        "source_record_id": "active",
+        "canonical_event_id": "sec_submissions:active",
+    }
+    unrelated = {
+        "source": "sec_submissions",
+        "url": "https://www.sec.gov/Archives/unrelated.htm",
+        "title": "Issuer auditor change",
+        "published_at": "2024-11-18",
+        "severity": "P1",
+        "source_record_id": "auditor",
+        "canonical_event_id": "sec_submissions:auditor",
+    }
+    closed = {
+        "source": "sec_submissions",
+        "url": "https://www.sec.gov/Archives/closed.htm",
+        "title": "SMCI Item 3.01 compliance filing",
+        "published_at": "2025-02-26",
+        "severity": "P1",
+        "source_record_id": "closed",
+        "canonical_event_id": "sec_submissions:closed",
+    }
+    topic = "nasdaq_periodic_reporting_rule_5250_c_1"
+    key = "sec:nasdaq:5250(c)(1):periodic_reporting"
+    classifications = {
+        "active": {"phase": "active", "resolution_status": "unknown", "lifecycle_topic": topic, "lifecycle_key": key},
+        "closed": {"phase": "resolved", "resolution_status": "closed", "lifecycle_topic": topic, "lifecycle_key": key},
+    }
+
+    rows, links = evidence_overlay_builder.apply_sec_listing_lifecycle(
+        [active, unrelated, closed], classifications
+    )
+
+    assert {row["source_record_id"] for row in rows} == {"active", "auditor"}
+    linked = next(row for row in rows if row["source_record_id"] == "active")
+    untouched = next(row for row in rows if row["source_record_id"] == "auditor")
+    assert linked["resolution_status"] == "closed"
+    assert linked["resolution_evidence"]["linked_event_id"] == "sec_submissions:active"
+    assert "resolution_evidence" not in untouched
+    assert links[0]["matched_event_ids"] == ["sec_submissions:active"]
+
+
 if __name__ == "__main__":
     import inspect
     import sys

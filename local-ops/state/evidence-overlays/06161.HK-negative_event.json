@@ -1,0 +1,120 @@
+{
+  "schema_version": "uzi.evidence_overlay.v1",
+  "ticker": "06161.HK",
+  "market": "HK",
+  "target": "negative_event",
+  "status": "partial",
+  "confidence": {
+    "level": "medium",
+    "score": 55,
+    "factors": [
+      "some evidence exists but field coverage or provenance is incomplete",
+      "negative event is not inferred from generic news or filings"
+    ],
+    "label_zh": "中",
+    "factors_zh": [
+      "已有部分证据，但字段覆盖或来源追溯不完整",
+      "负面事件不能从泛新闻或普通披露中推断"
+    ]
+  },
+  "evidence": [
+    {
+      "source": "sfc_enforcement",
+      "url": "https://apps.sfc.hk/edistributionWeb/gateway/EN/news-and-announcements/news/doc?refNo=26PR90",
+      "title": "SFC seeks share buy-out order against former chairman of Target Insurance (Holdings) Limited",
+      "published_at": "2026-06-17",
+      "fetched_at": "2026-07-13T08:20:44Z",
+      "fields": [
+        "15_events.recent_news"
+      ],
+      "severity": "P2",
+      "event_type": "sfc_related_person_enforcement",
+      "official_source": true,
+      "entity_match": "exact",
+      "entity_scope": "related_person",
+      "match_method": "body_stock_code+title_company_context",
+      "source_record_id": "26PR90",
+      "canonical_event_id": "sfc_enforcement:26PR90",
+      "resolution_status": "unknown",
+      "age_days": 26,
+      "severity_label_zh": "P2 上下文风险"
+    }
+  ],
+  "field_mapping": {
+    "hkex_discipline": {
+      "events": []
+    },
+    "hkex_critical_filings": {
+      "events": []
+    },
+    "sfc_enforcement": {
+      "events": [
+        {
+          "severity": "P2",
+          "event_type": "sfc_related_person_enforcement",
+          "published_at": "2026-06-17",
+          "source_record_id": "26PR90",
+          "entity_scope": "related_person"
+        }
+      ]
+    }
+  },
+  "source_plan": [
+    {
+      "source": "hkex_discipline",
+      "role": "HKEX issuer and related-person disciplinary actions"
+    },
+    {
+      "source": "hkex_critical_filings",
+      "role": "issuer-filed suspension and solvency events"
+    },
+    {
+      "source": "sfc_enforcement",
+      "role": "regulator enforcement"
+    }
+  ],
+  "source_coverage": [
+    {
+      "source": "hkex_discipline",
+      "status": "ok",
+      "scanned": 3,
+      "matched": 0,
+      "failed": 0,
+      "eligible": 0
+    },
+    {
+      "source": "hkex_critical_filings",
+      "status": "ok",
+      "scanned": 55,
+      "matched": 0,
+      "failed": 0,
+      "eligible": 0
+    },
+    {
+      "source": "sfc_enforcement",
+      "status": "ok",
+      "scanned": 20,
+      "matched": 1,
+      "failed": 0,
+      "eligible": 1
+    }
+  ],
+  "errors": [],
+  "fetched_at": "2026-07-13T08:20:35Z",
+  "as_of": "2026-07-13",
+  "lookback_days": 730,
+  "performance": {
+    "elapsed_sec": 12.789
+  },
+  "guardrails": [
+    "online evidence is frozen before branch comparison",
+    "missing evidence stays a gap; do not infer facts",
+    "same overlay must be reused for baseline and candidate refs"
+  ],
+  "display": {
+    "target_label_zh": "负面事件证据",
+    "status_label_zh": "证据不完整",
+    "confidence_label_zh": "中",
+    "summary_zh": "06161.HK 负面事件证据：证据不完整，置信度 中"
+  }
+}

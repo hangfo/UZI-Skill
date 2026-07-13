@@ -1,0 +1,151 @@
+{
+  "schema_version": "uzi.evidence_overlay.v1",
+  "ticker": "601872.SH",
+  "market": "A",
+  "target": "negative_event",
+  "status": "ready",
+  "confidence": {
+    "level": "high",
+    "score": 85,
+    "factors": [
+      "required evidence is present and frozen"
+    ],
+    "label_zh": "高",
+    "factors_zh": [
+      "必要证据已存在并冻结"
+    ]
+  },
+  "evidence": [
+    {
+      "source": "cninfo_company_announcement",
+      "url": "https://static.cninfo.com.cn/finalpage/2026-05-20/1225316590.PDF",
+      "title": "招商轮船关于收到中国证券监督管理委员会上海监管局《行政监管措施决定书》的公告",
+      "published_at": "2026-05-19",
+      "fetched_at": "2026-07-13T08:19:49Z",
+      "fields": [
+        "15_events.recent_news"
+      ],
+      "severity": "P1",
+      "event_type": "cninfo_enforcement_disclosure",
+      "official_source": true,
+      "entity_match": "exact",
+      "entity_scope": "issuer",
+      "match_method": "secCode+orgId",
+      "source_record_id": "1225316590",
+      "canonical_event_id": "cninfo_company_announcement:1225316590",
+      "resolution_status": "unknown",
+      "age_days": 55,
+      "severity_label_zh": "P1 重大风险升级"
+    },
+    {
+      "source": "sse_discipline",
+      "url": "https://www.sse.com.cn/disclosure/credibility/supervision/measures/focus/c/10818986/files/beb8da685e054cb6acc48d86cbd4ed0e.pdf",
+      "title": "关于对招商局能源运输股份有限公司予以监管警示的决定",
+      "published_at": "2026-05-19",
+      "fetched_at": "2026-07-13T08:19:53Z",
+      "fields": [
+        "15_events.recent_news"
+      ],
+      "severity": "P2",
+      "event_type": "sse_regulatory_measure",
+      "official_source": true,
+      "entity_match": "exact",
+      "entity_scope": "related_person",
+      "match_method": "extSECURITY_CODE",
+      "source_record_id": "10818986_28_10007",
+      "canonical_event_id": "sse_discipline:10818986_28_10007",
+      "resolution_status": "unknown",
+      "age_days": 55,
+      "severity_label_zh": "P2 上下文风险"
+    }
+  ],
+  "field_mapping": {
+    "cninfo": {
+      "events": [
+        {
+          "severity": "P1",
+          "event_type": "cninfo_enforcement_disclosure",
+          "published_at": "2026-05-19",
+          "source_record_id": "1225316590",
+          "entity_scope": "issuer"
+        }
+      ]
+    },
+    "csrc_penalties": {
+      "events": []
+    },
+    "sse_discipline": {
+      "events": [
+        {
+          "severity": "P2",
+          "event_type": "sse_regulatory_measure",
+          "published_at": "2026-05-19",
+          "source_record_id": "10818986_28_10007",
+          "entity_scope": "related_person"
+        }
+      ]
+    }
+  },
+  "source_plan": [
+    {
+      "source": "cninfo",
+      "role": "official company announcements and regulator decisions"
+    },
+    {
+      "source": "csrc_penalties",
+      "role": "central regulator penalty decisions"
+    },
+    {
+      "source": "sse_discipline",
+      "role": "SSE discipline and regulatory measures for .SH"
+    },
+    {
+      "source": "szse_discipline",
+      "role": "SZSE discipline and regulatory measures for .SZ"
+    }
+  ],
+  "source_coverage": [
+    {
+      "source": "cninfo",
+      "status": "ok",
+      "scanned": 20,
+      "matched": 1,
+      "failed": 0,
+      "eligible": 1
+    },
+    {
+      "source": "csrc_penalties",
+      "status": "ok",
+      "scanned": 20,
+      "matched": 0,
+      "failed": 0,
+      "eligible": 0
+    },
+    {
+      "source": "sse_discipline",
+      "status": "ok",
+      "scanned": 1,
+      "matched": 1,
+      "failed": 0,
+      "eligible": 1
+    }
+  ],
+  "errors": [],
+  "fetched_at": "2026-07-13T08:19:48Z",
+  "as_of": "2026-07-13",
+  "lookback_days": 730,
+  "performance": {
+    "elapsed_sec": 4.632
+  },
+  "guardrails": [
+    "online evidence is frozen before branch comparison",
+    "missing evidence stays a gap; do not infer facts",
+    "same overlay must be reused for baseline and candidate refs"
+  ],
+  "display": {
+    "target_label_zh": "负面事件证据",
+    "status_label_zh": "证据已冻结",
+    "confidence_label_zh": "高",
+    "summary_zh": "601872.SH 负面事件证据：证据已冻结，置信度 高"
+  }
+}

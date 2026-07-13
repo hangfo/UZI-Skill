@@ -1,0 +1,215 @@
+{
+  "schema_version": "uzi.evidence_overlay.v1",
+  "ticker": "000851.SZ",
+  "market": "A",
+  "target": "negative_event",
+  "status": "ready",
+  "confidence": {
+    "level": "high",
+    "score": 85,
+    "factors": [
+      "required evidence is present and frozen"
+    ],
+    "label_zh": "高",
+    "factors_zh": [
+      "必要证据已存在并冻结"
+    ]
+  },
+  "evidence": [
+    {
+      "source": "csrc_penalty_decision",
+      "url": "https://www.csrc.gov.cn/csrc/c101928/c7626997/content.shtml",
+      "title": "中国证券监督管理委员会行政处罚决定书：*ST高鸿",
+      "published_at": "2026-04-07",
+      "fetched_at": "2026-07-13T08:18:49Z",
+      "fields": [
+        "15_events.recent_news"
+      ],
+      "severity": "P0",
+      "event_type": "csrc_severe_issuer_penalty",
+      "official_source": true,
+      "entity_match": "exact",
+      "entity_scope": "issuer",
+      "match_method": "respondent_exact_stock_alias",
+      "source_record_id": "https://www.csrc.gov.cn/csrc/c101928/c7626997/content.shtml",
+      "canonical_event_id": "csrc_penalty_decision:https://www.csrc.gov.cn/csrc/c101928/c7626997/content.shtml",
+      "resolution_status": "unknown",
+      "age_days": 97,
+      "severity_label_zh": "P0 硬风险"
+    },
+    {
+      "source": "cninfo_company_announcement",
+      "url": "https://static.cninfo.com.cn/finalpage/2025-09-22/1224670725.PDF",
+      "title": "关于公司股票可能被实施重大违法强制退市的第七次风险提示公告",
+      "published_at": "2025-09-21",
+      "fetched_at": "2026-07-13T08:18:45Z",
+      "fields": [
+        "15_events.recent_news"
+      ],
+      "severity": "P0",
+      "event_type": "cninfo_severe_enforcement",
+      "official_source": true,
+      "entity_match": "exact",
+      "entity_scope": "issuer",
+      "match_method": "secCode+orgId",
+      "source_record_id": "1224670725",
+      "canonical_event_id": "cninfo_company_announcement:1224670725",
+      "resolution_status": "unknown",
+      "age_days": 295,
+      "severity_label_zh": "P0 硬风险"
+    },
+    {
+      "source": "szse_discipline",
+      "url": "https://www.szse.cn/UpFiles/zqjghj/sup_jghj_00019DAA27340A3FEF651A5DD1359B3F.pdf",
+      "title": "关于对大唐高鸿网络股份有限公司及相关当事人给予公开认定等纪律处分的决定",
+      "published_at": "2026-04-20",
+      "fetched_at": "2026-07-13T08:18:50Z",
+      "fields": [
+        "15_events.recent_news"
+      ],
+      "severity": "P1",
+      "event_type": "szse_disciplinary_action",
+      "official_source": true,
+      "entity_match": "exact",
+      "entity_scope": "issuer",
+      "match_method": "exchange_company_code",
+      "source_record_id": "/UpFiles/zqjghj/sup_jghj_00019DAA27340A3FEF651A5DD1359B3F.pdf",
+      "canonical_event_id": "szse_discipline:/UpFiles/zqjghj/sup_jghj_00019DAA27340A3FEF651A5DD1359B3F.pdf",
+      "resolution_status": "unknown",
+      "age_days": 84,
+      "severity_label_zh": "P1 重大风险升级"
+    },
+    {
+      "source": "szse_discipline",
+      "url": "https://www.szse.cn/UpFiles/zqjghj/sup_jghj_000191BA8514933FD0BD9FE97568323F.pdf",
+      "title": "关于对大唐高鸿网络股份有限公司及相关当事人给予公开谴责处分的决定",
+      "published_at": "2024-09-04",
+      "fetched_at": "2026-07-13T08:18:50Z",
+      "fields": [
+        "15_events.recent_news"
+      ],
+      "severity": "P1",
+      "event_type": "szse_disciplinary_action",
+      "official_source": true,
+      "entity_match": "exact",
+      "entity_scope": "issuer",
+      "match_method": "exchange_company_code",
+      "source_record_id": "/UpFiles/zqjghj/sup_jghj_000191BA8514933FD0BD9FE97568323F.pdf",
+      "canonical_event_id": "szse_discipline:/UpFiles/zqjghj/sup_jghj_000191BA8514933FD0BD9FE97568323F.pdf",
+      "resolution_status": "unknown",
+      "age_days": 677,
+      "severity_label_zh": "P1 重大风险升级"
+    }
+  ],
+  "field_mapping": {
+    "cninfo": {
+      "events": [
+        {
+          "severity": "P0",
+          "event_type": "cninfo_severe_enforcement",
+          "published_at": "2025-09-21",
+          "source_record_id": "1224670725",
+          "entity_scope": "issuer"
+        }
+      ]
+    },
+    "csrc_penalties": {
+      "events": [
+        {
+          "severity": "P0",
+          "event_type": "csrc_severe_issuer_penalty",
+          "published_at": "2026-04-07",
+          "source_record_id": "https://www.csrc.gov.cn/csrc/c101928/c7626997/content.shtml",
+          "entity_scope": "issuer"
+        }
+      ]
+    },
+    "szse_discipline": {
+      "events": [
+        {
+          "severity": "P1",
+          "event_type": "szse_disciplinary_action",
+          "published_at": "2026-04-20",
+          "source_record_id": "/UpFiles/zqjghj/sup_jghj_00019DAA27340A3FEF651A5DD1359B3F.pdf",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P1",
+          "event_type": "szse_disciplinary_action",
+          "published_at": "2026-04-20",
+          "source_record_id": "/UpFiles/zqjghj/sup_jghj_00019DAA27340A3FEF651A5DD1359B3F.pdf",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P1",
+          "event_type": "szse_disciplinary_action",
+          "published_at": "2024-09-04",
+          "source_record_id": "/UpFiles/zqjghj/sup_jghj_000191BA8514933FD0BD9FE97568323F.pdf",
+          "entity_scope": "issuer"
+        }
+      ]
+    }
+  },
+  "source_plan": [
+    {
+      "source": "cninfo",
+      "role": "official company announcements and regulator decisions"
+    },
+    {
+      "source": "csrc_penalties",
+      "role": "central regulator penalty decisions"
+    },
+    {
+      "source": "sse_discipline",
+      "role": "SSE discipline and regulatory measures for .SH"
+    },
+    {
+      "source": "szse_discipline",
+      "role": "SZSE discipline and regulatory measures for .SZ"
+    }
+  ],
+  "source_coverage": [
+    {
+      "source": "cninfo",
+      "status": "ok",
+      "scanned": 20,
+      "matched": 1,
+      "failed": 0,
+      "eligible": 1
+    },
+    {
+      "source": "csrc_penalties",
+      "status": "ok",
+      "scanned": 20,
+      "matched": 1,
+      "failed": 0,
+      "eligible": 1
+    },
+    {
+      "source": "szse_discipline",
+      "status": "ok",
+      "scanned": 3,
+      "matched": 3,
+      "failed": 0,
+      "eligible": 2
+    }
+  ],
+  "errors": [],
+  "fetched_at": "2026-07-13T08:18:44Z",
+  "as_of": "2026-07-13",
+  "lookback_days": 730,
+  "performance": {
+    "elapsed_sec": 6.471
+  },
+  "guardrails": [
+    "online evidence is frozen before branch comparison",
+    "missing evidence stays a gap; do not infer facts",
+    "same overlay must be reused for baseline and candidate refs"
+  ],
+  "display": {
+    "target_label_zh": "负面事件证据",
+    "status_label_zh": "证据已冻结",
+    "confidence_label_zh": "高",
+    "summary_zh": "000851.SZ 负面事件证据：证据已冻结，置信度 高"
+  }
+}

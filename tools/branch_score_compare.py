@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import copy
 import contextlib
+import datetime as dt
 import io
 import json
 import os
@@ -556,7 +557,7 @@ SYNTHETIC_RAW_CASES = [
                         "recent_news": [
                             {
                                 "title": "Official issuer event with deliberately neutral wording",
-                                "url": "https://www.sec.gov/example-resolved",
+                                "url": "https://www.sec.gov/Archives/edgar/data/1375365/resolved-p1.htm",
                                 "severity": "P1",
                                 "official_source": True,
                                 "entity_match": "exact",
@@ -564,6 +565,19 @@ SYNTHETIC_RAW_CASES = [
                                 "source_record_id": "resolved-p1",
                                 "canonical_event_id": "sec:resolved-p1",
                                 "resolution_status": "resolved",
+                                "published_at": "2026-06-01",
+                                "lifecycle_topic": "nasdaq_periodic_reporting_rule_5250_c_1",
+                                "resolution_evidence": {
+                                    "resolution_status": "resolved",
+                                    "official_source": True,
+                                    "entity_match": "exact",
+                                    "entity_scope": "issuer",
+                                    "url": "https://www.sec.gov/Archives/edgar/data/1375365/resolution-p1.htm",
+                                    "published_at": "2026-06-11",
+                                    "source_record_id": "resolution-p1",
+                                    "linked_event_id": "sec:resolved-p1",
+                                    "lifecycle_topic": "nasdaq_periodic_reporting_rule_5250_c_1",
+                                },
                                 "age_days": 10,
                             }
                         ],
@@ -1063,6 +1077,14 @@ def overlay_to_raw_cases(overlay: dict[str, Any], *, source_path: Path | None = 
     counterfactual = _negative_event_counterfactual_case(overlay, primary, source_path=source_path)
     if counterfactual:
         cases.append(counterfactual)
+    resolved_shadow = _resolved_event_shadow_case(primary)
+    if resolved_shadow:
+        cases.append(resolved_shadow)
+        resolved_counterfactual = _negative_event_counterfactual_case(
+            overlay, resolved_shadow, source_path=source_path
+        )
+        if resolved_counterfactual:
+            cases.append(resolved_counterfactual)
     return cases
 
 
@@ -1103,15 +1125,19 @@ def _negative_event_overlay_case(overlay: dict[str, Any], *, source_path: Path |
     if not evidence or not any(item.get("severity") in {"P0", "P1"} for item in evidence):
         return None
     severities = {str(item.get("severity")) for item in evidence}
-    if "P0" in severities:
+    resolved_evidence = [item for item in evidence if _overlay_resolution_verified(item)]
+    active_evidence = [item for item in evidence if not _overlay_resolution_verified(item)]
+    active_severities = {str(item.get("severity")) for item in active_evidence}
+    resolved_severities = {str(item.get("severity")) for item in resolved_evidence}
+    if "P0" in active_severities:
         max_dim_score = 4.9
         max_score = 60.0
-    elif "P1" in severities:
+    elif "P1" in active_severities:
         max_dim_score = 5.5
         max_score = 65.0
     else:
-        max_dim_score = 5.5
-        max_score = 70.0
+        max_dim_score = None
+        max_score = None
     case_ticker = f"__overlay_{ticker}_negative_event"
     raw = _minimal_raw(
         case_ticker,
@@ -1133,6 +1159,9 @@ def _negative_event_overlay_case(overlay: dict[str, Any], *, source_path: Path |
                             "source_record_id": item.get("source_record_id"),
                             "canonical_event_id": item.get("canonical_event_id"),
                             "resolution_status": item.get("resolution_status"),
+                            "resolved_at": item.get("resolved_at"),
+                            "lifecycle_topic": item.get("lifecycle_topic"),
+                            "resolution_evidence": copy.deepcopy(item.get("resolution_evidence")),
                             "corroborating_sources": item.get("corroborating_sources") or [],
                             "age_days": item.get("age_days"),
                         }
@@ -1151,20 +1180,32 @@ def _negative_event_overlay_case(overlay: dict[str, Any], *, source_path: Path |
             )
         },
     )
-    return {
+    case = {
         "ticker": case_ticker,
         "group": "evidence_overlay",
-        "role": f"frozen evidence overlay negative event: {ticker}",
-        "expectation": "negative_event",
-        "max_candidate_score": max_score,
-        "max_candidate_dim_scores": {"15_events": max_dim_score},
+        "role": (
+            f"frozen evidence overlay active negative event: {ticker}"
+            if active_severities & {"P0", "P1"}
+            else f"frozen evidence overlay verified resolved event: {ticker}"
+        ),
+        "expectation": (
+            "negative_event" if active_severities & {"P0", "P1"} else "resolved_negative_event"
+        ),
         "overlay_source_ticker": ticker,
         "overlay_target": overlay.get("target"),
         "overlay_market": overlay.get("market"),
         "overlay_path": str(source_path) if source_path else "",
-        "overlay_severities": sorted({str(item.get("severity")) for item in evidence}),
+        "overlay_severities": sorted(severities),
+        "overlay_active_severities": sorted(active_severities),
+        "overlay_resolved_severities": sorted(resolved_severities),
         "raw": raw,
     }
+    if max_score is not None:
+        case["max_candidate_score"] = max_score
+        case["max_candidate_dim_scores"] = {"15_events": max_dim_score}
+    else:
+        case["min_candidate_dim_scores"] = {"15_events": 5.0}
+    return case
 
 
 def _is_official_overlay_url(url: str) -> bool:
@@ -1173,6 +1214,116 @@ def _is_official_overlay_url(url: str) -> bool:
     except ValueError:
         return False
     return any(host == suffix or host.endswith("." + suffix) for suffix in OFFICIAL_OVERLAY_HOST_SUFFIXES)
+
+
+def _resolved_event_shadow_case(primary: dict[str, Any]) -> dict[str, Any] | None:
+    """Split verified resolutions from mixed overlays for independent non-harm checks."""
+    if primary.get("expectation") != "negative_event" or not primary.get("overlay_resolved_severities"):
+        return None
+    news = copy.deepcopy(
+        primary["raw"]["dimensions"]["15_events"]["data"].get("recent_news") or []
+    )
+    resolved_news = [
+        item for item in news if isinstance(item, dict) and _overlay_resolution_verified(item)
+    ]
+    if not resolved_news:
+        return None
+    source_ticker = str(primary.get("overlay_source_ticker") or "")
+    raw = _minimal_raw(
+        f"__overlayres_{source_ticker}_negative_event",
+        {"15_events": _dim({"recent_news": resolved_news, "recent_notices": []})},
+    )
+    return {
+        "ticker": f"__overlayres_{source_ticker}_negative_event",
+        "group": "evidence_overlay",
+        "role": f"verified official resolution non-harm shadow: {source_ticker}",
+        "expectation": "resolved_negative_event",
+        "min_candidate_dim_scores": {"15_events": 5.0},
+        "overlay_source_ticker": source_ticker,
+        "overlay_target": primary.get("overlay_target"),
+        "overlay_market": primary.get("overlay_market"),
+        "overlay_path": primary.get("overlay_path"),
+        "overlay_severities": primary.get("overlay_resolved_severities") or [],
+        "overlay_active_severities": [],
+        "overlay_resolved_severities": primary.get("overlay_resolved_severities") or [],
+        "raw": raw,
+    }
+
+
+def _overlay_date(value: Any) -> dt.date | None:
+    try:
+        return dt.date.fromisoformat(str(value or "")[:10])
+    except ValueError:
+        return None
+
+
+def _sec_archive_cik(url: Any) -> str | None:
+    try:
+        parsed = urllib.parse.urlsplit(str(url or ""))
+    except ValueError:
+        return None
+    host = (parsed.hostname or "").lower()
+    if host != "sec.gov" and not host.endswith(".sec.gov"):
+        return None
+    parts = [part for part in parsed.path.split("/") if part]
+    for index in range(len(parts) - 1):
+        if parts[index].lower() == "data" and parts[index + 1].isdigit():
+            return str(int(parts[index + 1]))
+    return None
+
+
+def _same_resolution_entity(event_url: Any, resolution_url: Any) -> bool:
+    event_cik = _sec_archive_cik(event_url)
+    resolution_cik = _sec_archive_cik(resolution_url)
+    try:
+        hosts = {
+            (urllib.parse.urlsplit(str(value or "")).hostname or "").lower()
+            for value in (event_url, resolution_url)
+        }
+    except ValueError:
+        return False
+    if any(host == "sec.gov" or host.endswith(".sec.gov") for host in hosts):
+        return bool(event_cik) and event_cik == resolution_cik
+    return True
+
+
+def _overlay_resolution_verified(item: dict[str, Any]) -> bool:
+    status = str(item.get("resolution_status") or "").strip().lower()
+    if status not in {"closed", "remediated", "resolved", "撤销", "已整改", "已解决"}:
+        return False
+    evidence = item.get("resolution_evidence")
+    if not isinstance(evidence, dict):
+        return False
+    if str(evidence.get("resolution_status") or "").strip().lower() != status:
+        return False
+    if evidence.get("official_source") is not True or evidence.get("entity_match") != "exact":
+        return False
+    resolution_url = str(evidence.get("url") or "")
+    event_url = str(item.get("url") or "")
+    if evidence.get("entity_scope") != "issuer" or not _is_official_overlay_url(resolution_url):
+        return False
+    if resolution_url == event_url or not _same_resolution_entity(event_url, resolution_url):
+        return False
+    event_id = str(item.get("canonical_event_id") or item.get("source_record_id") or item.get("url") or "")
+    if not event_id or str(evidence.get("linked_event_id") or "") != event_id:
+        return False
+    resolution_record_id = str(evidence.get("source_record_id") or "")
+    if not resolution_record_id or resolution_record_id == str(item.get("source_record_id") or ""):
+        return False
+    event_date = _overlay_date(item.get("published_at"))
+    resolved_date = _overlay_date(evidence.get("published_at"))
+    if not event_date or not resolved_date or resolved_date <= event_date:
+        return False
+    age_days = item.get("age_days")
+    if age_days is not None:
+        try:
+            as_of = event_date + dt.timedelta(days=int(age_days))
+        except (TypeError, ValueError, OverflowError):
+            return False
+        if resolved_date > as_of:
+            return False
+    topic = str(item.get("lifecycle_topic") or "")
+    return bool(topic) and str(evidence.get("lifecycle_topic") or "") == topic
 
 
 def _negative_event_counterfactual_case(
@@ -1213,29 +1364,43 @@ def _negative_event_counterfactual_case(
         "counterfactual_base": base_ticker,
         "source_path": str(source_path) if source_path else "",
     }
-    severities = set(primary.get("overlay_severities") or [])
+    severities = set(primary.get("overlay_active_severities") or [])
     if "P0" in severities:
         max_score = 59.9
         max_dim_score = 4.9
-    else:
+    elif "P1" in severities:
         max_score = 64.9
         max_dim_score = 5.5
+    else:
+        max_score = None
+        max_dim_score = None
     source_ticker = str(overlay.get("ticker") or "")
-    return {
-        "ticker": f"__overlaycf_{source_ticker}_on_{base_ticker}_negative_event",
+    case_kind = "negative_event" if severities else "resolution"
+    case = {
+        "ticker": f"__overlaycf_{source_ticker}_on_{base_ticker}_{case_kind}",
         "group": "evidence_overlay",
-        "role": f"market-matched counterfactual: {source_ticker} official event injected into {base_ticker}",
-        "expectation": "negative_event",
-        "max_candidate_score": max_score,
-        "max_candidate_dim_scores": {"15_events": max_dim_score},
+        "role": (
+            f"market-matched counterfactual: {source_ticker} active official event injected into {base_ticker}"
+            if severities
+            else f"market-matched counterfactual: {source_ticker} verified resolution injected into {base_ticker}"
+        ),
+        "expectation": "negative_event" if severities else "resolved_negative_event",
         "overlay_source_ticker": source_ticker,
         "overlay_target": overlay.get("target"),
         "overlay_market": market,
         "overlay_path": str(source_path) if source_path else "",
-        "overlay_severities": sorted(severities),
+        "overlay_severities": primary.get("overlay_severities") or [],
+        "overlay_active_severities": sorted(severities),
+        "overlay_resolved_severities": primary.get("overlay_resolved_severities") or [],
         "counterfactual_base_ticker": base_ticker,
         "raw": raw,
     }
+    if max_score is not None:
+        case["max_candidate_score"] = max_score
+        case["max_candidate_dim_scores"] = {"15_events": max_dim_score}
+    else:
+        case["min_candidate_dim_scores"] = {"15_events": 5.0}
+    return case
 
 
 def discover_cached_blindspot_cases(existing_tickers: set[str] | None = None) -> list[dict[str, Any]]:

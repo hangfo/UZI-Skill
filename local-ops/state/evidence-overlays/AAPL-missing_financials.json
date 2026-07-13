@@ -1,0 +1,187 @@
+{
+  "schema_version": "uzi.evidence_overlay.v1",
+  "ticker": "AAPL",
+  "market": "US",
+  "target": "missing_financials",
+  "status": "ready",
+  "confidence": {
+    "level": "high",
+    "score": 85,
+    "factors": [
+      "required evidence is present and frozen"
+    ]
+  },
+  "evidence": [
+    {
+      "source": "local_raw_data",
+      "url": "D:\\UZI-Skill\\skills\\deep-analysis\\scripts\\.cache\\AAPL\\raw_data.json",
+      "title": "Cached raw_data financial fields for AAPL",
+      "published_at": null,
+      "fetched_at": "2026-07-09T07:55:16Z",
+      "fields": [
+        "net_margin",
+        "revenue_history",
+        "roe"
+      ]
+    },
+    {
+      "source": "sec_companyfacts",
+      "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json",
+      "title": "SEC companyfacts for Apple Inc. (AAPL)",
+      "published_at": "2026-05-01",
+      "fetched_at": "2026-07-09T07:55:22Z",
+      "fields": [
+        "assets",
+        "equity",
+        "liabilities",
+        "net_income",
+        "revenue"
+      ]
+    }
+  ],
+  "field_mapping": {
+    "cache_raw_data": {
+      "roe": "141.5%",
+      "net_margin": "27.2%",
+      "revenue_history": [
+        NaN,
+        3943.28,
+        3832.85,
+        3910.35,
+        4161.61
+      ]
+    },
+    "sec_companyfacts": {
+      "revenue": {
+        "concept": "Revenues",
+        "label": "Revenues",
+        "values": [
+          {
+            "value": 215639000000,
+            "fy": 2018,
+            "fp": "FY",
+            "form": "10-K",
+            "filed": "2018-11-05",
+            "accn": "0000320193-18-000145"
+          },
+          {
+            "value": 78351000000,
+            "fy": 2018,
+            "fp": "FY",
+            "form": "10-K",
+            "filed": "2018-11-05",
+            "accn": "0000320193-18-000145"
+          }
+        ]
+      },
+      "net_income": {
+        "concept": "NetIncomeLoss",
+        "label": "Net Income (Loss) Attributable to Parent",
+        "values": [
+          {
+            "value": 61110000000,
+            "fy": 2026,
+            "fp": "Q2",
+            "form": "10-Q",
+            "filed": "2026-05-01",
+            "accn": "0000320193-26-000013"
+          },
+          {
+            "value": 24780000000,
+            "fy": 2026,
+            "fp": "Q2",
+            "form": "10-Q",
+            "filed": "2026-05-01",
+            "accn": "0000320193-26-000013"
+          }
+        ]
+      },
+      "assets": {
+        "concept": "Assets",
+        "label": "Assets",
+        "values": [
+          {
+            "value": 359241000000,
+            "fy": 2026,
+            "fp": "Q2",
+            "form": "10-Q",
+            "filed": "2026-05-01",
+            "accn": "0000320193-26-000013"
+          },
+          {
+            "value": 371082000000,
+            "fy": 2026,
+            "fp": "Q2",
+            "form": "10-Q",
+            "filed": "2026-05-01",
+            "accn": "0000320193-26-000013"
+          }
+        ]
+      },
+      "liabilities": {
+        "concept": "Liabilities",
+        "label": "Liabilities",
+        "values": [
+          {
+            "value": 285508000000,
+            "fy": 2026,
+            "fp": "Q2",
+            "form": "10-Q",
+            "filed": "2026-05-01",
+            "accn": "0000320193-26-000013"
+          },
+          {
+            "value": 264591000000,
+            "fy": 2026,
+            "fp": "Q2",
+            "form": "10-Q",
+            "filed": "2026-05-01",
+            "accn": "0000320193-26-000013"
+          }
+        ]
+      },
+      "equity": {
+        "concept": "StockholdersEquity",
+        "label": "Stockholders' Equity Attributable to Parent",
+        "values": [
+          {
+            "value": 56950000000,
+            "fy": 2026,
+            "fp": "Q2",
+            "form": "10-Q",
+            "filed": "2026-05-01",
+            "accn": "0000320193-26-000013"
+          },
+          {
+            "value": 66758000000,
+            "fy": 2026,
+            "fp": "Q2",
+            "form": "10-Q",
+            "filed": "2026-05-01",
+            "accn": "0000320193-26-000013"
+          }
+        ]
+      }
+    }
+  },
+  "source_plan": [
+    {
+      "source": "sec_companyfacts",
+      "role": "official XBRL facts"
+    },
+    {
+      "source": "sec_submissions",
+      "role": "filing provenance"
+    }
+  ],
+  "errors": [],
+  "fetched_at": "2026-07-09T07:55:16Z",
+  "performance": {
+    "elapsed_sec": 5.873
+  },
+  "guardrails": [
+    "online evidence is frozen before branch comparison",
+    "missing evidence stays a gap; do not infer facts",
+    "same overlay must be reused for baseline and candidate refs"
+  ]
+}

@@ -721,6 +721,7 @@ def _official_event(severity="P1", **overrides):
         "source_record_id": "event-1",
         "canonical_event_id": "sec:event-1",
         "resolution_status": "unknown",
+        "published_at": "2026-06-01",
         "age_days": 10,
     }
     item.update(overrides)
@@ -785,15 +786,126 @@ def test_structured_event_rejects_future_stale_and_non_numeric_age():
 def test_structured_p2_and_resolved_p1_are_review_only_not_positive_news():
     from lib.pipeline.score_fns import score_dimensions
 
+    resolved = _official_event(
+        "P1",
+        source_record_id="event-2",
+        url="https://www.sec.gov/Archives/edgar/data/1375365/event-2.htm",
+        resolution_status="resolved",
+        lifecycle_topic="nasdaq_periodic_reporting_rule_5250_c_1",
+    )
+    resolved["resolution_evidence"] = {
+        "resolution_status": "resolved",
+        "official_source": True,
+        "entity_match": "exact",
+        "entity_scope": "issuer",
+        "url": "https://www.sec.gov/Archives/edgar/data/1375365/resolution-2.htm",
+        "published_at": "2026-06-11",
+        "source_record_id": "resolution-2",
+        "linked_event_id": "sec:event-2",
+        "lifecycle_topic": "nasdaq_periodic_reporting_rule_5250_c_1",
+    }
     rows = [
         _official_event("P2", entity_scope="related_person"),
-        _official_event("P1", source_record_id="event-2", resolution_status="resolved"),
+        resolved,
     ]
     raw = _make_raw(dims_override={"15_events": {"data": {"recent_news": rows}}})
     event_dim = score_dimensions(raw)["dimensions"]["15_events"]
     assert event_dim["score"] == 5
     assert event_dim["risk_contract"]["highest_active_severity"] is None
     assert event_dim["risk_contract"]["review_only_count"] == 1
+    assert event_dim["risk_contract"]["verified_resolution_count"] == 1
+    assert event_dim["risk_contract"]["rejected_resolution_claim_count"] == 0
+
+
+def test_self_asserted_resolution_without_linked_official_evidence_stays_active():
+    from lib.pipeline.score_fns import score_dimensions
+
+    claimed = _official_event("P1", resolution_status="resolved")
+    raw = _make_raw(dims_override={"15_events": {"data": {"recent_news": [claimed]}}})
+    event_dim = score_dimensions(raw)["dimensions"]["15_events"]
+
+    assert event_dim["score"] == 4
+    assert event_dim["risk_contract"]["highest_active_severity"] == "P1"
+    assert event_dim["risk_contract"]["verified_resolution_count"] == 0
+    assert event_dim["risk_contract"]["rejected_resolution_claim_count"] == 1
+
+
+def test_self_referential_and_future_resolution_evidence_stays_active():
+    from lib.pipeline.score_fns import score_dimensions
+
+    rows = []
+    for source_record_id, resolved_at in (("event-1", "2026-06-05"), ("resolution-2", "2026-06-20")):
+        claimed = _official_event(
+            "P1",
+            source_record_id=f"event-{len(rows) + 1}",
+            resolution_status="resolved",
+            lifecycle_topic="nasdaq_periodic_reporting_rule_5250_c_1",
+        )
+        claimed["resolution_evidence"] = {
+            "resolution_status": "resolved",
+            "official_source": True,
+            "entity_match": "exact",
+            "entity_scope": "issuer",
+            "url": "https://www.sec.gov/example-resolution",
+            "published_at": resolved_at,
+            "source_record_id": source_record_id,
+            "linked_event_id": claimed["canonical_event_id"],
+            "lifecycle_topic": "nasdaq_periodic_reporting_rule_5250_c_1",
+        }
+        rows.append(claimed)
+    raw = _make_raw(dims_override={"15_events": {"data": {"recent_news": rows}}})
+    event_dim = score_dimensions(raw)["dimensions"]["15_events"]
+
+    assert event_dim["score"] == 4
+    assert event_dim["risk_contract"]["highest_active_severity"] == "P1"
+    assert event_dim["risk_contract"]["verified_resolution_count"] == 0
+    assert event_dim["risk_contract"]["rejected_resolution_claim_count"] == 2
+
+
+def test_cross_issuer_and_same_url_resolution_evidence_stays_active():
+    from lib.pipeline.score_fns import score_dimensions
+
+    rows = []
+    for event_id, resolution_url in (
+        (
+            "cross-issuer",
+            "https://www.sec.gov/Archives/edgar/data/320193/resolution.htm",
+        ),
+        (
+            "same-url",
+            "https://www.sec.gov/Archives/edgar/data/1375365/same-url.htm",
+        ),
+    ):
+        event_url = (
+            "https://www.sec.gov/Archives/edgar/data/1375365/same-url.htm"
+            if event_id == "same-url"
+            else "https://www.sec.gov/Archives/edgar/data/1375365/original.htm"
+        )
+        claimed = _official_event(
+            "P1",
+            source_record_id=event_id,
+            url=event_url,
+            resolution_status="resolved",
+            lifecycle_topic="nasdaq_periodic_reporting_rule_5250_c_1",
+        )
+        claimed["resolution_evidence"] = {
+            "resolution_status": "resolved",
+            "official_source": True,
+            "entity_match": "exact",
+            "entity_scope": "issuer",
+            "url": resolution_url,
+            "published_at": "2026-06-05",
+            "source_record_id": f"resolution-{event_id}",
+            "linked_event_id": claimed["canonical_event_id"],
+            "lifecycle_topic": "nasdaq_periodic_reporting_rule_5250_c_1",
+        }
+        rows.append(claimed)
+    raw = _make_raw(dims_override={"15_events": {"data": {"recent_news": rows}}})
+    risk = score_dimensions(raw)["dimensions"]["15_events"]["risk_contract"]
+
+    assert risk["highest_active_severity"] == "P1"
+    assert risk["verified_resolution_count"] == 0
+    assert risk["rejected_resolution_claim_count"] == 2
 
 
 def test_structured_event_mirror_duplicates_do_not_stack():

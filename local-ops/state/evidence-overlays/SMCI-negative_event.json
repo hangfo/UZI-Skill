@@ -1,0 +1,417 @@
+{
+  "schema_version": "uzi.evidence_overlay.v1",
+  "ticker": "SMCI",
+  "market": "US",
+  "target": "negative_event",
+  "status": "ready",
+  "confidence": {
+    "level": "high",
+    "score": 85,
+    "factors": [
+      "required evidence is present and frozen"
+    ],
+    "label_zh": "高",
+    "factors_zh": [
+      "必要证据已存在并冻结"
+    ]
+  },
+  "evidence": [
+    {
+      "source": "sec_submissions",
+      "url": "https://www.sec.gov/Archives/edgar/data/1375365/000137536524000045/smci-20241206.htm",
+      "title": "Super Micro Computer, Inc. (SMCI) 8-K Item 3.01: Notice of Delisting or Failure to Satisfy a Continued Listing Rule",
+      "published_at": "2024-12-06",
+      "fetched_at": "2026-07-13T10:05:14Z",
+      "fields": [
+        "15_events.recent_news",
+        "sec_submissions.recent.items"
+      ],
+      "severity": "P1",
+      "event_type": "sec_8k_item",
+      "form": "8-K",
+      "accession": "0001375365-24-000045",
+      "item_code": "3.01",
+      "official_source": true,
+      "entity_match": "exact",
+      "entity_scope": "issuer",
+      "match_method": "SEC CIK+ticker",
+      "source_record_id": "0001375365-24-000045",
+      "canonical_event_id": "sec_submissions:0001375365-24-000045",
+      "resolution_status": "closed",
+      "phase": "active",
+      "lifecycle_topic": "nasdaq_periodic_reporting_rule_5250_c_1",
+      "lifecycle_key": "sec:nasdaq:5250(c)(1):periodic_reporting",
+      "resolution_signal": "temporary_exception_pending_filings",
+      "resolved_at": "2025-02-26",
+      "resolution_evidence": {
+        "resolution_status": "closed",
+        "official_source": true,
+        "entity_match": "exact",
+        "entity_scope": "issuer",
+        "url": "https://www.sec.gov/Archives/edgar/data/1375365/000137536525000007/smci-20250221.htm",
+        "published_at": "2025-02-26",
+        "source_record_id": "0001375365-25-000007",
+        "linked_event_id": "sec_submissions:0001375365-24-000045",
+        "lifecycle_topic": "nasdaq_periodic_reporting_rule_5250_c_1",
+        "match_method": "SEC CIK+ticker+Item3.01+Nasdaq Rule 5250(c)(1)",
+        "resolution_signal": "now_complies_and_matter_closed"
+      },
+      "age_days": 584,
+      "severity_label_zh": "P1 重大风险升级"
+    },
+    {
+      "source": "sec_submissions",
+      "url": "https://www.sec.gov/Archives/edgar/data/1375365/000137536524000042/smci-20241114.htm",
+      "title": "Super Micro Computer, Inc. (SMCI) 8-K Item 3.01: Notice of Delisting or Failure to Satisfy a Continued Listing Rule",
+      "published_at": "2024-11-20",
+      "fetched_at": "2026-07-13T10:05:14Z",
+      "fields": [
+        "15_events.recent_news",
+        "sec_submissions.recent.items"
+      ],
+      "severity": "P1",
+      "event_type": "sec_8k_item",
+      "form": "8-K",
+      "accession": "0001375365-24-000042",
+      "item_code": "3.01",
+      "official_source": true,
+      "entity_match": "exact",
+      "entity_scope": "issuer",
+      "match_method": "SEC CIK+ticker",
+      "source_record_id": "0001375365-24-000042",
+      "canonical_event_id": "sec_submissions:0001375365-24-000042",
+      "resolution_status": "closed",
+      "phase": "active",
+      "lifecycle_topic": "nasdaq_periodic_reporting_rule_5250_c_1",
+      "lifecycle_key": "sec:nasdaq:5250(c)(1):periodic_reporting",
+      "resolution_signal": "explicit_noncompliance",
+      "resolved_at": "2025-02-26",
+      "resolution_evidence": {
+        "resolution_status": "closed",
+        "official_source": true,
+        "entity_match": "exact",
+        "entity_scope": "issuer",
+        "url": "https://www.sec.gov/Archives/edgar/data/1375365/000137536525000007/smci-20250221.htm",
+        "published_at": "2025-02-26",
+        "source_record_id": "0001375365-25-000007",
+        "linked_event_id": "sec_submissions:0001375365-24-000042",
+        "lifecycle_topic": "nasdaq_periodic_reporting_rule_5250_c_1",
+        "match_method": "SEC CIK+ticker+Item3.01+Nasdaq Rule 5250(c)(1)",
+        "resolution_signal": "now_complies_and_matter_closed"
+      },
+      "age_days": 600,
+      "severity_label_zh": "P1 重大风险升级"
+    },
+    {
+      "source": "sec_submissions",
+      "url": "https://www.sec.gov/Archives/edgar/data/1375365/000137536524000040/smci-20241118.htm",
+      "title": "Super Micro Computer, Inc. (SMCI) 8-K Item 4.01: Changes in Registrant's Certifying Accountant",
+      "published_at": "2024-11-18",
+      "fetched_at": "2026-07-13T10:05:14Z",
+      "fields": [
+        "15_events.recent_news",
+        "sec_submissions.recent.items"
+      ],
+      "severity": "P1",
+      "event_type": "sec_8k_item",
+      "form": "8-K",
+      "accession": "0001375365-24-000040",
+      "item_code": "4.01",
+      "official_source": true,
+      "entity_match": "exact",
+      "entity_scope": "issuer",
+      "match_method": "SEC CIK+ticker",
+      "source_record_id": "0001375365-24-000040",
+      "canonical_event_id": "sec_submissions:0001375365-24-000040",
+      "resolution_status": "unknown",
+      "age_days": 602,
+      "severity_label_zh": "P1 重大风险升级"
+    },
+    {
+      "source": "sec_submissions",
+      "url": "https://www.sec.gov/Archives/edgar/data/1375365/000137536524000036/smci-20241024.htm",
+      "title": "Super Micro Computer, Inc. (SMCI) 8-K Item 4.01: Changes in Registrant's Certifying Accountant",
+      "published_at": "2024-10-30",
+      "fetched_at": "2026-07-13T10:05:14Z",
+      "fields": [
+        "15_events.recent_news",
+        "sec_submissions.recent.items"
+      ],
+      "severity": "P1",
+      "event_type": "sec_8k_item",
+      "form": "8-K",
+      "accession": "0001375365-24-000036",
+      "item_code": "4.01",
+      "official_source": true,
+      "entity_match": "exact",
+      "entity_scope": "issuer",
+      "match_method": "SEC CIK+ticker",
+      "source_record_id": "0001375365-24-000036",
+      "canonical_event_id": "sec_submissions:0001375365-24-000036",
+      "resolution_status": "unknown",
+      "age_days": 621,
+      "severity_label_zh": "P1 重大风险升级"
+    },
+    {
+      "source": "sec_submissions",
+      "url": "https://www.sec.gov/Archives/edgar/data/1375365/000137536524000033/smci-20240917.htm",
+      "title": "Super Micro Computer, Inc. (SMCI) 8-K Item 3.01: Notice of Delisting or Failure to Satisfy a Continued Listing Rule",
+      "published_at": "2024-09-20",
+      "fetched_at": "2026-07-13T10:05:14Z",
+      "fields": [
+        "15_events.recent_news",
+        "sec_submissions.recent.items"
+      ],
+      "severity": "P1",
+      "event_type": "sec_8k_item",
+      "form": "8-K",
+      "accession": "0001375365-24-000033",
+      "item_code": "3.01",
+      "official_source": true,
+      "entity_match": "exact",
+      "entity_scope": "issuer",
+      "match_method": "SEC CIK+ticker",
+      "source_record_id": "0001375365-24-000033",
+      "canonical_event_id": "sec_submissions:0001375365-24-000033",
+      "resolution_status": "closed",
+      "phase": "active",
+      "lifecycle_topic": "nasdaq_periodic_reporting_rule_5250_c_1",
+      "lifecycle_key": "sec:nasdaq:5250(c)(1):periodic_reporting",
+      "resolution_signal": "explicit_noncompliance",
+      "resolved_at": "2025-02-26",
+      "resolution_evidence": {
+        "resolution_status": "closed",
+        "official_source": true,
+        "entity_match": "exact",
+        "entity_scope": "issuer",
+        "url": "https://www.sec.gov/Archives/edgar/data/1375365/000137536525000007/smci-20250221.htm",
+        "published_at": "2025-02-26",
+        "source_record_id": "0001375365-25-000007",
+        "linked_event_id": "sec_submissions:0001375365-24-000033",
+        "lifecycle_topic": "nasdaq_periodic_reporting_rule_5250_c_1",
+        "match_method": "SEC CIK+ticker+Item3.01+Nasdaq Rule 5250(c)(1)",
+        "resolution_signal": "now_complies_and_matter_closed"
+      },
+      "age_days": 661,
+      "severity_label_zh": "P1 重大风险升级"
+    }
+  ],
+  "field_mapping": {
+    "sec_submissions": {
+      "events": [
+        {
+          "severity": "P1",
+          "event_type": "sec_8k_item",
+          "published_at": "2024-12-06",
+          "source_record_id": "0001375365-24-000045",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P1",
+          "event_type": "sec_8k_item",
+          "published_at": "2024-11-20",
+          "source_record_id": "0001375365-24-000042",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P1",
+          "event_type": "sec_8k_item",
+          "published_at": "2024-11-18",
+          "source_record_id": "0001375365-24-000040",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P1",
+          "event_type": "sec_8k_item",
+          "published_at": "2024-10-30",
+          "source_record_id": "0001375365-24-000036",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P1",
+          "event_type": "sec_8k_item",
+          "published_at": "2024-09-20",
+          "source_record_id": "0001375365-24-000033",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P1",
+          "event_type": "sec_8k_item",
+          "published_at": "2024-05-09",
+          "source_record_id": "0001375365-24-000023",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P1",
+          "event_type": "sec_8k_item",
+          "published_at": "2023-03-15",
+          "source_record_id": "0001375365-23-000023",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P1",
+          "event_type": "sec_8k_item",
+          "published_at": "2019-03-11",
+          "source_record_id": "0001375365-19-000010",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P0",
+          "event_type": "sec_8k_item",
+          "published_at": "2018-11-15",
+          "source_record_id": "0001628280-18-014419",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P1",
+          "event_type": "sec_8k_item",
+          "published_at": "2018-08-23",
+          "source_record_id": "0001628280-18-011320",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P1",
+          "event_type": "sec_8k_item",
+          "published_at": "2018-08-21",
+          "source_record_id": "0001628280-18-011280",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P1",
+          "event_type": "sec_8k_item",
+          "published_at": "2018-07-13",
+          "source_record_id": "0001628280-18-009214",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P1",
+          "event_type": "sec_8k_item",
+          "published_at": "2018-05-21",
+          "source_record_id": "0001628280-18-007027",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P1",
+          "event_type": "sec_8k_item",
+          "published_at": "2018-03-16",
+          "source_record_id": "0001628280-18-003318",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P1",
+          "event_type": "sec_8k_item",
+          "published_at": "2018-02-21",
+          "source_record_id": "0001628280-18-001928",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P1",
+          "event_type": "sec_8k_item",
+          "published_at": "2017-11-20",
+          "source_record_id": "0001628280-17-011731",
+          "entity_scope": "issuer"
+        },
+        {
+          "severity": "P1",
+          "event_type": "sec_8k_item",
+          "published_at": "2017-09-15",
+          "source_record_id": "0001628280-17-009319",
+          "entity_scope": "issuer"
+        }
+      ]
+    },
+    "sec_litigation_releases": {
+      "events": []
+    },
+    "sec_trading_suspensions": {
+      "events": []
+    }
+  },
+  "source_plan": [
+    {
+      "source": "sec_litigation_releases",
+      "role": "official enforcement"
+    },
+    {
+      "source": "sec_trading_suspensions",
+      "role": "official regulator trading suspension"
+    },
+    {
+      "source": "sec_submissions",
+      "role": "company filed events"
+    }
+  ],
+  "source_coverage": [
+    {
+      "source": "sec_submissions",
+      "status": "ok",
+      "scanned": 1,
+      "matched": 17,
+      "failed": 0,
+      "eligible": 5
+    },
+    {
+      "source": "sec_litigation_releases",
+      "status": "ok",
+      "scanned": 100,
+      "matched": 0,
+      "failed": 0,
+      "eligible": 0
+    },
+    {
+      "source": "sec_trading_suspensions",
+      "status": "ok",
+      "scanned": 100,
+      "matched": 0,
+      "failed": 0,
+      "eligible": 0
+    }
+  ],
+  "errors": [],
+  "fetched_at": "2026-07-13T10:05:10Z",
+  "as_of": "2026-07-13",
+  "lookback_days": 730,
+  "performance": {
+    "elapsed_sec": 7.756
+  },
+  "guardrails": [
+    "online evidence is frozen before branch comparison",
+    "missing evidence stays a gap; do not infer facts",
+    "same overlay must be reused for baseline and candidate refs"
+  ],
+  "lifecycle": {
+    "status": "linked",
+    "links": [
+      {
+        "resolution_status": "closed",
+        "official_source": true,
+        "entity_match": "exact",
+        "entity_scope": "issuer",
+        "url": "https://www.sec.gov/Archives/edgar/data/1375365/000137536525000007/smci-20250221.htm",
+        "title": "Super Micro Computer, Inc. (SMCI) 8-K Item 3.01: Notice of Delisting or Failure to Satisfy a Continued Listing Rule",
+        "published_at": "2025-02-26",
+        "source_record_id": "0001375365-25-000007",
+        "lifecycle_topic": "nasdaq_periodic_reporting_rule_5250_c_1",
+        "matched_event_ids": [
+          "sec_submissions:0001375365-24-000033",
+          "sec_submissions:0001375365-24-000042",
+          "sec_submissions:0001375365-24-000045"
+        ],
+        "match_method": "SEC CIK+ticker+Item3.01+Nasdaq Rule 5250(c)(1)",
+        "resolution_signal": "now_complies_and_matter_closed"
+      }
+    ],
+    "policy": [
+      "resolution requires a later exact-issuer official record",
+      "resolution must match the same narrow event family and rule topic",
+      "penalties, fraud, non-reliance and generic remediation stay unresolved"
+    ],
+    "scanned": 4
+  },
+  "display": {
+    "target_label_zh": "负面事件证据",
+    "status_label_zh": "证据已冻结",
+    "confidence_label_zh": "高",
+    "summary_zh": "SMCI 负面事件证据：证据已冻结，置信度 高"
+  }
+}
