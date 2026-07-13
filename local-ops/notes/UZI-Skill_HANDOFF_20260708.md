@@ -1,6 +1,17 @@
 # UZI-Skill 交接记录 - 2026-07-08
 
-## 当前 Windows 状态
+## 2026-07-13 最新状态
+
+- 分支仍为 `codex/scoring-validation-guardrails`，个人远端为 `origin=https://github.com/hangfo/UZI-Skill.git`，upstream push 禁用。
+- 结构化事件实现 commit：`418ae5b`；同步后应至少包含该 commit，最新文档 commit 以 `git log -1` 为准。
+- branch-vs-branch、三市场官方事件 overlay、市场匹配反事实和结构化 P0/P1 消费契约均已完成。
+- 最终 67 项对照：`61 ok / 6 review / 0 possible_regression`。
+- `HUBG P0 -> AAPL`：`68/buy_candidate -> 59.9/watch`；`SMCI P1 -> AAPL`：`68/buy_candidate -> 64.9/watch`。
+- 测试：branch harness `31/31`、builder `26/26`、scoring consistency `33/33`、`py_compile` 与 `git diff --check` 通过。
+- 未重新安装、未跑 deep、未运行 update；branch runner 保持纯评分离线。
+- 当前权重和事件阈值冻结。下一项是官方事件解决态的 shadow 验证，不再继续调分。
+
+## 2026-07-08 历史起点
 
 - 仓库：`D:\UZI-Skill`
 - 分支：`codex/scoring-validation-guardrails`
@@ -92,11 +103,20 @@ After syncing, verify:
 4. lite/medium regression basket
 5. holdout CRCL, SIVE.ST, 688017.SH if cache exists
 
-Expected HEAD:
-5cf86467f72211c6337688aae0e9502a871c35aa
+Expected branch state:
+must contain commit 418ae5b; use git log -1 for the latest documentation commit
 ```
 
-## 建议的下一优先级
+## 当前下一优先级
+
+1. 对官方后续公告做 canonical event 生命周期关联，确定 `resolved/remediated/closed`，先只生成 overlay。
+2. 用相同冻结输入离线复验解决态，确认解除风险不会误伤现有 P0/P1 结论。
+3. NYSE/Nasdaq 动态列表没有稳定 schema 时保持 gap，不以搜索摘要或页面数量进入硬评分。
+4. 按自然时间窗口积累 holdout，不围绕当前阈值挑样本。
+
+推荐 GPT-5.6 medium；只有修改生命周期状态机或跨源 canonical matching 时使用 high。
+
+## 2026-07-08 历史建议（已完成）
 
 除非中立验证 harness 证明存在决策质量回退，否则不要继续调评分权重。
 

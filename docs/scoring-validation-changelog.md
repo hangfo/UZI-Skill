@@ -4,7 +4,30 @@
 
 ## 2026-07-13
 
-### 三市场官方负面事件 adapters 与反事实对照
+### `418ae5b` · 结构化事件风险正式进入评分与三市场扩源
+
+- 在 `score_fns.py` 增加最小 severity-aware 消费契约，不调整普通评分权重：
+  - 仅官方域名、精确 issuer、有效时效和未解决的 P0/P1 可触发护栏。
+  - P0：`15_events <= 2`、`investment_score <= 59.9`。
+  - P1：`15_events <= 4`、`investment_score <= 64.9`。
+  - P2、关联人、已解决事件只 review；非官方、模糊实体、未来/过期记录被拒绝。
+  - 镜像按 canonical/source record 去重；结构化负面行不再触发正向新闻奖励。
+  - 传统 `overall_score` 不变，交易护栏只影响 `investment_score`。
+- 美股从 SEC 8-K 单层扩为三层：SEC submissions、litigation releases、trading suspensions。
+- A 股新增证监会行政处罚决定，保留巨潮、上交所、深交所。
+- 港股新增 HKEX issuer critical filings，保留 HKEX disciplinary actions、SFC enforcement。
+- 新真实正例：
+  - `HUBG`：SEC 8-K P0/P1。
+  - `000851.SZ`：证监会处罚、巨潮重大违法退市风险、深交所处分。
+  - `00841.HK`：HKEX issuer critical filing P1。
+- 新对抗边界：伪造官方字段、已解决 P1、未来/过期 P1、非数字时效、镜像重复、P2/关联人不硬降级。
+- 验证：branch harness `31/31`、builder `26/26`、scoring consistency `33/33`，`py_compile` 和 `git diff --check` 通过；未安装 pytest。
+- 最终 branch-vs-branch：60 个 raw-mode 项 + 7 个 synthetic feature，共 `61 ok / 6 review / 0 possible_regression`；baseline/candidate 分别约 `2.7s/2.6s`。
+- 关键变化：`HUBG P0 -> AAPL` 从 `68/buy_candidate` 收紧为 `59.9/watch`；`SMCI P1 -> AAPL` 收紧为 `64.9/watch`。伪造、已解决和超时效 P1 保持中性。
+- 客观效果评分：结构化 P1 处理由 `4.0/10` 提升为 `8.8/10`；adapter+harness `9.3/10`；整体交付 `9.0/10`。扣分点是自动解决态追踪和部分官方列表的有界扫描，不为满分硬凑。
+- 在线/离线边界冻结：在线只负责从官方源发现和冻结事实；离线负责实体匹配、日期、taxonomy、去重、评分和 branch 对照；Agent 只做发现、解释和冲突复核，不能凭经验创造 P0/P1。
+
+### 三市场官方负面事件 adapters 与反事实对照（问题发现阶段）
 
 - `tools/evidence_overlay_builder.py` 新增 A/HK 官方 adapter：
   - 巨潮：动态读取 `orgId`，按证券代码查询公司公告。
@@ -35,7 +58,7 @@
   - A/HK P1 注入后候选 `15_events` 从 5 升到 6/7。
   - SMCI P1 注入 AAPL 后仍为 68 分 `buy_candidate`。
   - 根因是评分函数读取标题词表而不读取结构化 `severity`，且缺少部分中英文官方处罚语义。
-- 本轮效果评分：adapter+harness `9.0/10`；现有评分处理结构化 P1 `4.0/10`。公式保持冻结，下一步只设计 severity-aware 消费契约并复用同一冻结输入验证。
+- 当时效果评分：adapter+harness `9.0/10`；评分处理结构化 P1 `4.0/10`。该阶段只发现问题、未改评分；随后已由 `418ae5b` 的 severity-aware 消费契约和同输入复验闭环。
 
 ## 2026-07-09
 
@@ -132,7 +155,7 @@
 
 ## 后续计划
 
-1. 冻结本轮 overlay 和 counterfactual 输入，不再扩大关键词或继续挑样本。
-2. 设计最小 severity-aware 消费契约：官方结构化 `severity/entity_scope` 优先，P2 只 review，旧 raw data 继续走标题 fallback。
-3. 先补纯函数测试和同输入 branch-vs-branch，再决定是否修改公式；目标是修复已证明的方向错误，不提高其他样本分数。
-4. 增加真实 P0 issuer holdout 和 SFC issuer 级 P1/P0 正例；仍按固定时间窗口和官方列表顺序选样，避免事后挑选。
+1. 评分权重和事件阈值继续冻结，先做一段时间的 production shadow 观察，不让在线证据直接改动评分代码。
+2. 下一项高收益工作是“事件生命周期关联”：将后续整改、解除停牌、恢复合规等官方公告关联到 canonical event，生成可复核的 `resolution_status`，仍先进入 overlay 再对照。
+3. 对 NYSE/Nasdaq 等动态列表只做 schema 稳定性评估；没有稳定官方字段时保持 gap，不以页面抓取数量换覆盖率。
+4. 持续按固定窗口和官方列表顺序补自然出现的 P0/P1 holdout，不围绕当前阈值挑样本，也不继续扩张标题关键词。

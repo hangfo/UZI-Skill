@@ -393,9 +393,9 @@ local-ops/state/evidence-overlays/<ticker>-<target>.json
 当前支持：
 
 - `missing_financials`：美股走 SEC `company_tickers.json` + `companyfacts`，只做字段映射，不生成投资分数。
-- `negative_event / US`：SEC `submissions` 的 8-K item code。
-- `negative_event / A`：巨潮动态 `orgId` 映射后的公司公告；`.SH` 直连上交所监管措施；`.SZ` 直连深交所监管措施与纪律处分。
-- `negative_event / HK`：HKEX disciplinary overview 的精确 `Stock Code`；SFC enforcement 列表与正文中的精确 `stock code`。
+- `negative_event / US`：SEC `submissions` 的 8-K item code、SEC litigation releases、SEC trading suspensions。
+- `negative_event / A`：证监会行政处罚决定、巨潮动态 `orgId` 映射后的公司公告；`.SH` 直连上交所监管措施；`.SZ` 直连深交所监管措施与纪律处分。
+- `negative_event / HK`：HKEX issuer critical filings、HKEX disciplinary overview 的精确 `Stock Code`；SFC enforcement 列表与正文中的精确 `stock code`。
 - 缓存新闻只有在 URL 属于已知官方域名、ticker 归属可精确确认、标题命中明确 taxonomy 时才可成为正式证据；不靠泛新闻情绪或常识推断。
 - `--no-network`：只读本地缓存，用于测试和离线复跑。
 - `--no-write`：只打印状态，不落地 overlay。
@@ -471,10 +471,13 @@ D:\UZI-Skill\.venv\Scripts\python.exe tools\branch_score_compare.py `
 | 市场 | 样本 | 官方命中 | 冻结状态 | 用途 |
 |---|---|---|---|---|
 | US | `SMCI` | SEC 8-K `3.01`、`4.01` | `ready/P1` | issuer 级真实正例 |
+| US | `HUBG` | SEC 8-K `4.02`、`3.01` | `ready/P0+P1` | 财报不可依赖与上市规则真实 P0/P1 |
 | A / SZSE | `002038.SZ` | 巨潮公司公告、深交所纪律处分/监管函 | `ready/P1+P2` | 多源交叉正例与镜像去重 |
+| A / SZSE | `000851.SZ` | 证监会处罚、巨潮重大违法退市风险、深交所处分 | `ready/P0+P1` | 监管/发行人/交易所三层真实正例 |
 | A / SSE | `601872.SH` | 巨潮行政监管措施公告、上交所监管警示 | `ready/P1+P2` | 上交所直连正例 |
 | A / SSE | `600519.SH` | 时效窗口内无 eligible P0/P1 | `gap` | 不从历史旧记录推断当前负面 |
 | HK | `03616.HK` | HKEX issuer disciplinary action | `ready/P1` | issuer 级真实正例 |
+| HK | `00841.HK` | HKEX issuer critical filing | `ready/P1` | 发行人关键公告真实正例 |
 | HK | `00171.HK` | HKEX former director action | `partial/P2` | 关联人不冒充 issuer 处罚 |
 | HK | `06161.HK` | SFC former chairman proceeding，正文精确代码 `6161` | `partial/P2` | SFC 实体匹配反例 |
 
@@ -485,7 +488,9 @@ SFC 在线构建单 ticker 扫描最近 40 条 enforcement 正文时约 13-20 �
 - 最小 raw 同链路样本：证明 frozen overlay 确实被两分支消费。
 - 市场匹配反事实样本：US 注入 AAPL 缓存、A 股注入 600519.SH、HK 注入 00700.HK；只替换/追加 `15_events.recent_news`，其余缓存原样保留。它明确标记为 counterfactual，不冒充事件属于基础股票。
 
-最终对照共 `47` 行：`37 ok / 2 review / 8 possible_regression`。8 行回退来自 4 个反事实样本在 lite/medium 的重复验证，不是 8 个独立事实：
+#### 问题发现阶段（修复前）
+
+修复前对照共 `47` 行：`37 ok / 2 review / 8 possible_regression`。8 行回退来自 4 个反事实样本在 lite/medium 的重复验证，不是 8 个独立事实：
 
 | 反事实 | 基线 `15_events` | 候选 `15_events` | 候选总分/档位 | 结论 |
 |---|---:|---:|---|---|
@@ -496,12 +501,65 @@ SFC 在线构建单 ticker 扫描最近 40 条 enforcement 正文时约 13-20 �
 
 根因定位到 `score_fns.py` 的事件评分仍只解析标题关键词，不读取 overlay 已冻结的 `severity/entity_scope/official_source`：A/HK 官方标题中的“纪律处分/监管措施/Disciplinary Action”和英文 `delisting` 没有按结构化 P1 处理，部分记录还被计入 positive bonus。
 
-本轮因此得出“存在明确交易决策问题”的结论，但遵守公式冻结边界，**没有修改评分公式**。下一步应先设计一个最小 severity-aware 消费契约：结构化官方字段优先于标题词表，P2 不硬降级，旧 raw data 无结构化字段时继续走兼容 fallback；再用本节同一批冻结输入做前后对照。
+本轮因此得出“存在明确交易决策问题”的结论。后续修改严格限于事件证据消费契约和买入护栏，没有调整权重或其他维度公式。
 
 效果评分采用可复核的双评分，避免把“测试工具发现问题”和“现有评分已经解决问题”混为一谈：
 
-- adapter + harness 交付：`9.0/10`。五个官方入口已接通，三市场有正反例，20+31 个直接断言覆盖实体、时效、去重、来源和 counterfactual；扣 1 分是 SFC 采用有界扫描、真实 P0 尚未形成跨市场 holdout。
-- 现有评分对结构化 P1 的处理：`4.0/10`。输入已进入，但 A/HK 维度方向错误，美股高质量反事实仍保持买入候选；不能因为原 core basket 没退档就给高分。
+- 修复前 adapter + harness 交付：`9.0/10`。它准确暴露了交易决策问题，但当时评分端尚未消费结构化风险。
+- 修复前评分对结构化 P1 的处理：`4.0/10`。这是能力评估分，不是 `15_events` 风险维度分。
+
+### 2026-07-13 结构化事件消费契约与最终复验
+
+最小消费契约已经实现，未调整普通样本的权重：
+
+- 只有官方域名、`official_source=true`、`entity_match=exact`、issuer 直接事件、有效 `age_days` 的 P0/P1 才能触发交易护栏。
+- P0 将 `15_events` 上限设为 `2`、可买性分数上限设为 `59.9`；P1 分别为 `4` 和 `64.9`。
+- P2、关联人事件、已解决/已整改事件只保留审计信息，不硬降当前交易档位。
+- 非官方 URL、模糊实体、未来日期、超过 730 天、非数字日期、镜像重复记录都不能借结构化字段获得 P1 权限。
+- 没有结构化字段的旧 raw data 继续走原标题 fallback；结构化负面行不再被普通 positive-news bonus 反向奖励。
+- `overall_score/legacy_overall_score` 保持旧排序语义；护栏只作用于面向交易的 `investment_score`。
+
+最终对照报告为 `local-ops/state/branch-score-compare/20260713-structured-event-contract-final.md`。输入包含 core、holdout、真实冻结 overlay、市场匹配反事实和合成对抗样本，共 `67` 项：
+
+| 结果 | 数量 | 解释 |
+|---|---:|---|
+| `ok` | 61 | 满足样本边界，核心/holdout 未出现非预期退档。 |
+| `review` | 6 | HUBG P0、SMCI P1 在 AAPL 反事实中按设计阻止买入候选，各由 lite/medium 复验；另 2 项是既有 Stage 3/4 护栏。 |
+| `possible_regression` | 0 | 没有硬边界违规。 |
+
+关键决策变化：
+
+| 样本 | 修复前 | 修复后 | 解释 |
+|---|---|---|---|
+| `HUBG P0 -> AAPL` | `68 / buy_candidate`、事件维度 5 | `59.9 / watch`、事件维度 2 | 财报不可依赖等 P0 阻止买入。 |
+| `SMCI P1 -> AAPL` | `68 / buy_candidate`、事件维度 5 | `64.9 / watch`、事件维度 4 | 退市/审计风险阻止高置信买入。 |
+| 伪造非官方 P1 | 事件维度 5 | 事件维度 5 | 不信任自报 severity。 |
+| 已解决 P1 | 事件维度 5 | 事件维度 5 | 历史可审计，不压当前决策。 |
+| 超时效 P1 | 事件维度 5 | 事件维度 5 | 不用陈旧/未来证据制造风险。 |
+
+本次客观效果评分：
+
+- 结构化 P1 处理能力：`8.8/10`，由修复前 `4.0/10` 提升。消费正确性 `2/2`、交易边界 `2/2`、对抗防护 `2/2`、三市场真实证据 `1.8/2`、事件解决态自动追踪 `1.0/2`。最后一项未满分，因为当前只消费已冻结的 `resolution_status`，还没有自动关联后续解除/整改公告。
+- adapter + harness：`9.3/10`。90 个直接测试、67 项分支比较、三市场官方正反例和 0 个硬回退；扣分来自 SFC/部分列表仍为有界扫描，以及 NYSE/Nasdaq 动态列表没有稳定 schema，未强行接入。
+- 整体交付：`9.0/10`。已修复经过中立对照证明的交易问题，且没有通过扩大词表、挑样本或调高权重换取分数。
+
+注意：这里的能力评分 `8.8/10` 与事件维度 `15_events=4/10` 含义不同。后者是 P1 风险存在时的风险分，不应为了能力评分好看而提高。
+
+### 在线、离线与 Agent 分工
+
+最佳结构不是“来源越多越好”，而是“每个独立权威层至少一个稳定主源，镜像只增强溯源、不重复加权”：
+
+| 层 | US | A 股 | 港股 | 进入评分的条件 |
+|---|---|---|---|---|
+| 发行人披露 | SEC 8-K | 巨潮公司公告 | HKEX issuer critical filings | 官方、精确实体、日期有效、taxonomy 明确 |
+| 交易所 | SEC trading suspension 作为市场处置层 | SSE/SZSE 监管与纪律处分 | HKEX disciplinary action | 同上 |
+| 监管执法 | SEC litigation releases | CSRC 行政处罚 | SFC enforcement | 同上；关联人默认 P2 |
+
+- **必须在线**：发现最新处罚/公告、确认官方页面仍存在、读取当前日期和解决状态。这些事实会随时间变化，不能靠模型记忆。
+- **必须离线确定性执行**：实体精确匹配、日期窗口、taxonomy、去重、严重度、评分、branch 对照。这样同一冻结输入跨 Windows/Mac 可复跑。
+- **Agent/模型适合做**：发现候选官方入口、解释 P2 上下文、生成面向用户的说明、标记需要人工复核的冲突。
+- **Agent/模型不得做**：凭常识补 P0/P1、把搜索摘要直接写入评分、猜测实体归属或解决状态。网络搜索只能用于发现，必须回到官方、可追溯、带日期的原文后再冻结。
+- SEC 8-K 单源确实过窄，因此已补 SEC litigation releases 和 trading suspensions；A 股、港股也采用发行人、交易所、监管三层。公司 IR、媒体和搜索引擎可用于发现/解释，但不作为独立硬评分源，以免把转载数量误当事实强度。
 
 ## 性能与“卡壳”诊断
 

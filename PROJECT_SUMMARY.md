@@ -17,6 +17,8 @@
 
 当前原则：评分公式先冻结；先用同一批缓存 raw data 做旧分支 vs 新分支的中立对照。英文入口、agent 指令、命令模板和 schema 契约不做机械翻译，避免改变工具行为。
 
+截至 2026-07-13，branch-vs-branch 已证明结构化官方负面事件存在明确交易决策问题，因此只增加了最小事件风险消费契约，没有继续调权重。最终 67 项对照为 `61 ok / 6 review / 0 possible_regression`；结构化 P1 处理能力从 `4.0/10` 提升到 `8.8/10`。在线官方事实先冻结为 overlay，实体匹配、时效、去重、严重度和评分全部离线确定性执行。
+
 ---
 
 ## 改动总览
@@ -32,11 +34,13 @@
 | P1 | dim_13 政策：硬编码 6 → 读 policy_dir 情感 | `score_fns.py` | ✅ 已修复 |
 | P1 | dim_14 护城河：硬编码 6 → 读 scores 四力 | `score_fns.py` | ✅ 已修复 |
 | P1 | dim_15 事件：加负面新闻情感折扣 | `score_fns.py` | ✅ 已修复 |
+| P1 | 官方结构化 P0/P1：精确实体/时效/解决态消费与买入护栏 | `score_fns.py` | ✅ 已修复并完成三市场对照 |
 | P1 | dim_16 龙虎榜：改用净流向（inst_vs_youzi） | `score_fns.py` | ✅ 已修复 |
 | P2 | Quality 权重 0.25→0.30，Catalyst 0.28→0.22 | `score_fns.py` | ✅ 已修复 |
 | P2 | POLARIZE_K 改为动态自适应（基于 stdev） | `score_fns.py` | ✅ 已修复 |
 | 巧思 | 评分漂移追踪器（score_drift.py） | 新文件 | ✅ 已新增 |
 | 巧思 | `--score-drift` CLI flag | `run.py` | ✅ 已新增 |
+| 工具 | US/A/HK 官方负面事件 overlay + branch counterfactual | `evidence_overlay_builder.py` / `branch_score_compare.py` | ✅ 已完成 |
 
 ---
 
