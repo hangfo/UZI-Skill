@@ -26,6 +26,7 @@ import sys
 import time
 import traceback
 from pathlib import Path
+from urllib.parse import urlsplit
 
 # rrt 当前 sys.path 里的依赖（由 rrt 加入 · score_fns 只要 import）
 from lib.investor_db import INVESTORS
@@ -46,6 +47,98 @@ def _f(v, default=0.0):
         return float(str(v).replace("%", "").replace(",", "").replace("+", ""))
     except (ValueError, TypeError):
         return default
+
+
+_OFFICIAL_EVENT_HOST_SUFFIXES = (
+    "sec.gov",
+    "csrc.gov.cn",
+    "cninfo.com.cn",
+    "sse.com.cn",
+    "szse.cn",
+    "hkex.com.hk",
+    "hkexnews.hk",
+    "sfc.hk",
+)
+_EVENT_SEVERITY_RANK = {"P0": 0, "P1": 1, "P2": 2}
+_RESOLVED_EVENT_STATES = {"closed", "remediated", "resolved", "撤销", "已整改", "已解决"}
+
+
+def _is_official_event_url(url: object) -> bool:
+    try:
+        host = (urlsplit(str(url or "")).hostname or "").lower()
+    except ValueError:
+        return False
+    return any(host == suffix or host.endswith("." + suffix) for suffix in _OFFICIAL_EVENT_HOST_SUFFIXES)
+
+
+def _verified_structured_event(item: object) -> dict | None:
+    """Return a scoring-safe official event, or None for legacy/untrusted rows."""
+    if not isinstance(item, dict):
+        return None
+    severity = str(item.get("severity") or "")
+    if severity not in _EVENT_SEVERITY_RANK:
+        return None
+    if item.get("official_source") is not True or item.get("entity_match") != "exact":
+        return None
+    if not _is_official_event_url(item.get("url")):
+        return None
+    scope = str(item.get("entity_scope") or "")
+    if severity in {"P0", "P1"} and scope != "issuer":
+        return None
+    age_days = item.get("age_days")
+    if age_days is not None:
+        try:
+            age_days = int(age_days)
+        except (TypeError, ValueError):
+            return None
+        if age_days < 0 or age_days > 730:
+            return None
+    resolution = str(item.get("resolution_status") or "").strip().lower()
+    row = dict(item)
+    if age_days is not None:
+        row["age_days"] = age_days
+    row["resolution_status"] = resolution or "unknown"
+    row["decision_active"] = resolution not in _RESOLVED_EVENT_STATES
+    return row
+
+
+def _structured_event_risk(news: list[object]) -> dict:
+    """Summarize verified event evidence without rewarding duplicates or mirrors."""
+    unique: dict[str, dict] = {}
+    review_only = 0
+    rejected = 0
+    for item in news:
+        structured = _verified_structured_event(item)
+        if structured is None:
+            if isinstance(item, dict) and item.get("severity") in _EVENT_SEVERITY_RANK:
+                rejected += 1
+            continue
+        key = str(structured.get("canonical_event_id") or structured.get("source_record_id") or structured.get("url"))
+        previous = unique.get(key)
+        severity = str(structured["severity"])
+        if previous is None or _EVENT_SEVERITY_RANK[severity] < _EVENT_SEVERITY_RANK[str(previous["severity"])]:
+            unique[key] = structured
+
+    active = [row for row in unique.values() if row.get("decision_active")]
+    issuer_active = [row for row in active if row.get("entity_scope") == "issuer"]
+    review_only = sum(1 for row in active if row.get("severity") == "P2" or row.get("entity_scope") != "issuer")
+    highest = min(
+        (str(row["severity"]) for row in issuer_active if row.get("severity") in {"P0", "P1"}),
+        key=lambda value: _EVENT_SEVERITY_RANK[value],
+        default=None,
+    )
+    score_ceiling = 2 if highest == "P0" else 4 if highest == "P1" else None
+    buy_score_cap = 59.9 if highest == "P0" else 64.9 if highest == "P1" else None
+    return {
+        "highest_active_severity": highest,
+        "verified_count": len(unique),
+        "active_issuer_count": len(issuer_active),
+        "review_only_count": review_only,
+        "rejected_structured_count": rejected,
+        "score_ceiling": score_ceiling,
+        "buy_score_cap": buy_score_cap,
+        "verified_keys": sorted(unique),
+    }
 
 
 def score_dimensions(raw: dict) -> dict:
@@ -315,16 +408,28 @@ def score_dimensions(raw: dict) -> dict:
             if idx >= 0 and not _negated(idx):
                 return -0.5
         return 1.0
-    _news_weights = [_news_weight(n) for n in news]
+    event_risk = _structured_event_risk(news)
+    # Verified structured events are consumed by severity below. They must not
+    # also become a positive-news bonus, and mirrored records must not stack.
+    legacy_news = [item for item in news if _verified_structured_event(item) is None]
+    _news_weights = [_news_weight(n) for n in legacy_news]
     _positive_count = sum(1 for w in _news_weights if w > 0)
     _strong_neg_count = sum(1 for w in _news_weights if w <= -1.0)
     _weak_neg_count = sum(1 for w in _news_weights if -1.0 < w < 0)
     _positive_bonus = min(3, _positive_count // 10)
     _negative_penalty = min(3, _strong_neg_count + ((_weak_neg_count + 1) // 2))
     score_15  = 5 + _positive_bonus - _negative_penalty
+    if event_risk["score_ceiling"] is not None:
+        score_15 = min(score_15, event_risk["score_ceiling"])
     score_15  = max(1, min(10, score_15))
-    out["15_events"] = {"score": score_15, "weight": 4,
-                        "label": f"近期新闻 {len(news)} 条 · 公告 {len(notices)} 份"}
+    highest_event = event_risk["highest_active_severity"] or "无有效 P0/P1"
+    out["15_events"] = {
+        "score": score_15,
+        "weight": 4,
+        "label": f"近期新闻 {len(news)} 条 · 公告 {len(notices)} 份 · 结构化风险 {highest_event}",
+        "reasons_fail": ([f"官方发行人级 {highest_event} 事件"] if event_risk["highest_active_severity"] else []),
+        "risk_contract": event_risk,
+    }
 
     # 16 · 龙虎榜 (P1-B: 优先用净流向打分；fallback 才用上榜次数)
     lhb       = _get("16_lhb")
@@ -1344,6 +1449,24 @@ def generate_synthesis(raw: dict, dims_scored: dict, panel: dict, agent_analysis
     features = extract_features(raw, raw.get("dimensions", {}))
     investment_scorecard = compute_investment_score(features)
     buy_score = investment_scorecard.get("score", fund_score * 0.6 + consensus * 0.4)
+    event_risk_contract = (
+        (dims_scored.get("dimensions", {}).get("15_events") or {}).get("risk_contract") or {}
+    )
+    event_buy_cap = event_risk_contract.get("buy_score_cap")
+    if event_buy_cap is not None:
+        buy_score = min(buy_score, float(event_buy_cap))
+        investment_scorecard["score"] = round(buy_score, 1)
+        diagnostics = investment_scorecard.setdefault("diagnostics", {})
+        guardrails = diagnostics.setdefault("guardrails", {})
+        guardrails["official_event_risk_cap"] = {
+            "applied": True,
+            "severity": event_risk_contract.get("highest_active_severity"),
+            "cap": event_buy_cap,
+            "verified_count": event_risk_contract.get("verified_count", 0),
+        }
+        investment_scorecard["rating"] = (
+            "观察" if buy_score >= 60 else "谨慎观察" if buy_score >= 50 else "回避"
+        )
     legacy_overall = fund_score * 0.6 + consensus * 0.4
     # Backtest note (2026-07-01): the buyability score is best kept separate.
     # It is a quality/risk gate, not a replacement for the panel-driven overall

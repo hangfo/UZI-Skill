@@ -262,6 +262,10 @@ def test_build_payload_includes_synthetic_raw_cases():
     assert "__synthetic_empty_recent_news_stale_legacy" in tickers
     assert "__synthetic_single_strong_negative_event" in tickers
     assert "__synthetic_missing_financials_raw" in tickers
+    assert "__synthetic_verified_structured_p1" in tickers
+    assert "__synthetic_forged_structured_p1" in tickers
+    assert "__synthetic_resolved_structured_p1" in tickers
+    assert "__synthetic_out_of_window_structured_p1" in tickers
 
 
 def test_adversarial_suite_has_data_quality_cases():
@@ -448,6 +452,8 @@ def test_a_and_hk_official_overlays_preserve_market_and_entity_metadata():
         event = case["raw"]["dimensions"]["15_events"]["data"]["recent_news"][0]
         assert event["entity_scope"] == "issuer"
         assert event["match_method"] == "stock_code"
+        assert event["official_source"] is True
+        assert event["entity_match"] == "exact"
 
 
 def test_duplicate_official_overlay_urls_only_enter_once():

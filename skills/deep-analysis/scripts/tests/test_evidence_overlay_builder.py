@@ -371,6 +371,38 @@ def test_negative_event_recency_boundary_is_inclusive_and_future_is_rejected():
     assert finalized[0]["age_days"] == 730
 
 
+def test_event_limit_keeps_severe_evidence_before_newer_review_only_rows():
+    rows = [
+        {
+            "source": "sec_submissions",
+            "url": "https://www.sec.gov/p0",
+            "title": "Older hard risk",
+            "published_at": "2025-01-01",
+            "severity": "P0",
+            "event_type": "hard_risk",
+            "official_source": True,
+            "entity_match": "exact",
+        }
+    ] + [
+        {
+            "source": "sec_submissions",
+            "url": f"https://www.sec.gov/p2-{index}",
+            "title": f"New review row {index}",
+            "published_at": f"2026-07-{index + 1:02d}",
+            "severity": "P2",
+            "event_type": "review",
+            "official_source": True,
+            "entity_match": "exact",
+        }
+        for index in range(5)
+    ]
+    finalized = evidence_overlay_builder._finalize_negative_events(
+        rows, as_of=dt.date(2026, 7, 13), lookback_days=730, max_items=2
+    )
+    assert finalized[0]["severity"] == "P0"
+    assert any(item["url"].endswith("/p0") for item in finalized)
+
+
 def test_negative_event_dedupe_keeps_stricter_severity_for_same_official_url():
     rows = [
         {
@@ -459,6 +491,76 @@ def test_unofficial_cached_negative_event_cannot_become_ready_overlay():
             evidence_overlay_builder.CACHE = old_cache
     assert overlay["status"] == "gap"
     assert overlay["evidence"][0]["official_source"] is False
+
+
+def test_sec_release_rows_require_exact_registrant_identity():
+    page = """
+    <table><tr class="pr-list-page-row">
+      <td><time datetime="2026-06-12T01:09:01Z">June 11, 2026</time></td>
+      <td><div class='release-view__respondents'><a href='/files/action.pdf'>Happy City Holdings Limited</a></div>
+      <span>Release No.</span><span>34-105675</span></td>
+    </tr></table>
+    """
+    rows = evidence_overlay_builder.extract_sec_release_rows(page)
+    assert rows[0]["published_at"] == "2026-06-11"
+    assert evidence_overlay_builder._sec_respondent_matches_company(
+        rows[0]["respondents"], "Happy City Holdings Limited"
+    )
+    assert not evidence_overlay_builder._sec_respondent_matches_company(
+        rows[0]["respondents"], "City Holdings Limited"
+    )
+
+
+def test_csrc_penalty_requires_issuer_in_respondent_section():
+    issuer = "中国证监会行政处罚决定书。当事人：大唐高鸿网络股份有限公司。经查，高鸿股份财务造假。"
+    unrelated = "中国证监会行政处罚决定书。当事人：张三。案情涉及大唐高鸿网络股份有限公司。"
+    matched = evidence_overlay_builder.classify_csrc_penalty(
+        issuer, code="000851", short_name="ST高鸿"
+    )
+    assert matched["severity"] == "P0"
+    assert evidence_overlay_builder.classify_csrc_penalty(
+        unrelated, code="000851", short_name="ST高鸿"
+    ) is None
+
+
+def test_hkex_critical_filing_taxonomy_excludes_bare_halt_and_resumption():
+    assert evidence_overlay_builder.classify_hkex_critical_filing("EXCHANGE NOTICE - TRADING HALT") is None
+    assert evidence_overlay_builder.classify_hkex_critical_filing("RESUMPTION OF TRADING") is None
+    assert evidence_overlay_builder.classify_hkex_critical_filing(
+        "RESUMPTION GUIDANCE AND CONTINUED SUSPENSION OF TRADING"
+    )["severity"] == "P1"
+    assert evidence_overlay_builder.classify_hkex_critical_filing(
+        "WINDING UP AND LIQUIDATION OF ISSUER"
+    )["severity"] == "P0"
+
+
+def test_hkex_critical_filing_extracts_exact_stock_code_only():
+    page = """
+    <table><tbody>
+      <tr><td class="release-time">13/07/2026 08:54</td>
+      <td class="stock-short-code"><span>Stock Code: </span>00841</td>
+      <td><div class="headline">Announcements - [Inside Information / Suspension]</div>
+      <a href="/listedco/841.pdf">DELAY IN PUBLICATION AND CONTINUED SUSPENSION</a></td></tr>
+      <tr><td class="release-time">13/07/2026 08:54</td>
+      <td class="stock-short-code"><span>Stock Code: </span>01841</td>
+      <td><div class="headline">Announcements - [Suspension]</div>
+      <a href="/listedco/1841.pdf">CONTINUED SUSPENSION</a></td></tr>
+    </tbody></table>
+    """
+    events, scanned = evidence_overlay_builder.extract_hkex_critical_filing_events(page, ticker="00841.HK")
+    assert scanned == 2
+    assert len(events) == 1
+    assert events[0]["severity"] == "P1"
+    assert events[0]["entity_match"] == "exact"
+
+
+def test_negative_event_source_plans_cover_three_independent_authority_layers():
+    us = {row["source"] for row in evidence_overlay_builder.source_plan_for("US", "negative_event")}
+    a_share = {row["source"] for row in evidence_overlay_builder.source_plan_for("A", "negative_event")}
+    hk = {row["source"] for row in evidence_overlay_builder.source_plan_for("HK", "negative_event")}
+    assert {"sec_submissions", "sec_litigation_releases", "sec_trading_suspensions"} <= us
+    assert {"cninfo", "csrc_penalties"} <= a_share
+    assert {"hkex_discipline", "hkex_critical_filings", "sfc_enforcement"} <= hk
 
 
 if __name__ == "__main__":

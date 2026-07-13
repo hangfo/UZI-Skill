@@ -710,6 +710,116 @@ def test_p1c_single_strong_negative_event_penalised():
     assert score < 5, f"single strong negative event should score below neutral 5, got {score}."
 
 
+def _official_event(severity="P1", **overrides):
+    item = {
+        "title": "Official issuer event with deliberately neutral wording",
+        "url": "https://www.sec.gov/example",
+        "severity": severity,
+        "official_source": True,
+        "entity_match": "exact",
+        "entity_scope": "issuer",
+        "source_record_id": "event-1",
+        "canonical_event_id": "sec:event-1",
+        "resolution_status": "unknown",
+        "age_days": 10,
+    }
+    item.update(overrides)
+    if "source_record_id" in overrides and "canonical_event_id" not in overrides:
+        item["canonical_event_id"] = f"sec:{item['source_record_id']}"
+    return item
+
+
+def test_structured_p1_is_consumed_without_title_keyword_dependency():
+    from lib.pipeline.score_fns import score_dimensions
+
+    raw = _make_raw(dims_override={"15_events": {"data": {"recent_news": [_official_event()]}}})
+    event_dim = score_dimensions(raw)["dimensions"]["15_events"]
+    assert event_dim["score"] == 4
+    assert event_dim["risk_contract"]["highest_active_severity"] == "P1"
+    assert event_dim["risk_contract"]["buy_score_cap"] == 64.9
+
+
+def test_structured_p0_is_stricter_than_p1_but_does_not_change_other_dimensions():
+    from lib.pipeline.score_fns import score_dimensions
+
+    base = _make_raw()
+    p0 = _make_raw(dims_override={"15_events": {"data": {"recent_news": [_official_event("P0")]}}})
+    base_dims = score_dimensions(base)["dimensions"]
+    p0_dims = score_dimensions(p0)["dimensions"]
+    assert p0_dims["15_events"]["score"] == 2
+    assert p0_dims["15_events"]["risk_contract"]["buy_score_cap"] == 59.9
+    assert p0_dims["1_financials"]["score"] == base_dims["1_financials"]["score"]
+    assert p0_dims["10_valuation"]["score"] == base_dims["10_valuation"]["score"]
+
+
+def test_structured_event_requires_official_url_exact_entity_and_issuer_scope():
+    from lib.pipeline.score_fns import score_dimensions
+
+    adversarial = [
+        _official_event(url="https://example.com/forged"),
+        _official_event(entity_match="fuzzy", source_record_id="event-2"),
+        _official_event(entity_scope="related_person", source_record_id="event-3"),
+    ]
+    raw = _make_raw(dims_override={"15_events": {"data": {"recent_news": adversarial}}})
+    event_dim = score_dimensions(raw)["dimensions"]["15_events"]
+    assert event_dim["risk_contract"]["highest_active_severity"] is None
+    assert event_dim["risk_contract"]["rejected_structured_count"] == 3
+    assert event_dim["score"] >= 5
+
+
+def test_structured_event_rejects_future_stale_and_non_numeric_age():
+    from lib.pipeline.score_fns import score_dimensions
+
+    adversarial = [
+        _official_event(age_days=-1, source_record_id="future"),
+        _official_event(age_days=731, source_record_id="stale"),
+        _official_event(age_days="unknown", source_record_id="invalid"),
+    ]
+    raw = _make_raw(dims_override={"15_events": {"data": {"recent_news": adversarial}}})
+    event_dim = score_dimensions(raw)["dimensions"]["15_events"]
+    assert event_dim["risk_contract"]["highest_active_severity"] is None
+    assert event_dim["risk_contract"]["rejected_structured_count"] == 3
+    assert event_dim["score"] >= 5
+
+
+def test_structured_p2_and_resolved_p1_are_review_only_not_positive_news():
+    from lib.pipeline.score_fns import score_dimensions
+
+    rows = [
+        _official_event("P2", entity_scope="related_person"),
+        _official_event("P1", source_record_id="event-2", resolution_status="resolved"),
+    ]
+    raw = _make_raw(dims_override={"15_events": {"data": {"recent_news": rows}}})
+    event_dim = score_dimensions(raw)["dimensions"]["15_events"]
+    assert event_dim["score"] == 5
+    assert event_dim["risk_contract"]["highest_active_severity"] is None
+    assert event_dim["risk_contract"]["review_only_count"] == 1
+
+
+def test_structured_event_mirror_duplicates_do_not_stack():
+    from lib.pipeline.score_fns import score_dimensions
+
+    first = _official_event()
+    mirror = _official_event(url="https://www.sec.gov/mirror")
+    raw = _make_raw(dims_override={"15_events": {"data": {"recent_news": [first, mirror]}}})
+    event_dim = score_dimensions(raw)["dimensions"]["15_events"]
+    assert event_dim["score"] == 4
+    assert event_dim["risk_contract"]["verified_count"] == 1
+
+
+def test_structured_p1_caps_buyability_score_but_not_legacy_overall_score():
+    from lib.pipeline.score_fns import generate_panel, generate_synthesis, score_dimensions
+
+    raw = _make_raw(dims_override={"15_events": {"data": {"recent_news": [_official_event()]}}})
+    raw["dimensions"]["0_basic"]["data"]["price"] = 100.0
+    dims = score_dimensions(raw)
+    panel = generate_panel(dims, raw)
+    synthesis = generate_synthesis(raw, dims, panel)
+    assert synthesis["investment_score"] <= 64.9
+    assert synthesis["investment_scorecard"]["diagnostics"]["guardrails"]["official_event_risk_cap"]["applied"]
+    assert synthesis["overall_score"] == synthesis["legacy_overall_score"]
+
+
 def test_p2b_polarize_diagnostics_present():
     """P2-B: dynamic polarization must expose enough diagnostics for drift review."""
     raw = _make_raw()

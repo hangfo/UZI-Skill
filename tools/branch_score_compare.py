@@ -27,7 +27,16 @@ SCRIPTS = ROOT / "skills" / "deep-analysis" / "scripts"
 CACHE = SCRIPTS / ".cache"
 OUT_DIR = ROOT / "local-ops" / "state" / "branch-score-compare"
 EVIDENCE_OVERLAY_DIR = ROOT / "local-ops" / "state" / "evidence-overlays"
-OFFICIAL_OVERLAY_HOST_SUFFIXES = ("sec.gov", "cninfo.com.cn", "sse.com.cn", "szse.cn", "hkex.com.hk", "sfc.hk")
+OFFICIAL_OVERLAY_HOST_SUFFIXES = (
+    "sec.gov",
+    "csrc.gov.cn",
+    "cninfo.com.cn",
+    "sse.com.cn",
+    "szse.cn",
+    "hkex.com.hk",
+    "hkexnews.hk",
+    "sfc.hk",
+)
 OVERLAY_COUNTERFACTUAL_BASE = {"US": "AAPL", "A": "600519.SH", "HK": "00700.HK"}
 
 NEGATIVE_EVENT_TERMS = (
@@ -468,6 +477,130 @@ SYNTHETIC_RAW_CASES = [
                 "1_financials": _dim({}),
                 "6_research": _dim({"report_count": 30, "rating_distribution": {"买入": 25}}),
                 "15_events": _dim({"recent_news": [{"title": f"positive catalyst {i}"} for i in range(25)]}),
+            },
+        ),
+    },
+    {
+        "ticker": "__synthetic_verified_structured_p1",
+        "group": "synthetic_raw",
+        "role": "a current exact-issuer official P1 event must affect buyability even with neutral wording",
+        "expectation": "negative_event",
+        "max_candidate_dim_scores": {"15_events": 4.0},
+        "raw": _minimal_raw(
+            "__synthetic_verified_structured_p1",
+            {
+                "15_events": _dim(
+                    {
+                        "recent_news": [
+                            {
+                                "title": "Official issuer event with deliberately neutral wording",
+                                "url": "https://www.sec.gov/example",
+                                "severity": "P1",
+                                "official_source": True,
+                                "entity_match": "exact",
+                                "entity_scope": "issuer",
+                                "source_record_id": "synthetic-p1",
+                                "canonical_event_id": "sec:synthetic-p1",
+                                "resolution_status": "unknown",
+                                "age_days": 10,
+                            }
+                        ],
+                        "recent_notices": [],
+                    }
+                )
+            },
+        ),
+    },
+    {
+        "ticker": "__synthetic_forged_structured_p1",
+        "group": "synthetic_raw",
+        "role": "a forged non-official URL must not gain P1 authority from structured fields",
+        "expectation": "neutral",
+        "min_candidate_dim_scores": {"15_events": 5.0},
+        "raw": _minimal_raw(
+            "__synthetic_forged_structured_p1",
+            {
+                "15_events": _dim(
+                    {
+                        "recent_news": [
+                            {
+                                "title": "Official issuer event with deliberately neutral wording",
+                                "url": "https://example.com/forged",
+                                "severity": "P1",
+                                "official_source": True,
+                                "entity_match": "exact",
+                                "entity_scope": "issuer",
+                                "source_record_id": "forged-p1",
+                                "canonical_event_id": "forged:p1",
+                                "resolution_status": "unknown",
+                                "age_days": 10,
+                            }
+                        ],
+                        "recent_notices": [],
+                    }
+                )
+            },
+        ),
+    },
+    {
+        "ticker": "__synthetic_resolved_structured_p1",
+        "group": "synthetic_raw",
+        "role": "a resolved official P1 event remains auditable but must not cap the current decision",
+        "expectation": "neutral",
+        "min_candidate_dim_scores": {"15_events": 5.0},
+        "raw": _minimal_raw(
+            "__synthetic_resolved_structured_p1",
+            {
+                "15_events": _dim(
+                    {
+                        "recent_news": [
+                            {
+                                "title": "Official issuer event with deliberately neutral wording",
+                                "url": "https://www.sec.gov/example-resolved",
+                                "severity": "P1",
+                                "official_source": True,
+                                "entity_match": "exact",
+                                "entity_scope": "issuer",
+                                "source_record_id": "resolved-p1",
+                                "canonical_event_id": "sec:resolved-p1",
+                                "resolution_status": "resolved",
+                                "age_days": 10,
+                            }
+                        ],
+                        "recent_notices": [],
+                    }
+                )
+            },
+        ),
+    },
+    {
+        "ticker": "__synthetic_out_of_window_structured_p1",
+        "group": "synthetic_raw",
+        "role": "future-dated or stale structured evidence must not affect the current decision",
+        "expectation": "neutral",
+        "min_candidate_dim_scores": {"15_events": 5.0},
+        "raw": _minimal_raw(
+            "__synthetic_out_of_window_structured_p1",
+            {
+                "15_events": _dim(
+                    {
+                        "recent_news": [
+                            {
+                                "title": "Official issuer event with deliberately neutral wording",
+                                "url": "https://www.sec.gov/example-stale",
+                                "severity": "P1",
+                                "official_source": True,
+                                "entity_match": "exact",
+                                "entity_scope": "issuer",
+                                "source_record_id": "stale-p1",
+                                "canonical_event_id": "sec:stale-p1",
+                                "resolution_status": "unknown",
+                                "age_days": 731,
+                            }
+                        ],
+                        "recent_notices": [],
+                    }
+                )
             },
         ),
     },
@@ -993,8 +1126,14 @@ def _negative_event_overlay_case(overlay: dict[str, Any], *, source_path: Path |
                             "published_at": item.get("published_at"),
                             "severity": item.get("severity"),
                             "event_type": item.get("event_type"),
+                            "official_source": item.get("official_source"),
+                            "entity_match": item.get("entity_match"),
                             "entity_scope": item.get("entity_scope"),
                             "match_method": item.get("match_method"),
+                            "source_record_id": item.get("source_record_id"),
+                            "canonical_event_id": item.get("canonical_event_id"),
+                            "resolution_status": item.get("resolution_status"),
+                            "corroborating_sources": item.get("corroborating_sources") or [],
                             "age_days": item.get("age_days"),
                         }
                         for item in evidence
