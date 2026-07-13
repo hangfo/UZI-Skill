@@ -35,11 +35,11 @@
 - **修法**：
   1. `fetch_financials._apply_operating_cash_flow` 显式输出 OCF 字段；`stock_features` 读取 `ocf_to_net_income_ratio`。
   2. `fetch_peers` 在 industry 缺失时 self-only fallback，并写 `fallback_reason`。
-  3. `fetch_valuation` 在 industry 缺失/未匹配时用 cninfo 市场加权 PE 兜底，并写 `industry_pe_fallback_reason`。
+  3. `fetch_valuation` 在 industry 缺失/未匹配时不生成 `industry_pe`；cninfo 跨行业 PE 只写入 `market_pe_reference` 作披露，并用 `industry_pe_fallback_reason` 明确其不参与同行估值。
   4. pipeline registry 对齐 legacy 输出字段。
   5. `run.py` 抽出 direct report path + shared post-process，fund summary / versus / portfolio 均复用 `--output-dir` / `--remote`；`cloudflared` 缺失时默认只提示，显式 `--install-cloudflared` 才自动安装。
   6. `run_real_test._validate_agent_analysis_or_fallback` 对 error 级 schema issue 直接丢弃 payload，回退脚本骨架。
-- **验证**：新增 `tests/test_v3_9_2_flow_bugfixes.py`，覆盖 8 个回归。
+- **验证**：新增并加固 `tests/test_v3_9_2_flow_bugfixes.py`，覆盖 10 个回归，包括 OCF/FCF 隔离、fund direct-report 后处理和 mutual-fund pipeline 路由。
 - **未来改该区域注意事项**：
   - 新增/改名 fetcher 字段时，同步更新 `lib/pipeline/fetchers/registry.py`，并加行为测试，不只 grep 源码。
   - 所有“生成 HTML 的 CLI 模式”都必须返回 report path 并进入统一 post-process；不要再在 runner 分支里直接 `sys.exit(0)`。

@@ -4,6 +4,22 @@
 
 ## 2026-07-13
 
+### `71be11f` · 隔离吸收 upstream `fce996c` 并保持评分零漂移
+
+- 从稳定检查点 `120a6c9` 创建 `codex/scoring-validation-upstream-fce996c`，以 merge 方式吸收 upstream `fce996c`，保留双亲 ancestry；未修改 `codex/scoring-validation-guardrails` 或 `codex/windows-local-stable`。
+- `run.py` 冲突采用语义合并：保留 `--score-drift`、`--no-open-report` 和 Windows/Mac 路径行为，同时接入上游统一 direct-report 后处理、loopback HTTP、cloudflared 显式安装与隧道清理；修复 fund summary 设置 direct path 后仍被外层 `sys.exit(0)` 截断的问题。
+- 对上游数据契约再收紧两处：
+  - OCF 显式写入 `ocf` / `ocf_history` / `ocf_to_net_income_ratio`，不再回写 `fcf` 或 `financial_health.fcf_margin`。
+  - 缺行业或行业映射失败时不制造 `industry_pe`；cninfo 跨行业均值只进入 `market_pe_reference` 披露字段，不参与 `pe_vs_industry`。
+- 其他重叠文件按语义并集处理：保留 global-listing `G` 市场、成长 key alias、结构化事件评分和离线纯评分边界；接入 mutual fund legacy preflight、legacy registry shape、坏 `agent_analysis` fallback。
+- 验证边界：未重装、未跑 deep、未运行 update；项目 venv 无 pytest，使用 `py_compile` 与 direct runner。
+- 专项结果：v3.9.2 flow/data-contract `10/10`；scoring consistency `33/33`、branch harness `31/31`、overlay builder `26/26`、school scores `9/9`，合计附加 direct runner `99/99`；lite/medium 缓存篮子通过。
+- 冻结输入对照：baseline=`120a6c9`，candidate=`71be11f` 的代码树；core + holdout + discovered cache + frozen overlays + synthetic adversarial，共 `60 raw + 7 synthetic = 67` 项，`67 ok / 0 review / 0 possible_regression`。
+- 数量变化：investment / overall / fundamental / panel 最大绝对漂移均为 `0`，决策档位变化 `0`。HUBG P0 仍为 `59.9/watch`、事件维度 `2`；SMCI P1 仍为 `64.9/watch`、事件维度 `4`；伪造、已解决和过期 P1 仍保持事件维度 `5`。
+- 性能：baseline `3.132s`，candidate `3.059s`，候选约快 `2.3%`，`0` performance warning。由于与正式评分分支完全同分，不需要再运行 `codex/windows-local-stable` 历史参考对照。
+- 中立结论：上游 flow、OCF、registry、agent fallback 和 fund routing 修复值得吸收；原始 OCF/FCF 别名、跨行业 PE 冒充行业 PE、fund 外层早退不值得原样吸收，已在隔离分支收紧。建议后续合回正式评分分支，但本轮不直接合回。
+- 公正评分：原始 `fce996c` 为 `7.8/10`（方向正确但有三处残余契约/控制流风险）；隔离集成结果为 `9.2/10`。扣分项是未在本轮做真实联网 OCF/估值抓取、真实 fund 859 路径和实际 Cloudflare tunnel 端到端测试。
+
 ### `418ae5b` · 结构化事件风险正式进入评分与三市场扩源
 
 - 在 `score_fns.py` 增加最小 severity-aware 消费契约，不调整普通评分权重：

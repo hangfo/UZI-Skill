@@ -1,5 +1,17 @@
 # UZI-Skill 交接记录 - 2026-07-08
 
+## 2026-07-13 upstream fce996c 隔离集成
+
+- 隔离分支：`codex/scoring-validation-upstream-fce996c`；merge commit：`71be11f1ebb6058faf03429b1208dfc0b11388a0`，双亲为稳定检查点 `120a6c9` 与 upstream `fce996c`。
+- 个人 `main` 已 fast-forward 到 `fce996c` 并只推送 `origin/main`；`upstream.pushurl=DISABLED` 保持不变。未修改 `codex/scoring-validation-guardrails`、`codex/windows-local-stable`，未操作原作者 PR。
+- `run.py` 冲突保留 score drift / no-open 语义并接入统一 direct-report / remote 后处理；额外修复 fund summary 被外层 early exit 截断。
+- OCF 与 FCF 已隔离；缺行业时不再把跨行业 PE 写成 `industry_pe`。registry、mutual-fund legacy routing、坏 agent payload fallback 均通过专项测试。
+- 验证：`py_compile`；flow/data-contract `10/10`；其余 direct runner `99/99`；lite/medium 缓存篮子通过。
+- branch-vs-branch 报告：`local-ops/state/branch-score-compare/20260713-upstream-fce996c-integration.md`。`60 raw + 7 synthetic`，结果 `67 ok / 0 review / 0 possible_regression`；所有评分漂移与档位变化均为 0。
+- 性能：baseline `3.132s`，candidate `3.059s`，约快 `2.3%`，无告警。无需再跑 windows-local-stable 历史对照。
+- 建议：可以把该隔离分支合回正式评分分支，但必须保持单独 review，不在本轮直接合回。剩余风险仅是受本轮边界限制而未做真实网络 OCF/估值、fund 859 和 Cloudflare tunnel 端到端。
+- 下一步模型：`GPT-5.6 Sol`，`高推理`；任务应限定为复核 `71be11f` 后把隔离分支合回 `codex/scoring-validation-guardrails`，不再改评分公式。
+
 ## 2026-07-13 最新状态
 
 - 分支仍为 `codex/scoring-validation-guardrails`，个人远端为 `origin=https://github.com/hangfo/UZI-Skill.git`，upstream push 禁用。
