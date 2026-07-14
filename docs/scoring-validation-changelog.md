@@ -4,6 +4,23 @@
 
 ## 2026-07-14
 
+### `ea00a73` · 现金流量表 FCF 取代净利代理并可见披露
+
+- A 股从当前东财现金流同一报告行读取 `NETCASH_OPERATE` 和 `CONSTRUCT_LONG_ASSET`，只在期间一致且资本开支有效时生成 `free_cash_flow = OCF - cash capex`。年度历史、来源字段、期间和衍生 basis 均显式输出；缺 capex 时不猜测 FCF。
+- US 股优先消费 yfinance cashflow 的 `Free Cash Flow`，缺该行时才以同列 `Operating Cash Flow + signed Capital Expenditure` 重建。负 FCF 保持为负，不允许用正净利 fallback 制造 DCF。
+- 估值端优先使用实际/现金流表衍生 FCF；只有 FCF 完全缺失时才保留已标记的净利×0.8 fallback。输入为非正时 DCF 和敏感度矩阵均不生成。
+- 修复跨市场币种误导：AAPL DCF 从硬编码 `¥` 改为 `US$`，并在 HTML 估值卡可见展示“现金流量表 FCF/净利代理”、期间、输入值、币种和警告；所有文本做 HTML 转义。
+- 同日真实数据对比（DCF 增长/WACC 假设不变）：
+  - `600519.SH`：净利代理输入 `658.56亿` → 实际 FCF `583.95亿`；DCF `14528.0亿` → `12882.0亿`，约 `-11.3%`。
+  - `688017.SH`：代理 `0.99亿` → 实际 FCF `0.52亿`；DCF `21.9亿` → `11.5亿`，约 `-47.5%`；六年 FCF 中有两年为负，不再被利润代理遮盖。
+  - `AAPL`：代理 `896.08亿 USD` →现金流量表 FCF `987.67亿 USD`；DCF `19767.7亿` → `US$21788.2亿`，约 `+10.2%`。
+  - `MSTR`：实际 FCF `-225.8亿 USD`，明确返回 DCF 不适用；不生成零值敏感度表或任何正估值。
+- 真实基金富化补验：`600519.SH` 在 `993` 源行/`671` 主动基金上设 hard cap=`2`，只发出预算内 4 次调用，完整富化 2 家、保留 669 家 lite，总耗时 `2.2–2.9s`。
+- 验证：scoring `36/36`、branch harness `35/35`、builder `28/28`、flow/data-contract/render disclosure `22/22`、school `9/9`、registry `6/6`、fund runner `7/7`、fund lite/rendering `11/11`、mutual-fund classification `6/6`，共 `160/160`；`py_compile`、`git diff --check` 和 lite/medium 缓存篮子通过。
+- 最终对照 baseline=`f63f9b8`、candidate=完整代码树：`64 raw + 7 synthetic = 71`，结果 `71 ok / 0 review / 0 possible_regression`，分数与交易档位变化均为 0。
+- 纯评分三轮为 `2.124/2.226s`、`4.614/4.502s`、`2.660/2.607s`；中位数 `2.660/2.607s`，候选约快 `2.0%`，三轮均无告警。只判定“无性能回退”，不把运行顺序/文件系统缓存差异宣称为稳定提速。
+- 公正效果评分 `9.6/10`。剩余风险是当前 DCF 仍为单期输入的简化增长/WACC 模型；FCF 口径、多年归一化、FCFF/FCFE 和净债务桥接存在模型语义冲突，未经 shadow 对比不应继续自动调参。
+
 ### `952342d` · 真实数据契约补齐与长循环硬边界
 
 - 用当日真实东财/AkShare 返回发现 OCF schema 已漂移为 `NETCASH_OPERATE`；旧实现会静默返回空 OCF，且有将最新季度 OCF 除以最新年度净利的虚假期间精度风险。新契约同时兼容中英字段、按报告日排序、区分季报/年报，并只在同一财年年报 OCF 与净利间计算现金含量。

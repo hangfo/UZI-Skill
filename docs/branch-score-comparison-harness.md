@@ -598,6 +598,17 @@ builder 当前只自动识别 Nasdaq Rule `5250(c)(1)` 周期报告合规主题�
 
 最终报告为 `local-ops/state/branch-score-compare/20260714-live-data-contract-final.md`。baseline=`55580d0`，candidate=本轮代码树；`64 raw + 7 synthetic = 71`，分布为 core `10`、holdout `6`、official overlay `32`、synthetic raw `16`、synthetic feature `7`。结果 `71 ok / 0 review / 0 possible_regression`，评分和档位变化均为零。三轮纯评分中位数 `2.186s -> 2.177s`，无性能告警，只判定为持平。
 
+### 2026-07-14 现金流量表 FCF 对比规则
+
+DCF 输入效果必须与纯评分回归分开报告：
+
+- fetch/估值收益使用当日真实现金流量表，在相同增长率和 WACC 下对比旧净利代理与新 FCF 输入。真实结果为 600519 `-11.3%`、688017 `-47.5%`、AAPL `+10.2%`；MSTR 保持 DCF 不适用。
+- branch harness 仍只比较同一冻结 raw 输入上的纯评分与交易边界，不将网络数据随时间变化混入因果判断。
+- 负 FCF 和零 FCF 是有效观测；不得过滤后回退到利润代理，不得用全零敏感度矩阵伪装可用估值。
+- 报告必须同时展示 DCF 输入类型、期间、值、币种和警告；跨市场数值不得硬编码为人民币。
+
+最终报告 `local-ops/state/branch-score-compare/20260714-real-fcf-final.md`：baseline=`f63f9b8`，`71 ok / 0 review / 0 possible_regression`，分数与档位变化为零。三轮纯评分中位数 `2.660s -> 2.607s`，无性能告警，只判定无回退。
+
 ### 在线、离线与 Agent 分工
 
 最佳结构不是“来源越多越好”，而是“每个独立权威层至少一个稳定主源，镜像只增强溯源、不重复加权”：

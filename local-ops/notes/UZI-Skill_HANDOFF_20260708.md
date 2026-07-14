@@ -1,5 +1,16 @@
 # UZI-Skill 交接记录 - 2026-07-08
 
+## 2026-07-14 现金流量表 FCF 与 DCF 口径收口
+
+- 正式分支 `codex/scoring-validation-guardrails`；代码检查点 `ea00a73`。只允许 push 个人 origin，upstream push 仍必须 `DISABLED`，`codex/windows-local-stable` 不修改。
+- A 股现以同期 `NETCASH_OPERATE - CONSTRUCT_LONG_ASSET` 得到衍生 FCF；US 股使用 yfinance cashflow `Free Cash Flow`。负 FCF 不再回退利润代理，FCF 缺失时才保留明示标记的净利×0.8 fallback。
+- 真实同日对比：600519 DCF `14528.0亿 -> 12882.0亿`（`-11.3%`）；688017 `21.9亿 -> 11.5亿`（`-47.5%`）；AAPL `19767.7亿 -> US$21788.2亿`（`+10.2%`）；MSTR 真实 FCF `-225.8亿 USD`，DCF 不适用。
+- HTML 估值卡现可见披露 DCF 输入类型、期间、值、币种和模型警告；AAPL 不再错标为人民币，并对数据文本做 HTML 转义。
+- 真实基金富化：600519 的 `993` 源行/`671` 主动列表在 hard cap=`2` 时仅 4 次调用，2 家 full + 669 家 lite，`2.2–2.9s`完成。
+- 验证总计 `160/160` direct tests，`py_compile`、`git diff --check`、lite/medium 篮子通过。最终报告 `local-ops/state/branch-score-compare/20260714-real-fcf-final.md`：`71 ok / 0 review / 0 possible_regression`，分数和交易档位变化为 0。
+- 三轮纯评分中位数 `2.660s -> 2.607s`，无性能回退；不宣称稳定提速。公正效果评分 `9.6/10`。
+- 下一步只做 shadow 研究：用真实 A/US/HK 对比单年 FCF、多年归一化、FCFF/FCFE 与净债务桥接；在口径冲突解决前不改 DCF 假设、不调分。推荐 `GPT-5.6 Sol`，`高推理`。
+
 ## 2026-07-14 真实数据契约收口
 
 - 正式分支仍为 `codex/scoring-validation-guardrails`；代码检查点 `952342d`。个人 origin 是唯一 push 目标；upstream push 必须继续 `DISABLED`，不操作原作者 PR，不修改 `codex/windows-local-stable`。
