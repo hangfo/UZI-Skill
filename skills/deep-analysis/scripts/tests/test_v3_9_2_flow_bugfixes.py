@@ -240,6 +240,7 @@ def test_financials_current_em_schema_aligns_annual_ocf_ratio():
             "REPORT_DATE": ["2024-12-31", "2026-03-31", "2025-12-31"],
             "REPORT_TYPE": ["年报", "一季报", "年报"],
             "NETCASH_OPERATE": [92463692168.43, 26909891269.13, 61522204989.35],
+            "CONSTRUCT_LONG_ASSET": [4678712000.0, 604791600.0, 3127595000.0],
         }
     )
 
@@ -254,6 +255,35 @@ def test_financials_current_em_schema_aligns_annual_ocf_ratio():
     assert out["ocf_to_net_income_ratio"] == 0.75
     assert out["ocf_to_net_income_ratio_period"] == "2025"
     assert out["ocf_to_net_income_ratio_basis"] == "same_fiscal_year_annual_ocf_to_net_income"
+    assert out["free_cash_flow_history_years"] == ["2024", "2025"]
+    assert out["free_cash_flow_history"] == [877.85, 583.95]
+    assert out["free_cash_flow_yi"] == 583.95
+    assert out["free_cash_flow_period"] == "2025"
+    assert out["free_cash_flow_basis"] == "reported_ocf_minus_cash_paid_for_long_term_assets"
+    assert out["free_cash_flow_source_fields"]["cash_capex"] == "CONSTRUCT_LONG_ASSET"
+    assert "fcf" not in out
+
+
+def test_us_cashflow_schema_preserves_real_negative_fcf():
+    """Frozen from live MSTR yfinance cash flow on 2026-07-14."""
+    import fetch_financials as ff
+
+    cashflow = pd.DataFrame(
+        {
+            pd.Timestamp("2025-12-31"): [-22579540000.0, -22512300000.0, -67241000.0],
+            pd.Timestamp("2024-12-31"): [-22139270000.0, -22086240000.0, -53032000.0],
+        },
+        index=["Free Cash Flow", "Capital Expenditure", "Operating Cash Flow"],
+    )
+    out = {}
+
+    ff._apply_us_free_cash_flow(out, cashflow, "USD")
+
+    assert out["free_cash_flow_yi"] == -225.8
+    assert out["free_cash_flow_period"] == "2025-12-31"
+    assert out["free_cash_flow_history"] == [-221.39, -225.8]
+    assert out["free_cash_flow_basis"] == "yfinance_cashflow_free_cash_flow"
+    assert out["free_cash_flow_currency"] == "USD"
 
 
 def test_stock_features_reads_ocf_to_net_income_ratio():
@@ -358,6 +388,90 @@ def test_valuation_uses_cninfo_market_fallback_when_industry_missing(monkeypatch
     assert data["dcf_is_proxy"] is True
     assert data["dcf_input_basis"] == "net_profit_x_0_8_proxy_not_reported_fcf"
     assert "非实测 FCF/OCF" in data["dcf_warning"]
+
+
+def test_valuation_prefers_cash_statement_fcf_over_profit_proxy(monkeypatch):
+    """Frozen 600519 values: a valid cash-statement FCF must win over net profit."""
+    import fetch_financials
+    import fetch_valuation
+
+    monkeypatch.setattr(fetch_valuation.ds, "fetch_basic", lambda _ti: {
+        "name": "贵州茅台", "price": 1400, "pe_ttm": 14, "pb": 6,
+        "industry": "白酒", "market_cap_raw": 1.7e12,
+    })
+    monkeypatch.setattr(fetch_financials, "main", lambda _ticker: {"data": {
+        "net_profit_history": [823.2],
+        "financial_years": ["2025"],
+        "free_cash_flow_yi": 583.95,
+        "free_cash_flow_period": "2025",
+        "free_cash_flow_basis": "reported_ocf_minus_cash_paid_for_long_term_assets",
+        "free_cash_flow_source_fields": {
+            "operating_cash_flow": "NETCASH_OPERATE",
+            "cash_capex": "CONSTRUCT_LONG_ASSET",
+        },
+    }})
+    monkeypatch.setattr(fetch_valuation.ak, "stock_zh_valuation_baidu", lambda *a, **kw: pd.DataFrame())
+    monkeypatch.setattr(fetch_valuation.ak, "stock_industry_pe_ratio_cninfo", lambda *a, **kw: pd.DataFrame())
+
+    data = fetch_valuation.main("600519.SH")["data"]
+
+    assert data["dcf_is_proxy"] is False
+    assert data["dcf_input_value_yi"] == 583.95
+    assert data["dcf_input_basis"] == "reported_ocf_minus_cash_paid_for_long_term_assets"
+    assert data["dcf_simple"]["input_contract"]["is_proxy"] is False
+    assert data["dcf_input_source_fields"]["cash_capex"] == "CONSTRUCT_LONG_ASSET"
+    assert data["dcf_currency"] == "CNY"
+    assert data["dcf"].startswith("¥")
+
+
+def test_negative_cash_statement_fcf_never_falls_back_to_positive_profit_proxy(monkeypatch):
+    """Real MSTR negative FCF must make DCF unavailable, not manufacture value."""
+    import fetch_financials
+    import fetch_valuation
+
+    monkeypatch.setattr(fetch_valuation.ds, "fetch_basic", lambda _ti: {
+        "name": "Strategy", "price": 400, "pe_ttm": None, "pb": 2,
+        "industry": "Software", "market_cap_raw": 1e11,
+    })
+    monkeypatch.setattr(fetch_financials, "main", lambda _ticker: {"data": {
+        "net_profit_history": [100.0],
+        "financial_years": ["2025"],
+        "free_cash_flow_yi": -225.8,
+        "free_cash_flow_period": "2025-12-31",
+        "free_cash_flow_basis": "yfinance_cashflow_free_cash_flow",
+        "free_cash_flow_currency": "USD",
+    }})
+
+    data = fetch_valuation.main("MSTR")["data"]
+
+    assert data["dcf"] == "—"
+    assert data["dcf_is_proxy"] is False
+    assert data["dcf_input_value_yi"] == -225.8
+    assert data["dcf_simple"]["intrinsic_value"] is None
+    assert data["dcf_sensitivity"] == {}
+    assert data["dcf_currency"] == "USD"
+    assert fetch_valuation._currency_prefix("USD") == "US$"
+
+
+def test_valuation_viz_discloses_fcf_input_and_escapes_warning():
+    from lib.report.dim_viz import _viz_valuation
+
+    rendered = _viz_valuation({
+        "pe": "14",
+        "industry_pe": "18",
+        "dcf": "¥12882.0亿",
+        "dcf_is_proxy": False,
+        "dcf_input_basis": "reported_ocf_minus_cash_paid_for_long_term_assets",
+        "dcf_input_period": "2025",
+        "dcf_input_value_yi": 583.95,
+        "dcf_currency": "CNY",
+        "dcf_warning": "简化模型 <script>alert(1)</script>",
+    })
+
+    assert "DCF 输入·现金流量表 FCF" in rendered
+    assert "2025" in rendered and "583.95亿 CNY" in rendered
+    assert "<script>" not in rendered
+    assert "&lt;script&gt;" in rendered
 
 
 def test_fund_stats_budget_requires_explicit_unbounded_opt_in():

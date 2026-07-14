@@ -18,6 +18,8 @@ assemble_report.py 做 `from lib.report.dim_viz import *` · 所有历史引用�
 """
 from __future__ import annotations
 
+import html
+
 from lib.report.svg_primitives import (
     COLOR_BULL, COLOR_BEAR, COLOR_GOLD, COLOR_CYAN,
     COLOR_BLUE, COLOR_PINK, COLOR_INDIGO, COLOR_MUTED, COLOR_GRID,
@@ -127,6 +129,30 @@ def _viz_valuation(raw: dict) -> str:
     <div style="font-family:Fira Sans;font-size:16px;color:#0f172a;font-weight:700">{dcf}</div>
   </div>
 </div>'''
+
+    dcf_basis = str(raw.get("dcf_input_basis") or "")
+    dcf_warning = str(raw.get("dcf_warning") or "")
+    if dcf_basis or dcf_warning:
+        is_proxy = bool(raw.get("dcf_is_proxy"))
+        input_label = "净利润代理" if is_proxy else "现金流量表 FCF"
+        input_period = str(raw.get("dcf_input_period") or "期间未知")
+        input_currency = str(raw.get("dcf_currency") or "")
+        input_value = raw.get("dcf_input_value_yi")
+        try:
+            input_value_text = f"{float(input_value):.2f}亿 {input_currency}" if input_value is not None else "数值未知"
+        except (TypeError, ValueError):
+            input_value_text = "数值未知"
+        border = "#f59e0b" if is_proxy else "#0891b2"
+        background = "#fffbeb" if is_proxy else "#ecfeff"
+        viz += (
+            f'<div style="margin-top:8px;padding:8px 10px;border:1px solid {border};'
+            f'background:{background};border-radius:6px;font-family:Fira Code;font-size:9px;'
+            'line-height:1.5;color:#334155">'
+            f'<strong>DCF 输入·{html.escape(input_label)}</strong> · '
+            f'{html.escape(input_period)} · {html.escape(input_value_text)}<br>'
+            f'{html.escape(dcf_warning)}'
+            '</div>'
+        )
 
     # DCF sensitivity matrix if present
     dcf_matrix = raw.get("dcf_sensitivity", {})
@@ -756,4 +782,3 @@ DIM_VIZ_RENDERERS = {
     "18_trap":         _viz_trap,
     "19_contests":     _viz_contests,
 }
-

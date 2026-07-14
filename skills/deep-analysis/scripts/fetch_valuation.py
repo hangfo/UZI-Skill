@@ -3,6 +3,7 @@
 补全：原方案要求 PE/PB/PEG/PS/EV/EBITDA + DCF + 历史分位 + 行业中枢
 """
 import json
+import math
 import sys
 from typing import Any
 
@@ -29,6 +30,26 @@ def _cross_industry_pe_reference(df) -> float | None:
         if 0 < pe < 500:
             vals.append(pe)
     return round(sum(vals) / len(vals), 1) if vals else None
+
+
+def _finite_float_or_none(value: Any) -> float | None:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    return number if math.isfinite(number) else None
+
+
+def _currency_prefix(currency: str) -> str:
+    return {
+        "CNY": "¥",
+        "RMB": "¥",
+        "HKD": "HK$",
+        "USD": "US$",
+        "EUR": "€",
+        "GBP": "£",
+        "JPY": "JP¥",
+    }.get(currency.upper(), f"{currency.upper()} " if currency else "")
 
 
 def simple_dcf(
@@ -197,27 +218,52 @@ def main(ticker: str) -> dict:
     dcf_sensitivity: dict = {}
     dcf_input_basis = ""
     dcf_input_period = ""
+    dcf_input_value_yi = None
+    dcf_input_is_proxy = False
+    dcf_input_source_fields: dict = {}
+    dcf_warning = ""
+    dcf_currency = str(basic.get("currency") or {"A": "CNY", "H": "HKD", "US": "USD"}.get(ti.market, ""))
     try:
         # Import our upgraded fetch_financials instead of the raw ds
         from fetch_financials import main as _fin_main
         fin_result = _fin_main(ti.full)
         fin_data = fin_result.get("data", {}) if isinstance(fin_result, dict) else {}
+        dcf_currency = str(
+            fin_data.get("free_cash_flow_currency")
+            or fin_data.get("currency")
+            or dcf_currency
+        )
         net_profit_hist = fin_data.get("net_profit_history", [])
         net_profit_latest_yi = net_profit_hist[-1] if net_profit_hist else 0  # 亿元
+        reported_fcf_yi = _finite_float_or_none(fin_data.get("free_cash_flow_yi"))
 
-        if net_profit_latest_yi > 0:
-            # Convert 亿 → 元 for DCF calc
-            net_profit_yuan = net_profit_latest_yi * 1e8
-            proxy_fcf_yuan = net_profit_yuan * 0.8
+        if reported_fcf_yi is not None:
+            dcf_input_value_yi = reported_fcf_yi
+            dcf_input_basis = str(fin_data.get("free_cash_flow_basis") or "cash_statement_free_cash_flow")
+            dcf_input_period = str(fin_data.get("free_cash_flow_period") or "")
+            dcf_input_source_fields = fin_data.get("free_cash_flow_source_fields") or {}
+            dcf_warning = (
+                "DCF 输入为现金流量表衍生 FCF；仍是简化增长/WACC 模型，"
+                "不代表精确内在价值"
+            )
+        elif _finite_float_or_none(net_profit_latest_yi) is not None and float(net_profit_latest_yi) > 0:
+            dcf_input_value_yi = float(net_profit_latest_yi) * 0.8
             dcf_input_basis = "net_profit_x_0_8_proxy_not_reported_fcf"
             financial_years = fin_data.get("financial_years") or []
             dcf_input_period = str(financial_years[-1]) if financial_years else ""
-            dcf_result = simple_dcf(fcf_latest=proxy_fcf_yuan)
+            dcf_input_is_proxy = True
+            dcf_warning = "简化 DCF 使用净利润×0.8 代理现金流；非实测 FCF/OCF，不应解读为精确内在价值"
+
+        if dcf_input_value_yi is not None:
+            dcf_input_yuan = dcf_input_value_yi * 1e8
+            dcf_result = simple_dcf(fcf_latest=dcf_input_yuan)
             dcf_result["input_contract"] = {
                 "basis": dcf_input_basis,
                 "period": dcf_input_period,
-                "is_proxy": True,
-                "warning": "简化估值输入，不是财报披露 FCF，也不等同于 OCF",
+                "value_yi": round(dcf_input_value_yi, 2),
+                "is_proxy": dcf_input_is_proxy,
+                "source_fields": dcf_input_source_fields,
+                "warning": dcf_warning,
             }
             current_price = basic.get("price") or 0
             total_shares = basic.get("total_shares") or 0
@@ -227,19 +273,20 @@ def main(ticker: str) -> dict:
                 if current_price and mcap_raw:
                     total_shares = mcap_raw / current_price
             total_shares = total_shares or 1e9
-            dcf_sensitivity = dcf_sensitivity_matrix(
-                fcf_latest=proxy_fcf_yuan,
-                waccs=[8, 9, 10, 11, 12],
-                growths=[6, 8, 10, 12],
-                current_price=current_price,
-                shares_out=total_shares,
-            )
+            if dcf_input_yuan > 0:
+                dcf_sensitivity = dcf_sensitivity_matrix(
+                    fcf_latest=dcf_input_yuan,
+                    waccs=[8, 9, 10, 11, 12],
+                    growths=[6, 8, 10, 12],
+                    current_price=current_price,
+                    shares_out=total_shares,
+                )
     except Exception as e:
         dcf_result = {"error": str(e)[:80]}
 
     cur_pe = basic.get("pe_ttm")
     iv_total = dcf_result.get("intrinsic_value_total") if isinstance(dcf_result, dict) else None
-    dcf_display = f"¥{iv_total / 1e8:.1f}亿" if iv_total else "—"
+    dcf_display = f"{_currency_prefix(dcf_currency)}{iv_total / 1e8:.1f}亿" if iv_total else "—"
 
     return {
         "ticker": ti.full,
@@ -260,13 +307,13 @@ def main(ticker: str) -> dict:
                 if market_pe_reference is not None else ""
             ),
             "dcf": dcf_display,
-            "dcf_is_proxy": bool(dcf_input_basis),
+            "dcf_is_proxy": dcf_input_is_proxy,
             "dcf_input_basis": dcf_input_basis,
             "dcf_input_period": dcf_input_period,
-            "dcf_warning": (
-                "简化 DCF 使用净利润×0.8 代理现金流；非实测 FCF/OCF，不应解读为精确内在价值"
-                if dcf_input_basis else ""
-            ),
+            "dcf_input_value_yi": round(dcf_input_value_yi, 2) if dcf_input_value_yi is not None else None,
+            "dcf_input_source_fields": dcf_input_source_fields,
+            "dcf_currency": dcf_currency,
+            "dcf_warning": dcf_warning,
             "pe_history": pe_history,
             "dcf_simple": dcf_result,
             "dcf_sensitivity": dcf_sensitivity,

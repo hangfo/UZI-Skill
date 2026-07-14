@@ -46,11 +46,11 @@ def _to_yi(v) -> float:
 
 
 def _apply_operating_cash_flow(out: dict, df_cf) -> None:
-    """Attach operating cash-flow fields using 亿 units.
+    """Attach period-aligned OCF and, when available, derived FCF in 亿.
 
-    This is OCF, not true FCF. Keep the naming explicit so trap-detector and
-    investor rules can judge cash-profit matching without mistaking it for
-    free cash flow after capex.
+    OCF remains an explicit standalone field. Free cash flow is only emitted
+    when the same statement row also contains cash paid to acquire or construct
+    long-term assets; it is then derived as OCF minus that cash capex.
     """
     if df_cf is None or df_cf.empty:
         return
@@ -70,6 +70,20 @@ def _apply_operating_cash_flow(out: dict, df_cf) -> None:
     if value_col is None:
         return
 
+    capex_col = next(
+        (
+            col
+            for col in (
+                "CONSTRUCT_LONG_ASSET",
+                "购建固定资产、无形资产和其他长期资产支付的现金",
+                "购建固定资产、无形资产和其他长期资产所支付的现金",
+                "购建固定资产等支付的现金",
+            )
+            if col in df_cf.columns
+        ),
+        None,
+    )
+
     date_col = next(
         (col for col in ("REPORT_DATE", "报告期", "报告日期") if col in df_cf.columns),
         None,
@@ -87,6 +101,16 @@ def _apply_operating_cash_flow(out: dict, df_cf) -> None:
         except (TypeError, ValueError):
             continue
         if math.isfinite(value):
+            capex_yi = None
+            capex_value_yuan = None
+            if capex_col:
+                try:
+                    capex_value = float(str(row.get(capex_col)).replace(",", "").replace("%", ""))
+                    if math.isfinite(capex_value) and capex_value >= 0:
+                        capex_value_yuan = capex_value
+                        capex_yi = round(capex_value / 1e8, 2)
+                except (TypeError, ValueError):
+                    pass
             period = ""
             if date_col:
                 raw_period = str(row.get(date_col) or "")
@@ -100,6 +124,11 @@ def _apply_operating_cash_flow(out: dict, df_cf) -> None:
                     "report_type": report_type,
                     "is_annual": is_annual,
                     "value_yi": round(value / 1e8, 2),
+                    "capex_yi": capex_yi,
+                    "free_cash_flow_yi": (
+                        round((value - capex_value_yuan) / 1e8, 2)
+                        if capex_value_yuan is not None else None
+                    ),
                 }
             )
     if not records:
@@ -116,6 +145,7 @@ def _apply_operating_cash_flow(out: dict, df_cf) -> None:
     out["operating_cash_flow"] = out["ocf"]
     out["operating_cash_flow_yi"] = round(ocf_latest, 2)
     out["ocf_source_field"] = value_col
+    out["capex_source_field"] = capex_col or ""
     out["ocf_latest_period"] = latest["period"]
     out["ocf_latest_report_type"] = latest["report_type"]
     out["ocf_latest_is_annual"] = latest["is_annual"]
@@ -128,10 +158,15 @@ def _apply_operating_cash_flow(out: dict, df_cf) -> None:
 
     if has_period_metadata:
         annual_by_year: dict[str, float] = {}
+        annual_capex_by_year: dict[str, float] = {}
+        annual_fcf_by_year: dict[str, float] = {}
         for record in records:
             year = record["period"][:4]
             if record["is_annual"] and year and year not in annual_by_year:
                 annual_by_year[year] = record["value_yi"]
+            if record["is_annual"] and year and record["capex_yi"] is not None:
+                annual_capex_by_year.setdefault(year, record["capex_yi"])
+                annual_fcf_by_year.setdefault(year, record["free_cash_flow_yi"])
 
         financial_years = [str(year)[:4] for year in (out.get("financial_years") or [])]
         profit_history = out.get("net_profit_history") or []
@@ -146,6 +181,30 @@ def _apply_operating_cash_flow(out: dict, df_cf) -> None:
         out["ocf_history_years"] = history_years
         out["ocf_history"] = [annual_by_year[year] for year in history_years]
         out["ocf_history_basis"] = "annual_reports_aligned_to_financial_years"
+
+        fcf_history_years = [year for year in history_years if year in annual_fcf_by_year]
+        if not fcf_history_years:
+            fcf_history_years = sorted(annual_fcf_by_year)[-6:]
+        out["free_cash_flow_history_years"] = fcf_history_years
+        out["free_cash_flow_history"] = [annual_fcf_by_year[year] for year in fcf_history_years]
+        out["capex_history_years"] = fcf_history_years
+        out["capex_history"] = [annual_capex_by_year[year] for year in fcf_history_years]
+        if fcf_history_years:
+            latest_fcf_year = fcf_history_years[-1]
+            latest_fcf_yi = annual_fcf_by_year[latest_fcf_year]
+            out["free_cash_flow"] = f"{latest_fcf_yi:.1f}亿"
+            out["free_cash_flow_yi"] = latest_fcf_yi
+            out["free_cash_flow_period"] = latest_fcf_year
+            out["free_cash_flow_basis"] = "reported_ocf_minus_cash_paid_for_long_term_assets"
+            out["free_cash_flow_is_derived"] = True
+            out["free_cash_flow_source_fields"] = {
+                "operating_cash_flow": value_col,
+                "cash_capex": capex_col,
+            }
+        elif capex_col:
+            out["free_cash_flow_unavailable_reason"] = "no_annual_ocf_and_capex_pair"
+        else:
+            out["free_cash_flow_unavailable_reason"] = "cash_capex_field_missing"
 
         common_years = sorted(set(annual_by_year) & set(profit_by_year))
         if common_years:
@@ -163,6 +222,7 @@ def _apply_operating_cash_flow(out: dict, df_cf) -> None:
         out["ocf_history"] = [record["value_yi"] for record in records[:6]]
         out["ocf_history_years"] = []
         out["ocf_history_basis"] = "source_order_no_period_metadata"
+        out["free_cash_flow_unavailable_reason"] = "period_metadata_missing"
 
     out["ocf_to_net_income_ratio_basis"] = ratio_basis
     out["ocf_to_net_income_ratio_period"] = ratio_period
@@ -170,6 +230,56 @@ def _apply_operating_cash_flow(out: dict, df_cf) -> None:
         ratio = round(ratio_ocf / ratio_profit, 2)
         out["ocf_to_net_income_ratio"] = ratio
         out.setdefault("financial_health", {})["ocf_to_net_income_ratio"] = ratio
+
+
+def _apply_us_free_cash_flow(out: dict, cashflow, currency: str = "USD") -> None:
+    """Normalize annual US free cash flow from yfinance cash-flow rows."""
+    if cashflow is None or cashflow.empty:
+        return
+
+    fcf_row = next((name for name in ("Free Cash Flow", "FreeCashFlow") if name in cashflow.index), None)
+    ocf_row = next(
+        (name for name in ("Operating Cash Flow", "Total Cash From Operating Activities") if name in cashflow.index),
+        None,
+    )
+    capex_row = next((name for name in ("Capital Expenditure", "Capital Expenditures") if name in cashflow.index), None)
+    records = []
+    for column in cashflow.columns:
+        period = str(column)[:10]
+        value = None
+        basis = ""
+        if fcf_row and _is_finite(cashflow.at[fcf_row, column]):
+            value = float(cashflow.at[fcf_row, column])
+            basis = "yfinance_cashflow_free_cash_flow"
+        elif (
+            ocf_row and capex_row
+            and _is_finite(cashflow.at[ocf_row, column])
+            and _is_finite(cashflow.at[capex_row, column])
+        ):
+            # yfinance reports capital expenditure as a negative cash outflow.
+            value = float(cashflow.at[ocf_row, column]) + float(cashflow.at[capex_row, column])
+            basis = "yfinance_operating_cash_flow_plus_signed_capex"
+        if value is not None and math.isfinite(value):
+            records.append({"period": period, "value_yi": round(value / 1e8, 2), "basis": basis})
+    if not records:
+        out["free_cash_flow_unavailable_reason"] = "us_cashflow_rows_missing"
+        return
+
+    records.sort(key=lambda record: record["period"])
+    latest = records[-1]
+    out["free_cash_flow"] = f"{latest['value_yi']:.1f}亿"
+    out["free_cash_flow_yi"] = latest["value_yi"]
+    out["free_cash_flow_period"] = latest["period"]
+    out["free_cash_flow_history_years"] = [record["period"][:4] for record in records]
+    out["free_cash_flow_history"] = [record["value_yi"] for record in records]
+    out["free_cash_flow_basis"] = latest["basis"]
+    out["free_cash_flow_is_derived"] = True
+    out["free_cash_flow_currency"] = currency
+    out["free_cash_flow_source_fields"] = {
+        "free_cash_flow": fcf_row or "",
+        "operating_cash_flow": ocf_row or "",
+        "signed_capex": capex_row or "",
+    }
 
 
 def _fetch_a_share(ti) -> dict:
@@ -507,6 +617,7 @@ def _fetch_us(ti) -> dict:
                 if gp_vals:
                     out["gross_margin"] = f"{gp_vals[-1] / latest_revenue * 100:.1f}%"
             out["financial_years"] = [str(c)[:4] for c in fin.columns[::-1]]
+        _apply_us_free_cash_flow(out, cf, str(info.get("currency") or "USD"))
         out["roe"] = f"{info.get('returnOnEquity', 0) * 100:.1f}%" if info.get("returnOnEquity") else "—"
         out["net_margin"] = f"{info.get('profitMargins', 0) * 100:.1f}%" if info.get("profitMargins") else "—"
         if info.get("grossMargins") and not out.get("gross_margin"):
@@ -515,9 +626,13 @@ def _fetch_us(ti) -> dict:
         total_debt = info.get("totalDebt") or 0
         total_cash = info.get("totalCash") or 0
         if latest_revenue > 0:
-            fcf = info.get("freeCashflow")
-            if _is_finite(fcf):
-                health["fcf_margin"] = round(float(fcf) / latest_revenue * 100, 1)
+            normalized_fcf_yi = out.get("free_cash_flow_yi")
+            if _is_finite(normalized_fcf_yi):
+                health["fcf_margin"] = round(float(normalized_fcf_yi) * 1e8 / latest_revenue * 100, 1)
+            else:
+                fcf = info.get("freeCashflow")
+                if _is_finite(fcf):
+                    health["fcf_margin"] = round(float(fcf) / latest_revenue * 100, 1)
         if _is_finite(total_debt):
             health["total_debt"] = round(float(total_debt) / 1e8, 2)
         if _is_finite(total_cash):
