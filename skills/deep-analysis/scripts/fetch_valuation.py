@@ -96,6 +96,9 @@ def main(ticker: str) -> dict:
     industry_pe_avg = None
     industry_pe_fallback_reason = ""
     market_pe_reference = None
+    industry_pe_source = ""
+    industry_pe_match_method = ""
+    market_pe_reference_source = ""
 
     if ti.market == "A":
         # 1. PE 5 年历史序列 via 百度股市通 (stock_zh_valuation_baidu)
@@ -146,11 +149,14 @@ def main(ticker: str) -> dict:
                             pe_col = _find_weighted_pe_col(df)
                             if pe_col:
                                 industry_pe_avg = round(float(row[pe_col]), 2)
+                                industry_pe_source = "cninfo:stock_industry_pe_ratio_cninfo"
+                                industry_pe_match_method = "semantic_csrc_industry_mapping"
                                 break
                         elif not ind_name:
                             market_pe = _cross_industry_pe_reference(df)
                             if market_pe is not None:
                                 market_pe_reference = market_pe
+                                market_pe_reference_source = "cninfo:stock_industry_pe_ratio_cninfo"
                                 industry_pe_fallback_reason = (
                                     "basic.industry 缺失 · 未生成行业 PE；"
                                     "cninfo 跨行业参考仅作披露，不参与同行估值"
@@ -160,6 +166,7 @@ def main(ticker: str) -> dict:
                             market_pe = _cross_industry_pe_reference(df)
                             if market_pe is not None:
                                 market_pe_reference = market_pe
+                                market_pe_reference_source = "cninfo:stock_industry_pe_ratio_cninfo"
                                 industry_pe_fallback_reason = (
                                     f"行业 {ind_name} 未匹配 · 未生成行业 PE；"
                                     "cninfo 跨行业参考仅作披露，不参与同行估值"
@@ -180,12 +187,16 @@ def main(ticker: str) -> dict:
                 pes = [p for p in pes if p > 0 and p < 500]
                 if pes:
                     industry_pe_avg = round(sum(pes) / len(pes), 2)
+                    industry_pe_source = "akshare:hk_valuation_comparison_em"
+                    industry_pe_match_method = "provider_peer_comparison"
         except Exception:
             pass
 
     # 3. DCF 敏感度矩阵 - use fetch_financials output from our upgraded fetcher
     dcf_result: dict = {}
     dcf_sensitivity: dict = {}
+    dcf_input_basis = ""
+    dcf_input_period = ""
     try:
         # Import our upgraded fetch_financials instead of the raw ds
         from fetch_financials import main as _fin_main
@@ -197,7 +208,17 @@ def main(ticker: str) -> dict:
         if net_profit_latest_yi > 0:
             # Convert 亿 → 元 for DCF calc
             net_profit_yuan = net_profit_latest_yi * 1e8
-            dcf_result = simple_dcf(fcf_latest=net_profit_yuan * 0.8)
+            proxy_fcf_yuan = net_profit_yuan * 0.8
+            dcf_input_basis = "net_profit_x_0_8_proxy_not_reported_fcf"
+            financial_years = fin_data.get("financial_years") or []
+            dcf_input_period = str(financial_years[-1]) if financial_years else ""
+            dcf_result = simple_dcf(fcf_latest=proxy_fcf_yuan)
+            dcf_result["input_contract"] = {
+                "basis": dcf_input_basis,
+                "period": dcf_input_period,
+                "is_proxy": True,
+                "warning": "简化估值输入，不是财报披露 FCF，也不等同于 OCF",
+            }
             current_price = basic.get("price") or 0
             total_shares = basic.get("total_shares") or 0
             if not total_shares:
@@ -207,7 +228,7 @@ def main(ticker: str) -> dict:
                     total_shares = mcap_raw / current_price
             total_shares = total_shares or 1e9
             dcf_sensitivity = dcf_sensitivity_matrix(
-                fcf_latest=net_profit_yuan * 0.8,
+                fcf_latest=proxy_fcf_yuan,
                 waccs=[8, 9, 10, 11, 12],
                 growths=[6, 8, 10, 12],
                 current_price=current_price,
@@ -228,13 +249,24 @@ def main(ticker: str) -> dict:
             "pe_quantile": f"5 年 {pe_quantile_val:.0f} 分位" if pe_quantile_val is not None else "—",
             "pb_quantile": f"{pb_quantile_val:.0f}%" if pb_quantile_val is not None else "—",
             "industry_pe": str(industry_pe_avg) if industry_pe_avg else "—",
+            "industry_pe_source": industry_pe_source,
+            "industry_pe_match_method": industry_pe_match_method,
+            "industry_pe_input_industry": str(basic.get("industry") or ""),
             "industry_pe_fallback_reason": industry_pe_fallback_reason,
             "market_pe_reference": str(market_pe_reference) if market_pe_reference else "—",
+            "market_pe_reference_source": market_pe_reference_source,
             "market_pe_reference_method": (
                 "cninfo 行业加权 PE 的等权均值；非同行估值，不进入 industry_pe"
                 if market_pe_reference is not None else ""
             ),
             "dcf": dcf_display,
+            "dcf_is_proxy": bool(dcf_input_basis),
+            "dcf_input_basis": dcf_input_basis,
+            "dcf_input_period": dcf_input_period,
+            "dcf_warning": (
+                "简化 DCF 使用净利润×0.8 代理现金流；非实测 FCF/OCF，不应解读为精确内在价值"
+                if dcf_input_basis else ""
+            ),
             "pe_history": pe_history,
             "dcf_simple": dcf_result,
             "dcf_sensitivity": dcf_sensitivity,

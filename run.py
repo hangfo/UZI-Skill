@@ -641,10 +641,14 @@ def main():
     _pipeline_requested = not _force_legacy
     if _pipeline_requested:
         try:
-            from lib.pipeline.run import run_pipeline
+            from lib.pipeline.run import PipelineFallback, run_pipeline
             print("🚀 [run.py] v3.0.0 pipeline · 默认路径")
-            run_pipeline(args.ticker, resume=not args.no_resume)
-            _pipeline_succeeded = True
+            try:
+                run_pipeline(args.ticker, resume=not args.no_resume)
+                _pipeline_succeeded = True
+            except PipelineFallback as e:
+                print(f"↪️  [run.py] 预期分流到 legacy: {str(e)[:120]}")
+                _pipeline_succeeded = False
         except Exception as e:
             print(f"⚠️  [run.py] pipeline 异常 · 回退 legacy: {type(e).__name__}: {str(e)[:100]}")
             import traceback

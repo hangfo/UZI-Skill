@@ -52,31 +52,122 @@ def _apply_operating_cash_flow(out: dict, df_cf) -> None:
     investor rules can judge cash-profit matching without mistaking it for
     free cash flow after capex.
     """
-    if df_cf is None or df_cf.empty or "经营活动产生的现金流量净额" not in df_cf.columns:
+    if df_cf is None or df_cf.empty:
         return
 
-    ocf_history = []
-    for raw_value in df_cf["经营活动产生的现金流量净额"].tolist():
+    value_col = next(
+        (
+            col
+            for col in (
+                "经营活动产生的现金流量净额",
+                "NETCASH_OPERATE",
+                "经营活动现金流量净额",
+            )
+            if col in df_cf.columns
+        ),
+        None,
+    )
+    if value_col is None:
+        return
+
+    date_col = next(
+        (col for col in ("REPORT_DATE", "报告期", "报告日期") if col in df_cf.columns),
+        None,
+    )
+    type_col = next(
+        (col for col in ("REPORT_TYPE", "REPORT_DATE_NAME", "报告类型") if col in df_cf.columns),
+        None,
+    )
+
+    records = []
+    for _, row in df_cf.iterrows():
+        raw_value = row.get(value_col)
         try:
             value = float(str(raw_value).replace(",", "").replace("%", ""))
         except (TypeError, ValueError):
             continue
         if math.isfinite(value):
-            # Zero is a valid cash-flow observation. Dropping it would shift an
-            # older period into the "latest" slot and manufacture stale OCF.
-            ocf_history.append(round(value / 1e8, 2))
-    if not ocf_history:
+            period = ""
+            if date_col:
+                raw_period = str(row.get(date_col) or "")
+                if raw_period not in ("NaT", "nan", "None"):
+                    period = raw_period[:10]
+            report_type = str(row.get(type_col) or "") if type_col else ""
+            is_annual = "年报" in report_type or period.endswith("12-31")
+            records.append(
+                {
+                    "period": period,
+                    "report_type": report_type,
+                    "is_annual": is_annual,
+                    "value_yi": round(value / 1e8, 2),
+                }
+            )
+    if not records:
         return
 
-    ocf_latest = ocf_history[0]
+    has_period_metadata = any(record["period"] for record in records)
+    if has_period_metadata:
+        # Do not trust provider row order. ISO report dates sort chronologically.
+        records.sort(key=lambda record: record["period"], reverse=True)
+
+    latest = records[0]
+    ocf_latest = latest["value_yi"]
     out["ocf"] = f"{ocf_latest:.1f}亿"
     out["operating_cash_flow"] = out["ocf"]
     out["operating_cash_flow_yi"] = round(ocf_latest, 2)
-    out["ocf_history"] = ocf_history[:6]
+    out["ocf_source_field"] = value_col
+    out["ocf_latest_period"] = latest["period"]
+    out["ocf_latest_report_type"] = latest["report_type"]
+    out["ocf_latest_is_annual"] = latest["is_annual"]
+    out["ocf_observations"] = records[:6]
 
-    np_latest = (out.get("net_profit_history") or [0])[-1]
-    if np_latest:
-        ratio = round(ocf_latest / np_latest, 2)
+    ratio_ocf = ocf_latest
+    ratio_profit = (out.get("net_profit_history") or [0])[-1]
+    ratio_period = ""
+    ratio_basis = "legacy_source_order_no_period_metadata"
+
+    if has_period_metadata:
+        annual_by_year: dict[str, float] = {}
+        for record in records:
+            year = record["period"][:4]
+            if record["is_annual"] and year and year not in annual_by_year:
+                annual_by_year[year] = record["value_yi"]
+
+        financial_years = [str(year)[:4] for year in (out.get("financial_years") or [])]
+        profit_history = out.get("net_profit_history") or []
+        profit_by_year = {
+            year: profit_history[index]
+            for index, year in enumerate(financial_years)
+            if index < len(profit_history)
+        }
+        history_years = [year for year in financial_years if year in annual_by_year]
+        if not history_years:
+            history_years = sorted(annual_by_year)[-6:]
+        out["ocf_history_years"] = history_years
+        out["ocf_history"] = [annual_by_year[year] for year in history_years]
+        out["ocf_history_basis"] = "annual_reports_aligned_to_financial_years"
+
+        common_years = sorted(set(annual_by_year) & set(profit_by_year))
+        if common_years:
+            ratio_period = common_years[-1]
+            ratio_ocf = annual_by_year[ratio_period]
+            ratio_profit = profit_by_year[ratio_period]
+            ratio_basis = "same_fiscal_year_annual_ocf_to_net_income"
+        else:
+            # A quarterly cumulative OCF divided by an unrelated annual profit
+            # is false precision. Leave the ratio absent until periods align.
+            ratio_profit = 0
+            ratio_basis = "unavailable_no_same_period_net_income"
+    else:
+        # Backward compatibility for legacy providers without any period field.
+        out["ocf_history"] = [record["value_yi"] for record in records[:6]]
+        out["ocf_history_years"] = []
+        out["ocf_history_basis"] = "source_order_no_period_metadata"
+
+    out["ocf_to_net_income_ratio_basis"] = ratio_basis
+    out["ocf_to_net_income_ratio_period"] = ratio_period
+    if ratio_profit:
+        ratio = round(ratio_ocf / ratio_profit, 2)
         out["ocf_to_net_income_ratio"] = ratio
         out.setdefault("financial_health", {})["ocf_to_net_income_ratio"] = ratio
 

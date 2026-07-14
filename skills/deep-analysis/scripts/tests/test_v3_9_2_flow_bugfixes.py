@@ -226,6 +226,36 @@ def test_financials_preserves_zero_as_latest_ocf():
     assert out["ocf_to_net_income_ratio"] == 0.0
 
 
+def test_financials_current_em_schema_aligns_annual_ocf_ratio():
+    """Real 2026 Eastmoney schema: latest quarter display, annual ratio alignment."""
+    import fetch_financials as ff
+
+    out = {
+        "financial_years": ["2024", "2025"],
+        "net_profit_history": [862.28, 823.2],
+    }
+    # Field names and values are frozen from the live 600519 response on 2026-07-14.
+    df_cf = pd.DataFrame(
+        {
+            "REPORT_DATE": ["2024-12-31", "2026-03-31", "2025-12-31"],
+            "REPORT_TYPE": ["年报", "一季报", "年报"],
+            "NETCASH_OPERATE": [92463692168.43, 26909891269.13, 61522204989.35],
+        }
+    )
+
+    ff._apply_operating_cash_flow(out, df_cf)
+
+    assert out["ocf"] == "269.1亿"
+    assert out["ocf_source_field"] == "NETCASH_OPERATE"
+    assert out["ocf_latest_period"] == "2026-03-31"
+    assert out["ocf_latest_is_annual"] is False
+    assert out["ocf_history_years"] == ["2024", "2025"]
+    assert out["ocf_history"] == [924.64, 615.22]
+    assert out["ocf_to_net_income_ratio"] == 0.75
+    assert out["ocf_to_net_income_ratio_period"] == "2025"
+    assert out["ocf_to_net_income_ratio_basis"] == "same_fiscal_year_annual_ocf_to_net_income"
+
+
 def test_stock_features_reads_ocf_to_net_income_ratio():
     from lib.stock_features import extract_features
 
@@ -320,8 +350,23 @@ def test_valuation_uses_cninfo_market_fallback_when_industry_missing(monkeypatch
     data = result["data"]
 
     assert data["industry_pe"] == "—"
+    assert data["industry_pe_source"] == ""
+    assert data["industry_pe_input_industry"] == ""
     assert data["market_pe_reference"] == "20.0"
+    assert data["market_pe_reference_source"] == "cninfo:stock_industry_pe_ratio_cninfo"
     assert "不参与同行估值" in data["industry_pe_fallback_reason"]
+    assert data["dcf_is_proxy"] is True
+    assert data["dcf_input_basis"] == "net_profit_x_0_8_proxy_not_reported_fcf"
+    assert "非实测 FCF/OCF" in data["dcf_warning"]
+
+
+def test_fund_stats_budget_requires_explicit_unbounded_opt_in():
+    from fetch_fund_holders import _bounded_fund_stats_budget
+
+    assert _bounded_fund_stats_budget(20, hard_cap=50) == 20
+    assert _bounded_fund_stats_budget(993, hard_cap=50) == 50
+    assert _bounded_fund_stats_budget(993, hard_cap=50, allow_unbounded=True) == 993
+    assert _bounded_fund_stats_budget(-1, hard_cap=50) == 0
 
 
 def test_pipeline_routes_mutual_fund_to_legacy(monkeypatch):
@@ -344,6 +389,15 @@ def test_pipeline_routes_mutual_fund_to_legacy(monkeypatch):
         assert "legacy" in str(exc)
     else:
         raise AssertionError("mutual fund must route to legacy before pipeline collection")
+
+
+def test_expected_pipeline_fallback_has_dedicated_exception_contract():
+    from lib.pipeline import run as pipeline_run
+
+    assert issubclass(pipeline_run.PipelineFallback, ValueError)
+    source = (ROOT / "run.py").read_text(encoding="utf-8")
+    assert "except PipelineFallback as e:" in source
+    assert "预期分流到 legacy" in source
 
 
 def test_registry_matches_legacy_output_shapes():

@@ -53,6 +53,18 @@ MANAGER_AVATAR_MAP = {
 }
 
 
+def _bounded_fund_stats_budget(
+    requested: int,
+    *,
+    hard_cap: int = 50,
+    allow_unbounded: bool = False,
+) -> int:
+    """Bound per-fund network enrichment while preserving the full lite list."""
+    requested = max(0, int(requested))
+    hard_cap = max(0, int(hard_cap))
+    return requested if allow_unbounded else min(requested, hard_cap)
+
+
 def _recent_quarter_date() -> str:
     """Return the most recent reported quarter in YYYYMMDD format.
     Q1 report comes out in April; Q2 in August; Q3 in Oct; Q4 in March next year.
@@ -267,7 +279,21 @@ def main(ticker: str, limit: int | None = None) -> dict:
     #   · 其余家只列清单（名字 + 持仓% + 基金链接）
     # 这样 649 家 × 每家 2 API ≈ 1300 次 → 缩到 20 × 2 = 40 次 API
     # 用户想看某家 5Y 业绩，点 fund_url 到东财看
-    stats_top_n = int(_os.environ.get("UZI_FUND_STATS_TOP", "20"))
+    requested_stats_top = 20
+    try:
+        requested_stats_top = int(_os.environ.get("UZI_FUND_STATS_TOP", "20"))
+    except ValueError:
+        requested_stats_top = 20
+    try:
+        stats_hard_cap = int(_os.environ.get("UZI_FUND_STATS_HARD_CAP", "50"))
+    except ValueError:
+        stats_hard_cap = 50
+    allow_unbounded_stats = _os.environ.get("UZI_FUND_ALLOW_UNBOUNDED_STATS") == "1"
+    stats_top_n = _bounded_fund_stats_budget(
+        requested_stats_top,
+        hard_cap=stats_hard_cap,
+        allow_unbounded=allow_unbounded_stats,
+    )
 
     # 按持仓金额/比例降序，保证头部大票仓位的拿到完整业绩
     def _pos_pct(h: dict) -> float:
@@ -368,7 +394,11 @@ def main(ticker: str, limit: int | None = None) -> dict:
     top_full = iter_holders[:stats_top_n]
     rest_lite = iter_holders[stats_top_n:]
 
-    _workers = int(_os.environ.get("UZI_FUND_WORKERS", "1"))
+    try:
+        _workers = int(_os.environ.get("UZI_FUND_WORKERS", "1"))
+    except ValueError:
+        _workers = 1
+    _workers = max(1, min(_workers, 8))
     managers: list[dict] = []
 
     # Top N · 完整版（2 次 API/家）
@@ -414,6 +444,10 @@ def main(ticker: str, limit: int | None = None) -> dict:
     managers.sort(key=_sort_key)
 
     passive_count = max(0, total_funds - len(active_holders))
+    holdings_as_of = max(
+        (str(row.get("截止日期") or "")[:10] for row in holders if row.get("截止日期")),
+        default="",
+    )
     return {
         "ticker": ti.full,
         "data": {
@@ -423,12 +457,24 @@ def main(ticker: str, limit: int | None = None) -> dict:
             "full_stats_count": len(top_full),
             "lite_count": lite_count,
             "passive_funds_filtered": passive_count,
+            "holdings_as_of": holdings_as_of,
+            "source_rows_count": len(holders),
+            "processed_active_rows": len(iter_holders),
+            "stats_top_requested": max(0, requested_stats_top),
+            "stats_top_effective": len(top_full),
+            "stats_hard_cap": max(0, stats_hard_cap),
+            "stats_unbounded_opt_in": allow_unbounded_stats,
+            "stats_network_call_budget": len(top_full) * 2,
+            "fund_workers": _workers,
+            "processing_mode": "two_tier_full_then_zero_api_lite",
             "_note": (
                 f"共 {total_funds} 家基金持有 · "
                 f"头部 {len(top_full)} 家算完整 5Y 业绩（按持仓排序），"
                 f"其余 {lite_count} 家只列清单（点 fund_url 跳东财看详情）· "
                 f"过滤 {passive_count} 家 ETF/指数基金 · "
-                f"UZI_FUND_STATS_TOP=N 可调"
+                f"完整业绩网络预算最多 {len(top_full) * 2} 次调用 · "
+                f"UZI_FUND_STATS_TOP=N 可调，默认 hard cap={max(0, stats_hard_cap)}，"
+                "只有 UZI_FUND_ALLOW_UNBOUNDED_STATS=1 才可越过"
             ),
         },
         "source": "akshare:stock_fund_stock_holder + fund_open_fund_info_em(top N only)",

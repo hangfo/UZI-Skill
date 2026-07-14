@@ -16,6 +16,10 @@ from .score import score_from_cache
 from .synthesize import synthesize_and_render
 
 
+class PipelineFallback(ValueError):
+    """Expected routing signal for targets handled by the legacy preflight path."""
+
+
 def run_pipeline(ticker: str, resume: bool = True) -> str:
     """完整管道入口（v3.0.0 主干）.
 
@@ -66,13 +70,13 @@ def run_pipeline(ticker: str, resume: bool = True) -> str:
 def _preflight_guards(ticker: str) -> None:
     """v3.0.0 · pipeline 不覆盖的场景 · 抛异常让 run.py 回退 legacy.
 
-    抛 ValueError 触发 fallback（不 crash · run.py catch 后走 legacy stage1 能正常处理）.
+    抛 PipelineFallback 触发预期路由（不 crash · run.py 不打印异常 traceback）.
     """
     from lib.market_router import is_chinese_name, parse_ticker, classify_security_type
 
     # 1. 中文名 · 由 legacy stage1 的 resolve_chinese_name_rich 处理
     if is_chinese_name(ticker):
-        raise ValueError(
+        raise PipelineFallback(
             f"pipeline: 中文名 {ticker!r} 需 legacy 解析 · fallback"
         )
 
@@ -82,10 +86,10 @@ def _preflight_guards(ticker: str) -> None:
         if ti.market == "A":
             sec_type = classify_security_type(ti.code)
             if sec_type in ("etf", "lof", "mutual_fund", "convertible_bond", "index"):
-                raise ValueError(
+                raise PipelineFallback(
                     f"pipeline: {sec_type} 证券类型需 legacy 处理 · fallback"
                 )
-    except ValueError:
+    except PipelineFallback:
         raise  # 重新抛 · 让 run.py fallback
     except Exception:
         pass  # 其他异常（parse 失败）· 让 pipeline 自己尝试 · 失败后再 fallback

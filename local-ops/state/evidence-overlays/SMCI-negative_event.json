@@ -21,7 +21,7 @@
       "url": "https://www.sec.gov/Archives/edgar/data/1375365/000137536524000045/smci-20241206.htm",
       "title": "Super Micro Computer, Inc. (SMCI) 8-K Item 3.01: Notice of Delisting or Failure to Satisfy a Continued Listing Rule",
       "published_at": "2024-12-06",
-      "fetched_at": "2026-07-13T10:05:14Z",
+      "fetched_at": "2026-07-14T02:28:53Z",
       "fields": [
         "15_events.recent_news",
         "sec_submissions.recent.items"
@@ -56,7 +56,7 @@
         "match_method": "SEC CIK+ticker+Item3.01+Nasdaq Rule 5250(c)(1)",
         "resolution_signal": "now_complies_and_matter_closed"
       },
-      "age_days": 584,
+      "age_days": 585,
       "severity_label_zh": "P1 重大风险升级"
     },
     {
@@ -64,7 +64,7 @@
       "url": "https://www.sec.gov/Archives/edgar/data/1375365/000137536524000042/smci-20241114.htm",
       "title": "Super Micro Computer, Inc. (SMCI) 8-K Item 3.01: Notice of Delisting or Failure to Satisfy a Continued Listing Rule",
       "published_at": "2024-11-20",
-      "fetched_at": "2026-07-13T10:05:14Z",
+      "fetched_at": "2026-07-14T02:28:53Z",
       "fields": [
         "15_events.recent_news",
         "sec_submissions.recent.items"
@@ -99,7 +99,7 @@
         "match_method": "SEC CIK+ticker+Item3.01+Nasdaq Rule 5250(c)(1)",
         "resolution_signal": "now_complies_and_matter_closed"
       },
-      "age_days": 600,
+      "age_days": 601,
       "severity_label_zh": "P1 重大风险升级"
     },
     {
@@ -107,7 +107,7 @@
       "url": "https://www.sec.gov/Archives/edgar/data/1375365/000137536524000040/smci-20241118.htm",
       "title": "Super Micro Computer, Inc. (SMCI) 8-K Item 4.01: Changes in Registrant's Certifying Accountant",
       "published_at": "2024-11-18",
-      "fetched_at": "2026-07-13T10:05:14Z",
+      "fetched_at": "2026-07-14T02:28:53Z",
       "fields": [
         "15_events.recent_news",
         "sec_submissions.recent.items"
@@ -124,7 +124,7 @@
       "source_record_id": "0001375365-24-000040",
       "canonical_event_id": "sec_submissions:0001375365-24-000040",
       "resolution_status": "unknown",
-      "age_days": 602,
+      "age_days": 603,
       "severity_label_zh": "P1 重大风险升级"
     },
     {
@@ -132,7 +132,7 @@
       "url": "https://www.sec.gov/Archives/edgar/data/1375365/000137536524000036/smci-20241024.htm",
       "title": "Super Micro Computer, Inc. (SMCI) 8-K Item 4.01: Changes in Registrant's Certifying Accountant",
       "published_at": "2024-10-30",
-      "fetched_at": "2026-07-13T10:05:14Z",
+      "fetched_at": "2026-07-14T02:28:53Z",
       "fields": [
         "15_events.recent_news",
         "sec_submissions.recent.items"
@@ -149,7 +149,7 @@
       "source_record_id": "0001375365-24-000036",
       "canonical_event_id": "sec_submissions:0001375365-24-000036",
       "resolution_status": "unknown",
-      "age_days": 621,
+      "age_days": 622,
       "severity_label_zh": "P1 重大风险升级"
     },
     {
@@ -157,7 +157,7 @@
       "url": "https://www.sec.gov/Archives/edgar/data/1375365/000137536524000033/smci-20240917.htm",
       "title": "Super Micro Computer, Inc. (SMCI) 8-K Item 3.01: Notice of Delisting or Failure to Satisfy a Continued Listing Rule",
       "published_at": "2024-09-20",
-      "fetched_at": "2026-07-13T10:05:14Z",
+      "fetched_at": "2026-07-14T02:28:53Z",
       "fields": [
         "15_events.recent_news",
         "sec_submissions.recent.items"
@@ -192,7 +192,7 @@
         "match_method": "SEC CIK+ticker+Item3.01+Nasdaq Rule 5250(c)(1)",
         "resolution_signal": "now_complies_and_matter_closed"
       },
-      "age_days": 661,
+      "age_days": 662,
       "severity_label_zh": "P1 重大风险升级"
     }
   ],
@@ -368,11 +368,11 @@
     }
   ],
   "errors": [],
-  "fetched_at": "2026-07-13T10:05:10Z",
-  "as_of": "2026-07-13",
+  "fetched_at": "2026-07-14T02:28:50Z",
+  "as_of": "2026-07-14",
   "lookback_days": 730,
   "performance": {
-    "elapsed_sec": 7.756
+    "elapsed_sec": 6.872
   },
   "guardrails": [
     "online evidence is frozen before branch comparison",
