@@ -583,6 +583,21 @@ builder 当前只自动识别 Nasdaq Rule `5250(c)(1)` 周期报告合规主题�
 
 合成用例仍保留，但用途只限于无法安全在线制造的攻击边界，例如跨 CIK、同 URL 自引用、未来解决记录和伪造官方字段；它们不替代上述真实数据效果验证。
 
+### 2026-07-14 真实运行数据契约复验
+
+本轮不使用合成数据来宣称 fetch 层收益，而是直接调用项目 venv 中的当前数据源：
+
+| 真实输入 | 修复前/风险 | 修复后硬边界 |
+|---|---|---|
+| `600519.SH` 东财现金流 | `NETCASH_OPERATE` 无法识别，OCF 静默为空 | 2026Q1 `269.1亿`只作最新披露；2025 年报 OCF `615.22亿` 只与 2025 净利计算 `0.75` |
+| `688017.SH` 实时估值 | 缺行业时容易把跨行业参考解读为同行 | `industry_pe=—`；cninfo `33.2` 只是 market reference；DCF 明示标记净利代理输入 |
+| `600519.SH` 基金持仓 | 环境变量可将几百家基金全部升级为网络富化 | 真实 `993` 源行/`671` 主动基金列表保留；完整统计默认上限 `50`，无界仅能显式 opt-in |
+| `510300.SH` / `110011` | 证券类型错路由可重新触发成分股批量分析 | 实时识别 ETF/开放式基金并返回真实持仓；root pipeline 以无 traceback 的预期分流退回 legacy |
+
+官方事件也以 `as_of=2026-07-14` 重抓 SMCI/HUBG/AAPL。新证据没有满足新事件族的终态门槛，因此不扩大解决态 taxonomy：SMCI Item 4.01 继续 unknown，HUBG Item 4.02/3.01 继续 active/unknown，AAPL 继续 gap。
+
+最终报告为 `local-ops/state/branch-score-compare/20260714-live-data-contract-final.md`。baseline=`55580d0`，candidate=本轮代码树；`64 raw + 7 synthetic = 71`，分布为 core `10`、holdout `6`、official overlay `32`、synthetic raw `16`、synthetic feature `7`。结果 `71 ok / 0 review / 0 possible_regression`，评分和档位变化均为零。三轮纯评分中位数 `2.186s -> 2.177s`，无性能告警，只判定为持平。
+
 ### 在线、离线与 Agent 分工
 
 最佳结构不是“来源越多越好”，而是“每个独立权威层至少一个稳定主源，镜像只增强溯源、不重复加权”：

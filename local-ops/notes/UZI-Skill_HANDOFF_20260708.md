@@ -1,5 +1,17 @@
 # UZI-Skill 交接记录 - 2026-07-08
 
+## 2026-07-14 真实数据契约收口
+
+- 正式分支仍为 `codex/scoring-validation-guardrails`；代码检查点 `952342d`。个人 origin 是唯一 push 目标；upstream push 必须继续 `DISABLED`，不操作原作者 PR，不修改 `codex/windows-local-stable`。
+- 真实 `600519.SH` 暴露当前东财 OCF 字段 `NETCASH_OPERATE`；旧逻辑静默为空。修复后 2026Q1 OCF `269.1亿`，2025 年报 `615.22亿`，同年 OCF/净利 `0.75`；季度与年度不再混除，OCF 不再被当作 FCF。
+- 真实 `688017.SH` 缺行业时保持 `industry_pe=—`，跨行业 `33.2` 只披露为 market reference；DCF 明示标记为净利×0.8 代理，不是财报 FCF/OCF。
+- 真实 `600519.SH` 基金源为 `993` 行/`671` 主动/`322` 被动；lite 全列表保留，完整统计默认 hard cap `50`，无界扩展必须显式 opt-in。`510300.SH` 和 `110011` 真实识别/持仓路由通过；`run.py 110011` 以退出码 0 无 traceback 分流到 legacy。
+- SMCI/HUBG/AAPL 官方 overlay 已刷新到 `2026-07-14`。没有新的精确终局证据，因此没有扩展生命周期规则：Item 4.01、4.02、HUBG 3.01 继续不解除风险，AAPL gap 不被推断为安全。
+- 验证总计 `156/156` direct tests，`py_compile`、`git diff --check`、lite/medium 缓存篮子全通过；未重装、未跑 deep、未运行 update。
+- 最终对照报告 `local-ops/state/branch-score-compare/20260714-live-data-contract-final.md`：`71 ok / 0 review / 0 possible_regression`，所有分数和交易档位变化为 0。三轮纯评分中位数 `2.186s -> 2.177s`，无性能回退。
+- 建议合回/保留：当前就是正式评分分支，建议保留并推送本次修复；不需要对 `codex/windows-local-stable` 做历史参考对照。公正效果评分 `9.5/10`。
+- 下一步不调分、不扩关键词。只有出现精确 issuer+精确 case/rule topic+官方终局语言时，才 shadow 扩展另一生命周期事件族。推荐 `GPT-5.6 Sol`，`高推理`。
+
 ## 2026-07-13 官方事件解决态闭环
 
 - 实现检查点 `f8f235b`；真实 SEC 生命周期把 SMCI 2024 年 3 条 Nasdaq Rule `5250(c)(1)` 记录关联到 2025-02-26 官方 closed 记录，两个 Item 4.01 仍 active。

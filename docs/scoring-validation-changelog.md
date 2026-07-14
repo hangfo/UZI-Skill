@@ -2,6 +2,21 @@
 
 > 当前文档记录 `codex/scoring-validation-guardrails` 分支上的评分验证、branch-vs-branch harness、证据冻结与文档治理改动。它是开发追溯文档，不是 agent 指令入口；影响 agent 行为的规则仍以 `AGENTS.md` 和相关 harness 文档为准。
 
+## 2026-07-14
+
+### `952342d` · 真实数据契约补齐与长循环硬边界
+
+- 用当日真实东财/AkShare 返回发现 OCF schema 已漂移为 `NETCASH_OPERATE`；旧实现会静默返回空 OCF，且有将最新季度 OCF 除以最新年度净利的虚假期间精度风险。新契约同时兼容中英字段、按报告日排序、区分季报/年报，并只在同一财年年报 OCF 与净利间计算现金含量。
+- 真实 `600519.SH` 回放：修复前 OCF 为空；修复后最新 2026Q1 OCF `269.1亿`，2025 年度 OCF `615.22亿`，与同年净利的比率 `0.75`。输出明确为 OCF，没有创建 `fcf` 或 `fcf_margin`。
+- 估值输出增加来源、匹配方法和输入行业诊断；缺行业时 cninfo 跨行业参考仍不写入 `industry_pe`。真实 `688017.SH` 返回 PE `505.59`、PB `19.58`、`industry_pe=—`，市场 PE 参考 `33.2` 仅披露。既有 DCF 公式未调参，但现明示标记为 `净利×0.8` 代理输入，不得解读为实测 FCF/OCF 或精确内在价值。
+- 真实 `600519.SH` 基金持仓源返回 `993` 行：`671` 个主动基金进入 lite 列表，`322` 个被动/指数基金过滤，零完整统计网络调用时 `0.746s`。新增默认 hard cap `50`、worker 上限 `8` 和调用预算诊断；只有显式 `UZI_FUND_ALLOW_UNBOUNDED_STATS=1` 才能越过上限，从控制面阻断 859/993 式长循环回归。
+- 真实证券路由：`510300.SH` 识别为 ETF 并返回 10 个真实持仓；`110011` 识别为开放式基金并返回 10 个真实持仓。root `run.py 110011 --depth lite --no-open-report` 现以专用 `PipelineFallback` 预期分流到 legacy，退出码 `0`、无 traceback，且没有启动股票 pipeline。
+- 官方事件 overlay 刷新至 `as_of=2026-07-14`：SMCI 仍只有 Rule `5250(c)(1)` 明确闭环，两条 Item 4.01 仍 unknown；HUBG 的 Item 4.02/3.01 均未闭环；AAPL 仍为 gap。因没有新的精确 issuer+同规则/事件族+官方终局语句，本轮刻意不扩展生命周期关键词。
+- 验证：`py_compile` 和 `git diff --check` 通过；scoring `36/36`、branch harness `35/35`、builder `28/28`、flow `18/18`、school `9/9`、registry `6/6`、fund runner `7/7`、fund lite/rendering `11/11`、mutual-fund classification `6/6`，共 `156/156`；lite/medium 缓存篮子通过。未重装、未跑 deep、未运行 update。
+- 最终中立对照 baseline=`55580d0`、candidate=本次代码树：`64 raw + 7 synthetic = 71`，分布为 core `10`、holdout `6`、official overlays `32`、synthetic raw `16`、synthetic feature `7`。结果 `71 ok / 0 review / 0 possible_regression`，所有评分与交易档位变化均为 `0`。
+- 纯评分三轮 baseline/candidate 为 `2.186/2.645s`、`2.151/2.085s`、`2.192/2.177s`；中位数 `2.186/2.177s`，候选约快 `0.4%`，三轮均无性能告警，中立结论为性能持平。
+- 公正效果评分 `9.5/10`：本轮关闭了前次三个真实网络残余风险中的 OCF/估值和基金长列表，且评分边界零漂移。扣分项是 DCF 仍只是已明示披露的简化代理，以及未建立真实公网 Cloudflare tunnel（避免在验证中无必要暴露本地报告）。
+
 ## 2026-07-13
 
 ### `f8f235b` · 官方事件解决态闭环与真实 SEC 生命周期复验
