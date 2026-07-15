@@ -1,5 +1,14 @@
 # UZI-Skill 交接记录 - 2026-07-08
 
+## 2026-07-15 A/US/HK 真实 shadow 与估值安全收口
+
+- 隔离分支 `codex/scoring-validation-real-shadow-hardening`，实现提交 `a21e554`，基线 `1e9ccd9`。正式 `codex/scoring-validation-guardrails` 与 `codex/windows-local-stable` 均未修改；只能 push 个人 origin，upstream push 继续 `DISABLED`。
+- 10 个真实标的年度 FCF shadow 已保存到 `local-ops/state/valuation-shadow/20260715-a-us-hk/`。低归一化风险只出现在 600519 和 AAPL 的 shadow 诊断，但二者仍分别缺生产净债务桥和非 A 市场折现率契约；不能据此启用生产 DCF。金融机构 601318/JPM/00005、负 FCF MSTR/09988、波动/符号翻转 300750/AMZN，以及 HK 跨币种均被明确 gate。
+- 生产 DCF 移除全部利润/收入/市值代理，要求真实正 FCF、非金融机构、债务现金桥、可靠股数、币种一致和已验证市场 WACC；失败原因进入 report/self-review。结构化 P0/P1 同时校验 published/as-of/age，伪造或缺失时间信息不再触发硬决策。
+- 真实 600519 基金 medium：993 源行、671 主动、20 full、651 lite、40 次预算上限、18.548 秒；无 859/993 无界循环。真实 AAPL 生产链复验得到 314.86 美元、46244.6081 亿美元市值、146.874 亿股且交叉校验通过；当次 financial endpoint 未返回可消费 FCF，且非 A WACC 未验证，因此安全拒绝 DCF。
+- 验证为 `171/171` direct tests、`py_compile`、`git diff --check`、lite/medium 缓存篮子通过。正式 frozen report：`local-ops/state/branch-score-compare/20260715-real-shadow-hardening-final.md`，`71 ok / 0 review / 0 possible_regression`，分数与档位变化全为 0。三轮纯评分中位数 `3.985s -> 3.259s`，只判定无性能回退。
+- 建议：将本隔离分支的 fail-closed、单位/币种和事件时间契约合回正式评分分支；暂不吸收多年 FCF 归一化、FCFF/FCFE 或跨市场 WACC 参数。下一阶段先补可审计 A/HK balance-sheet 与 FX 桥，再做只读 shadow。推荐 `GPT-5.6 Sol` + `高推理`。
+
 ## 2026-07-14 现金流量表 FCF 与 DCF 口径收口
 
 - 正式分支 `codex/scoring-validation-guardrails`；代码检查点 `ea00a73`。只允许 push 个人 origin，upstream push 仍必须 `DISABLED`，`codex/windows-local-stable` 不修改。

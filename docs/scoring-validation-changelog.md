@@ -2,6 +2,20 @@
 
 > 当前文档记录 `codex/scoring-validation-guardrails` 分支上的评分验证、branch-vs-branch harness、证据冻结与文档治理改动。它是开发追溯文档，不是 agent 指令入口；影响 agent 行为的规则仍以 `AGENTS.md` 和相关 harness 文档为准。
 
+## 2026-07-15
+
+### `a21e554` · A/US/HK 真实估值 shadow 与 DCF fail-closed 契约
+
+- 从稳定检查点 `1e9ccd9` 建立隔离分支 `codex/scoring-validation-real-shadow-hardening`；没有改写正式评分分支、`codex/windows-local-stable` 或 upstream。三名只读裁判分别复核估值语义、跨市场真实数据和对抗边界。
+- 真实 shadow 共 10 个标的：A 股 `600519/300750/601318`，US `AAPL/AMZN/MSTR/JPM`，HK `00700/09988/00005`。保存财报年度 FCF、最新值、3Y/5Y 中位数、MAD、符号翻转、财报/报价币种和生产硬门槛；不把 shadow 多年归一化直接写入生产模型。
+- 最新/3Y 中位数（亿）：600519 `583.95/639.73`、300750 `908.75/658.10`、601318 `6502.77/3757.96`；AAPL `987.67/995.84`、AMZN `76.95/322.17`、MSTR `-225.80/-221.39`、JPM `-1477.82/-420.12`；腾讯 `1901.71/1745.55`、阿里 `-507.24/775.37`、汇丰 `251.05/354.16`。
+- 生产 DCF 现必须同时满足：明确非代理 FCF、正 FCF、非金融机构、债务/现金股权桥、有效股数及市值交叉校验、现金流/报价同币种；非 A 市场还必须显式提供已验证市场折现率契约。任一缺失即返回可审计原因，不再用净利×0.8、收入×利润率或市值×5%制造估值。十个真实样本当前均至少触发一项生产 gate，因此 `0/10` 直接生成内在价值，这是安全拒绝而非评分降级。
+- US 旧缓存裸数市值统一换算为亿元，显式 `market_cap_yi` 与“亿”字符串保持原口径；股数优先取 provider 明确字段，衍生股数必须通过市值/价格 10% 交叉校验。报告显示 fail-closed 原因；`terminal growth >= WACC` 直接拒绝。
+- 结构化 P0/P1 事件增加 published/as-of/age 三者一致性校验，缺日期、自报 age、伪造 age、未来或过期记录不能进入硬门槛；P2、resolved 和 counterfactual 非伤害边界保持不变。真实基金 medium 补验为 `993` 源行、`671` 主动、`20` full、`651` lite，预算上限 `40` 次网络调用、`18.548s`，没有恢复 859/993 无界循环。
+- 验证：项目 venv 无 pytest且未安装依赖；新增 stdlib direct runner，专项/评分/harness/overlay/US/fund/school/registry 合计 `171/171`。`py_compile`、`git diff --check`、真实 lite/medium 缓存篮子通过；未重装、未跑 deep、未运行 update。
+- 冻结分支对照 baseline=`1e9ccd9`、candidate=`a21e554`：`64 raw + 7 synthetic = 71` 个 lite/medium 配对结论，`71 ok / 0 review / 0 possible_regression`；所有分数变化与交易档位变化均为 `0`。三轮交换顺序纯评分耗时：基线 `5.546/3.007/3.985s`（中位 `3.985s`），候选 `3.658/3.005/3.259s`（中位 `3.259s`），无性能告警；只判定无回退。
+- 公正效果评分 `9.4/10`：收益来自阻断伪精确估值、补齐跨市场单位/币种/金融机构边界，同时纯评分零漂移。扣分项是生产链尚未具备完整 FCFF/FCFE 分类、A 股债务/现金桥、HK FX 桥和 US/HK 市场 WACC 参数，因此建议吸收 fail-closed 修复，但不要把多年归一化或新估值参数合回正式评分分支。
+
 ## 2026-07-14
 
 ### `ea00a73` · 现金流量表 FCF 取代净利代理并可见披露
