@@ -197,6 +197,7 @@ def _apply_operating_cash_flow(out: dict, df_cf) -> None:
             out["free_cash_flow_period"] = latest_fcf_year
             out["free_cash_flow_basis"] = "reported_ocf_minus_cash_paid_for_long_term_assets"
             out["free_cash_flow_is_derived"] = True
+            out["free_cash_flow_currency"] = "CNY"
             out["free_cash_flow_source_fields"] = {
                 "operating_cash_flow": value_col,
                 "cash_capex": capex_col,
@@ -273,7 +274,7 @@ def _apply_us_free_cash_flow(out: dict, cashflow, currency: str = "USD") -> None
     out["free_cash_flow_history_years"] = [record["period"][:4] for record in records]
     out["free_cash_flow_history"] = [record["value_yi"] for record in records]
     out["free_cash_flow_basis"] = latest["basis"]
-    out["free_cash_flow_is_derived"] = True
+    out["free_cash_flow_is_derived"] = latest["basis"] != "yfinance_cashflow_free_cash_flow"
     out["free_cash_flow_currency"] = currency
     out["free_cash_flow_source_fields"] = {
         "free_cash_flow": fcf_row or "",
@@ -676,10 +677,16 @@ def main(ticker: str) -> dict:
         error = f"{type(e).__name__}: {e}"
         traceback.print_exc(file=sys.stderr)
 
+    source = {
+        "A": "akshare:stock_financial_abstract + indicator + cash_flow + dividend_detail",
+        "H": "akshare:stock_financial_hk_analysis_indicator_em",
+        "U": "yfinance:financials + cashflow + balance_sheet + info",
+        "G": "yfinance:financials + cashflow + balance_sheet + info",
+    }.get(ti.market, "unknown")
     return {
         "ticker": ti.full,
         "data": data,
-        "source": "akshare:stock_financial_abstract + indicator + cash_flow + dividend_detail",
+        "source": source,
         "fallback": not bool(data),
         "error": error,
     }

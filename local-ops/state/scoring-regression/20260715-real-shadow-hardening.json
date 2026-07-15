@@ -1,0 +1,530 @@
+{
+  "generated_at": "2026-07-15 10:13:26 +0800",
+  "basket": [
+    {
+      "mode": "lite",
+      "ticker": "600519.SH",
+      "role": "A-share quality/value control",
+      "overall_score": 52.2,
+      "investment_score": 59,
+      "investment_rating": "谨慎观察",
+      "verdict_label": "观望偏空 · 5 派看空",
+      "fundamental_score": 61.9,
+      "panel_consensus": 37.7,
+      "axes": {
+        "quality": 94.0,
+        "growth": 34.0,
+        "catalyst": 42.0,
+        "valuation": 70.0,
+        "risk_control": 71.0
+      },
+      "diagnostics": {
+        "market": "A",
+        "pe": 13.71,
+        "pb": 5.39,
+        "roe": 32.58,
+        "net_margin": 47.8,
+        "rev_growth": 10.490150165985046,
+        "profit_growth": -4.532170524655556,
+        "stage_num": 4,
+        "ytd_return": -11.0,
+        "volatility": 20.6,
+        "max_drawdown": -23.5,
+        "market_cap_yi": 14937.98,
+        "guardrails": {
+          "speculative_quality_risk_cap": false,
+          "valuation_risk_cap": false,
+          "quality_floor_eligible": true,
+          "falling_trend_cap": true,
+          "buyback_distorted_pb": false
+        }
+      }
+    },
+    {
+      "mode": "lite",
+      "ticker": "00700.HK",
+      "role": "HK platform quality control",
+      "overall_score": 51.0,
+      "investment_score": 59,
+      "investment_rating": "谨慎观察",
+      "verdict_label": "观望偏空 · 1 派看多 / 5 派看空",
+      "fundamental_score": 59.9,
+      "panel_consensus": 37.6,
+      "axes": {
+        "quality": 88.0,
+        "growth": 40.0,
+        "catalyst": 42.0,
+        "valuation": 60.0,
+        "risk_control": 61.0
+      },
+      "diagnostics": {
+        "market": "HK",
+        "pe": 14.890150058587,
+        "pb": 3.065236777546,
+        "roe": 22.476,
+        "net_margin": 29.9,
+        "rev_growth": 10.674304478103402,
+        "profit_growth": 15.854343468694774,
+        "stage_num": 4,
+        "ytd_return": -30.2,
+        "volatility": 30.2,
+        "max_drawdown": -38.5,
+        "market_cap_yi": 33941.6,
+        "guardrails": {
+          "speculative_quality_risk_cap": false,
+          "valuation_risk_cap": false,
+          "quality_floor_eligible": true,
+          "falling_trend_cap": true,
+          "buyback_distorted_pb": false
+        }
+      }
+    },
+    {
+      "mode": "lite",
+      "ticker": "AAPL",
+      "role": "US profitable mega-cap, valuation constrained",
+      "overall_score": 50.2,
+      "investment_score": 68,
+      "investment_rating": "观察",
+      "verdict_label": "观望偏空 · 1 派看多 / 4 派看空",
+      "fundamental_score": 61.5,
+      "panel_consensus": 33.3,
+      "axes": {
+        "quality": 91.0,
+        "growth": 64.2,
+        "catalyst": 50.0,
+        "valuation": 46.0,
+        "risk_control": 58.0
+      },
+      "diagnostics": {
+        "market": "US",
+        "pe": 34.35593,
+        "pb": 39.088154,
+        "roe": 141.5,
+        "net_margin": 26.9,
+        "rev_growth": 1.8125357434793932,
+        "profit_growth": 19.495177946573346,
+        "stage_num": 2,
+        "ytd_return": 41.7,
+        "volatility": 23.6,
+        "max_drawdown": -13.8,
+        "market_cap_yi": 41679.77926656,
+        "guardrails": {
+          "speculative_quality_risk_cap": false,
+          "valuation_risk_cap": false,
+          "quality_floor_eligible": true,
+          "falling_trend_cap": false,
+          "buyback_distorted_pb": true
+        }
+      }
+    },
+    {
+      "mode": "lite",
+      "ticker": "MSTR",
+      "role": "crypto-treasury volatility/risk control",
+      "overall_score": 38.0,
+      "investment_score": 34.3,
+      "investment_rating": "回避",
+      "verdict_label": "谨慎 · 8 派看空",
+      "fundamental_score": 54.6,
+      "panel_consensus": 13.1,
+      "axes": {
+        "quality": 32.0,
+        "growth": 7.0,
+        "catalyst": 42.0,
+        "valuation": 48.0,
+        "risk_control": 44.0
+      },
+      "diagnostics": {
+        "market": "US",
+        "pe": 0.0,
+        "pb": 0.7768686,
+        "roe": -30.8,
+        "net_margin": 0.0,
+        "rev_growth": -1.4917483564379608,
+        "profit_growth": -229.73436161096825,
+        "stage_num": 4,
+        "ytd_return": -78.7,
+        "volatility": 73.0,
+        "max_drawdown": -81.9,
+        "market_cap_yi": 294.4792576,
+        "guardrails": {
+          "speculative_quality_risk_cap": false,
+          "valuation_risk_cap": false,
+          "quality_floor_eligible": false,
+          "falling_trend_cap": true,
+          "buyback_distorted_pb": false
+        }
+      }
+    },
+    {
+      "mode": "lite",
+      "ticker": "AXTI",
+      "role": "speculative small-cap adversarial control",
+      "overall_score": 43.8,
+      "investment_score": 31.9,
+      "investment_rating": "回避",
+      "verdict_label": "谨慎 · 1 派看多 / 5 派看空",
+      "fundamental_score": 57.5,
+      "panel_consensus": 23.3,
+      "axes": {
+        "quality": 20.0,
+        "growth": 49.0,
+        "catalyst": 50.0,
+        "valuation": 30.0,
+        "risk_control": 13.0
+      },
+      "diagnostics": {
+        "market": "US",
+        "pe": 0.0,
+        "pb": 14.335721,
+        "roe": -5.0,
+        "net_margin": -14.7,
+        "rev_growth": -14.541646757977455,
+        "profit_growth": -75.0,
+        "stage_num": 2,
+        "ytd_return": 330.1,
+        "volatility": 139.4,
+        "max_drawdown": -51.0,
+        "market_cap_yi": 47.2,
+        "guardrails": {
+          "speculative_quality_risk_cap": true,
+          "valuation_risk_cap": true,
+          "quality_floor_eligible": false,
+          "falling_trend_cap": false,
+          "buyback_distorted_pb": false
+        }
+      }
+    },
+    {
+      "mode": "medium",
+      "ticker": "600519.SH",
+      "role": "A-share quality/value control",
+      "overall_score": 52.2,
+      "investment_score": 59,
+      "investment_rating": "谨慎观察",
+      "verdict_label": "观望偏空 · 5 派看空",
+      "fundamental_score": 61.9,
+      "panel_consensus": 37.7,
+      "axes": {
+        "quality": 94.0,
+        "growth": 34.0,
+        "catalyst": 42.0,
+        "valuation": 70.0,
+        "risk_control": 71.0
+      },
+      "diagnostics": {
+        "market": "A",
+        "pe": 13.71,
+        "pb": 5.39,
+        "roe": 32.58,
+        "net_margin": 47.8,
+        "rev_growth": 10.490150165985046,
+        "profit_growth": -4.532170524655556,
+        "stage_num": 4,
+        "ytd_return": -11.0,
+        "volatility": 20.6,
+        "max_drawdown": -23.5,
+        "market_cap_yi": 14937.98,
+        "guardrails": {
+          "speculative_quality_risk_cap": false,
+          "valuation_risk_cap": false,
+          "quality_floor_eligible": true,
+          "falling_trend_cap": true,
+          "buyback_distorted_pb": false
+        }
+      }
+    },
+    {
+      "mode": "medium",
+      "ticker": "00700.HK",
+      "role": "HK platform quality control",
+      "overall_score": 51.0,
+      "investment_score": 59,
+      "investment_rating": "谨慎观察",
+      "verdict_label": "观望偏空 · 1 派看多 / 5 派看空",
+      "fundamental_score": 59.4,
+      "panel_consensus": 38.5,
+      "axes": {
+        "quality": 92.0,
+        "growth": 40.0,
+        "catalyst": 42.0,
+        "valuation": 60.0,
+        "risk_control": 61.0
+      },
+      "diagnostics": {
+        "market": "HK",
+        "pe": 14.890150058587,
+        "pb": 3.065236777546,
+        "roe": 22.476,
+        "net_margin": 29.9,
+        "rev_growth": 10.674304478103402,
+        "profit_growth": 15.854343468694774,
+        "stage_num": 4,
+        "ytd_return": -30.2,
+        "volatility": 30.2,
+        "max_drawdown": -38.5,
+        "market_cap_yi": 33941.6,
+        "guardrails": {
+          "speculative_quality_risk_cap": false,
+          "valuation_risk_cap": false,
+          "quality_floor_eligible": true,
+          "falling_trend_cap": true,
+          "buyback_distorted_pb": false
+        }
+      }
+    },
+    {
+      "mode": "medium",
+      "ticker": "AAPL",
+      "role": "US profitable mega-cap, valuation constrained",
+      "overall_score": 50.2,
+      "investment_score": 68,
+      "investment_rating": "观察",
+      "verdict_label": "观望偏空 · 1 派看多 / 4 派看空",
+      "fundamental_score": 61.5,
+      "panel_consensus": 33.3,
+      "axes": {
+        "quality": 91.0,
+        "growth": 64.2,
+        "catalyst": 50.0,
+        "valuation": 46.0,
+        "risk_control": 58.0
+      },
+      "diagnostics": {
+        "market": "US",
+        "pe": 34.35593,
+        "pb": 39.088154,
+        "roe": 141.5,
+        "net_margin": 26.9,
+        "rev_growth": 1.8125357434793932,
+        "profit_growth": 19.495177946573346,
+        "stage_num": 2,
+        "ytd_return": 41.7,
+        "volatility": 23.6,
+        "max_drawdown": -13.8,
+        "market_cap_yi": 41679.77926656,
+        "guardrails": {
+          "speculative_quality_risk_cap": false,
+          "valuation_risk_cap": false,
+          "quality_floor_eligible": true,
+          "falling_trend_cap": false,
+          "buyback_distorted_pb": true
+        }
+      }
+    },
+    {
+      "mode": "medium",
+      "ticker": "MSTR",
+      "role": "crypto-treasury volatility/risk control",
+      "overall_score": 37.8,
+      "investment_score": 35.5,
+      "investment_rating": "回避",
+      "verdict_label": "谨慎 · 8 派看空",
+      "fundamental_score": 54.2,
+      "panel_consensus": 13.1,
+      "axes": {
+        "quality": 36.0,
+        "growth": 7.0,
+        "catalyst": 42.0,
+        "valuation": 48.0,
+        "risk_control": 44.0
+      },
+      "diagnostics": {
+        "market": "US",
+        "pe": 0.0,
+        "pb": 0.7768686,
+        "roe": -30.8,
+        "net_margin": 0.0,
+        "rev_growth": -1.4917483564379608,
+        "profit_growth": -229.73436161096825,
+        "stage_num": 4,
+        "ytd_return": -78.7,
+        "volatility": 73.0,
+        "max_drawdown": -81.9,
+        "market_cap_yi": 294.4792576,
+        "guardrails": {
+          "speculative_quality_risk_cap": false,
+          "valuation_risk_cap": false,
+          "quality_floor_eligible": false,
+          "falling_trend_cap": true,
+          "buyback_distorted_pb": false
+        }
+      }
+    },
+    {
+      "mode": "medium",
+      "ticker": "AXTI",
+      "role": "speculative small-cap adversarial control",
+      "overall_score": 43.8,
+      "investment_score": 31.9,
+      "investment_rating": "回避",
+      "verdict_label": "谨慎 · 1 派看多 / 5 派看空",
+      "fundamental_score": 57.5,
+      "panel_consensus": 23.3,
+      "axes": {
+        "quality": 20.0,
+        "growth": 49.0,
+        "catalyst": 50.0,
+        "valuation": 30.0,
+        "risk_control": 13.0
+      },
+      "diagnostics": {
+        "market": "US",
+        "pe": 0.0,
+        "pb": 14.335721,
+        "roe": -5.0,
+        "net_margin": -14.7,
+        "rev_growth": -14.541646757977455,
+        "profit_growth": -75.0,
+        "stage_num": 2,
+        "ytd_return": 330.1,
+        "volatility": 139.4,
+        "max_drawdown": -51.0,
+        "market_cap_yi": 47.2,
+        "guardrails": {
+          "speculative_quality_risk_cap": true,
+          "valuation_risk_cap": true,
+          "quality_floor_eligible": false,
+          "falling_trend_cap": false,
+          "buyback_distorted_pb": false
+        }
+      }
+    }
+  ],
+  "adversarial": [
+    {
+      "case": "theme_only_microcap",
+      "scorecard": {
+        "score": 42.4,
+        "rating": "回避",
+        "axes": {
+          "quality": 38.0,
+          "growth": 49.0,
+          "catalyst": 78.0,
+          "valuation": 30.0,
+          "risk_control": 6.0
+        },
+        "weights": {
+          "quality": 0.3,
+          "growth": 0.17,
+          "catalyst": 0.22,
+          "valuation": 0.15,
+          "risk_control": 0.16
+        },
+        "diagnostics": {
+          "market": "US",
+          "pe": 0.0,
+          "pb": 18.0,
+          "roe": 0.0,
+          "net_margin": -18.0,
+          "rev_growth": -5.0,
+          "profit_growth": -40.0,
+          "stage_num": 2,
+          "ytd_return": 420.0,
+          "volatility": 150.0,
+          "max_drawdown": -65.0,
+          "market_cap_yi": 30.0,
+          "guardrails": {
+            "speculative_quality_risk_cap": true,
+            "valuation_risk_cap": true,
+            "quality_floor_eligible": false,
+            "falling_trend_cap": false,
+            "buyback_distorted_pb": false
+          }
+        }
+      }
+    },
+    {
+      "case": "quality_compounder_no_momentum",
+      "scorecard": {
+        "score": 59,
+        "rating": "谨慎观察",
+        "axes": {
+          "quality": 88.0,
+          "growth": 35.0,
+          "catalyst": 42.0,
+          "valuation": 60.0,
+          "risk_control": 66.0
+        },
+        "weights": {
+          "quality": 0.3,
+          "growth": 0.17,
+          "catalyst": 0.22,
+          "valuation": 0.15,
+          "risk_control": 0.16
+        },
+        "diagnostics": {
+          "market": "A",
+          "pe": 16.0,
+          "pb": 4.0,
+          "roe": 24.0,
+          "net_margin": 32.0,
+          "rev_growth": 6.0,
+          "profit_growth": 3.0,
+          "stage_num": 4,
+          "ytd_return": -12.0,
+          "volatility": 25.0,
+          "max_drawdown": -24.0,
+          "market_cap_yi": 9000.0,
+          "guardrails": {
+            "speculative_quality_risk_cap": false,
+            "valuation_risk_cap": false,
+            "quality_floor_eligible": true,
+            "falling_trend_cap": true,
+            "buyback_distorted_pb": false
+          }
+        }
+      }
+    },
+    {
+      "case": "expensive_profitable_platform",
+      "scorecard": {
+        "score": 61.4,
+        "rating": "观察",
+        "axes": {
+          "quality": 86.0,
+          "growth": 72.4,
+          "catalyst": 50.0,
+          "valuation": 20.0,
+          "risk_control": 58.0
+        },
+        "weights": {
+          "quality": 0.3,
+          "growth": 0.17,
+          "catalyst": 0.22,
+          "valuation": 0.15,
+          "risk_control": 0.16
+        },
+        "diagnostics": {
+          "market": "US",
+          "pe": 55.0,
+          "pb": 28.0,
+          "roe": 45.0,
+          "net_margin": 28.0,
+          "rev_growth": 12.0,
+          "profit_growth": 10.0,
+          "stage_num": 2,
+          "ytd_return": 35.0,
+          "volatility": 30.0,
+          "max_drawdown": -22.0,
+          "market_cap_yi": 30000.0,
+          "guardrails": {
+            "speculative_quality_risk_cap": false,
+            "valuation_risk_cap": false,
+            "quality_floor_eligible": false,
+            "falling_trend_cap": false,
+            "buyback_distorted_pb": false
+          }
+        }
+      }
+    }
+  ],
+  "stats": {
+    "count": 10,
+    "investment_score_min": 31.9,
+    "investment_score_max": 68.0,
+    "investment_score_stdev": 14.43
+  },
+  "failures": []
+}

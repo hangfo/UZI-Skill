@@ -1976,6 +1976,7 @@ def _finalize_negative_events(
         item["title"] = title
         item["published_at"] = published.isoformat()
         item["age_days"] = age_days
+        item["as_of_date"] = as_of.isoformat()
         item["official_source"] = bool(item.get("official_source")) and _is_official_event_url(url)
         if item.get("entity_match") not in {"exact", "unverified"}:
             item["entity_match"] = "unverified"

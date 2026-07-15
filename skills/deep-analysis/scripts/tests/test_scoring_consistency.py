@@ -722,6 +722,7 @@ def _official_event(severity="P1", **overrides):
         "canonical_event_id": "sec:event-1",
         "resolution_status": "unknown",
         "published_at": "2026-06-01",
+        "as_of_date": "2026-06-11",
         "age_days": 10,
     }
     item.update(overrides)
@@ -781,6 +782,32 @@ def test_structured_event_rejects_future_stale_and_non_numeric_age():
     assert event_dim["risk_contract"]["highest_active_severity"] is None
     assert event_dim["risk_contract"]["rejected_structured_count"] == 3
     assert event_dim["score"] >= 5
+
+
+def test_structured_p0_p1_requires_dated_asof_consistent_age():
+    from lib.pipeline.score_fns import score_dimensions
+
+    adversarial = [
+        _official_event(published_at=None, source_record_id="missing-published"),
+        _official_event(as_of_date=None, fetched_at=None, source_record_id="missing-asof"),
+        _official_event(
+            published_at="2010-01-01", as_of_date="2026-06-11",
+            age_days=10, source_record_id="forged-age",
+        ),
+    ]
+    raw = _make_raw(dims_override={"15_events": {"data": {"recent_news": adversarial}}})
+    event_dim = score_dimensions(raw)["dimensions"]["15_events"]
+    assert event_dim["risk_contract"]["highest_active_severity"] is None
+    assert event_dim["risk_contract"]["rejected_structured_count"] == 3
+
+
+def test_structured_p1_accepts_consistent_published_and_asof_dates():
+    from lib.pipeline.score_fns import score_dimensions
+
+    event = _official_event()
+    raw = _make_raw(dims_override={"15_events": {"data": {"recent_news": [event]}}})
+    event_dim = score_dimensions(raw)["dimensions"]["15_events"]
+    assert event_dim["risk_contract"]["highest_active_severity"] == "P1"
 
 
 def test_structured_p2_and_resolved_p1_are_review_only_not_positive_news():

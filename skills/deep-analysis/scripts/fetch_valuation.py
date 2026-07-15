@@ -40,6 +40,14 @@ def _finite_float_or_none(value: Any) -> float | None:
     return number if math.isfinite(number) else None
 
 
+def _is_financial_institution(industry: object) -> bool:
+    text = str(industry or "").lower()
+    return any(term in text for term in (
+        "银行", "保险", "证券", "券商", "信托", "bank", "insurance",
+        "capital markets", "brokerage", "financial conglomerate",
+    ))
+
+
 def _currency_prefix(currency: str) -> str:
     return {
         "CNY": "¥",
@@ -62,6 +70,12 @@ def simple_dcf(
     """5+5 阶段简易 DCF，永续增长。"""
     if fcf_latest <= 0:
         return {"intrinsic_value": None, "_note": "negative FCF, DCF not applicable"}
+    if wacc <= growth_terminal:
+        return {
+            "intrinsic_value": None,
+            "intrinsic_value_total": None,
+            "_note": "invalid terminal assumptions: WACC must exceed terminal growth",
+        }
     fcfs = []
     fcf = fcf_latest
     for y in range(1, years + 1):
@@ -222,7 +236,9 @@ def main(ticker: str) -> dict:
     dcf_input_is_proxy = False
     dcf_input_source_fields: dict = {}
     dcf_warning = ""
-    dcf_currency = str(basic.get("currency") or {"A": "CNY", "H": "HKD", "US": "USD"}.get(ti.market, ""))
+    dcf_unavailable_reason = ""
+    quote_currency = str(basic.get("currency") or {"A": "CNY", "H": "HKD", "U": "USD"}.get(ti.market, ""))
+    dcf_currency = quote_currency
     try:
         # Import our upgraded fetch_financials instead of the raw ds
         from fetch_financials import main as _fin_main
@@ -233,11 +249,12 @@ def main(ticker: str) -> dict:
             or fin_data.get("currency")
             or dcf_currency
         )
-        net_profit_hist = fin_data.get("net_profit_history", [])
-        net_profit_latest_yi = net_profit_hist[-1] if net_profit_hist else 0  # 亿元
         reported_fcf_yi = _finite_float_or_none(fin_data.get("free_cash_flow_yi"))
 
-        if reported_fcf_yi is not None:
+        if _is_financial_institution(basic.get("industry")):
+            dcf_unavailable_reason = "not_applicable_financial_institution"
+            dcf_warning = "银行、保险、券商等金融企业不适用普通 CFO-capex/WACC DCF"
+        elif reported_fcf_yi is not None:
             dcf_input_value_yi = reported_fcf_yi
             dcf_input_basis = str(fin_data.get("free_cash_flow_basis") or "cash_statement_free_cash_flow")
             dcf_input_period = str(fin_data.get("free_cash_flow_period") or "")
@@ -246,18 +263,12 @@ def main(ticker: str) -> dict:
                 "DCF 输入为现金流量表衍生 FCF；仍是简化增长/WACC 模型，"
                 "不代表精确内在价值"
             )
-        elif _finite_float_or_none(net_profit_latest_yi) is not None and float(net_profit_latest_yi) > 0:
-            dcf_input_value_yi = float(net_profit_latest_yi) * 0.8
-            dcf_input_basis = "net_profit_x_0_8_proxy_not_reported_fcf"
-            financial_years = fin_data.get("financial_years") or []
-            dcf_input_period = str(financial_years[-1]) if financial_years else ""
-            dcf_input_is_proxy = True
-            dcf_warning = "简化 DCF 使用净利润×0.8 代理现金流；非实测 FCF/OCF，不应解读为精确内在价值"
+        else:
+            dcf_unavailable_reason = str(fin_data.get("free_cash_flow_unavailable_reason") or "missing_explicit_fcf")
+            dcf_warning = "缺少显式现金流量表 FCF；禁止用净利润或市值代理制造内在价值"
 
         if dcf_input_value_yi is not None:
-            dcf_input_yuan = dcf_input_value_yi * 1e8
-            dcf_result = simple_dcf(fcf_latest=dcf_input_yuan)
-            dcf_result["input_contract"] = {
+            input_contract = {
                 "basis": dcf_input_basis,
                 "period": dcf_input_period,
                 "value_yi": round(dcf_input_value_yi, 2),
@@ -265,6 +276,16 @@ def main(ticker: str) -> dict:
                 "source_fields": dcf_input_source_fields,
                 "warning": dcf_warning,
             }
+            if dcf_currency and quote_currency and dcf_currency != quote_currency:
+                dcf_unavailable_reason = "cashflow_quote_currency_mismatch_requires_fx"
+                dcf_warning = "现金流本位币与报价币种不同；缺少带日期 FX 证据，DCF 关闭"
+                input_contract["warning"] = dcf_warning
+                dcf_result = {"available": False, "reason": dcf_unavailable_reason, "input_contract": input_contract}
+            else:
+                dcf_input_yuan = dcf_input_value_yi * 1e8
+                dcf_result = simple_dcf(fcf_latest=dcf_input_yuan)
+                dcf_result["available"] = dcf_result.get("intrinsic_value_total") is not None
+                dcf_result["input_contract"] = input_contract
             current_price = basic.get("price") or 0
             total_shares = basic.get("total_shares") or 0
             if not total_shares:
@@ -272,15 +293,16 @@ def main(ticker: str) -> dict:
                 mcap_raw = basic.get("market_cap_raw") or 0
                 if current_price and mcap_raw:
                     total_shares = mcap_raw / current_price
-            total_shares = total_shares or 1e9
-            if dcf_input_yuan > 0:
+            if not dcf_unavailable_reason and dcf_input_value_yi > 0 and total_shares:
                 dcf_sensitivity = dcf_sensitivity_matrix(
-                    fcf_latest=dcf_input_yuan,
+                    fcf_latest=dcf_input_value_yi * 1e8,
                     waccs=[8, 9, 10, 11, 12],
                     growths=[6, 8, 10, 12],
                     current_price=current_price,
                     shares_out=total_shares,
                 )
+        else:
+            dcf_result = {"available": False, "reason": dcf_unavailable_reason}
     except Exception as e:
         dcf_result = {"error": str(e)[:80]}
 
@@ -314,6 +336,8 @@ def main(ticker: str) -> dict:
             "dcf_input_source_fields": dcf_input_source_fields,
             "dcf_currency": dcf_currency,
             "dcf_warning": dcf_warning,
+            "dcf_available": bool(iv_total),
+            "dcf_unavailable_reason": dcf_unavailable_reason,
             "pe_history": pe_history,
             "dcf_simple": dcf_result,
             "dcf_sensitivity": dcf_sensitivity,

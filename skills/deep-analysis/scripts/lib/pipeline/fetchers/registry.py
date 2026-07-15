@@ -89,6 +89,10 @@ FETCHER_REGISTRY: dict[str, type] = {
         optional=[
             "gross_margin", "revenue_growth", "financial_health",
             "ocf", "ocf_history", "ocf_to_net_income_ratio",
+            "free_cash_flow_yi", "free_cash_flow_history",
+            "free_cash_flow_history_years", "free_cash_flow_basis",
+            "free_cash_flow_period", "free_cash_flow_currency",
+            "free_cash_flow_source_fields",
         ],
         args_fn=lambda t, r: (t,),
     ),

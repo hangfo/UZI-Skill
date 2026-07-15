@@ -13,7 +13,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from lib.market_router import is_global_listing_symbol
+from lib.market_router import is_global_listing_symbol, parse_ticker
 
 
 def _f(v, default=0.0) -> float:
@@ -65,6 +65,41 @@ def _min(values: list, default: float = 0.0) -> float:
     return min(vals) if vals else default
 
 
+def _market_cap_yi(basic: dict) -> tuple[float, str]:
+    """Normalize market cap to 100m quote-currency units with provenance.
+
+    Current fetchers normally expose a string such as ``46244.6亿`` plus a
+    raw currency-unit value.  Older real caches for US listings can contain
+    only the raw numeric value; treating that number as already being in 亿
+    inflates market cap and inferred shares by 1e8.
+    """
+    explicit = basic.get("market_cap_yi")
+    if explicit not in (None, ""):
+        return _f(explicit), "market_cap_yi"
+
+    value = basic.get("market_cap")
+    if isinstance(value, str) and ("亿" in value or "浜?" in value):
+        return _f(value), "market_cap_display_yi"
+
+    raw = basic.get("market_cap_raw")
+    if raw in (None, ""):
+        raw = value
+    parsed = _f(raw)
+    if abs(parsed) >= 10_000_000:
+        return parsed / 1e8, "market_cap_raw_currency_units"
+    return parsed, "market_cap_assumed_yi"
+
+
+def _is_financial_institution(industry: object, sector: object = None) -> bool:
+    """Conservative DCF exclusion for deposit/lending/risk-underwriting firms."""
+    text = f"{industry or ''} {sector or ''}".lower()
+    terms = (
+        "银行", "保险", "证券", "券商", "信托", "bank", "insurance",
+        "capital markets", "brokerage", "financial conglomerate",
+    )
+    return any(term in text for term in terms)
+
+
 def extract_features(raw: dict, dims: dict) -> dict:
     """Extract ~60 features for criteria evaluation.
 
@@ -100,11 +135,17 @@ def extract_features(raw: dict, dims: dict) -> dict:
 
     # ─────────────── BASIC / PRICE ───────────────
     f["code"] = basic.get("code") or raw.get("ticker")
+    try:
+        market = parse_ticker(str(f["code"] or raw.get("ticker") or "")).market
+    except Exception:
+        market = "G"
+    f["market"] = market
     f["name"] = basic.get("name") or "—"
     f["industry"] = basic.get("industry") or "—"
+    f["sector"] = basic.get("sector") or ""
     f["price"] = _f(basic.get("price"))
     f["change_pct"] = _f(basic.get("change_pct"))
-    f["market_cap_yi"] = _f(str(basic.get("market_cap", "0")).replace("亿", ""))
+    f["market_cap_yi"], f["market_cap_basis"] = _market_cap_yi(basic)
     f["circulating_cap_yi"] = _f(str(basic.get("circulating_cap", "0")).replace("亿", ""))
     f["listed_date"] = str(basic.get("listed_date", ""))[:10]
     f["chairman"] = basic.get("chairman") or "—"
@@ -353,21 +394,50 @@ def extract_features(raw: dict, dims: dict) -> dict:
     # Shares outstanding in 亿股 — derived from market_cap / price
     mcap = _f(f.get("market_cap_yi"), 0)
     px = _f(f.get("price"), 0)
-    f["shares_outstanding_yi"] = round(mcap / px, 3) if px > 0 else 0
+    derived_shares_yi = mcap / px if px > 0 else 0
+    supplier_shares = _f(basic.get("total_shares"), 0)
+    supplier_shares_yi = supplier_shares / 1e8 if supplier_shares >= 1_000_000 else supplier_shares
+    f["shares_outstanding_yi"] = round(supplier_shares_yi or derived_shares_yi, 3)
+    f["shares_outstanding_basis"] = (
+        str(basic.get("total_shares_source") or "basic.total_shares")
+        if supplier_shares_yi else "market_cap_yi_div_price"
+    )
+    if supplier_shares_yi and derived_shares_yi:
+        share_gap = abs(supplier_shares_yi - derived_shares_yi) / supplier_shares_yi
+        f["shares_crosscheck_gap_pct"] = round(share_gap * 100, 2)
+        f["shares_crosscheck_ok"] = share_gap <= 0.10
+    else:
+        f["shares_crosscheck_gap_pct"] = None
+        f["shares_crosscheck_ok"] = True
     # EPS = net_income / shares
     latest_ni = _last(fin.get("net_profit_history") or [])
     f["eps"] = round(latest_ni / f["shares_outstanding_yi"], 3) if f["shares_outstanding_yi"] > 0 else 0
     # BVPS = equity / shares
     eq = _f(f.get("equity_yi"), 0)
     f["bvps"] = round(eq / f["shares_outstanding_yi"], 3) if f["shares_outstanding_yi"] > 0 else 0
-    # FCF latest (proxy from net_income × 0.8 if not present)
-    f["fcf_latest_yi"] = round(latest_ni * 0.8, 2) if latest_ni > 0 else 0
+    # DCF input contract: consume the same explicit cash-statement FCF as dim10.
+    # Missing, zero and negative are distinct states; none may be replaced by a
+    # profit or market-cap proxy in the institutional model.
+    reported_fcf = fin.get("free_cash_flow_yi")
+    fcf_available = reported_fcf is not None and str(reported_fcf).strip().lower() not in {"", "nan", "none"}
+    f["fcf_latest_yi"] = _f(reported_fcf) if fcf_available else None
+    f["fcf_available"] = fcf_available
+    f["fcf_input_basis"] = fin.get("free_cash_flow_basis") or ""
+    f["fcf_input_period"] = fin.get("free_cash_flow_period") or ""
+    f["fcf_input_currency"] = fin.get("free_cash_flow_currency") or {"A": "CNY", "H": "HKD", "U": "USD"}.get(market, "")
+    f["fcf_input_source_fields"] = fin.get("free_cash_flow_source_fields") or {}
+    f["fcf_unavailable_reason"] = fin.get("free_cash_flow_unavailable_reason") or ("missing_explicit_fcf" if not fcf_available else "")
     # EBITDA (proxy: net_income / 0.6)
     f["ebitda_yi"] = round(latest_ni / 0.6, 2) if latest_ni > 0 else 0
     # Debt and cash (from financial_health if available; else default)
     health = fin.get("financial_health") or {}
-    f["total_debt_yi"] = _f(health.get("total_debt"), 0) if isinstance(health, dict) else 0
-    f["cash_yi"] = _f(health.get("cash"), 0) if isinstance(health, dict) else 0
+    debt_present = isinstance(health, dict) and health.get("total_debt") is not None
+    cash_present = isinstance(health, dict) and health.get("cash") is not None
+    f["total_debt_yi"] = _f(health.get("total_debt")) if debt_present else None
+    f["cash_yi"] = _f(health.get("cash")) if cash_present else None
+    f["net_debt_bridge_available"] = debt_present and cash_present
+    f["quote_currency"] = basic.get("currency") or {"A": "CNY", "H": "HKD", "U": "USD"}.get(market, "")
+    f["dcf_is_financial_institution"] = _is_financial_institution(f.get("industry"), f.get("sector"))
     # Gross margin (%)
     f["gross_margin"] = _f(fin.get("gross_margin"), default=f.get("net_margin", 10) + 18)
     # PS ratio

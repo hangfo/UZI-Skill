@@ -351,12 +351,21 @@ def check_valuation_sanity(ctx: dict) -> list[Issue]:
     vm = _get_dim(ctx, "20_valuation_models")
     if not vm: return issues
     dcf = vm.get("dcf") or {}
-    iv = dcf.get("intrinsic_value_per_share", 0)
-    if iv in (None, 0, "—"):
+    if dcf.get("available") is False:
+        issues.append(Issue(
+            severity="info", category="valuation", dim="20_valuation_models",
+            issue="DCF 因输入契约不完整或业务不适用而关闭",
+            evidence=f"reason={dcf.get('reason')}",
+            suggested_fix="补齐同口径 FCF、净债务、股本和币种证据；金融企业改用专用模型",
+        ))
+        iv = None
+    else:
+        iv = dcf.get("intrinsic_per_share", 0)
+    if dcf.get("available") is not False and iv in (None, 0, "—"):
         issues.append(Issue(
             severity="warning", category="valuation", dim="20_valuation_models",
             issue="DCF 内在价值为 0/None（可能负 FCF 或假设异常）",
-            evidence=f"intrinsic_value_per_share={iv}",
+            evidence=f"intrinsic_per_share={iv}",
             suggested_fix="检查 fetch_financials.net_profit_history 最新值是否 > 0",
         ))
 

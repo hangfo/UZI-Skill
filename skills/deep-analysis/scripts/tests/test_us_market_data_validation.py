@@ -15,7 +15,10 @@ def test_fetch_basic_us_normalizes_market_cap_and_fast_info(monkeypatch):
             self.info = {
                 "longName": "Apple Inc.",
                 "industry": "Consumer Electronics",
+                "sector": "Technology",
+                "currency": "USD",
                 "marketCap": 3_100_000_000_000,
+                "sharesOutstanding": 15_000_000_000,
                 "currentPrice": 0,
                 "regularMarketPrice": None,
                 "regularMarketPreviousClose": 190,
@@ -35,6 +38,10 @@ def test_fetch_basic_us_normalizes_market_cap_and_fast_info(monkeypatch):
     assert out["price"] == 200
     assert out["market_cap_raw"] == 3_100_000_000_000
     assert out["market_cap"] == "31000.0亿"
+    assert out["market_cap_yi"] == 31000.0
+    assert out["total_shares"] == 15_000_000_000
+    assert out["currency"] == "USD"
+    assert out["sector"] == "Technology"
     assert round(out["change_pct"], 2) == 5.26
     assert "yfinance.fast_info" in out["_fallback_snap"]
 

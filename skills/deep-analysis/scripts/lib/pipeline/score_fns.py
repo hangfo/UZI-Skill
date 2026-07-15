@@ -172,6 +172,13 @@ def _verified_structured_event(item: object) -> dict | None:
             return None
         if age_days < 0 or age_days > 730:
             return None
+    published_date = _event_date(item.get("published_at"))
+    as_of_date = _event_date(item.get("as_of_date") or item.get("fetched_at"))
+    if severity in {"P0", "P1"}:
+        if published_date is None or as_of_date is None or age_days is None:
+            return None
+        if (as_of_date - published_date).days != age_days:
+            return None
     resolution = str(item.get("resolution_status") or "").strip().lower()
     resolution_claimed = resolution in _RESOLVED_EVENT_STATES
     resolution_verified = _verified_resolution_evidence(item, resolution)

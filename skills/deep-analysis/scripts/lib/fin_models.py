@@ -95,21 +95,52 @@ def compute_dcf(features: dict, assumptions: dict | None = None) -> dict:
     }
     a.update(assumptions or {})
 
+    input_contract = {
+        "value_yi": features.get("fcf_latest_yi"),
+        "basis": features.get("fcf_input_basis") or "",
+        "period": features.get("fcf_input_period") or "",
+        "currency": features.get("fcf_input_currency") or "",
+        "source_fields": features.get("fcf_input_source_fields") or {},
+        "available": features.get("fcf_available") is True,
+        "is_proxy": False,
+    }
+
+    def _unavailable(reason: str) -> dict:
+        return {
+            "available": False,
+            "status": "not_applicable" if reason.startswith("not_applicable") else "unavailable",
+            "reason": reason,
+            "input_contract": input_contract,
+            "method": "DCF unavailable: explicit cash-flow contract not satisfied",
+            "methodology_log": [f"DCF fail-closed: {reason}"],
+        }
+
+    if features.get("dcf_is_financial_institution") is True:
+        return _unavailable("not_applicable_financial_institution")
+    if str(features.get("market") or "A") != "A" and not (assumptions or {}).get("market_parameters_verified"):
+        return _unavailable("unsupported_market_discount_rate_contract")
+    if input_contract["available"] is not True:
+        return _unavailable(str(features.get("fcf_unavailable_reason") or "missing_explicit_fcf"))
+
+    fcf0 = _num(input_contract["value_yi"])
+    if fcf0 <= 0:
+        return _unavailable("non_positive_explicit_fcf")
+    if features.get("net_debt_bridge_available") is not True:
+        return _unavailable("missing_debt_or_cash_for_equity_bridge")
+    if _num(features.get("shares_outstanding_yi")) <= 0:
+        return _unavailable("missing_shares_for_per_share_value")
+    if features.get("shares_crosscheck_ok") is False:
+        return _unavailable("shares_market_cap_crosscheck_failed")
+    cashflow_currency = str(input_contract["currency"] or "")
+    quote_currency = str(features.get("quote_currency") or "")
+    if cashflow_currency and quote_currency and cashflow_currency != quote_currency:
+        return _unavailable("cashflow_quote_currency_mismatch_requires_fx")
+
     # WACC
     wacc_info = compute_wacc(
         beta=a["beta"], tax=a["tax"], target_debt_ratio=a["target_debt_ratio"],
     )
     wacc = wacc_info["wacc"]
-
-    # Base FCF — if missing, approximate from revenue × net_margin × 0.8
-    fcf0 = _num(features.get("fcf_latest_yi"))
-    if fcf0 <= 0:
-        rev = _num(features.get("revenue_latest_yi"))
-        nm = _num(features.get("net_margin")) / 100
-        fcf0 = rev * nm * 0.8  # rough FCF ≈ 80% of net income
-    if fcf0 <= 0:
-        # Final fallback: proxy from market_cap assuming 5% FCF yield
-        fcf0 = _num(features.get("market_cap_yi")) * 0.05
 
     # Stage 1: high growth
     projected_fcf: list[float] = []
@@ -169,6 +200,9 @@ def compute_dcf(features: dict, assumptions: dict | None = None) -> dict:
     )
 
     return {
+        "available": True,
+        "status": "available",
+        "input_contract": input_contract,
         "method": "DCF (2-stage + Gordon Growth terminal)",
         "wacc_breakdown": wacc_info,
         "base_fcf_yi": round(fcf0, 3),

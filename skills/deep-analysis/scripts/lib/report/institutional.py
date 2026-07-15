@@ -26,6 +26,8 @@ assemble_report.py 做 `from lib.report.institutional import *` · 调用不变.
 """
 from __future__ import annotations
 
+from html import escape
+
 from lib.report.svg_primitives import (
     COLOR_BULL, COLOR_BEAR, COLOR_GOLD, COLOR_CYAN, COLOR_MUTED,
     svg_gauge, svg_progress_row,
@@ -60,6 +62,17 @@ def trap_color_emoji(level: str) -> tuple[str, str]:
 def _render_dcf_block(dim20: dict) -> str:
     """DCF methodology + WACC breakdown + sensitivity heatmap."""
     dcf = (dim20 or {}).get("dcf") or {}
+    if dcf and dcf.get("available") is False:
+        reason = escape(str(dcf.get("reason") or "input_contract_not_satisfied"))
+        return (
+            '<div class="dcf-block" style="background:#fff7ed;border:1px solid #fdba74;'
+            'border-radius:12px;padding:16px;margin:16px 0">'
+            '<div style="font-weight:700;color:#9a3412">DCF unavailable (fail-closed)</div>'
+            f'<div style="margin-top:6px;color:#7c2d12;font-size:13px">Reason: {reason}</div>'
+            '<div style="margin-top:6px;color:#6b7280;font-size:12px">'
+            'No intrinsic value or buy/sell signal was generated from incomplete inputs.'
+            '</div></div>'
+        )
     if not dcf or "intrinsic_per_share" not in dcf:
         return '<div class="dcf-block"><p class="muted">DCF 数据缺失</p></div>'
 

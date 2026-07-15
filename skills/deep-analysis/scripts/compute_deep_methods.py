@@ -120,6 +120,8 @@ def compute_dim_20(features: dict, raw: dict) -> dict:
             "three_statement": three_stmt,
             "lbo": lbo,
             "summary": {
+                "dcf_available": dcf.get("available", "intrinsic_per_share" in dcf),
+                "dcf_unavailable_reason": dcf.get("reason"),
                 "dcf_intrinsic": dcf.get("intrinsic_per_share"),
                 "dcf_safety_margin_pct": dcf.get("safety_margin_pct"),
                 "dcf_verdict": dcf.get("verdict"),

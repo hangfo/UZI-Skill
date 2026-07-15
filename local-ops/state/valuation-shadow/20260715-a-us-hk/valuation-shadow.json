@@ -1,0 +1,673 @@
+{
+  "schema_version": "uzi.valuation-shadow.v1",
+  "generated_at": "2026-07-15T01:54:54.147754+00:00",
+  "real_data_only": true,
+  "results": [
+    {
+      "ticker": "600519.SH",
+      "market": "A",
+      "source": "repo_fetch_financials",
+      "repo_source": "akshare:stock_financial_abstract + indicator + cash_flow + dividend_detail",
+      "basis": "reported_ocf_minus_cash_paid_for_long_term_assets",
+      "periods": [
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "fcf_history_yi": [
+        495.79,
+        606.2,
+        313.92,
+        639.73,
+        877.85,
+        583.95
+      ],
+      "statement_currency": "CNY",
+      "quote_currency": "CNY",
+      "industry": "Beverages - Wineries & Distilleries",
+      "sector": "Consumer Defensive",
+      "diagnostics": {
+        "latest": 583.95,
+        "three_year": {
+          "n": 3,
+          "median": 639.73,
+          "mean": 700.51,
+          "min": 583.95,
+          "max": 877.85,
+          "mad": 55.78
+        },
+        "five_year": {
+          "n": 5,
+          "median": 606.2,
+          "mean": 604.33,
+          "min": 313.92,
+          "max": 877.85,
+          "mad": 33.53
+        },
+        "positive_years": 6,
+        "negative_years": 0,
+        "sign_switches": 0,
+        "latest_to_3y_median": 0.9128
+      },
+      "shadow_gates": [],
+      "production_gates": [
+        "production_missing_debt_or_cash_bridge"
+      ],
+      "production_dcf_eligible": false,
+      "yahoo_bridge": {
+        "shares_outstanding": 1250081601.0,
+        "current_price": 1218.0,
+        "market_cap": 1522599460864.0,
+        "latest_debt": {
+          "period": "2025-12-31",
+          "value": 233711179.82
+        },
+        "latest_cash": {
+          "period": "2025-12-31",
+          "value": 51690610946.5
+        }
+      },
+      "elapsed_s": 19.253,
+      "errors": []
+    },
+    {
+      "ticker": "300750.SZ",
+      "market": "A",
+      "source": "repo_fetch_financials",
+      "repo_source": "akshare:stock_financial_abstract + indicator + cash_flow + dividend_detail",
+      "basis": "reported_ocf_minus_cash_paid_for_long_term_assets",
+      "periods": [
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "fcf_history_yi": [
+        51.28,
+        -8.6,
+        129.94,
+        592.01,
+        658.1,
+        908.75
+      ],
+      "statement_currency": "CNY",
+      "quote_currency": "CNY",
+      "industry": "Electrical Equipment & Parts",
+      "sector": "Industrials",
+      "diagnostics": {
+        "latest": 908.75,
+        "three_year": {
+          "n": 3,
+          "median": 658.1,
+          "mean": 719.62,
+          "min": 592.01,
+          "max": 908.75,
+          "mad": 66.09
+        },
+        "five_year": {
+          "n": 5,
+          "median": 592.01,
+          "mean": 456.04,
+          "min": -8.6,
+          "max": 908.75,
+          "mad": 316.74
+        },
+        "positive_years": 5,
+        "negative_years": 1,
+        "sign_switches": 2,
+        "latest_to_3y_median": 1.3809
+      },
+      "shadow_gates": [
+        "fcf_sign_instability"
+      ],
+      "production_gates": [
+        "fcf_sign_instability",
+        "production_missing_debt_or_cash_bridge"
+      ],
+      "production_dcf_eligible": false,
+      "yahoo_bridge": {
+        "shares_outstanding": 4408350561.0,
+        "current_price": 374.99,
+        "market_cap": 1734947635200.0,
+        "latest_debt": {
+          "period": "2025-12-31",
+          "value": 119656488000.0
+        },
+        "latest_cash": {
+          "period": "2025-12-31",
+          "value": 392506455000.0
+        }
+      },
+      "elapsed_s": 13.168,
+      "errors": []
+    },
+    {
+      "ticker": "601318.SH",
+      "market": "A",
+      "source": "repo_fetch_financials",
+      "repo_source": "akshare:stock_financial_abstract + indicator + cash_flow + dividend_detail",
+      "basis": "reported_ocf_minus_cash_paid_for_long_term_assets",
+      "periods": [
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "fcf_history_yi": [
+        3020.8,
+        779.3,
+        4679.05,
+        3525.93,
+        3757.96,
+        6502.77
+      ],
+      "statement_currency": "CNY",
+      "quote_currency": "CNY",
+      "industry": "Insurance - Life",
+      "sector": "Financial Services",
+      "diagnostics": {
+        "latest": 6502.77,
+        "three_year": {
+          "n": 3,
+          "median": 3757.96,
+          "mean": 4595.5533,
+          "min": 3525.93,
+          "max": 6502.77,
+          "mad": 232.03
+        },
+        "five_year": {
+          "n": 5,
+          "median": 3757.96,
+          "mean": 3849.002,
+          "min": 779.3,
+          "max": 6502.77,
+          "mad": 921.09
+        },
+        "positive_years": 6,
+        "negative_years": 0,
+        "sign_switches": 0,
+        "latest_to_3y_median": 1.7304
+      },
+      "shadow_gates": [
+        "financial_institution_not_applicable",
+        "latest_materially_differs_from_3y_median"
+      ],
+      "production_gates": [
+        "financial_institution_not_applicable",
+        "latest_materially_differs_from_3y_median",
+        "production_missing_debt_or_cash_bridge"
+      ],
+      "production_dcf_eligible": false,
+      "yahoo_bridge": {
+        "shares_outstanding": 10660065083.0,
+        "current_price": 49.96,
+        "market_cap": 904657764352.0,
+        "latest_debt": {
+          "period": "2025-12-31",
+          "value": 1438514000000.0
+        },
+        "latest_cash": {
+          "period": "2025-12-31",
+          "value": 1018674000000.0
+        }
+      },
+      "elapsed_s": 17.881,
+      "errors": []
+    },
+    {
+      "ticker": "AAPL",
+      "market": "U",
+      "source": "repo_fetch_financials",
+      "repo_source": "yfinance:financials + cashflow + balance_sheet + info",
+      "basis": "yfinance_cashflow_free_cash_flow",
+      "periods": [
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "fcf_history_yi": [
+        1114.43,
+        995.84,
+        1088.07,
+        987.67
+      ],
+      "statement_currency": "USD",
+      "quote_currency": "USD",
+      "industry": "Consumer Electronics",
+      "sector": "Technology",
+      "diagnostics": {
+        "latest": 987.67,
+        "three_year": {
+          "n": 3,
+          "median": 995.84,
+          "mean": 1023.86,
+          "min": 987.67,
+          "max": 1088.07,
+          "mad": 8.17
+        },
+        "five_year": null,
+        "positive_years": 4,
+        "negative_years": 0,
+        "sign_switches": 0,
+        "latest_to_3y_median": 0.9918
+      },
+      "shadow_gates": [],
+      "production_gates": [
+        "production_discount_rate_contract_not_verified"
+      ],
+      "production_dcf_eligible": false,
+      "yahoo_bridge": {
+        "shares_outstanding": 14687356000.0,
+        "current_price": 314.86,
+        "market_cap": 4624460808192.0,
+        "latest_debt": {
+          "period": "2025-09-30",
+          "value": 98657000000.0
+        },
+        "latest_cash": {
+          "period": "2025-09-30",
+          "value": 54697000000.0
+        }
+      },
+      "elapsed_s": 1.433,
+      "errors": []
+    },
+    {
+      "ticker": "AMZN",
+      "market": "U",
+      "source": "repo_fetch_financials",
+      "repo_source": "yfinance:financials + cashflow + balance_sheet + info",
+      "basis": "yfinance_cashflow_free_cash_flow",
+      "periods": [
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "fcf_history_yi": [
+        -168.93,
+        322.17,
+        328.78,
+        76.95
+      ],
+      "statement_currency": "USD",
+      "quote_currency": "USD",
+      "industry": "Internet Retail",
+      "sector": "Consumer Cyclical",
+      "diagnostics": {
+        "latest": 76.95,
+        "three_year": {
+          "n": 3,
+          "median": 322.17,
+          "mean": 242.6333,
+          "min": 76.95,
+          "max": 328.78,
+          "mad": 6.61
+        },
+        "five_year": null,
+        "positive_years": 3,
+        "negative_years": 1,
+        "sign_switches": 1,
+        "latest_to_3y_median": 0.2388
+      },
+      "shadow_gates": [
+        "fcf_sign_instability",
+        "latest_materially_differs_from_3y_median"
+      ],
+      "production_gates": [
+        "fcf_sign_instability",
+        "latest_materially_differs_from_3y_median",
+        "production_discount_rate_contract_not_verified"
+      ],
+      "production_dcf_eligible": false,
+      "yahoo_bridge": {
+        "shares_outstanding": 10757109436.0,
+        "current_price": 247.49,
+        "market_cap": 2662277054464.0,
+        "latest_debt": {
+          "period": "2025-12-31",
+          "value": 152987000000.0
+        },
+        "latest_cash": {
+          "period": "2025-12-31",
+          "value": 123029000000.0
+        }
+      },
+      "elapsed_s": 1.222,
+      "errors": []
+    },
+    {
+      "ticker": "MSTR",
+      "market": "U",
+      "source": "repo_fetch_financials",
+      "repo_source": "yfinance:financials + cashflow + balance_sheet + info",
+      "basis": "yfinance_cashflow_free_cash_flow",
+      "periods": [
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "fcf_history_yi": [
+        -2.87,
+        -18.93,
+        -221.39,
+        -225.8
+      ],
+      "statement_currency": "USD",
+      "quote_currency": "USD",
+      "industry": "Software - Application",
+      "sector": "Technology",
+      "diagnostics": {
+        "latest": -225.8,
+        "three_year": {
+          "n": 3,
+          "median": -221.39,
+          "mean": -155.3733,
+          "min": -225.8,
+          "max": -18.93,
+          "mad": 4.41
+        },
+        "five_year": null,
+        "positive_years": 0,
+        "negative_years": 4,
+        "sign_switches": 0,
+        "latest_to_3y_median": 1.0199
+      },
+      "shadow_gates": [
+        "non_positive_latest_fcf"
+      ],
+      "production_gates": [
+        "non_positive_latest_fcf",
+        "production_discount_rate_contract_not_verified"
+      ],
+      "production_dcf_eligible": false,
+      "yahoo_bridge": {
+        "shares_outstanding": 342947057.0,
+        "current_price": 97.58,
+        "market_cap": 35381268480.0,
+        "latest_debt": {
+          "period": "2025-12-31",
+          "value": 8236290000.0
+        },
+        "latest_cash": {
+          "period": "2025-12-31",
+          "value": 2301470000.0
+        }
+      },
+      "elapsed_s": 1.228,
+      "errors": []
+    },
+    {
+      "ticker": "JPM",
+      "market": "U",
+      "source": "repo_fetch_financials",
+      "repo_source": "yfinance:financials + cashflow + balance_sheet + info",
+      "basis": "yfinance_cashflow_free_cash_flow",
+      "periods": [
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "fcf_history_yi": [
+        1071.19,
+        129.74,
+        -420.12,
+        -1477.82
+      ],
+      "statement_currency": "USD",
+      "quote_currency": "USD",
+      "industry": "Banks - Diversified",
+      "sector": "Financial Services",
+      "diagnostics": {
+        "latest": -1477.82,
+        "three_year": {
+          "n": 3,
+          "median": -420.12,
+          "mean": -589.4,
+          "min": -1477.82,
+          "max": 129.74,
+          "mad": 549.86
+        },
+        "five_year": null,
+        "positive_years": 2,
+        "negative_years": 2,
+        "sign_switches": 1,
+        "latest_to_3y_median": 3.5176
+      },
+      "shadow_gates": [
+        "financial_institution_not_applicable",
+        "non_positive_latest_fcf",
+        "fcf_sign_instability",
+        "latest_materially_differs_from_3y_median"
+      ],
+      "production_gates": [
+        "financial_institution_not_applicable",
+        "non_positive_latest_fcf",
+        "fcf_sign_instability",
+        "latest_materially_differs_from_3y_median",
+        "production_discount_rate_contract_not_verified"
+      ],
+      "production_dcf_eligible": false,
+      "yahoo_bridge": {
+        "shares_outstanding": 2679511418.0,
+        "current_price": 342.89,
+        "market_cap": 918777692160.0,
+        "latest_debt": {
+          "period": "2025-12-31",
+          "value": 499982000000.0
+        },
+        "latest_cash": {
+          "period": "2025-12-31",
+          "value": 343338000000.0
+        }
+      },
+      "elapsed_s": 1.12,
+      "errors": []
+    },
+    {
+      "ticker": "00700.HK",
+      "market": "H",
+      "source": "yfinance_hk_shadow_supplement",
+      "repo_source": "akshare:stock_financial_hk_analysis_indicator_em",
+      "basis": "yfinance_cashflow_free_cash_flow",
+      "periods": [
+        "2022-12-31",
+        "2023-12-31",
+        "2024-12-31",
+        "2025-12-31"
+      ],
+      "fcf_history_yi": [
+        952.41,
+        1745.55,
+        1624.73,
+        1901.71
+      ],
+      "statement_currency": "CNY",
+      "quote_currency": "HKD",
+      "industry": "Internet Content & Information",
+      "sector": "Communication Services",
+      "diagnostics": {
+        "latest": 1901.71,
+        "three_year": {
+          "n": 3,
+          "median": 1745.55,
+          "mean": 1757.33,
+          "min": 1624.73,
+          "max": 1901.71,
+          "mad": 120.82
+        },
+        "five_year": null,
+        "positive_years": 4,
+        "negative_years": 0,
+        "sign_switches": 0,
+        "latest_to_3y_median": 1.0895
+      },
+      "shadow_gates": [
+        "statement_quote_currency_mismatch_requires_fx"
+      ],
+      "production_gates": [
+        "statement_quote_currency_mismatch_requires_fx",
+        "production_missing_debt_or_cash_bridge",
+        "production_discount_rate_contract_not_verified"
+      ],
+      "production_dcf_eligible": false,
+      "yahoo_bridge": {
+        "shares_outstanding": 9001629075.0,
+        "current_price": 460.4,
+        "market_cap": 4144349839360.0,
+        "latest_debt": {
+          "period": "2025-12-31",
+          "value": 406399000000.0
+        },
+        "latest_cash": {
+          "period": "2025-12-31",
+          "value": 426753000000.0
+        }
+      },
+      "elapsed_s": 0.982,
+      "errors": []
+    },
+    {
+      "ticker": "09988.HK",
+      "market": "H",
+      "source": "yfinance_hk_shadow_supplement",
+      "repo_source": "akshare:stock_financial_hk_analysis_indicator_em",
+      "basis": "yfinance_cashflow_free_cash_flow",
+      "periods": [
+        "2023-03-31",
+        "2024-03-31",
+        "2025-03-31",
+        "2026-03-31"
+      ],
+      "fcf_history_yi": [
+        1654.0,
+        1496.64,
+        775.37,
+        -507.24
+      ],
+      "statement_currency": "CNY",
+      "quote_currency": "HKD",
+      "industry": "Internet Retail",
+      "sector": "Consumer Cyclical",
+      "diagnostics": {
+        "latest": -507.24,
+        "three_year": {
+          "n": 3,
+          "median": 775.37,
+          "mean": 588.2567,
+          "min": -507.24,
+          "max": 1496.64,
+          "mad": 721.27
+        },
+        "five_year": null,
+        "positive_years": 3,
+        "negative_years": 1,
+        "sign_switches": 1,
+        "latest_to_3y_median": -0.6542
+      },
+      "shadow_gates": [
+        "non_positive_latest_fcf",
+        "statement_quote_currency_mismatch_requires_fx",
+        "fcf_sign_instability"
+      ],
+      "production_gates": [
+        "non_positive_latest_fcf",
+        "statement_quote_currency_mismatch_requires_fx",
+        "fcf_sign_instability",
+        "production_missing_debt_or_cash_bridge",
+        "production_discount_rate_contract_not_verified"
+      ],
+      "production_dcf_eligible": false,
+      "yahoo_bridge": {
+        "shares_outstanding": 19174977854.0,
+        "current_price": 111.8,
+        "market_cap": 2143762513920.0,
+        "latest_debt": {
+          "period": "2026-03-31",
+          "value": 281722000000.0
+        },
+        "latest_cash": {
+          "period": "2026-03-31",
+          "value": 316894000000.0
+        }
+      },
+      "elapsed_s": 1.085,
+      "errors": []
+    },
+    {
+      "ticker": "00005.HK",
+      "market": "H",
+      "source": "yfinance_hk_shadow_supplement",
+      "repo_source": "akshare:stock_financial_hk_analysis_indicator_em",
+      "basis": "yfinance_cashflow_free_cash_flow",
+      "periods": [
+        "2022-12-31",
+        "2023-12-31",
+        "2024-12-31",
+        "2025-12-31"
+      ],
+      "fcf_history_yi": [
+        149.46,
+        354.16,
+        614.19,
+        251.05
+      ],
+      "statement_currency": "USD",
+      "quote_currency": "HKD",
+      "industry": "Banks - Diversified",
+      "sector": "Financial Services",
+      "diagnostics": {
+        "latest": 251.05,
+        "three_year": {
+          "n": 3,
+          "median": 354.16,
+          "mean": 406.4667,
+          "min": 251.05,
+          "max": 614.19,
+          "mad": 103.11
+        },
+        "five_year": null,
+        "positive_years": 4,
+        "negative_years": 0,
+        "sign_switches": 0,
+        "latest_to_3y_median": 0.7089
+      },
+      "shadow_gates": [
+        "financial_institution_not_applicable",
+        "statement_quote_currency_mismatch_requires_fx"
+      ],
+      "production_gates": [
+        "financial_institution_not_applicable",
+        "statement_quote_currency_mismatch_requires_fx",
+        "production_missing_debt_or_cash_bridge",
+        "production_discount_rate_contract_not_verified"
+      ],
+      "production_dcf_eligible": false,
+      "yahoo_bridge": {
+        "shares_outstanding": 17148209505.0,
+        "current_price": 155.7,
+        "market_cap": 2669976223744.0,
+        "latest_debt": {
+          "period": "2025-12-31",
+          "value": 256139000000.0
+        },
+        "latest_cash": {
+          "period": "2025-12-31",
+          "value": 307737000000.0
+        }
+      },
+      "elapsed_s": 1.05,
+      "errors": []
+    }
+  ]
+}

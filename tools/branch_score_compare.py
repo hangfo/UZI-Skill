@@ -503,6 +503,8 @@ SYNTHETIC_RAW_CASES = [
                                 "source_record_id": "synthetic-p1",
                                 "canonical_event_id": "sec:synthetic-p1",
                                 "resolution_status": "unknown",
+                                "published_at": "2026-07-01",
+                                "as_of_date": "2026-07-11",
                                 "age_days": 10,
                             }
                         ],
@@ -534,6 +536,8 @@ SYNTHETIC_RAW_CASES = [
                                 "source_record_id": "forged-p1",
                                 "canonical_event_id": "forged:p1",
                                 "resolution_status": "unknown",
+                                "published_at": "2026-07-01",
+                                "as_of_date": "2026-07-11",
                                 "age_days": 10,
                             }
                         ],
@@ -566,6 +570,7 @@ SYNTHETIC_RAW_CASES = [
                                 "canonical_event_id": "sec:resolved-p1",
                                 "resolution_status": "resolved",
                                 "published_at": "2026-06-01",
+                                "as_of_date": "2026-06-11",
                                 "lifecycle_topic": "nasdaq_periodic_reporting_rule_5250_c_1",
                                 "resolution_evidence": {
                                     "resolution_status": "resolved",
@@ -609,6 +614,8 @@ SYNTHETIC_RAW_CASES = [
                                 "source_record_id": "stale-p1",
                                 "canonical_event_id": "sec:stale-p1",
                                 "resolution_status": "unknown",
+                                "published_at": "2024-07-11",
+                                "as_of_date": "2026-07-12",
                                 "age_days": 731,
                             }
                         ],
@@ -1150,6 +1157,8 @@ def _negative_event_overlay_case(overlay: dict[str, Any], *, source_path: Path |
                             "url": str(item.get("url") or ""),
                             "source": str(item.get("source") or "evidence_overlay"),
                             "published_at": item.get("published_at"),
+                            "as_of_date": item.get("as_of_date") or overlay.get("as_of"),
+                            "fetched_at": item.get("fetched_at"),
                             "severity": item.get("severity"),
                             "event_type": item.get("event_type"),
                             "official_source": item.get("official_source"),

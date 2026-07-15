@@ -260,6 +260,7 @@ def test_financials_current_em_schema_aligns_annual_ocf_ratio():
     assert out["free_cash_flow_yi"] == 583.95
     assert out["free_cash_flow_period"] == "2025"
     assert out["free_cash_flow_basis"] == "reported_ocf_minus_cash_paid_for_long_term_assets"
+    assert out["free_cash_flow_currency"] == "CNY"
     assert out["free_cash_flow_source_fields"]["cash_capex"] == "CONSTRUCT_LONG_ASSET"
     assert "fcf" not in out
 
@@ -283,6 +284,7 @@ def test_us_cashflow_schema_preserves_real_negative_fcf():
     assert out["free_cash_flow_period"] == "2025-12-31"
     assert out["free_cash_flow_history"] == [-221.39, -225.8]
     assert out["free_cash_flow_basis"] == "yfinance_cashflow_free_cash_flow"
+    assert out["free_cash_flow_is_derived"] is False
     assert out["free_cash_flow_currency"] == "USD"
 
 
@@ -385,9 +387,11 @@ def test_valuation_uses_cninfo_market_fallback_when_industry_missing(monkeypatch
     assert data["market_pe_reference"] == "20.0"
     assert data["market_pe_reference_source"] == "cninfo:stock_industry_pe_ratio_cninfo"
     assert "不参与同行估值" in data["industry_pe_fallback_reason"]
-    assert data["dcf_is_proxy"] is True
-    assert data["dcf_input_basis"] == "net_profit_x_0_8_proxy_not_reported_fcf"
-    assert "非实测 FCF/OCF" in data["dcf_warning"]
+    assert data["dcf_is_proxy"] is False
+    assert data["dcf_input_basis"] == ""
+    assert data["dcf_available"] is False
+    assert data["dcf_unavailable_reason"] == "missing_explicit_fcf"
+    assert "禁止" in data["dcf_warning"]
 
 
 def test_valuation_prefers_cash_statement_fcf_over_profit_proxy(monkeypatch):
@@ -451,6 +455,39 @@ def test_negative_cash_statement_fcf_never_falls_back_to_positive_profit_proxy(m
     assert data["dcf_sensitivity"] == {}
     assert data["dcf_currency"] == "USD"
     assert fetch_valuation._currency_prefix("USD") == "US$"
+
+
+def test_valuation_rejects_financial_institution_and_cross_currency_fcf(monkeypatch):
+    import fetch_financials
+    import fetch_valuation
+
+    monkeypatch.setattr(fetch_valuation.ak, "stock_zh_valuation_baidu", lambda *a, **kw: pd.DataFrame())
+    monkeypatch.setattr(fetch_valuation.ak, "stock_industry_pe_ratio_cninfo", lambda *a, **kw: pd.DataFrame())
+
+    monkeypatch.setattr(fetch_valuation.ds, "fetch_basic", lambda _ti: {
+        "name": "Bank", "price": 10, "industry": "Banks - Diversified",
+        "currency": "USD", "market_cap_raw": 100e8,
+    })
+    monkeypatch.setattr(fetch_financials, "main", lambda _ticker: {"data": {
+        "free_cash_flow_yi": 100.0, "free_cash_flow_currency": "USD",
+    }})
+    financial = fetch_valuation.main("JPM")["data"]
+    assert financial["dcf_available"] is False
+    assert financial["dcf_unavailable_reason"] == "not_applicable_financial_institution"
+
+    monkeypatch.setattr(fetch_valuation.ds, "fetch_basic", lambda _ti: {
+        "name": "Tencent", "price": 500, "industry": "Internet Content",
+        "currency": "HKD", "market_cap_raw": 4e12,
+    })
+    monkeypatch.setattr(fetch_financials, "main", lambda _ticker: {"data": {
+        "free_cash_flow_yi": 1901.71, "free_cash_flow_currency": "CNY",
+        "free_cash_flow_period": "2025-12-31",
+        "free_cash_flow_basis": "yfinance_cashflow_free_cash_flow",
+    }})
+    mismatch = fetch_valuation.main("00700.HK")["data"]
+    assert mismatch["dcf_available"] is False
+    assert mismatch["dcf_unavailable_reason"] == "cashflow_quote_currency_mismatch_requires_fx"
+    assert mismatch["dcf_sensitivity"] == {}
 
 
 def test_valuation_viz_discloses_fcf_input_and_escapes_warning():
@@ -529,6 +566,16 @@ def test_registry_matches_legacy_output_shapes():
             "ocf": "12.0亿",
             "ocf_history": [12.0, 8.0],
             "ocf_to_net_income_ratio": 1.2,
+            "free_cash_flow_yi": 10.0,
+            "free_cash_flow_history": [8.0, 10.0],
+            "free_cash_flow_history_years": ["2024", "2025"],
+            "free_cash_flow_basis": "reported_ocf_minus_cash_paid_for_long_term_assets",
+            "free_cash_flow_period": "2025",
+            "free_cash_flow_currency": "CNY",
+            "free_cash_flow_source_fields": {
+                "operating_cash_flow": "NETCASH_OPERATE",
+                "cash_capex": "CONSTRUCT_LONG_ASSET",
+            },
         },
         "10_valuation": {
             "pe": "20.0",
@@ -543,3 +590,108 @@ def test_registry_matches_legacy_output_shapes():
         spec = FETCHER_REGISTRY[dim_key].spec
         result = validate_result(DimResult(dim_key=dim_key, data=data), spec)
         assert result.data_gaps == []
+        if dim_key == "1_financials":
+            for key in ("free_cash_flow_yi", "free_cash_flow_history", "free_cash_flow_basis", "free_cash_flow_period"):
+                assert key in spec.optional_fields
+
+
+def test_stock_features_normalizes_legacy_us_raw_market_cap_and_uses_real_fcf():
+    from lib.stock_features import extract_features
+
+    raw = {
+        "ticker": "AAPL",
+        "dimensions": {
+            "0_basic": {"data": {
+                "code": "AAPL", "price": 314.86,
+                "market_cap": 4_624_460_808_192,
+                "total_shares": 14_687_356_000,
+                "total_shares_source": "yfinance.info.sharesOutstanding",
+                "industry": "Consumer Electronics",
+            }},
+            "1_financials": {"data": {
+                "net_profit_history": [1120.10],
+                "free_cash_flow_yi": 987.67,
+                "free_cash_flow_period": "2025-09-30",
+                "free_cash_flow_basis": "yfinance_cashflow_free_cash_flow",
+                "free_cash_flow_currency": "USD",
+                "financial_health": {"total_debt": 847.11, "cash": 685.07},
+            }},
+        },
+    }
+    features = extract_features(raw, raw["dimensions"])
+
+    assert round(features["market_cap_yi"], 2) == 46244.61
+    assert round(features["shares_outstanding_yi"], 3) == 146.874
+    assert features["shares_crosscheck_ok"] is True
+    assert features["fcf_latest_yi"] == 987.67
+    assert features["fcf_input_basis"] == "yfinance_cashflow_free_cash_flow"
+    assert features["net_debt_bridge_available"] is True
+
+
+def test_stock_features_preserves_explicit_negative_fcf_without_profit_proxy():
+    from lib.stock_features import extract_features
+
+    raw = {
+        "ticker": "MSTR",
+        "dimensions": {
+            "0_basic": {"data": {
+                "code": "MSTR", "price": 97.58, "market_cap": "353.8亿",
+                "industry": "Software - Application",
+            }},
+            "1_financials": {"data": {
+                "net_profit_history": [100.0],
+                "free_cash_flow_yi": -225.8,
+                "free_cash_flow_period": "2025-12-31",
+                "free_cash_flow_basis": "yfinance_cashflow_free_cash_flow",
+                "free_cash_flow_currency": "USD",
+                "financial_health": {"total_debt": 82.57, "cash": 22.07},
+            }},
+        },
+    }
+    features = extract_features(raw, raw["dimensions"])
+    assert features["fcf_available"] is True
+    assert features["fcf_latest_yi"] == -225.8
+
+
+def test_institutional_dcf_fails_closed_for_unsafe_inputs():
+    from lib.fin_models import compute_dcf
+
+    base = {
+        "market": "A",
+        "price": 100, "market_cap_yi": 1000, "shares_outstanding_yi": 10,
+        "fcf_available": True, "fcf_latest_yi": 50,
+        "fcf_input_basis": "cash_statement", "fcf_input_period": "2025",
+        "fcf_input_currency": "USD", "quote_currency": "USD",
+        "net_debt_bridge_available": True, "total_debt_yi": 20, "cash_yi": 10,
+    }
+    assert compute_dcf({**base, "fcf_latest_yi": -1})["reason"] == "non_positive_explicit_fcf"
+    assert compute_dcf({**base, "fcf_available": False, "fcf_latest_yi": None})["available"] is False
+    assert compute_dcf({**base, "dcf_is_financial_institution": True})["reason"] == "not_applicable_financial_institution"
+    assert compute_dcf({**base, "net_debt_bridge_available": False})["reason"] == "missing_debt_or_cash_for_equity_bridge"
+    assert compute_dcf({**base, "quote_currency": "HKD"})["reason"] == "cashflow_quote_currency_mismatch_requires_fx"
+    assert compute_dcf({**base, "market": "U"})["reason"] == "unsupported_market_discount_rate_contract"
+
+    valid = compute_dcf(base)
+    assert valid["available"] is True
+    assert valid["base_fcf_yi"] == 50
+    assert valid["input_contract"]["is_proxy"] is False
+
+
+def test_simple_dcf_rejects_terminal_growth_at_or_above_wacc():
+    from fetch_valuation import simple_dcf
+
+    result = simple_dcf(100, growth_terminal=0.10, wacc=0.10)
+    assert result["intrinsic_value_total"] is None
+    assert "WACC must exceed terminal growth" in result["_note"]
+
+
+def test_institutional_renderer_discloses_fail_closed_reason():
+    from lib.report.institutional import _render_dcf_block
+
+    rendered = _render_dcf_block({"dcf": {
+        "available": False,
+        "reason": "missing_debt_or_cash_for_equity_bridge<script>",
+    }})
+    assert "DCF unavailable (fail-closed)" in rendered
+    assert "missing_debt_or_cash_for_equity_bridge" in rendered
+    assert "<script>" not in rendered
