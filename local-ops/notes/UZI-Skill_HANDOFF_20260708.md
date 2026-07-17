@@ -1,5 +1,14 @@
 # UZI-Skill 交接记录 - 2026-07-08
 
+## 2026-07-17 FX/FCFF shadow 停止线
+
+- 当前隔离分支 `codex/scoring-validation-fx-fcff-shadow`，基线 `4afce20`，实现提交 `af59243`。通过硬门禁后应 fast-forward 合回并继续在正式 `codex/scoring-validation-guardrails` 开发；不要合到 `main`、`codex/windows-local-stable` 或历史实验分支。
+- 真实 FX：Yahoo direct/inverse/triangle + 同日 ECB 官方交叉盘，CNY/HKD、CNY/USD、USD/HKD 全部通过，跨源误差 `0.054045%/0.019265%/0.018544%`。HKMA 最新值滞后 17 天，只作参考，不视为新鲜数据。
+- 真实 FCFF：11 个 A/US/HK 样本 `0/11` 可进入生产。AMZN 两法一负一正且差 `162.7959%`；BABA/09988 差 `110.4038%`；即使 600519 只差 `0.0722%`，也缺发行人利息现金流分类证明。不要继续用字段名或数值接近推断 FCFF。
+- 验证：`175/175` direct tests、`py_compile`、`git diff --check`；frozen branch compare `71 ok / 0 review / 0 possible_regression`，全部分数/档位零变化；六轮纯评分中位 `2.8s -> 2.5s`，仅判无回退。
+- 保留审计工具/冻结证据/测试；不把 FX/FCFF 数值接生产，不新增静态 WACC/增长/税率 clamp，不修改金融机构估值。完整表见 `docs/fx-fcff-shadow-validation.md`。
+- 下一步使用 `GPT-5.6 Sol` + `高推理`，但只在逐发行人闭环 FCFF 会计政策、金融机构模型或跨市场 WACC 契约时继续；普通维护无需为“继续开发”而扩大模型面。
+
 ## 2026-07-17 正式分支合回与资本桥/FCFF 语义收口
 
 - 分支判断已经执行：`codex/scoring-validation-real-shadow-hardening` 先合到正式评分分支；本轮 `codex/scoring-validation-balance-sheet-fx-shadow` 通过全部门禁后又以 `--ff-only` 合回。当前分支与 origin 均为 `codex/scoring-validation-guardrails@0b74234`。不要合到 `main`、`codex/windows-local-stable` 或历史 `codex/scoring-validation-upstream-fce996c`。

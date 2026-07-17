@@ -4,6 +4,15 @@
 
 ## 2026-07-17
 
+### `af59243` · 时间戳 FX 官方交叉验证与 FCFF 重建停止线
+
+- 从正式检查点 `4afce20` 建立隔离分支 `codex/scoring-validation-fx-fcff-shadow`；没有修改生产评分、DCF、WACC、增长率、基金路由、`main`、`codex/windows-local-stable` 或 upstream。
+- 三组真实 FX 合约同时校验 Yahoo direct/inverse/triangle 与同日 ECB 官方交叉盘；CNY/HKD、CNY/USD、USD/HKD 的跨源误差分别为 `0.054045%/0.019265%/0.018544%`，三组均通过 shadow 门槛。HKMA 最新记录滞后 17 天，显式降为 reference-only，不用权威性掩盖时效缺口。
+- 11 个 A/US/HK 真实年度报表样本比较 partial EBIT bridge 与 FCF+after-tax-interest。600519/300750/腾讯虽只差 `0.0722%/4.0811%/4.3977%`，但利息现金流分类仍未验证；AMZN 差 `162.7959%`，BABA/09988 差 `110.4038%` 且方向冲突。FCFF 因此 `0/11` 晋级，金融机构继续不适用。
+- `175/175` direct tests、`py_compile`、`git diff --check` 通过；未安装 pytest、未重装、未跑 deep、未运行 update。冻结对照 baseline=`4afce20`、candidate=`af59243`：`71 ok / 0 review / 0 possible_regression`，全部分数与档位变化为 0。
+- 六轮交换顺序纯评分中位数 `2.8s -> 2.5s`，只判定无性能回退。建议吸收只读审计工具/证据/测试；放弃本轮 FCFF 产品化，不新增静态 FX/WACC 或自动换汇。完整结论见 `docs/fx-fcff-shadow-validation.md`。
+- 公正效果评分 `9.5/10`：高收益来自证明 FX 桥可审计、同时用真实反例阻止错误 FCFF 进入生产；扣分来自发行人会计政策、SEC Companyfacts、金融机构估值和跨市场 WACC 尚未闭环。
+
 ### `ac4e1ad` · 现金流类别、同期间资本桥与 A/US/HK 真实交叉验证
 
 - 已验证的 `codex/scoring-validation-real-shadow-hardening` 先以 fast-forward 合回正式 `codex/scoring-validation-guardrails`，正式分支从 `1e9ccd9` 前进到 `3af25a3` 并推送个人 origin；`main`、`codex/windows-local-stable`、upstream 均未修改。后续开发在隔离分支 `codex/scoring-validation-balance-sheet-fx-shadow` 完成。
