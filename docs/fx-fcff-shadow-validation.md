@@ -1,8 +1,11 @@
 # A/US/HK 时间戳 FX 与 FCFF 重建 shadow 验证
 
-日期：2026-07-17  
-隔离分支：`codex/scoring-validation-fx-fcff-shadow`  
-基线：`4afce20`  
+日期：2026-07-17
+
+隔离分支：`codex/scoring-validation-fx-fcff-shadow`
+
+基线：`4afce20`
+
 实现提交：`af59243`
 
 ## 结论先行
@@ -64,5 +67,6 @@
 - HKMA 发布滞后必须继续可见；若 ECB 或市场源不可达/过期，未来 bridge 必须拒绝，不能回退最近常数。
 - SEC Companyfacts 403、FCFE 专用折现、跨市场 WACC 与金融机构估值继续作为遗留项；在出现独立真实证据前不扩大生产面。
 
-原始证据：`local-ops/state/fx-fcff-shadow/20260717-a-us-hk-final/`。  
+原始证据：`local-ops/state/fx-fcff-shadow/20260717-a-us-hk-final/`。
+
 分支对照：`local-ops/state/branch-score-compare/20260717-fx-fcff-shadow-final.md`。
