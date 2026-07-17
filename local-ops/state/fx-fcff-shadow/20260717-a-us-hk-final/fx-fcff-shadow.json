@@ -1,0 +1,1127 @@
+{
+  "schema_version": "uzi.fx-fcff-shadow.v2",
+  "generated_at": "2026-07-17T09:41:10.941443+00:00",
+  "real_data_only": true,
+  "production_mutation": false,
+  "fx": [
+    {
+      "base": "CNY",
+      "quote": "HKD",
+      "direct": "CNYHKD=X",
+      "inverse": "HKDCNY=X",
+      "triangle": [
+        "CNYUSD=X",
+        "USDHKD=X"
+      ],
+      "as_of": "2026-07-17",
+      "direct_rate": 1.1563999652862549,
+      "inverse_rate": 0.8628000020980835,
+      "triangle_rate": 1.158676473557307,
+      "official_rate": 1.158539099953606,
+      "official_as_of": "2026-07-16",
+      "official_same_date_market_rate": 1.1579129695892334,
+      "hkma_reference_rate": 1.1549,
+      "hkma_reference_as_of": "2026-06-30",
+      "validation": {
+        "eligible": true,
+        "gates": [],
+        "implied_from_inverse": 1.159017150635472,
+        "inverse_gap_pct": 0.225811,
+        "triangle_gap_pct": 0.196475,
+        "official_gap_pct": 0.054045,
+        "stale_days": 0,
+        "official_stale_days": 1,
+        "five_observation_range_pct": 0.180417
+      },
+      "histories": {
+        "CNYHKD=X": [
+          {
+            "date": "2026-07-06",
+            "close": 1.155068039894104
+          },
+          {
+            "date": "2026-07-07",
+            "close": 1.1538079977035522
+          },
+          {
+            "date": "2026-07-08",
+            "close": 1.1541539430618286
+          },
+          {
+            "date": "2026-07-09",
+            "close": 1.1521199941635132
+          },
+          {
+            "date": "2026-07-10",
+            "close": 1.1535500288009644
+          },
+          {
+            "date": "2026-07-13",
+            "close": 1.1567610502243042
+          },
+          {
+            "date": "2026-07-14",
+            "close": 1.1558259725570679
+          },
+          {
+            "date": "2026-07-15",
+            "close": 1.1575560569763184
+          },
+          {
+            "date": "2026-07-16",
+            "close": 1.1579129695892334
+          },
+          {
+            "date": "2026-07-17",
+            "close": 1.1563999652862549
+          }
+        ],
+        "HKDCNY=X": [
+          {
+            "date": "2026-07-06",
+            "close": 0.8655340075492859
+          },
+          {
+            "date": "2026-07-07",
+            "close": 0.8665410280227661
+          },
+          {
+            "date": "2026-07-08",
+            "close": 0.8662949800491333
+          },
+          {
+            "date": "2026-07-09",
+            "close": 0.8677740097045898
+          },
+          {
+            "date": "2026-07-10",
+            "close": 0.8667759895324707
+          },
+          {
+            "date": "2026-07-13",
+            "close": 0.864395022392273
+          },
+          {
+            "date": "2026-07-14",
+            "close": 0.8650010228157043
+          },
+          {
+            "date": "2026-07-15",
+            "close": 0.8637869954109192
+          },
+          {
+            "date": "2026-07-16",
+            "close": 0.8634470105171204
+          },
+          {
+            "date": "2026-07-17",
+            "close": 0.8628000020980835
+          }
+        ],
+        "CNYUSD=X": [
+          {
+            "date": "2026-07-06",
+            "close": 0.14730577170848846
+          },
+          {
+            "date": "2026-07-07",
+            "close": 0.1471497118473053
+          },
+          {
+            "date": "2026-07-08",
+            "close": 0.14720170199871063
+          },
+          {
+            "date": "2026-07-09",
+            "close": 0.14700478315353394
+          },
+          {
+            "date": "2026-07-10",
+            "close": 0.147229865193367
+          },
+          {
+            "date": "2026-07-13",
+            "close": 0.14756663143634796
+          },
+          {
+            "date": "2026-07-14",
+            "close": 0.14750351011753082
+          },
+          {
+            "date": "2026-07-15",
+            "close": 0.14771048724651337
+          },
+          {
+            "date": "2026-07-16",
+            "close": 0.14774976670742035
+          },
+          {
+            "date": "2026-07-17",
+            "close": 0.14778470993041992
+          }
+        ],
+        "USDHKD=X": [
+          {
+            "date": "2026-07-06",
+            "close": 7.842820167541504
+          },
+          {
+            "date": "2026-07-07",
+            "close": 7.842299938201904
+          },
+          {
+            "date": "2026-07-08",
+            "close": 7.841599941253662
+          },
+          {
+            "date": "2026-07-09",
+            "close": 7.838799953460693
+          },
+          {
+            "date": "2026-07-10",
+            "close": 7.8358001708984375
+          },
+          {
+            "date": "2026-07-13",
+            "close": 7.8394598960876465
+          },
+          {
+            "date": "2026-07-14",
+            "close": 7.837500095367432
+          },
+          {
+            "date": "2026-07-15",
+            "close": 7.837490081787109
+          },
+          {
+            "date": "2026-07-16",
+            "close": 7.838260173797607
+          },
+          {
+            "date": "2026-07-17",
+            "close": 7.8403000831604
+          }
+        ]
+      },
+      "source": "Yahoo Finance daily FX close",
+      "retrieved_at": "2026-07-17T09:41:01.116142+00:00"
+    },
+    {
+      "base": "CNY",
+      "quote": "USD",
+      "direct": "CNYUSD=X",
+      "inverse": "USDCNY=X",
+      "triangle": [
+        "CNYHKD=X",
+        "HKDUSD=X"
+      ],
+      "as_of": "2026-07-17",
+      "direct_rate": 0.14778470993041992,
+      "inverse_rate": 6.766600131988525,
+      "triangle_rate": 0.14749434216720658,
+      "official_rate": 0.14777823599154596,
+      "official_as_of": "2026-07-16",
+      "official_same_date_market_rate": 0.14774976670742035,
+      "hkma_reference_rate": 0.14723355430902602,
+      "hkma_reference_as_of": "2026-06-30",
+      "validation": {
+        "eligible": true,
+        "gates": [],
+        "implied_from_inverse": 0.14778470435582342,
+        "inverse_gap_pct": 4e-06,
+        "triangle_gap_pct": 0.19648,
+        "official_gap_pct": 0.019265,
+        "stale_days": 0,
+        "official_stale_days": 1,
+        "five_observation_range_pct": 0.190372
+      },
+      "histories": {
+        "CNYUSD=X": [
+          {
+            "date": "2026-07-06",
+            "close": 0.14730577170848846
+          },
+          {
+            "date": "2026-07-07",
+            "close": 0.1471497118473053
+          },
+          {
+            "date": "2026-07-08",
+            "close": 0.14720170199871063
+          },
+          {
+            "date": "2026-07-09",
+            "close": 0.14700478315353394
+          },
+          {
+            "date": "2026-07-10",
+            "close": 0.147229865193367
+          },
+          {
+            "date": "2026-07-13",
+            "close": 0.14756663143634796
+          },
+          {
+            "date": "2026-07-14",
+            "close": 0.14750351011753082
+          },
+          {
+            "date": "2026-07-15",
+            "close": 0.14771048724651337
+          },
+          {
+            "date": "2026-07-16",
+            "close": 0.14774976670742035
+          },
+          {
+            "date": "2026-07-17",
+            "close": 0.14778470993041992
+          }
+        ],
+        "USDCNY=X": [
+          {
+            "date": "2026-07-06",
+            "close": 6.788599967956543
+          },
+          {
+            "date": "2026-07-07",
+            "close": 6.79580020904541
+          },
+          {
+            "date": "2026-07-08",
+            "close": 6.793399810791016
+          },
+          {
+            "date": "2026-07-09",
+            "close": 6.802499771118164
+          },
+          {
+            "date": "2026-07-10",
+            "close": 6.792099952697754
+          },
+          {
+            "date": "2026-07-13",
+            "close": 6.776599884033203
+          },
+          {
+            "date": "2026-07-14",
+            "close": 6.7795000076293945
+          },
+          {
+            "date": "2026-07-15",
+            "close": 6.769999980926514
+          },
+          {
+            "date": "2026-07-16",
+            "close": 6.768199920654297
+          },
+          {
+            "date": "2026-07-17",
+            "close": 6.766600131988525
+          }
+        ],
+        "CNYHKD=X": [
+          {
+            "date": "2026-07-06",
+            "close": 1.155068039894104
+          },
+          {
+            "date": "2026-07-07",
+            "close": 1.1538079977035522
+          },
+          {
+            "date": "2026-07-08",
+            "close": 1.1541539430618286
+          },
+          {
+            "date": "2026-07-09",
+            "close": 1.1521199941635132
+          },
+          {
+            "date": "2026-07-10",
+            "close": 1.1535500288009644
+          },
+          {
+            "date": "2026-07-13",
+            "close": 1.1567610502243042
+          },
+          {
+            "date": "2026-07-14",
+            "close": 1.1558259725570679
+          },
+          {
+            "date": "2026-07-15",
+            "close": 1.1575560569763184
+          },
+          {
+            "date": "2026-07-16",
+            "close": 1.1579129695892334
+          },
+          {
+            "date": "2026-07-17",
+            "close": 1.1563999652862549
+          }
+        ],
+        "HKDUSD=X": [
+          {
+            "date": "2026-07-06",
+            "close": 0.12750515341758728
+          },
+          {
+            "date": "2026-07-07",
+            "close": 0.12751361727714539
+          },
+          {
+            "date": "2026-07-08",
+            "close": 0.12752500176429749
+          },
+          {
+            "date": "2026-07-09",
+            "close": 0.12757055461406708
+          },
+          {
+            "date": "2026-07-10",
+            "close": 0.12761938571929932
+          },
+          {
+            "date": "2026-07-13",
+            "close": 0.1275598108768463
+          },
+          {
+            "date": "2026-07-14",
+            "close": 0.12759169936180115
+          },
+          {
+            "date": "2026-07-15",
+            "close": 0.12759186327457428
+          },
+          {
+            "date": "2026-07-16",
+            "close": 0.12757933139801025
+          },
+          {
+            "date": "2026-07-17",
+            "close": 0.12754613161087036
+          }
+        ]
+      },
+      "source": "Yahoo Finance daily FX close",
+      "retrieved_at": "2026-07-17T09:41:01.464830+00:00"
+    },
+    {
+      "base": "USD",
+      "quote": "HKD",
+      "direct": "USDHKD=X",
+      "inverse": "HKDUSD=X",
+      "triangle": [
+        "USDCNY=X",
+        "CNYHKD=X"
+      ],
+      "as_of": "2026-07-17",
+      "direct_rate": 7.8403000831604,
+      "inverse_rate": 0.12754613161087036,
+      "triangle_rate": 7.8248961577374985,
+      "official_rate": 7.839713961803437,
+      "official_as_of": "2026-07-16",
+      "official_same_date_market_rate": 7.838260173797607,
+      "hkma_reference_rate": 7.843999999999999,
+      "hkma_reference_as_of": "2026-06-30",
+      "validation": {
+        "eligible": true,
+        "gates": [],
+        "implied_from_inverse": 7.840300504376669,
+        "inverse_gap_pct": 5e-06,
+        "triangle_gap_pct": 0.196471,
+        "official_gap_pct": 0.018544,
+        "stale_days": 0,
+        "official_stale_days": 1,
+        "five_observation_range_pct": 0.03585
+      },
+      "histories": {
+        "USDHKD=X": [
+          {
+            "date": "2026-07-06",
+            "close": 7.842820167541504
+          },
+          {
+            "date": "2026-07-07",
+            "close": 7.842299938201904
+          },
+          {
+            "date": "2026-07-08",
+            "close": 7.841599941253662
+          },
+          {
+            "date": "2026-07-09",
+            "close": 7.838799953460693
+          },
+          {
+            "date": "2026-07-10",
+            "close": 7.8358001708984375
+          },
+          {
+            "date": "2026-07-13",
+            "close": 7.8394598960876465
+          },
+          {
+            "date": "2026-07-14",
+            "close": 7.837500095367432
+          },
+          {
+            "date": "2026-07-15",
+            "close": 7.837490081787109
+          },
+          {
+            "date": "2026-07-16",
+            "close": 7.838260173797607
+          },
+          {
+            "date": "2026-07-17",
+            "close": 7.8403000831604
+          }
+        ],
+        "HKDUSD=X": [
+          {
+            "date": "2026-07-06",
+            "close": 0.12750515341758728
+          },
+          {
+            "date": "2026-07-07",
+            "close": 0.12751361727714539
+          },
+          {
+            "date": "2026-07-08",
+            "close": 0.12752500176429749
+          },
+          {
+            "date": "2026-07-09",
+            "close": 0.12757055461406708
+          },
+          {
+            "date": "2026-07-10",
+            "close": 0.12761938571929932
+          },
+          {
+            "date": "2026-07-13",
+            "close": 0.1275598108768463
+          },
+          {
+            "date": "2026-07-14",
+            "close": 0.12759169936180115
+          },
+          {
+            "date": "2026-07-15",
+            "close": 0.12759186327457428
+          },
+          {
+            "date": "2026-07-16",
+            "close": 0.12757933139801025
+          },
+          {
+            "date": "2026-07-17",
+            "close": 0.12754613161087036
+          }
+        ],
+        "USDCNY=X": [
+          {
+            "date": "2026-07-06",
+            "close": 6.788599967956543
+          },
+          {
+            "date": "2026-07-07",
+            "close": 6.79580020904541
+          },
+          {
+            "date": "2026-07-08",
+            "close": 6.793399810791016
+          },
+          {
+            "date": "2026-07-09",
+            "close": 6.802499771118164
+          },
+          {
+            "date": "2026-07-10",
+            "close": 6.792099952697754
+          },
+          {
+            "date": "2026-07-13",
+            "close": 6.776599884033203
+          },
+          {
+            "date": "2026-07-14",
+            "close": 6.7795000076293945
+          },
+          {
+            "date": "2026-07-15",
+            "close": 6.769999980926514
+          },
+          {
+            "date": "2026-07-16",
+            "close": 6.768199920654297
+          },
+          {
+            "date": "2026-07-17",
+            "close": 6.766600131988525
+          }
+        ],
+        "CNYHKD=X": [
+          {
+            "date": "2026-07-06",
+            "close": 1.155068039894104
+          },
+          {
+            "date": "2026-07-07",
+            "close": 1.1538079977035522
+          },
+          {
+            "date": "2026-07-08",
+            "close": 1.1541539430618286
+          },
+          {
+            "date": "2026-07-09",
+            "close": 1.1521199941635132
+          },
+          {
+            "date": "2026-07-10",
+            "close": 1.1535500288009644
+          },
+          {
+            "date": "2026-07-13",
+            "close": 1.1567610502243042
+          },
+          {
+            "date": "2026-07-14",
+            "close": 1.1558259725570679
+          },
+          {
+            "date": "2026-07-15",
+            "close": 1.1575560569763184
+          },
+          {
+            "date": "2026-07-16",
+            "close": 1.1579129695892334
+          },
+          {
+            "date": "2026-07-17",
+            "close": 1.1563999652862549
+          }
+        ]
+      },
+      "source": "Yahoo Finance daily FX close",
+      "retrieved_at": "2026-07-17T09:41:01.780843+00:00"
+    }
+  ],
+  "official_fx_sources": {
+    "ecb": {
+      "as_of": "2026-07-16",
+      "rates": {
+        "CNY/HKD": 1.158539099953606,
+        "CNY/USD": 0.14777823599154596,
+        "USD/HKD": 7.839713961803437
+      },
+      "source": "ECB euro foreign exchange reference rates",
+      "url": "https://data-api.ecb.europa.eu/service/data/EXR/D.USD+CNY+HKD.EUR.SP00.A?lastNObservations=5&format=csvdata"
+    },
+    "hkma": {
+      "as_of": "2026-06-30",
+      "stale_days": 17,
+      "rates": {
+        "CNY/HKD": 1.1549,
+        "CNY/USD": 0.14723355430902602,
+        "USD/HKD": 7.843999999999999
+      },
+      "source": "HKMA daily exchange rates",
+      "url": "https://api.hkma.gov.hk/public/market-data-and-statistics/monthly-statistical-bulletin/er-ir/er-eeri-daily?offset=0",
+      "freshness_role": "reference_only; not an eligibility gate when publication lags"
+    }
+  },
+  "fcff": [
+    {
+      "ticker": "600519.SH",
+      "symbol": "600519.SS",
+      "market": "A",
+      "financial_institution": false,
+      "period": "2025-12-31",
+      "statement_currency": "CNY",
+      "quote_currency": "CNY",
+      "components": {
+        "ebit": 114783996553.37,
+        "tax_provision": 29444936771.41,
+        "pretax_income": 114755261605.08,
+        "interest_expense": 28734948.29,
+        "depreciation_amortization": 2238749319.79,
+        "signed_capex": -3127594916.41,
+        "change_working_capital": -25984668280.0,
+        "levered_fcf": 58394610072.94
+      },
+      "source_fields": {
+        "ebit": "EBIT",
+        "tax_provision": "Tax Provision",
+        "pretax_income": "Pretax Income",
+        "interest_expense": "Interest Expense",
+        "depreciation_amortization": "Depreciation And Amortization",
+        "signed_capex": "Capital Expenditure",
+        "change_working_capital": "Change In Working Capital",
+        "levered_fcf": "Free Cash Flow"
+      },
+      "reconstruction": {
+        "effective_tax_rate": 0.25658899,
+        "partial_ebit_bridge": 58458172833.955765,
+        "after_tax_interest_bridge": 58415971949.84579,
+        "method_gap_pct": 0.0722,
+        "gates": [
+          "interest_cashflow_classification_unverified"
+        ],
+        "production_eligible": false
+      },
+      "source": "Yahoo Finance annual financials/cashflow",
+      "retrieved_at": "2026-07-17T09:41:02.493887+00:00",
+      "elapsed_s": 0.713
+    },
+    {
+      "ticker": "300750.SZ",
+      "symbol": "300750.SZ",
+      "market": "A",
+      "financial_institution": false,
+      "period": "2025-12-31",
+      "statement_currency": "CNY",
+      "quote_currency": "CNY",
+      "components": {
+        "ebit": 92260563000.0,
+        "tax_provision": 12740236000.0,
+        "pretax_income": 89526545000.0,
+        "interest_expense": 2734018000.0,
+        "depreciation_amortization": 25172147000.0,
+        "signed_capex": -42344558000.0,
+        "change_working_capital": 27457067000.0,
+        "levered_fcf": 90875424000.0
+      },
+      "source_fields": {
+        "ebit": "EBIT",
+        "tax_provision": "Tax Provision",
+        "pretax_income": "Pretax Income",
+        "interest_expense": "Interest Expense",
+        "depreciation_amortization": "Depreciation And Amortization",
+        "signed_capex": "Capital Expenditure",
+        "change_working_capital": "Change In Working Capital",
+        "levered_fcf": "Free Cash Flow"
+      },
+      "reconstruction": {
+        "effective_tax_rate": 0.1423068,
+        "partial_ebit_bridge": 89415913651.36996,
+        "after_tax_interest_bridge": 93220372651.36996,
+        "method_gap_pct": 4.0811,
+        "gates": [
+          "interest_cashflow_classification_unverified"
+        ],
+        "production_eligible": false
+      },
+      "source": "Yahoo Finance annual financials/cashflow",
+      "retrieved_at": "2026-07-17T09:41:03.355886+00:00",
+      "elapsed_s": 0.862
+    },
+    {
+      "ticker": "601318.SH",
+      "symbol": "601318.SS",
+      "market": "A",
+      "financial_institution": true,
+      "period": "2025-12-31",
+      "statement_currency": "CNY",
+      "quote_currency": "CNY",
+      "components": {
+        "ebit": 207199000000.0,
+        "tax_provision": 27289000000.0,
+        "pretax_income": 185590000000.0,
+        "interest_expense": 21609000000.0,
+        "depreciation_amortization": 16674000000.0,
+        "signed_capex": -8355000000.0,
+        "change_working_capital": 641740000000.0,
+        "levered_fcf": 650277000000.0
+      },
+      "source_fields": {
+        "ebit": "EBIT",
+        "tax_provision": "Tax Provision",
+        "pretax_income": "Pretax Income",
+        "interest_expense": "Interest Expense",
+        "depreciation_amortization": "Depreciation And Amortization",
+        "signed_capex": "Capital Expenditure",
+        "change_working_capital": "Change In Working Capital",
+        "levered_fcf": "Free Cash Flow"
+      },
+      "reconstruction": {
+        "effective_tax_rate": 0.14703917,
+        "partial_ebit_bridge": 826791630524.2739,
+        "after_tax_interest_bridge": 668708630524.2739,
+        "method_gap_pct": 19.1201,
+        "gates": [
+          "financial_institution_not_applicable",
+          "fcff_methods_gap_gt_10pct",
+          "interest_cashflow_classification_unverified"
+        ],
+        "production_eligible": false
+      },
+      "source": "Yahoo Finance annual financials/cashflow",
+      "retrieved_at": "2026-07-17T09:41:04.241464+00:00",
+      "elapsed_s": 0.885
+    },
+    {
+      "ticker": "AAPL",
+      "symbol": "AAPL",
+      "market": "U",
+      "financial_institution": false,
+      "period": "2025-09-30",
+      "statement_currency": "USD",
+      "quote_currency": "USD",
+      "components": {
+        "ebit": 133050000000.0,
+        "tax_provision": 20719000000.0,
+        "pretax_income": 132729000000.0,
+        "interest_expense": null,
+        "depreciation_amortization": 11698000000.0,
+        "signed_capex": -12715000000.0,
+        "change_working_capital": -25000000000.0,
+        "levered_fcf": 98767000000.0
+      },
+      "source_fields": {
+        "ebit": "EBIT",
+        "tax_provision": "Tax Provision",
+        "pretax_income": "Pretax Income",
+        "interest_expense": "Interest Expense",
+        "depreciation_amortization": "Depreciation And Amortization",
+        "signed_capex": "Capital Expenditure",
+        "change_working_capital": "Change In Working Capital",
+        "levered_fcf": "Free Cash Flow"
+      },
+      "reconstruction": {
+        "effective_tax_rate": 0.15610002,
+        "partial_ebit_bridge": 86263891892.50276,
+        "after_tax_interest_bridge": null,
+        "method_gap_pct": null,
+        "gates": [
+          "after_tax_interest_bridge_incomplete",
+          "fcff_methods_gap_gt_10pct",
+          "interest_cashflow_classification_unverified"
+        ],
+        "production_eligible": false
+      },
+      "source": "Yahoo Finance annual financials/cashflow",
+      "retrieved_at": "2026-07-17T09:41:05.191993+00:00",
+      "elapsed_s": 0.95
+    },
+    {
+      "ticker": "AMZN",
+      "symbol": "AMZN",
+      "market": "U",
+      "financial_institution": false,
+      "period": "2025-12-31",
+      "statement_currency": "USD",
+      "quote_currency": "USD",
+      "components": {
+        "ebit": 99585000000.0,
+        "tax_provision": 19087000000.0,
+        "pretax_income": 97311000000.0,
+        "interest_expense": 2274000000.0,
+        "depreciation_amortization": 65756000000.0,
+        "signed_capex": -131819000000.0,
+        "change_working_capital": -19969000000.0,
+        "levered_fcf": 7695000000.0
+      },
+      "source_fields": {
+        "ebit": "EBIT",
+        "tax_provision": "Tax Provision",
+        "pretax_income": "Pretax Income",
+        "interest_expense": "Interest Expense",
+        "depreciation_amortization": "Depreciation And Amortization",
+        "signed_capex": "Capital Expenditure",
+        "change_working_capital": "Change In Working Capital",
+        "levered_fcf": "Free Cash Flow"
+      },
+      "reconstruction": {
+        "effective_tax_rate": 0.19614432,
+        "partial_ebit_bridge": -5980032185.467224,
+        "after_tax_interest_bridge": 9522967814.532787,
+        "method_gap_pct": 162.7959,
+        "gates": [
+          "fcff_methods_gap_gt_10pct",
+          "nonpositive_partial_fcff",
+          "interest_cashflow_classification_unverified"
+        ],
+        "production_eligible": false
+      },
+      "source": "Yahoo Finance annual financials/cashflow",
+      "retrieved_at": "2026-07-17T09:41:05.956737+00:00",
+      "elapsed_s": 0.764
+    },
+    {
+      "ticker": "MSTR",
+      "symbol": "MSTR",
+      "market": "U",
+      "financial_institution": false,
+      "period": "2025-12-31",
+      "statement_currency": "USD",
+      "quote_currency": "USD",
+      "components": {
+        "ebit": -5460986000.0,
+        "tax_provision": -1677802000.0,
+        "pretax_income": -5525954000.0,
+        "interest_expense": 64968000.0,
+        "depreciation_amortization": 25517000.0,
+        "signed_capex": -22512295000.0,
+        "change_working_capital": -55193000.0,
+        "levered_fcf": -22579536000.0
+      },
+      "source_fields": {
+        "ebit": "EBIT",
+        "tax_provision": "Tax Provision",
+        "pretax_income": "Pretax Income",
+        "interest_expense": "Interest Expense",
+        "depreciation_amortization": "Depreciation And Amortization",
+        "signed_capex": "Capital Expenditure",
+        "change_working_capital": "Change In Working Capital",
+        "levered_fcf": "Free Cash Flow"
+      },
+      "reconstruction": {
+        "effective_tax_rate": null,
+        "partial_ebit_bridge": null,
+        "after_tax_interest_bridge": null,
+        "method_gap_pct": null,
+        "gates": [
+          "invalid_effective_tax_rate",
+          "partial_ebit_bridge_incomplete",
+          "after_tax_interest_bridge_incomplete",
+          "fcff_methods_gap_gt_10pct",
+          "interest_cashflow_classification_unverified"
+        ],
+        "production_eligible": false
+      },
+      "source": "Yahoo Finance annual financials/cashflow",
+      "retrieved_at": "2026-07-17T09:41:06.842427+00:00",
+      "elapsed_s": 0.885
+    },
+    {
+      "ticker": "BABA",
+      "symbol": "BABA",
+      "market": "U",
+      "financial_institution": false,
+      "period": "2026-03-31",
+      "statement_currency": "CNY",
+      "quote_currency": "USD",
+      "components": {
+        "ebit": 139180000000.0,
+        "tax_provision": 30045000000.0,
+        "pretax_income": 129387000000.0,
+        "interest_expense": 9793000000.0,
+        "depreciation_amortization": 47118000000.0,
+        "signed_capex": -126937000000.0,
+        "change_working_capital": -22547000000.0,
+        "levered_fcf": -50724000000.0
+      },
+      "source_fields": {
+        "ebit": "EBIT",
+        "tax_provision": "Tax Provision",
+        "pretax_income": "Pretax Income",
+        "interest_expense": "Interest Expense",
+        "depreciation_amortization": "Depreciation And Amortization",
+        "signed_capex": "Capital Expenditure",
+        "change_working_capital": "Change In Working Capital",
+        "levered_fcf": "Free Cash Flow"
+      },
+      "reconstruction": {
+        "effective_tax_rate": 0.23221035,
+        "partial_ebit_bridge": 4494964084.490723,
+        "after_tax_interest_bridge": -43205035915.509285,
+        "method_gap_pct": 110.4038,
+        "gates": [
+          "fcff_methods_gap_gt_10pct",
+          "nonpositive_interest_bridge_fcff",
+          "interest_cashflow_classification_unverified",
+          "statement_quote_currency_mismatch_requires_fx"
+        ],
+        "production_eligible": false
+      },
+      "source": "Yahoo Finance annual financials/cashflow",
+      "retrieved_at": "2026-07-17T09:41:07.761272+00:00",
+      "elapsed_s": 0.919
+    },
+    {
+      "ticker": "JPM",
+      "symbol": "JPM",
+      "market": "U",
+      "financial_institution": true,
+      "period": "2025-12-31",
+      "statement_currency": "USD",
+      "quote_currency": "USD",
+      "components": {
+        "ebit": null,
+        "tax_provision": 15547000000.0,
+        "pretax_income": 72595000000.0,
+        "interest_expense": 97898000000.0,
+        "depreciation_amortization": 8821000000.0,
+        "signed_capex": null,
+        "change_working_capital": -218801000000.0,
+        "levered_fcf": -147782000000.0
+      },
+      "source_fields": {
+        "ebit": "",
+        "tax_provision": "Tax Provision",
+        "pretax_income": "Pretax Income",
+        "interest_expense": "Interest Expense",
+        "depreciation_amortization": "Depreciation And Amortization",
+        "signed_capex": "",
+        "change_working_capital": "Change In Working Capital",
+        "levered_fcf": "Free Cash Flow"
+      },
+      "reconstruction": {
+        "effective_tax_rate": 0.21416075,
+        "partial_ebit_bridge": null,
+        "after_tax_interest_bridge": -70849909580.54964,
+        "method_gap_pct": null,
+        "gates": [
+          "financial_institution_not_applicable",
+          "partial_ebit_bridge_incomplete",
+          "fcff_methods_gap_gt_10pct",
+          "nonpositive_interest_bridge_fcff",
+          "interest_cashflow_classification_unverified"
+        ],
+        "production_eligible": false
+      },
+      "source": "Yahoo Finance annual financials/cashflow",
+      "retrieved_at": "2026-07-17T09:41:08.565297+00:00",
+      "elapsed_s": 0.804
+    },
+    {
+      "ticker": "00700.HK",
+      "symbol": "0700.HK",
+      "market": "H",
+      "financial_institution": false,
+      "period": "2025-12-31",
+      "statement_currency": "CNY",
+      "quote_currency": "HKD",
+      "components": {
+        "ebit": 290705000000.0,
+        "tax_provision": 47448000000.0,
+        "pretax_income": 277249000000.0,
+        "interest_expense": 13456000000.0,
+        "depreciation_amortization": 66028000000.0,
+        "signed_capex": -112881000000.0,
+        "change_working_capital": 16484000000.0,
+        "levered_fcf": 190171000000.0
+      },
+      "source_fields": {
+        "ebit": "EBIT",
+        "tax_provision": "Tax Provision",
+        "pretax_income": "Pretax Income",
+        "interest_expense": "Interest Expense",
+        "depreciation_amortization": "Depreciation And Amortization",
+        "signed_capex": "Capital Expenditure",
+        "change_working_capital": "Change In Working Capital",
+        "levered_fcf": "Free Cash Flow"
+      },
+      "reconstruction": {
+        "effective_tax_rate": 0.17113858,
+        "partial_ebit_bridge": 210585159275.59705,
+        "after_tax_interest_bridge": 201324159275.59702,
+        "method_gap_pct": 4.3977,
+        "gates": [
+          "interest_cashflow_classification_unverified",
+          "statement_quote_currency_mismatch_requires_fx"
+        ],
+        "production_eligible": false
+      },
+      "source": "Yahoo Finance annual financials/cashflow",
+      "retrieved_at": "2026-07-17T09:41:09.226501+00:00",
+      "elapsed_s": 0.66
+    },
+    {
+      "ticker": "09988.HK",
+      "symbol": "9988.HK",
+      "market": "H",
+      "financial_institution": false,
+      "period": "2026-03-31",
+      "statement_currency": "CNY",
+      "quote_currency": "HKD",
+      "components": {
+        "ebit": 139180000000.0,
+        "tax_provision": 30045000000.0,
+        "pretax_income": 129387000000.0,
+        "interest_expense": 9793000000.0,
+        "depreciation_amortization": 47118000000.0,
+        "signed_capex": -126937000000.0,
+        "change_working_capital": -22547000000.0,
+        "levered_fcf": -50724000000.0
+      },
+      "source_fields": {
+        "ebit": "EBIT",
+        "tax_provision": "Tax Provision",
+        "pretax_income": "Pretax Income",
+        "interest_expense": "Interest Expense",
+        "depreciation_amortization": "Depreciation And Amortization",
+        "signed_capex": "Capital Expenditure",
+        "change_working_capital": "Change In Working Capital",
+        "levered_fcf": "Free Cash Flow"
+      },
+      "reconstruction": {
+        "effective_tax_rate": 0.23221035,
+        "partial_ebit_bridge": 4494964084.490723,
+        "after_tax_interest_bridge": -43205035915.509285,
+        "method_gap_pct": 110.4038,
+        "gates": [
+          "fcff_methods_gap_gt_10pct",
+          "nonpositive_interest_bridge_fcff",
+          "interest_cashflow_classification_unverified",
+          "statement_quote_currency_mismatch_requires_fx"
+        ],
+        "production_eligible": false
+      },
+      "source": "Yahoo Finance annual financials/cashflow",
+      "retrieved_at": "2026-07-17T09:41:10.021402+00:00",
+      "elapsed_s": 0.795
+    },
+    {
+      "ticker": "00005.HK",
+      "symbol": "0005.HK",
+      "market": "H",
+      "financial_institution": true,
+      "period": "2025-12-31",
+      "statement_currency": "USD",
+      "quote_currency": "HKD",
+      "components": {
+        "ebit": null,
+        "tax_provision": 6776000000.0,
+        "pretax_income": 29907000000.0,
+        "interest_expense": 63078000000.0,
+        "depreciation_amortization": 4916000000.0,
+        "signed_capex": -4661000000.0,
+        "change_working_capital": 30790000000.0,
+        "levered_fcf": 25105000000.0
+      },
+      "source_fields": {
+        "ebit": "",
+        "tax_provision": "Tax Provision",
+        "pretax_income": "Pretax Income",
+        "interest_expense": "Interest Expense",
+        "depreciation_amortization": "Depreciation And Amortization",
+        "signed_capex": "Capital Expenditure",
+        "change_working_capital": "Change In Working Capital",
+        "levered_fcf": "Free Cash Flow"
+      },
+      "reconstruction": {
+        "effective_tax_rate": 0.22656903,
+        "partial_ebit_bridge": null,
+        "after_tax_interest_bridge": 73891478683.92015,
+        "method_gap_pct": null,
+        "gates": [
+          "financial_institution_not_applicable",
+          "partial_ebit_bridge_incomplete",
+          "fcff_methods_gap_gt_10pct",
+          "interest_cashflow_classification_unverified",
+          "statement_quote_currency_mismatch_requires_fx"
+        ],
+        "production_eligible": false
+      },
+      "source": "Yahoo Finance annual financials/cashflow",
+      "retrieved_at": "2026-07-17T09:41:10.941443+00:00",
+      "elapsed_s": 0.919
+    }
+  ]
+}
