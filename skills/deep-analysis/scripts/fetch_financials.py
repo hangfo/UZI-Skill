@@ -196,6 +196,9 @@ def _apply_operating_cash_flow(out: dict, df_cf) -> None:
             out["free_cash_flow_yi"] = latest_fcf_yi
             out["free_cash_flow_period"] = latest_fcf_year
             out["free_cash_flow_basis"] = "reported_ocf_minus_cash_paid_for_long_term_assets"
+            # CFO is after interest under the reporting frameworks used here.
+            # CFO - cash capex is therefore a levered cash-flow proxy, not FCFF.
+            out["free_cash_flow_class"] = "levered_cash_flow_proxy"
             out["free_cash_flow_is_derived"] = True
             out["free_cash_flow_currency"] = "CNY"
             out["free_cash_flow_source_fields"] = {
@@ -274,6 +277,9 @@ def _apply_us_free_cash_flow(out: dict, cashflow, currency: str = "USD") -> None
     out["free_cash_flow_history_years"] = [record["period"][:4] for record in records]
     out["free_cash_flow_history"] = [record["value_yi"] for record in records]
     out["free_cash_flow_basis"] = latest["basis"]
+    # yfinance's Free Cash Flow is CFO - capex.  Preserve that semantic
+    # boundary so an enterprise-value DCF cannot subtract net debt twice.
+    out["free_cash_flow_class"] = "levered_cash_flow_proxy"
     out["free_cash_flow_is_derived"] = latest["basis"] != "yfinance_cashflow_free_cash_flow"
     out["free_cash_flow_currency"] = currency
     out["free_cash_flow_source_fields"] = {
@@ -618,14 +624,13 @@ def _fetch_us(ti) -> dict:
                 if gp_vals:
                     out["gross_margin"] = f"{gp_vals[-1] / latest_revenue * 100:.1f}%"
             out["financial_years"] = [str(c)[:4] for c in fin.columns[::-1]]
-        _apply_us_free_cash_flow(out, cf, str(info.get("currency") or "USD"))
+        statement_currency = str(info.get("financialCurrency") or info.get("currency") or "USD")
+        _apply_us_free_cash_flow(out, cf, statement_currency)
         out["roe"] = f"{info.get('returnOnEquity', 0) * 100:.1f}%" if info.get("returnOnEquity") else "—"
         out["net_margin"] = f"{info.get('profitMargins', 0) * 100:.1f}%" if info.get("profitMargins") else "—"
         if info.get("grossMargins") and not out.get("gross_margin"):
             out["gross_margin"] = f"{info.get('grossMargins') * 100:.1f}%"
         health = {}
-        total_debt = info.get("totalDebt") or 0
-        total_cash = info.get("totalCash") or 0
         if latest_revenue > 0:
             normalized_fcf_yi = out.get("free_cash_flow_yi")
             if _is_finite(normalized_fcf_yi):
@@ -634,10 +639,6 @@ def _fetch_us(ti) -> dict:
                 fcf = info.get("freeCashflow")
                 if _is_finite(fcf):
                     health["fcf_margin"] = round(float(fcf) / latest_revenue * 100, 1)
-        if _is_finite(total_debt):
-            health["total_debt"] = round(float(total_debt) / 1e8, 2)
-        if _is_finite(total_cash):
-            health["cash"] = round(float(total_cash) / 1e8, 2)
         if bs is not None and not bs.empty:
             asset_row = next((r for r in ["Total Assets", "TotalAssets"] if r in bs.index), None)
             debt_row = next((r for r in ["Total Debt", "TotalDebt"] if r in bs.index), None)
@@ -646,6 +647,30 @@ def _fetch_us(ti) -> dict:
                 debts = [float(v) for v in bs.loc[debt_row].tolist()[::-1] if _is_finite(v)]
                 if assets and debts and assets[-1] > 0:
                     health["debt_ratio"] = round(debts[-1] / assets[-1] * 100, 1)
+            debt_record = _latest_balance_value(bs, ("Total Debt", "TotalDebt"))
+            cash_record = _latest_balance_value(
+                bs,
+                (
+                    "Cash Cash Equivalents And Short Term Investments",
+                    "Cash And Cash Equivalents",
+                    "CashCashEquivalentsAndShortTermInvestments",
+                    "CashAndCashEquivalents",
+                ),
+            )
+            if debt_record:
+                health["total_debt"] = round(debt_record["value"] / 1e8, 2)
+            if cash_record:
+                health["cash"] = round(cash_record["value"] / 1e8, 2)
+            if debt_record and cash_record:
+                same_period = debt_record["period"] == cash_record["period"]
+                health["net_debt_bridge_period"] = debt_record["period"] if same_period else ""
+                health["net_debt_bridge_currency"] = statement_currency
+                health["net_debt_bridge_basis"] = "yfinance_balance_sheet_same_period"
+                health["net_debt_bridge_source_fields"] = {
+                    "total_debt": debt_record["field"],
+                    "cash": cash_record["field"],
+                }
+                health["net_debt_bridge_production_eligible"] = bool(same_period)
         if health:
             out["financial_health"] = health
         return out
@@ -658,6 +683,24 @@ def _is_finite(v) -> bool:
         return math.isfinite(float(v))
     except (TypeError, ValueError):
         return False
+
+
+def _latest_balance_value(balance_sheet, candidates: tuple[str, ...]) -> dict | None:
+    """Return the latest finite annual balance-sheet value with provenance."""
+    if balance_sheet is None or balance_sheet.empty:
+        return None
+    field = next((name for name in candidates if name in balance_sheet.index), None)
+    if field is None:
+        return None
+    records = []
+    for column in balance_sheet.columns:
+        value = balance_sheet.at[field, column]
+        if _is_finite(value):
+            records.append({"field": field, "period": str(column)[:10], "value": float(value)})
+    if not records:
+        return None
+    records.sort(key=lambda record: record["period"])
+    return records[-1]
 
 
 def main(ticker: str) -> dict:

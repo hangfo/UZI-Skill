@@ -423,6 +423,7 @@ def extract_features(raw: dict, dims: dict) -> dict:
     f["fcf_latest_yi"] = _f(reported_fcf) if fcf_available else None
     f["fcf_available"] = fcf_available
     f["fcf_input_basis"] = fin.get("free_cash_flow_basis") or ""
+    f["fcf_input_class"] = fin.get("free_cash_flow_class") or "unknown"
     f["fcf_input_period"] = fin.get("free_cash_flow_period") or ""
     f["fcf_input_currency"] = fin.get("free_cash_flow_currency") or {"A": "CNY", "H": "HKD", "U": "USD"}.get(market, "")
     f["fcf_input_source_fields"] = fin.get("free_cash_flow_source_fields") or {}
@@ -435,7 +436,15 @@ def extract_features(raw: dict, dims: dict) -> dict:
     cash_present = isinstance(health, dict) and health.get("cash") is not None
     f["total_debt_yi"] = _f(health.get("total_debt")) if debt_present else None
     f["cash_yi"] = _f(health.get("cash")) if cash_present else None
-    f["net_debt_bridge_available"] = debt_present and cash_present
+    f["net_debt_bridge_available"] = (
+        debt_present
+        and cash_present
+        and health.get("net_debt_bridge_production_eligible") is True
+    )
+    f["net_debt_bridge_period"] = health.get("net_debt_bridge_period") or ""
+    f["net_debt_bridge_currency"] = health.get("net_debt_bridge_currency") or ""
+    f["net_debt_bridge_basis"] = health.get("net_debt_bridge_basis") or ""
+    f["net_debt_bridge_source_fields"] = health.get("net_debt_bridge_source_fields") or {}
     f["quote_currency"] = basic.get("currency") or {"A": "CNY", "H": "HKD", "U": "USD"}.get(market, "")
     f["dcf_is_financial_institution"] = _is_financial_institution(f.get("industry"), f.get("sector"))
     # Gross margin (%)

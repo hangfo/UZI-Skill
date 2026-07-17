@@ -92,7 +92,7 @@ FETCHER_REGISTRY: dict[str, type] = {
             "free_cash_flow_yi", "free_cash_flow_history",
             "free_cash_flow_history_years", "free_cash_flow_basis",
             "free_cash_flow_period", "free_cash_flow_currency",
-            "free_cash_flow_source_fields",
+            "free_cash_flow_source_fields", "free_cash_flow_class",
         ],
         args_fn=lambda t, r: (t,),
     ),

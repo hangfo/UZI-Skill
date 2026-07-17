@@ -98,6 +98,7 @@ def compute_dcf(features: dict, assumptions: dict | None = None) -> dict:
     input_contract = {
         "value_yi": features.get("fcf_latest_yi"),
         "basis": features.get("fcf_input_basis") or "",
+        "cash_flow_class": features.get("fcf_input_class") or "unknown",
         "period": features.get("fcf_input_period") or "",
         "currency": features.get("fcf_input_currency") or "",
         "source_fields": features.get("fcf_input_source_fields") or {},
@@ -125,6 +126,8 @@ def compute_dcf(features: dict, assumptions: dict | None = None) -> dict:
     fcf0 = _num(input_contract["value_yi"])
     if fcf0 <= 0:
         return _unavailable("non_positive_explicit_fcf")
+    if input_contract["cash_flow_class"] != "fcff":
+        return _unavailable("unsupported_cash_flow_class_for_enterprise_dcf")
     if features.get("net_debt_bridge_available") is not True:
         return _unavailable("missing_debt_or_cash_for_equity_bridge")
     if _num(features.get("shares_outstanding_yi")) <= 0:

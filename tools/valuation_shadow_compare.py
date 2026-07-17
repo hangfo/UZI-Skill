@@ -150,6 +150,7 @@ def collect_one(ticker: str) -> dict[str, Any]:
     source = "repo_fetch_financials"
     statement_currency = str(fin.get("free_cash_flow_currency") or "")
     basis = str(fin.get("free_cash_flow_basis") or "")
+    cash_flow_class = str(fin.get("free_cash_flow_class") or "unknown")
 
     if ti.market == "H" and yahoo.get("fcf"):
         periods = [row["period"] for row in yahoo["fcf"]]
@@ -157,6 +158,7 @@ def collect_one(ticker: str) -> dict[str, Any]:
         source = "yfinance_hk_shadow_supplement"
         statement_currency = str(yahoo.get("statement_currency") or "")
         basis = "yfinance_cashflow_free_cash_flow"
+        cash_flow_class = "levered_cash_flow_proxy"
 
     industry = yahoo.get("industry") or ""
     sector = yahoo.get("sector") or ""
@@ -178,8 +180,10 @@ def collect_one(ticker: str) -> dict[str, Any]:
     if diagnostics["latest_to_3y_median"] is not None and not 0.5 <= abs(diagnostics["latest_to_3y_median"]) <= 1.5:
         gates.append("latest_materially_differs_from_3y_median")
     production_gates = list(gates)
+    if cash_flow_class != "fcff":
+        production_gates.append("production_unsupported_cash_flow_class_for_enterprise_dcf")
     health = fin.get("financial_health") or {}
-    if health.get("total_debt") is None or health.get("cash") is None:
+    if health.get("net_debt_bridge_production_eligible") is not True:
         production_gates.append("production_missing_debt_or_cash_bridge")
     if ti.market != "A":
         production_gates.append("production_discount_rate_contract_not_verified")
@@ -190,6 +194,7 @@ def collect_one(ticker: str) -> dict[str, Any]:
         "source": source,
         "repo_source": repo.get("source"),
         "basis": basis,
+        "cash_flow_class": cash_flow_class,
         "periods": periods,
         "fcf_history_yi": clean_values,
         "statement_currency": statement_currency,

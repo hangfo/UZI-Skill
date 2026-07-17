@@ -260,6 +260,7 @@ def test_financials_current_em_schema_aligns_annual_ocf_ratio():
     assert out["free_cash_flow_yi"] == 583.95
     assert out["free_cash_flow_period"] == "2025"
     assert out["free_cash_flow_basis"] == "reported_ocf_minus_cash_paid_for_long_term_assets"
+    assert out["free_cash_flow_class"] == "levered_cash_flow_proxy"
     assert out["free_cash_flow_currency"] == "CNY"
     assert out["free_cash_flow_source_fields"]["cash_capex"] == "CONSTRUCT_LONG_ASSET"
     assert "fcf" not in out
@@ -284,6 +285,7 @@ def test_us_cashflow_schema_preserves_real_negative_fcf():
     assert out["free_cash_flow_period"] == "2025-12-31"
     assert out["free_cash_flow_history"] == [-221.39, -225.8]
     assert out["free_cash_flow_basis"] == "yfinance_cashflow_free_cash_flow"
+    assert out["free_cash_flow_class"] == "levered_cash_flow_proxy"
     assert out["free_cash_flow_is_derived"] is False
     assert out["free_cash_flow_currency"] == "USD"
 
@@ -570,6 +572,7 @@ def test_registry_matches_legacy_output_shapes():
             "free_cash_flow_history": [8.0, 10.0],
             "free_cash_flow_history_years": ["2024", "2025"],
             "free_cash_flow_basis": "reported_ocf_minus_cash_paid_for_long_term_assets",
+            "free_cash_flow_class": "levered_cash_flow_proxy",
             "free_cash_flow_period": "2025",
             "free_cash_flow_currency": "CNY",
             "free_cash_flow_source_fields": {
@@ -591,7 +594,7 @@ def test_registry_matches_legacy_output_shapes():
         result = validate_result(DimResult(dim_key=dim_key, data=data), spec)
         assert result.data_gaps == []
         if dim_key == "1_financials":
-            for key in ("free_cash_flow_yi", "free_cash_flow_history", "free_cash_flow_basis", "free_cash_flow_period"):
+            for key in ("free_cash_flow_yi", "free_cash_flow_history", "free_cash_flow_basis", "free_cash_flow_class", "free_cash_flow_period"):
                 assert key in spec.optional_fields
 
 
@@ -613,8 +616,16 @@ def test_stock_features_normalizes_legacy_us_raw_market_cap_and_uses_real_fcf():
                 "free_cash_flow_yi": 987.67,
                 "free_cash_flow_period": "2025-09-30",
                 "free_cash_flow_basis": "yfinance_cashflow_free_cash_flow",
+                "free_cash_flow_class": "levered_cash_flow_proxy",
                 "free_cash_flow_currency": "USD",
-                "financial_health": {"total_debt": 847.11, "cash": 685.07},
+                "financial_health": {
+                    "total_debt": 847.11,
+                    "cash": 685.07,
+                    "net_debt_bridge_period": "2025-09-30",
+                    "net_debt_bridge_currency": "USD",
+                    "net_debt_bridge_basis": "yfinance_balance_sheet_same_period",
+                    "net_debt_bridge_production_eligible": True,
+                },
             }},
         },
     }
@@ -625,6 +636,7 @@ def test_stock_features_normalizes_legacy_us_raw_market_cap_and_uses_real_fcf():
     assert features["shares_crosscheck_ok"] is True
     assert features["fcf_latest_yi"] == 987.67
     assert features["fcf_input_basis"] == "yfinance_cashflow_free_cash_flow"
+    assert features["fcf_input_class"] == "levered_cash_flow_proxy"
     assert features["net_debt_bridge_available"] is True
 
 
@@ -643,6 +655,7 @@ def test_stock_features_preserves_explicit_negative_fcf_without_profit_proxy():
                 "free_cash_flow_yi": -225.8,
                 "free_cash_flow_period": "2025-12-31",
                 "free_cash_flow_basis": "yfinance_cashflow_free_cash_flow",
+                "free_cash_flow_class": "levered_cash_flow_proxy",
                 "free_cash_flow_currency": "USD",
                 "financial_health": {"total_debt": 82.57, "cash": 22.07},
             }},
@@ -661,6 +674,7 @@ def test_institutional_dcf_fails_closed_for_unsafe_inputs():
         "price": 100, "market_cap_yi": 1000, "shares_outstanding_yi": 10,
         "fcf_available": True, "fcf_latest_yi": 50,
         "fcf_input_basis": "cash_statement", "fcf_input_period": "2025",
+        "fcf_input_class": "fcff",
         "fcf_input_currency": "USD", "quote_currency": "USD",
         "net_debt_bridge_available": True, "total_debt_yi": 20, "cash_yi": 10,
     }
@@ -670,11 +684,31 @@ def test_institutional_dcf_fails_closed_for_unsafe_inputs():
     assert compute_dcf({**base, "net_debt_bridge_available": False})["reason"] == "missing_debt_or_cash_for_equity_bridge"
     assert compute_dcf({**base, "quote_currency": "HKD"})["reason"] == "cashflow_quote_currency_mismatch_requires_fx"
     assert compute_dcf({**base, "market": "U"})["reason"] == "unsupported_market_discount_rate_contract"
+    assert compute_dcf({**base, "fcf_input_class": "levered_cash_flow_proxy"})["reason"] == "unsupported_cash_flow_class_for_enterprise_dcf"
 
     valid = compute_dcf(base)
     assert valid["available"] is True
     assert valid["base_fcf_yi"] == 50
     assert valid["input_contract"]["is_proxy"] is False
+
+
+def test_us_balance_bridge_preserves_missingness_and_period_provenance():
+    import pandas as pd
+    import fetch_financials as ff
+
+    columns = [pd.Timestamp("2024-09-30"), pd.Timestamp("2025-09-30")]
+    balance = pd.DataFrame(
+        [[100.0, 90.0], [40.0, float("nan")]],
+        index=["Total Debt", "Cash And Cash Equivalents"],
+        columns=columns,
+    )
+    debt = ff._latest_balance_value(balance, ("Total Debt",))
+    cash = ff._latest_balance_value(balance, ("Cash And Cash Equivalents",))
+
+    assert debt == {"field": "Total Debt", "period": "2025-09-30", "value": 90.0}
+    assert cash == {"field": "Cash And Cash Equivalents", "period": "2024-09-30", "value": 40.0}
+    assert debt["period"] != cash["period"]
+    assert ff._latest_balance_value(balance, ("Invented Cash",)) is None
 
 
 def test_simple_dcf_rejects_terminal_growth_at_or_above_wacc():
