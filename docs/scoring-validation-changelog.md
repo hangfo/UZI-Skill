@@ -11,6 +11,7 @@
 - 11 个 A/US/HK 真实年度报表样本比较 partial EBIT bridge 与 FCF+after-tax-interest。600519/300750/腾讯虽只差 `0.0722%/4.0811%/4.3977%`，但利息现金流分类仍未验证；AMZN 差 `162.7959%`，BABA/09988 差 `110.4038%` 且方向冲突。FCFF 因此 `0/11` 晋级，金融机构继续不适用。
 - `175/175` direct tests、`py_compile`、`git diff --check` 通过；未安装 pytest、未重装、未跑 deep、未运行 update。冻结对照 baseline=`4afce20`、candidate=`af59243`：`71 ok / 0 review / 0 possible_regression`，全部分数与档位变化为 0。
 - 六轮交换顺序纯评分中位数 `2.8s -> 2.5s`，只判定无性能回退。建议吸收只读审计工具/证据/测试；放弃本轮 FCFF 产品化，不新增静态 FX/WACC 或自动换汇。完整结论见 `docs/fx-fcff-shadow-validation.md`。
+- 全部硬门禁通过后，隔离分支已 fast-forward 合回正式 `codex/scoring-validation-guardrails` 并推送个人 origin；隔离分支也已留存在个人 origin 供审计。后续开发继续在正式评分分支，不合到 `main` 或历史 Windows 基线。
 - 公正效果评分 `9.5/10`：高收益来自证明 FX 桥可审计、同时用真实反例阻止错误 FCFF 进入生产；扣分来自发行人会计政策、SEC Companyfacts、金融机构估值和跨市场 WACC 尚未闭环。
 
 ### `ac4e1ad` · 现金流类别、同期间资本桥与 A/US/HK 真实交叉验证
