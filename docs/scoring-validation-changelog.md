@@ -4,6 +4,14 @@
 
 ## 2026-07-17
 
+### 三方上游审计与补充数据技能 v3.4.0
+
+- 实时核对 `a-stock-data`、`global-stock-data` 和 `wbh604/UZI-Skill`：仅 `a-stock-data` 从本地 `v3.3.0` 落后到 `v3.4.0`；`global-stock-data v1.0.1` 与上游内容一致；正式评分分支已包含 `upstream/main=fce996c`，为 `ahead 55 / behind 0`。
+- 本地 `a-stock-data` 与官方 `v3.3.0` blob 哈希一致，无私人改动，已精确升级到不可变 release `v3.4.0`。没有把同类示例函数复制到 UZI 生产流水线，也没有修改评分、估值、路由或缓存契约。
+- 真实验证而非 mock：47 个 Python fenced blocks 全部可编译；财联社签名电报返回实时记录；交易所龙虎榜、600519 新浪资金流、000001 深交所公告均返回真实数据；002475 解禁的 type/shares/able_shares 均非空；100 个行业按涨跌幅正确排序。
+- Windows 更新入口改为默认只审计；移除自动硬重置、自动合并、自动安装依赖和滚动 main 覆盖。技能更新必须显式使用 `-Mode ApplySkills`，且只从 release tag 下载并先备份。UZI 代码永远走隔离分支与同输入回归门禁。
+- UZI 重叠审查结论：解禁、行业、CLS、龙虎榜、资金流和公告在 UZI 已有消费链或多源 fallback；未证明真实覆盖缺口前不重复接入，避免口径混用、重复事件计权与性能回退。完整规范见 `docs/upstream-intake-policy.md`。
+
 ### `af59243` · 时间戳 FX 官方交叉验证与 FCFF 重建停止线
 
 - 从正式检查点 `4afce20` 建立隔离分支 `codex/scoring-validation-fx-fcff-shadow`；没有修改生产评分、DCF、WACC、增长率、基金路由、`main`、`codex/windows-local-stable` 或 upstream。

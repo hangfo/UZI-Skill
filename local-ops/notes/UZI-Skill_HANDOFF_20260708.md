@@ -1,5 +1,14 @@
 # UZI-Skill 交接记录 - 2026-07-08
 
+## 2026-07-17 三方上游择优吸收
+
+- 当前开发分支仍为 `codex/scoring-validation-guardrails`；UZI 相对 `upstream/main=fce996c` 为 `ahead 55 / behind 0`，不需要再次合并。`upstream` push URL 保持 `DISABLED`，`main` 与 `codex/windows-local-stable` 未修改。
+- 用户级 `a-stock-data` 已从无本地改动的 `v3.3.0` 更新到官方 `v3.4.0`；`global-stock-data v1.0.1` 已精确匹配上游，无需更新。
+- v3.4.0 的 47 个 Python 块全部编译；CLS 实时电报、交易所龙虎榜、新浪资金流、深交所公告、解禁字段和行业排序均用真实网络数据通过。没有用 mock，也没有把这些示例重复移植进 UZI。
+- `local-ops/windows/update-uzi.ps1` 现在默认只审计。它不再 reset 分支、安装依赖或自动合并；显式 `-Mode ApplySkills` 也只更新两个补充技能，并从不可变 release tag 下载、先备份再替换。
+- 长期规则见 `docs/upstream-intake-policy.md`：补充技能走 release/hash/真实 smoke；UZI 走隔离 merge、同输入 lite/medium、事件护栏和性能门禁；重复 provider、营销变化和无真实缺口支撑的参数不吸收。
+- 下一步常规开发继续在 `codex/scoring-validation-guardrails`。仅当新 UZI upstream 与评分/估值/路由重叠，或真实失败率证明需要把技能备源产品化时，使用 `GPT-5.6 Sol` + `高推理`；纯 release 审计用 `GPT-5.6 Terra` + `中推理` 即可。
+
 ## 2026-07-17 FX/FCFF shadow 停止线
 
 - 隔离分支 `codex/scoring-validation-fx-fcff-shadow` 从基线 `4afce20` 完成，实现提交 `af59243`、文档检查点 `c3a226f`；已推送个人 origin，并已 fast-forward 合回正式 `codex/scoring-validation-guardrails`。当前及后续开发分支是正式评分分支；不要合到 `main`、`codex/windows-local-stable` 或历史实验分支。
