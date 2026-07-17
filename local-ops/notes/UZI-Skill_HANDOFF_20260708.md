@@ -2,12 +2,12 @@
 
 ## 2026-07-17 正式分支合回与资本桥/FCFF 语义收口
 
-- 分支判断已经执行：`codex/scoring-validation-real-shadow-hardening` 是正式评分分支的直接后代，已 `--ff-only` 合回 `codex/scoring-validation-guardrails`，正式检查点和 origin 均为 `3af25a3`。不要合到 `main`、`codex/windows-local-stable` 或历史 `codex/scoring-validation-upstream-fce996c`。当前开发分支为 `codex/scoring-validation-balance-sheet-fx-shadow`。
+- 分支判断已经执行：`codex/scoring-validation-real-shadow-hardening` 先合到正式评分分支；本轮 `codex/scoring-validation-balance-sheet-fx-shadow` 通过全部门禁后又以 `--ff-only` 合回。当前分支与 origin 均为 `codex/scoring-validation-guardrails@0b74234`。不要合到 `main`、`codex/windows-local-stable` 或历史 `codex/scoring-validation-upstream-fce996c`。
 - 隔离实现提交 `ac4e1ad`：CFO-capex/Yahoo FCF 标记为 `levered_cash_flow_proxy`；企业价值 DCF 仅接受真正 FCFF；美股同期间债务/现金桥带 provenance，缺失不补 0；现金流使用财报币种。
 - 真实证据：A/US/HK 10 标的 Yahoo+新浪/东财交叉；AAPL FCF 两源 0 差异，腾讯债务/现金 `2.59%/0%`，阿里债务/现金/FCF `7.71%/0%/1.72%`。宁德时代供应商 FCFF/FCFE 与 CFO-capex 差 `80.76%/93.42%`，MSTR FCF 差 `99.50%`，因此不接入生产。完整表见 `docs/cross-market-capital-bridge-shadow.md`。
 - 验证：核心/评分/harness/overlay `130/130`，基金/路由/学校 `27/27`，评分校准 `7/7`；`py_compile`、`git diff --check` 通过。branch compare `71 ok / 0 review / 0 possible_regression`，所有分数和档位变化为 0；纯评分三轮中位数 `2.400s -> 2.300s`，无性能回退。
 - 遗留：SEC Companyfacts 当前网络 403；时间戳 FX、真正 FCFF、FCFE 专用折现、跨市场市场参数和金融机构估值尚未闭环。不要用静态 FX/WACC 或供应商字段名直接填坑。
-- 建议：本隔离分支值得合回正式评分分支，但继续通过 fast-forward/普通 merge 保留检查点，不要改写历史。合回后回到正式 `codex/scoring-validation-guardrails` 开发；新的 FX/FCFF 研究仍先从正式点另开隔离分支。下一步使用 `GPT-5.6 Sol` + `高推理`。
+- 已执行：隔离分支已 fast-forward 合回并推送正式评分分支。后续常规开发继续在 `codex/scoring-validation-guardrails`；新的 FX/FCFF 研究仍先从正式点另开隔离分支。下一步使用 `GPT-5.6 Sol` + `高推理`。
 
 ## 2026-07-15 A/US/HK 真实 shadow 与估值安全收口
 
