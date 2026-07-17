@@ -2,6 +2,19 @@
 
 > 当前文档记录 `codex/scoring-validation-guardrails` 分支上的评分验证、branch-vs-branch harness、证据冻结与文档治理改动。它是开发追溯文档，不是 agent 指令入口；影响 agent 行为的规则仍以 `AGENTS.md` 和相关 harness 文档为准。
 
+## 2026-07-17
+
+### `ac4e1ad` · 现金流类别、同期间资本桥与 A/US/HK 真实交叉验证
+
+- 已验证的 `codex/scoring-validation-real-shadow-hardening` 先以 fast-forward 合回正式 `codex/scoring-validation-guardrails`，正式分支从 `1e9ccd9` 前进到 `3af25a3` 并推送个人 origin；`main`、`codex/windows-local-stable`、upstream 均未修改。后续开发在隔离分支 `codex/scoring-validation-balance-sheet-fx-shadow` 完成。
+- 第一性原理修正：`CFO-capex` 与 Yahoo FCF 明确标为 `levered_cash_flow_proxy`，不能作为 FCFF 折现为企业价值后再扣净债务。现有企业价值 DCF 仅接受明确 `fcff`，否则 fail-closed。
+- 美股资产负债桥只接受同一期报表值，记录期间、财报币种、basis 和来源字段；缺债务/现金不再静默写 0。现金流币种改用 `financialCurrency`，真实 BABA 从错误风险收口为财报 CNY/报价 USD 的显式错配。
+- 新增真实 10 标的跨源 capital-bridge shadow。600519/300750 的债务和严格现金两源均零差异；AAPL FCF/现金零差异，腾讯债务/现金差 `2.59%/0%`，阿里债务/现金/FCF 差 `7.71%/0%/1.72%`。宁德时代供应商 FCFF/FCFE 与 CFO-capex 差 `80.76%/93.42%`，MSTR FCF 差 `99.50%`，证明这些字段不可混用。
+- SEC Companyfacts 在当前网络返回 403，已显式保留为遗留项；没有以估算或 mock 补齐。FX、静态 WACC、FCFE 路径和金融机构专用估值继续暂缓，避免过拟合和伪精确。
+- 验证：`py_compile`、`git diff --check`；核心专项 `130/130`、基金/路由/学校 `27/27`、评分校准 `7/7`。修复了“不同轴向必须产生不同整数总分”的脆弱测试，但没有调整评分公式。
+- 中立对照 baseline=`3af25a3`、candidate=`ac4e1ad`：`71 ok / 0 review / 0 possible_regression`，全部评分和档位变化为 0。三轮纯评分中位数 `2.400s -> 2.300s`，只判定无性能回退。
+- 公正效果评分 `9.6/10`：阻断了杠杆后现金流重复扣债、缺失债务/现金伪装为零和跨币种错标，同时评分零漂移。扣分来自 SEC 官方源暂不可达、FX/FCFF/金融机构模型尚未闭环。
+
 ## 2026-07-15
 
 ### `a21e554` · A/US/HK 真实估值 shadow 与 DCF fail-closed 契约
