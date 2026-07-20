@@ -2,7 +2,7 @@
 """Minimal stdlib test-function runner for environments without pytest.
 
 Supports the two fixtures used by the bounded UZI validation suite:
-``monkeypatch`` (setattr/setenv) and ``tmp_path``.  It is intentionally not a
+``monkeypatch`` (setattr/setenv/delenv/chdir) and ``tmp_path``.  It is intentionally not a
 pytest replacement; unsupported fixtures fail explicitly instead of being
 silently skipped.
 """
@@ -42,6 +42,15 @@ class MonkeyPatch:
         old = os.environ.get(name)
         os.environ[name] = str(value)
         self._undo.append(("env", (name, existed, old)))
+
+    def delenv(self, name: str, raising: bool = True) -> None:
+        existed = name in os.environ
+        if not existed:
+            if raising:
+                raise KeyError(name)
+            return
+        old = os.environ.pop(name)
+        self._undo.append(("env", (name, True, old)))
 
     def chdir(self, path: str | os.PathLike[str]) -> None:
         old = Path.cwd()

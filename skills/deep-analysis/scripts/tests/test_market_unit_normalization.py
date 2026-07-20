@@ -91,6 +91,63 @@ def test_kline_filters_nan_rows_before_stats():
     assert ind["last_close"] == 120.0
 
 
+def test_kline_short_history_does_not_fabricate_ma200_stage_or_year_window():
+    from fetch_kline import compute_indicators
+
+    rows = [
+        {
+            "日期": f"2026-01-{(i % 28) + 1:02d}",
+            "开盘": 100 + i,
+            "收盘": 100 + i,
+            "最高": 101 + i,
+            "最低": 99 + i,
+            "成交量": 1_000_000 + i,
+        }
+        for i in range(90)
+    ]
+
+    ind = compute_indicators(rows)
+
+    assert ind["history_observations"] == 90
+    assert ind["trend_history_sufficient"] is False
+    assert ind["year_window_complete"] is False
+    assert ind["stage"] == 0
+    assert ind["ma200"] is None
+    assert ind["above_ma200"] is None
+    assert ind["ma120"] is None
+    assert ind["ma_bull_alignment"] is None
+    assert ind["year_high"] is None
+    assert ind["year_low"] is None
+    assert ind["pct_from_year_high"] is None
+    assert ind["available_history_high"] == 189.0
+
+
+def test_kline_full_history_enables_ma200_stage_and_year_window():
+    from fetch_kline import compute_indicators
+
+    rows = [
+        {
+            "日期": f"2025-{(i // 28) + 1:02d}-{(i % 28) + 1:02d}",
+            "开盘": 100 + i,
+            "收盘": 100 + i,
+            "最高": 101 + i,
+            "最低": 99 + i,
+            "成交量": 1_000_000 + i,
+        }
+        for i in range(250)
+    ]
+
+    ind = compute_indicators(rows)
+
+    assert ind["trend_history_sufficient"] is True
+    assert ind["year_window_complete"] is True
+    assert ind["stage"] == 2
+    assert ind["ma200"] is not None
+    assert ind["above_ma200"] is True
+    assert ind["year_high"] == 349.0
+    assert ind["pct_from_year_high"] == 0.0
+
+
 def test_lite_profile_sets_fund_limit(monkeypatch):
     from lib.analysis_profile import apply_profile_to_env, get_profile
 

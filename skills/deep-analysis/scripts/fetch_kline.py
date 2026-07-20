@@ -20,6 +20,10 @@ from lib import data_sources as ds
 from lib.market_router import parse_ticker
 
 
+MIN_STAGE_OBSERVATIONS = 200
+MIN_YEAR_WINDOW_OBSERVATIONS = 250
+
+
 def _ema(values, n):
     k = 2 / (n + 1)
     out, prev = [], None
@@ -102,7 +106,10 @@ def _finite_float(v, default=None):
 
 def _stage(closes, ma200) -> int:
     """Weinstein Stage Analysis: 1=底部 2=上升 3=顶部 4=下降"""
-    if len(closes) < 60 or ma200 is None:
+    # A 200-day moving average is not a 200-day signal until 200 actual
+    # observations exist.  The old 60-row gate silently treated a partial
+    # history average as MA200, which could award Stage 2 to recent IPOs.
+    if len(closes) < MIN_STAGE_OBSERVATIONS or ma200 is None:
         return 0
     last = closes[-1]
     ma200_now = ma200[-1]
@@ -161,13 +168,34 @@ def compute_indicators(klines: list[dict]) -> dict:
     avg_vol_5 = mean(vols[-5:]) if len(vols) >= 5 else 0
     avg_vol_20 = mean(vols[-20:]) if len(vols) >= 20 else 0
 
+    history_count = len(closes)
+    has_ma5 = history_count >= 5
+    has_ma10 = history_count >= 10
+    has_ma20 = history_count >= 20
+    has_ma60 = history_count >= 60
+    has_ma120 = history_count >= 120
+    has_ma200 = history_count >= MIN_STAGE_OBSERVATIONS
+    has_year_window = history_count >= MIN_YEAR_WINDOW_OBSERVATIONS
+    available_high = max(closes)
+    available_low = min(closes)
+
     return {
         "last_close": last,
-        "ma5": ma5[-1], "ma10": ma10[-1], "ma20": ma20[-1],
-        "ma60": ma60[-1], "ma120": ma120[-1], "ma200": ma200[-1] if ma200 else None,
-        "above_ma20": last > ma20[-1],
-        "above_ma200": last > ma200[-1] if ma200 else None,
-        "ma_bull_alignment": ma5[-1] > ma10[-1] > ma20[-1] > ma60[-1] > ma120[-1],
+        "history_observations": history_count,
+        "trend_history_sufficient": has_ma200,
+        "year_window_complete": has_year_window,
+        "ma5": ma5[-1] if has_ma5 else None,
+        "ma10": ma10[-1] if has_ma10 else None,
+        "ma20": ma20[-1] if has_ma20 else None,
+        "ma60": ma60[-1] if has_ma60 else None,
+        "ma120": ma120[-1] if has_ma120 else None,
+        "ma200": ma200[-1] if has_ma200 else None,
+        "above_ma20": last > ma20[-1] if has_ma20 else None,
+        "above_ma200": last > ma200[-1] if has_ma200 else None,
+        "ma_bull_alignment": (
+            ma5[-1] > ma10[-1] > ma20[-1] > ma60[-1] > ma120[-1]
+            if has_ma120 else None
+        ),
         "macd_dif": dif[-1], "macd_dea": dea[-1], "macd_hist": macd_hist[-1],
         "macd_golden_cross": dif[-1] > dea[-1] and dif[-2] <= dea[-2] if len(dif) > 1 else False,
         "rsi_14": _rsi(closes, 14),
@@ -178,9 +206,14 @@ def compute_indicators(klines: list[dict]) -> dict:
         "obv": _obv(closes, vols)[0],
         "obv_trend_up": _obv(closes, vols)[1],
         "williams_r": _williams_r(closes, highs, lows, 14),
-        "year_high": max(closes[-250:]) if len(closes) >= 250 else max(closes),
-        "year_low": min(closes[-250:]) if len(closes) >= 250 else min(closes),
-        "pct_from_year_high": (last - max(closes[-250:])) / max(closes[-250:]) * 100 if len(closes) >= 250 else 0,
+        "year_high": max(closes[-250:]) if has_year_window else None,
+        "year_low": min(closes[-250:]) if has_year_window else None,
+        "pct_from_year_high": (
+            (last - max(closes[-250:])) / max(closes[-250:]) * 100
+            if has_year_window else None
+        ),
+        "available_history_high": available_high,
+        "available_history_low": available_low,
         "stage": _stage(closes, ma200),
         "vol_5_vs_20": (avg_vol_5 / avg_vol_20) if avg_vol_20 else None,
         "vcp_score": _vcp_score(highs, lows),
@@ -328,7 +361,8 @@ def main(ticker: str) -> dict:
 
     # Derive stage / ma_align / macd / rsi human labels from indicators
     stage_label = STAGE_LABEL.get(indicators.get("stage", 0), "—")
-    ma_align = "多头排列" if indicators.get("ma_bull_alignment") else "非多头"
+    ma_alignment = indicators.get("ma_bull_alignment")
+    ma_align = "多头排列" if ma_alignment is True else ("非多头" if ma_alignment is False else "历史不足")
     macd_label = "金叉水上" if (indicators.get("macd_golden_cross") and indicators.get("macd_dif", 0) > 0) else (
         "死叉水上" if (indicators.get("macd_dif", 0) > 0 and indicators.get("macd_hist", 0) < 0) else
         "水下" if indicators.get("macd_dif", 0) < 0 else "中性"
