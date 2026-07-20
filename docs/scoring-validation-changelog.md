@@ -11,6 +11,7 @@
 - MU/WDC/STX/SNDK/GEV/BMNR/CRCL/FIG/SPCX 共 49 个真实历史窗口：`42 beneficial_contract_fix / 7 no_change / 0 possible_regression`。成熟 full Stage 全部不变，FIG 242 日保留 Stage 4 但不伪造年度精度，SPCX 24 日明确 unknown/null。
 - 生产重抓：MU lite `52.8`、SNDK medium `47.6`、SPCX lite `38.3`，最新日线均为 `2026-07-17`；无 traceback。冻结评分对照 `64 raw + 7 synthetic = 71`，`71 ok / 0 review / 0 possible_regression`，所有评分/档位变化为 0。
 - 31 轮纯计算中位数 `0.092015s -> 0.087824s`，无性能回退；direct tests `213/213`、`py_compile`、`git diff --check` 通过。完整结论见 `docs/us-momentum-history-validation.md`。
+- 全部门槛通过后，隔离分支已推送个人 origin，并以 fast-forward 合回正式 `codex/scoring-validation-guardrails`；后续开发继续使用正式评分分支。
 
 ## 2026-07-17
 

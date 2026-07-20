@@ -6,7 +6,7 @@
 - 真实 Yahoo 日线 9 股、49 个窗口结果为 `42 beneficial / 7 unchanged / 0 possible_regression`；成熟 MU/WDC/STX/SNDK/GEV/BMNR/CRCL full Stage 不变，FIG 242 日保留 Stage 4，SPCX 24 日保持 unknown 且不再输出伪 MA200/年度偏离。
 - 真实生产重抓 MU lite、SNDK medium、SPCX lite，最新 K 线均为 `2026-07-17`；得分 `52.8/47.6/38.3`，报告已生成。网络补充维度缺口显式保留，没有默认填充。
 - 冻结分支对照 `71/71`、`0 possible_regression`、评分和档位零变化；direct tests `213/213`。31 轮纯计算中位 `0.092015s -> 0.087824s`，无性能回退。
-- 全部硬边界通过后应 fast-forward 合回并继续在 `codex/scoring-validation-guardrails` 开发；`main`、`codex/windows-local-stable` 和 upstream 不动。详见 `docs/us-momentum-history-validation.md`。
+- 全部硬边界通过后，隔离分支已推送个人 origin，并已 fast-forward 合回正式 `codex/scoring-validation-guardrails`。后续继续在该正式评分分支开发；`main`、`codex/windows-local-stable` 和 upstream 未动。详见 `docs/us-momentum-history-validation.md`。
 
 ## 2026-07-17 三方上游择优吸收
 
