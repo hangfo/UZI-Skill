@@ -2,6 +2,16 @@
 
 > 当前文档记录 `codex/scoring-validation-guardrails` 分支上的评分验证、branch-vs-branch harness、证据冻结与文档治理改动。它是开发追溯文档，不是 agent 指令入口；影响 agent 行为的规则仍以 `AGENTS.md` 和相关 harness 文档为准。
 
+## 2026-07-20
+
+### 美股动量短历史 fail-closed
+
+- 从正式检查点 `2fdc8b4` 建立隔离分支 `codex/scoring-validation-us-momentum-history`。真实 Yahoo 日线发现旧版在只有 60-199 个交易日时用部分均值冒充 MA200 并判 Stage 1-4，不足 250 日还把年度高点偏离写成 `0`。
+- 生产契约改为按真实观察数开放 MA5/10/20/60/120/200；Stage 至少需要 200 日，年度高低点和偏离至少需要 250 日。新增观察数/完整性字段及实际可观察区间高低点；不改评分、阈值、估值或路由。
+- MU/WDC/STX/SNDK/GEV/BMNR/CRCL/FIG/SPCX 共 49 个真实历史窗口：`42 beneficial_contract_fix / 7 no_change / 0 possible_regression`。成熟 full Stage 全部不变，FIG 242 日保留 Stage 4 但不伪造年度精度，SPCX 24 日明确 unknown/null。
+- 生产重抓：MU lite `52.8`、SNDK medium `47.6`、SPCX lite `38.3`，最新日线均为 `2026-07-17`；无 traceback。冻结评分对照 `64 raw + 7 synthetic = 71`，`71 ok / 0 review / 0 possible_regression`，所有评分/档位变化为 0。
+- 31 轮纯计算中位数 `0.092015s -> 0.087824s`，无性能回退；direct tests `213/213`、`py_compile`、`git diff --check` 通过。完整结论见 `docs/us-momentum-history-validation.md`。
+
 ## 2026-07-17
 
 ### 三方上游审计与补充数据技能 v3.4.0

@@ -650,3 +650,9 @@ DCF 输入效果必须与纯评分回归分开报告：
 - `lib/quant_signal.py` 支持上述离线环境变量，避免纯评分场景偷偷访问 AkShare。
 
 修复后完整 both+holdout 对照从数分钟级降到数秒级，并且 `29 ok / 2 review / 0 possible_regression` 不变。后续如果在非 harness 的普通报告流程中还遇到 859 长循环，应单独治理 fetch 层或 fund holdings runner，不要和评分公式质量问题混在一起。
+
+## 2026-07-20 · 真实美股历史完整性影子
+
+`tools/us_momentum_history_shadow.py` 补足了 branch harness 不覆盖 fetch 计算契约的盲区。它一次抓取 Yahoo 真实日线，在两个 detached worktree 中重放完全相同的 bars，并比较 60/90/120/180/200/full 窗口的 Stage、MA200 和年度窗口，不把在线漂移混入因果判断。
+
+默认篮子为 `MU/WDC/STX/SNDK/GEV/BMNR/CRCL/FIG/SPCX`。2026-07-20 结果为 49 行：`42 beneficial_contract_fix / 7 no_change / 0 possible_regression`；31 轮纯计算中位 `0.092015s -> 0.087824s`，无性能告警。该工具只验证 fetch/指标证据完整性；评分和交易边界仍必须另跑 `branch_score_compare.py` 的 core、holdout、discovered cache、frozen overlays、synthetic adversarial 组合。本轮该组合为 `71/71` 且全部 score/tier delta 为 0。
