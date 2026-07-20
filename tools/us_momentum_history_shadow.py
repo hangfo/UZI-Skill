@@ -11,6 +11,7 @@ import argparse
 import json
 import os
 import shutil
+import statistics
 import subprocess
 import sys
 import tempfile
@@ -76,40 +77,48 @@ def _fetch_yahoo_daily(ticker: str, range_: str = "2y") -> list[dict[str, Any]]:
 
 
 _EVALUATOR = r"""
-import json, sys
+import json, sys, time
 from pathlib import Path
 worktree, payload_path, output_path = map(Path, sys.argv[1:4])
 sys.path.insert(0, str(worktree / 'skills' / 'deep-analysis' / 'scripts'))
 from fetch_kline import compute_indicators
 payload = json.loads(payload_path.read_text(encoding='utf-8'))
+timings = []
 out = []
-for ticker, rows in payload['bars'].items():
-    lengths = sorted(set(payload['windows'] + [len(rows)]))
-    for length in lengths:
-        if length > len(rows):
-            continue
-        sample = rows[:length] if length < len(rows) else rows
-        ind = compute_indicators(sample)
-        out.append({
-            'ticker': ticker,
-            'window': 'full' if length == len(rows) else length,
-            'rows': length,
-            'as_of': sample[-1]['Date'],
-            'stage': ind.get('stage'),
-            'ma200': ind.get('ma200'),
-            'above_ma200': ind.get('above_ma200'),
-            'ma_bull_alignment': ind.get('ma_bull_alignment'),
-            'year_high': ind.get('year_high'),
-            'pct_from_year_high': ind.get('pct_from_year_high'),
-            'history_observations': ind.get('history_observations'),
-            'trend_history_sufficient': ind.get('trend_history_sufficient'),
-            'year_window_complete': ind.get('year_window_complete'),
-        })
-output_path.write_text(json.dumps(out, ensure_ascii=False), encoding='utf-8')
+for _ in range(payload.get('repeats', 5)):
+    started = time.perf_counter()
+    current = []
+    for ticker, rows in payload['bars'].items():
+        lengths = sorted(set(payload['windows'] + [len(rows)]))
+        for length in lengths:
+            if length > len(rows):
+                continue
+            sample = rows[:length] if length < len(rows) else rows
+            ind = compute_indicators(sample)
+            current.append({
+                'ticker': ticker,
+                'window': 'full' if length == len(rows) else length,
+                'rows': length,
+                'as_of': sample[-1]['Date'],
+                'stage': ind.get('stage'),
+                'ma200': ind.get('ma200'),
+                'above_ma200': ind.get('above_ma200'),
+                'ma_bull_alignment': ind.get('ma_bull_alignment'),
+                'year_high': ind.get('year_high'),
+                'pct_from_year_high': ind.get('pct_from_year_high'),
+                'history_observations': ind.get('history_observations'),
+                'trend_history_sufficient': ind.get('trend_history_sufficient'),
+                'year_window_complete': ind.get('year_window_complete'),
+            })
+    timings.append(time.perf_counter() - started)
+    out = current
+output_path.write_text(json.dumps({'rows': out, 'compute_seconds': timings}, ensure_ascii=False), encoding='utf-8')
 """
 
 
-def _evaluate_ref(ref: str, payload_path: Path, temp_root: Path) -> tuple[str, list[dict[str, Any]], float]:
+def _evaluate_ref(
+    ref: str, payload_path: Path, temp_root: Path
+) -> tuple[str, list[dict[str, Any]], float, list[float]]:
     sha = _resolve_ref(ref)
     worktree = temp_root / f"worktree-{sha[:10]}"
     output = temp_root / f"result-{sha[:10]}.json"
@@ -122,8 +131,8 @@ def _evaluate_ref(ref: str, payload_path: Path, temp_root: Path) -> tuple[str, l
         )
         if proc.returncode:
             raise RuntimeError(proc.stderr.strip() or proc.stdout.strip() or "indicator evaluation failed")
-        rows = json.loads(output.read_text(encoding="utf-8"))
-        return sha, rows, time.perf_counter() - started
+        evaluated = json.loads(output.read_text(encoding="utf-8"))
+        return sha, evaluated["rows"], time.perf_counter() - started, evaluated["compute_seconds"]
     finally:
         _git("worktree", "remove", "--force", str(worktree), check=False)
 
@@ -194,7 +203,8 @@ def _markdown(result: dict[str, Any]) -> str:
         f"- candidate: `{result['candidate']}`",
         f"- real tickers: `{', '.join(result['tickers'])}`",
         f"- rows: `{summary['total']}`; no_change `{summary['no_change']}`; beneficial_contract_fix `{summary['beneficial_contract_fix']}`; possible_regression `{summary['possible_regression']}`",
-        f"- evaluation seconds: baseline `{result['timing_seconds']['baseline']:.3f}`, candidate `{result['timing_seconds']['candidate']:.3f}`",
+        f"- process seconds: baseline `{result['timing_seconds']['baseline_process']:.3f}`, candidate `{result['timing_seconds']['candidate_process']:.3f}`",
+        f"- pure-compute median seconds: baseline `{result['timing_seconds']['baseline_compute_median']:.6f}`, candidate `{result['timing_seconds']['candidate_compute_median']:.6f}`; warning `{result['performance_warning']}`",
         "",
         "| ticker | window | as of | baseline stage | candidate stage | verdict |",
         "|---|---:|---|---:|---:|---|",
@@ -216,6 +226,7 @@ def main() -> int:
     parser.add_argument("--candidate", required=True)
     parser.add_argument("--tickers", nargs="+", default=DEFAULT_TICKERS)
     parser.add_argument("--windows", nargs="+", type=int, default=DEFAULT_WINDOWS)
+    parser.add_argument("--repeats", type=int, default=7)
     parser.add_argument("--json-out", type=Path)
     parser.add_argument("--markdown-out", type=Path)
     args = parser.parse_args()
@@ -230,9 +241,16 @@ def main() -> int:
         if temp_root.parent != temp_base or not temp_root.name.startswith("uzi-us-momentum-shadow-"):
             raise RuntimeError(f"unexpected temp path: {temp_root}")
         payload_path = temp_root / "real-bars.json"
-        payload_path.write_text(json.dumps({"bars": bars, "windows": args.windows}), encoding="utf-8")
-        baseline_sha, baseline_rows, baseline_seconds = _evaluate_ref(args.baseline, payload_path, temp_root)
-        candidate_sha, candidate_rows, candidate_seconds = _evaluate_ref(args.candidate, payload_path, temp_root)
+        payload_path.write_text(
+            json.dumps({"bars": bars, "windows": args.windows, "repeats": max(1, args.repeats)}),
+            encoding="utf-8",
+        )
+        baseline_sha, baseline_rows, baseline_seconds, baseline_compute = _evaluate_ref(
+            args.baseline, payload_path, temp_root
+        )
+        candidate_sha, candidate_rows, candidate_seconds, candidate_compute = _evaluate_ref(
+            args.candidate, payload_path, temp_root
+        )
 
     rows = _compare(baseline_rows, candidate_rows)
     summary = {
@@ -241,6 +259,12 @@ def main() -> int:
         "beneficial_contract_fix": sum(row["verdict"] == "beneficial_contract_fix" for row in rows),
         "possible_regression": sum(row["verdict"] == "possible_regression" for row in rows),
     }
+    baseline_median = statistics.median(baseline_compute)
+    candidate_median = statistics.median(candidate_compute)
+    performance_warning = (
+        candidate_median > baseline_median * 1.15
+        and candidate_median - baseline_median > 0.01
+    )
     result = {
         "schema_version": "uzi.us_momentum_history_shadow.v1",
         "fetched_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -248,7 +272,15 @@ def main() -> int:
         "candidate": candidate_sha,
         "tickers": list(bars),
         "source": "Yahoo Finance chart v8 real daily bars",
-        "timing_seconds": {"baseline": baseline_seconds, "candidate": candidate_seconds},
+        "timing_seconds": {
+            "baseline_process": baseline_seconds,
+            "candidate_process": candidate_seconds,
+            "baseline_compute_runs": baseline_compute,
+            "candidate_compute_runs": candidate_compute,
+            "baseline_compute_median": baseline_median,
+            "candidate_compute_median": candidate_median,
+        },
+        "performance_warning": performance_warning,
         "summary": summary,
         "rows": rows,
     }
@@ -259,7 +291,7 @@ def main() -> int:
         args.markdown_out.parent.mkdir(parents=True, exist_ok=True)
         args.markdown_out.write_text(_markdown(result), encoding="utf-8")
     print(json.dumps(result, ensure_ascii=False))
-    return 1 if summary["possible_regression"] else 0
+    return 1 if summary["possible_regression"] or performance_warning else 0
 
 
 if __name__ == "__main__":
