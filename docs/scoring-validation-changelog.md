@@ -11,6 +11,7 @@
 - UZI 只吸收可证明的语义缺口：canonical router 已把 `920002` 识别为 BJ，但 data source/direct Tencent/Sina 各自复制旧前缀表，真实请求误发 `sz920002/sh920002` 均为空。统一 transport prefix 后，腾讯和新浪 `bj920002` 均返回万达轴承真实价格；腾讯同时返回总/流通市值。
 - 48 个 A 股 Skill 和 35 个全球 Skill Python blocks 全编译；AAPL、00700、920002/688146/601127、FINRA、Treasury、CFTC、OCC 与 SEC fail-closed 用真实端点或真实契约验证。CBOE 因授权条款没有联网。未复制板块资金流、FINRA、Frames、Treasury/CFTC 到 UZI，未改评分、估值和交易阈值。
 - Windows 审计器改为按 release commit SHA 下载，记录 release/HEAD drift，安装后复核状态；默认 audit-only，UZI 永不自动 merge。完整结论见 `docs/upstream-intake-audit-20260728.md`。
+- 冻结对照 baseline=`6b295bd`、candidate=`5cb1323`：`64 raw + 7 synthetic`，lite/medium 全覆盖，`71 ok / 0 review / 0 possible_regression`；全部评分与交易档位变化为 0。三轮交换顺序整批中位数 `2.6s -> 2.3s`，只判无性能回退。direct runner `269/269`、`py_compile`、`git diff --check` 通过。
 
 ## 2026-07-20
 

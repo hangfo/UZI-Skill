@@ -100,9 +100,22 @@
 6. 生产接入新数据源前先跑 shadow：覆盖率、字段完整率、时效、跨源误差、延迟和条款许可都通过，才讨论消费端。
 7. 最后用同一冻结输入跑 lite/medium、真实 overlay、synthetic adversarial 和多轮性能门禁；零 `possible_regression` 才能 fast-forward 正式分支。
 
+## 冻结评分与性能门禁
+
+baseline=`6b295bd`，candidate=`5cb1323`。输入为 `64` 个 core/holdout/discovered-cache/frozen-overlay raw cases，加 `7` 个 synthetic adversarial cases；raw 全部同时跑 lite 与 medium。
+
+- `71 ok / 0 review / 0 possible_regression`。
+- 所有 investment score、overall score、fundamental score、panel consensus 和交易档位变化均为 `0`。
+- structured active P0/P1、缺财务但主题热、游资热但机构卖出继续受限；伪造、已解决、过期和非 issuer 事件继续不误伤。
+- 三轮交换顺序的整批进程耗时中位数：baseline `2.6s`，candidate `2.3s`。单轮范围分别为 `2.3–4.1s` 与 `2.2–4.6s`；存在 Windows 进程启动噪声，只能判定“无性能回退”，不宣称提速。
+- direct runner `269/269`、`py_compile`、`git diff --check` 通过；项目 venv 无 pytest，未安装。
+
+完整逐行结果：
+`local-ops/state/branch-score-compare/20260728-upstream-intake-final.md`。
+
 ## 剩余风险与停止线
 
-- 东财现已出现短时断连；分页修复证明了逻辑缺陷，但外部源可达性仍会变化。不得把断连改成默认值。
+- 东财在首轮重试中出现短时断连，随后真实复跑成功返回 `total=496 / rows=205`；这既验证了补丁，也证明外部可达性会波动。不得把断连改成默认值。
 - `board_fund_flow` 尚无 UZI 消费需求；在缺少收益归因前不得接入评分。
 - FINRA short volume 不能冒充未平仓空头；SEC Frames 不能按名称相似直接进入 FCFF/DCF。
 - CBOE 在取得明确授权前不运行网络 smoke，也不作为默认源。

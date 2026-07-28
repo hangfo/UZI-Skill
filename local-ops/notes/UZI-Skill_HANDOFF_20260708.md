@@ -6,7 +6,8 @@
 - 用户级 `a-stock-data` 已从官方 `v3.4.0` 更新为 `v3.5.1+uzi.1`；`global-stock-data` 从官方 `v1.0.1` 精确更新为 `v2.0.3`。前者本地补丁只修复东财当前实得 100-row page 导致 `top_n>200` 提前截断的问题，补丁基版、哈希和删除条件均已落盘。
 - 真实交叉验证发现 UZI 自己的 `920xxx` transport 路由漂移：canonical market 是 BJ，但腾讯/新浪直连曾拼成 SH/SZ。候选实现统一复用 canonical prefix；真实 `bj920002` 在 data source、Tencent provider 和 Sina provider 三路均成功。
 - 美股/港股现有 UZI 公共 Tencent quote 解析用 AAPL/00700 实测正常，不做无收益重写。板块资金流、FINRA short volume、SEC Frames、Treasury、CFTC、Nasdaq 和 CBOE 均不复制进默认生产链；其中 CBOE 未获授权不联网。
-- 重跑入口：`D:\UZI-Skill\.venv\Scripts\python.exe tools\stock_skill_release_smoke.py --skip-board-flow --json-out local-ops\state\upstream-audit\20260728-stock-skills-real-smoke.json`。Eastmoney 恢复后可去掉 `--skip-board-flow` 单独复核分页。
+- 重跑入口：`D:\UZI-Skill\.venv\Scripts\python.exe tools\stock_skill_release_smoke.py --json-out local-ops\state\upstream-audit\20260728-stock-skills-real-smoke.json`。若 Eastmoney 临时不可达，可用 `--skip-board-flow` 完成其余独立端点，但必须把该项记录为 access gap。
+- Eastmoney 随后已恢复并通过完整分页：`total=496 / returned=205`。冻结评分对照 baseline=`6b295bd`、candidate=`5cb1323` 为 `71/71 ok、0 possible_regression`，所有评分和交易档位零变化；三轮交换顺序整批中位数 `2.6s -> 2.3s`，无性能回退。direct runner `269/269`。
 - 详细矩阵、剩余风险和长期策略见 `docs/upstream-intake-audit-20260728.md` 与 `docs/upstream-intake-policy.md`。全部冻结评分/性能门禁通过后才允许 fast-forward 正式分支；继续使用 `GPT-5.6 Sol + 高推理` 处理重叠代码，纯 release 审计可用 `GPT-5.6 Terra + 中推理`。
 
 ## 2026-07-20 美股动量短历史契约
