@@ -12,6 +12,7 @@
 - 与 2026-07-20 对比：MU `52.8→52.6`、SNDK `47.6→47.6`、SPCX `38.3→38.3`，无档位变化；MU 的 -0.2 来自 07-17 到 07-27 的真实输入更新，同输入分支比较为零变化。
 - baseline=`e7241dc`、candidate=`1f5251c`：`68 raw + 7 synthetic`，lite/medium 全覆盖，`75 ok / 0 review / 0 possible_regression`，全部分数/档位变化为零。7 股 37 个真实历史窗口全部 no-change；31 轮纯计算中位 `0.073388s→0.073262s`，无性能回退。
 - 相关 direct runner `157/157`、新增契约 `10/10`、`py_compile`、`git diff --check` 通过；没有安装 pytest、没有跑 deep/update。完整结论见 `docs/us-momentum-real-refresh-validation-20260728.md`。
+- 全部硬门禁通过后，隔离分支已只推个人 origin，并以 `--ff-only` 合回正式 `codex/scoring-validation-guardrails@9fa1914`；后续继续在正式评分分支，`main`、`codex/windows-local-stable` 与 upstream 均未修改。
 
 ### 三方 release/HEAD 择优吸收与北交所路由
 
