@@ -9,6 +9,7 @@
 - 重跑入口：`D:\UZI-Skill\.venv\Scripts\python.exe tools\stock_skill_release_smoke.py --json-out local-ops\state\upstream-audit\20260728-stock-skills-real-smoke.json`。若 Eastmoney 临时不可达，可用 `--skip-board-flow` 完成其余独立端点，但必须把该项记录为 access gap。
 - Eastmoney 随后已恢复并通过完整分页：`total=496 / returned=205`。冻结评分对照 baseline=`6b295bd`、candidate=`5cb1323` 为 `71/71 ok、0 possible_regression`，所有评分和交易档位零变化；三轮交换顺序整批中位数 `2.6s -> 2.3s`，无性能回退。direct runner `269/269`。
 - 详细矩阵、剩余风险和长期策略见 `docs/upstream-intake-audit-20260728.md` 与 `docs/upstream-intake-policy.md`。全部冻结评分/性能门禁通过后才允许 fast-forward 正式分支；继续使用 `GPT-5.6 Sol + 高推理` 处理重叠代码，纯 release 审计可用 `GPT-5.6 Terra + 中推理`。
+- 隔离分支已推送个人 origin，并已 `--ff-only` 合回正式 `codex/scoring-validation-guardrails`。下一步继续在正式评分分支；不要回到隔离分支继续堆叠常规开发。
 
 ## 2026-07-20 美股动量短历史契约
 
