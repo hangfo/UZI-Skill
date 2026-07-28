@@ -1,0 +1,24 @@
+Subject: a-stock-data v3.5.1 board pagination uses observed page size
+
+Upstream release: v3.5.1 / 281fc69a0b733ffc6458fe2cf9f1ea56804aa886
+Local version: 3.5.1+uzi.1
+Observed: 2026-07-28
+
+The Eastmoney clist endpoint reported total=496 while returning 100 rows for
+each request even when pz=200.  Upstream fixed pagination but retained
+`_PAGE = 200`, so the second 100-row page satisfies `len(more) < _PAGE` and
+stops at 200 rows.
+
+Apply this semantic change after installing the exact v3.5.1 SKILL.md:
+
+    items, total = _page(1)
+    _PAGE = len(items) or int(base["pz"])
+
+Remove the earlier fixed `_PAGE = 200`.  The local frontmatter version is
+`3.5.1+uzi.1`.  The Windows updater protects a `+uzi.*` patch only while its
+base version matches the latest release.  A newer upstream release replaces
+the file normally, after which the real smoke test decides whether this patch
+is still needed.
+
+Do not copy `board_fund_flow()` into UZI production code.  This patch belongs
+to the independently loaded supplemental skill only.

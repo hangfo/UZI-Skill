@@ -105,6 +105,16 @@ def _a_share_suffix(code6: str) -> str:
     return "SZ"
 
 
+def a_share_transport_prefix(code6: str) -> str:
+    """Return the lowercase exchange prefix used by Tencent/Sina quote URLs.
+
+    Keep transport routing derived from the canonical market router so newer
+    Beijing Stock Exchange prefixes (for example 920xxx) cannot silently drift
+    back to the Shanghai/Shenzhen fallbacks in individual providers.
+    """
+    return _a_share_suffix(str(code6).strip()).lower()
+
+
 def classify_security_type(code6: str) -> SecurityType:
     """v2.9.2 新增：识别标的类型（stock / etf / lof / convertible_bond / mutual_fund）.
 

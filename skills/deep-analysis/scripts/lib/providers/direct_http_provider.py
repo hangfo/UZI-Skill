@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import re
 from . import register, ProviderError
+from ..market_router import a_share_transport_prefix
 
 try:
     import requests
@@ -57,7 +58,7 @@ class _DirectHttpProvider:
 
         if market == "A":
             # sh600519 / sz000001
-            prefix = "sh" if code.startswith(("6", "9", "5", "1")) else "sz"
+            prefix = a_share_transport_prefix(code)
             qt_code = f"{prefix}{code}"
         elif market == "H":
             # hk00700
@@ -110,7 +111,7 @@ class _DirectHttpProvider:
             raise ProviderError("requests 未安装")
 
         if market == "A":
-            prefix = "sh" if code.startswith(("6", "9", "5", "1")) else "sz"
+            prefix = a_share_transport_prefix(code)
             sina_code = f"{prefix}{code}"
         elif market == "H":
             # 新浪港股 hk00700

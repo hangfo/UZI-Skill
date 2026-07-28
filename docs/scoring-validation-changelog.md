@@ -2,6 +2,16 @@
 
 > 当前文档记录 `codex/scoring-validation-guardrails` 分支上的评分验证、branch-vs-branch harness、证据冻结与文档治理改动。它是开发追溯文档，不是 agent 指令入口；影响 agent 行为的规则仍以 `AGENTS.md` 和相关 harness 文档为准。
 
+## 2026-07-28
+
+### 三方 release/HEAD 择优吸收与北交所路由
+
+- 在隔离分支 `codex/upstream-intake-20260728` 核对三方真值：`a-stock-data v3.5.1/281fc69` 与 `global-stock-data v2.0.3/c0b3ed8` 均为 release=HEAD；`UZI-Skill` latest release 是 `v3.9.1`，但 HEAD 为 `fce996c`。正式评分基线已经包含该 HEAD，当前 `ahead 62 / behind 0`，没有重复 merge。
+- 用户级 `a-stock-data` 从精确 `v3.4.0` 更新到 `v3.5.1+uzi.1`。真实东财响应显示 `total=496`、请求 `pz=200` 却每页实得 100，官方 v3.5.1 仍会在 200 条提前退出；本地最小补丁改用首屏实得页长，且由基版+SHA256 allowlist 管理。`global-stock-data` 从精确 `v1.0.1` 升到无本地修改的 `v2.0.3`。
+- UZI 只吸收可证明的语义缺口：canonical router 已把 `920002` 识别为 BJ，但 data source/direct Tencent/Sina 各自复制旧前缀表，真实请求误发 `sz920002/sh920002` 均为空。统一 transport prefix 后，腾讯和新浪 `bj920002` 均返回万达轴承真实价格；腾讯同时返回总/流通市值。
+- 48 个 A 股 Skill 和 35 个全球 Skill Python blocks 全编译；AAPL、00700、920002/688146/601127、FINRA、Treasury、CFTC、OCC 与 SEC fail-closed 用真实端点或真实契约验证。CBOE 因授权条款没有联网。未复制板块资金流、FINRA、Frames、Treasury/CFTC 到 UZI，未改评分、估值和交易阈值。
+- Windows 审计器改为按 release commit SHA 下载，记录 release/HEAD drift，安装后复核状态；默认 audit-only，UZI 永不自动 merge。完整结论见 `docs/upstream-intake-audit-20260728.md`。
+
 ## 2026-07-20
 
 ### 美股动量短历史 fail-closed

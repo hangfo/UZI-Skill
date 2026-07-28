@@ -1,0 +1,151 @@
+{
+  "checked_at_utc": "2026-07-28T06:13:27.210961+00:00",
+  "skills": {
+    "a-stock-data": {
+      "path": "C:\\Users\\admin\\.agents\\skills\\a-stock-data\\SKILL.md",
+      "compile": {
+        "blocks": 48,
+        "compiled": 48,
+        "errors": []
+      },
+      "real_smoke": {
+        "prefixes": {
+          "510300": "sh",
+          "000016": "sh",
+          "920002": "bj",
+          "sh000001": "sh",
+          "sz000001": "sz"
+        },
+        "quotes": {
+          "601127": {
+            "name": "赛力斯",
+            "price": 55.8,
+            "market_cap": 972.03,
+            "float_market_cap": 868.92
+          },
+          "688146": {
+            "name": "中船特气",
+            "price": 274.6,
+            "market_cap": 1453.76,
+            "float_market_cap": 398.09
+          },
+          "sz000001": {
+            "name": "平安银行",
+            "price": 11.2,
+            "market_cap": 2173.46,
+            "float_market_cap": 2173.43
+          },
+          "sh000001": {
+            "name": "上证指数",
+            "price": 3806.98,
+            "market_cap": 665616.65,
+            "float_market_cap": 593624.23
+          },
+          "920002": {
+            "name": "万达轴承",
+            "price": 50.93,
+            "market_cap": 32.44,
+            "float_market_cap": 22.71
+          }
+        },
+        "quote_seconds": 0.203,
+        "board_flow": {
+          "skipped": false,
+          "total": 496,
+          "returned": 205,
+          "first": {
+            "rank": 1,
+            "name": "银行",
+            "code": "BK1283",
+            "change_pct": 0.8,
+            "main_net": 1361372416.0,
+            "main_pct": 5.03,
+            "leader": "工商银行",
+            "super_large_net": 840811008.0,
+            "large_net": 520561408.0,
+            "medium_net": -736343808.0,
+            "small_net": -625109504.0
+          },
+          "seconds": 9.563
+        }
+      }
+    },
+    "global-stock-data": {
+      "path": "C:\\Users\\admin\\.agents\\skills\\global-stock-data\\SKILL.md",
+      "compile": {
+        "blocks": 35,
+        "compiled": 35,
+        "errors": []
+      },
+      "real_smoke": {
+        "us_quote": {
+          "name": "苹果",
+          "name_en": "Apple Inc.",
+          "price": 336.91,
+          "currency": "USD",
+          "market_cap": 49483.1711,
+          "float_market_cap": 49452.60958,
+          "pe": 40.79,
+          "pb": 46.47
+        },
+        "hk_quote": {
+          "name": "腾讯控股",
+          "name_en": "TENCENT",
+          "price": 446.4,
+          "currency": "HKD",
+          "market_cap": 40588.9927,
+          "float_market_cap": 40588.9927,
+          "pe": 16.31,
+          "pb": 3.23
+        },
+        "occ_parser": {
+          "adjusted": {
+            "expiry": "2026-07-24",
+            "type": "call",
+            "strike": 150.0
+          },
+          "standard": {
+            "expiry": "2026-07-24",
+            "type": "put",
+            "strike": 200.0
+          }
+        },
+        "finra": {
+          "date": "20260727",
+          "market": "CNMS",
+          "count": 12108,
+          "aapl": {
+            "short": 7122658.90303,
+            "short_exempt": 36753.0,
+            "total": 17694478.557076,
+            "ratio": 0.4025
+          }
+        },
+        "treasury_latest": {
+          "Date": "07/27/2026",
+          "1 Mo": "3.80",
+          "1.5 Month": "3.89",
+          "2 Mo": "3.95",
+          "3 Mo": "3.96",
+          "4 Mo": "4.05",
+          "6 Mo": "4.10",
+          "1 Yr": "4.14",
+          "2 Yr": "4.31",
+          "3 Yr": "4.35",
+          "5 Yr": "4.40",
+          "7 Yr": "4.52",
+          "10 Yr": "4.65",
+          "20 Yr": "5.15",
+          "30 Yr": "5.12"
+        },
+        "cftc_count": 3,
+        "sec_frames": {
+          "instant_quarter": "CY2025Q1I",
+          "instant_year": "CY2025Q4I",
+          "undeclared_contact_fail_closed": true
+        },
+        "cboe_network_called": false
+      }
+    }
+  }
+}

@@ -21,7 +21,7 @@ from .cache import (
     TTL_QUARTERLY,
     TTL_STATIC,
 )
-from .market_router import Market, TickerInfo, parse_ticker
+from .market_router import Market, TickerInfo, a_share_transport_prefix, parse_ticker
 
 try:
     import akshare as ak
@@ -60,7 +60,7 @@ def _fetch_price_tencent_qt(market: str, code_raw: str) -> dict:
     if requests is None:
         return {}
     if market == "A":
-        prefix = "sh" if code_raw.startswith(("60", "688", "900")) else "sz"
+        prefix = a_share_transport_prefix(code_raw)
         symbol = f"{prefix}{code_raw}"
     elif market == "H":
         symbol = f"hk{code_raw.zfill(5)}"

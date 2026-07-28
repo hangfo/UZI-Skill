@@ -1,0 +1,55 @@
+﻿{
+    "checked_at":  "2026-07-28 14:08:41",
+    "mode":  "Audit",
+    "uzi":  {
+                "branch":  "codex/upstream-intake-20260728",
+                "head":  "6b295bddca38eecee74a9e547a4157c67ba5eb2a",
+                "clean":  false,
+                "upstream_main":  "fce996c33e70eddce8e375f53cd252b549eb3d7c",
+                "ahead_of_upstream":  62,
+                "behind_upstream":  0,
+                "upstream_push_url":  "DISABLED"
+            },
+    "skills":  [
+                   {
+                       "repo":  "simonlin1212/a-stock-data",
+                       "tag":  "v3.5.1",
+                       "published_at":  "2026-07-26T08:36:34Z",
+                       "release_url":  "https://github.com/simonlin1212/a-stock-data/releases/tag/v3.5.1",
+                       "release_commit":  "281fc69a0b733ffc6458fe2cf9f1ea56804aa886",
+                       "head_commit":  "281fc69a0b733ffc6458fe2cf9f1ea56804aa886",
+                       "head_commit_date":  "2026-07-26T08:35:54Z",
+                       "release_is_head":  true,
+                       "commits_after_release":  0,
+                       "installed_version":  "3.5.1+uzi.1",
+                       "installed_sha256":  "7d807dfc893c584f7bd188c88ca13308efc7a83b4a31aed33509e84887e6d1f7",
+                       "release_sha256":  "f6c3099df190d865cfdb74b2b380627fad6984e3da8927d0f618fcded412bf6a",
+                       "matches_latest_release":  false,
+                       "protected_local_patch":  true,
+                       "unverified_local_patch":  false
+                   },
+                   {
+                       "repo":  "simonlin1212/global-stock-data",
+                       "tag":  "v2.0.3",
+                       "published_at":  "2026-07-26T08:24:52Z",
+                       "release_url":  "https://github.com/simonlin1212/global-stock-data/releases/tag/v2.0.3",
+                       "release_commit":  "c0b3ed8d8a1fdff0932e5899fc64a5994308a5ef",
+                       "head_commit":  "c0b3ed8d8a1fdff0932e5899fc64a5994308a5ef",
+                       "head_commit_date":  "2026-07-26T08:09:42Z",
+                       "release_is_head":  true,
+                       "commits_after_release":  0,
+                       "installed_version":  "2.0.3",
+                       "installed_sha256":  "42646558cdf689baeb4b49c2e87f8108b4cb7d6da913085df2e0d320bb52a980",
+                       "release_sha256":  "42646558cdf689baeb4b49c2e87f8108b4cb7d6da913085df2e0d320bb52a980",
+                       "matches_latest_release":  true,
+                       "protected_local_patch":  false,
+                       "unverified_local_patch":  false
+                   }
+               ],
+    "policy":  {
+                   "default_is_audit_only":  true,
+                   "uzi_auto_merge":  false,
+                   "dependency_auto_install":  false,
+                   "skill_source_is_immutable_release":  true
+               }
+}

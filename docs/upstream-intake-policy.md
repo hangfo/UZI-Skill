@@ -1,12 +1,12 @@
 # 上游择优吸收规范
 
-## 当前基线（2026-07-17）
+## 当前基线（2026-07-28）
 
 | 上游 | 本地状态 | 上游状态 | 结论 |
 |---|---|---|---|
-| `simonlin1212/a-stock-data` | 用户技能 `v3.4.0` | release/HEAD `v3.4.0` (`9ed665c`) | 已更新并用真实端点验证 |
-| `simonlin1212/global-stock-data` | 用户技能 `v1.0.1` | release/HEAD `v1.0.1` (`d52a8a0`) | 字节内容一致，无需更新 |
-| `wbh604/UZI-Skill` | 正式评分分支包含 `fce996c` | `upstream/main=fce996c` | `ahead 55 / behind 0`，无需合并 |
+| `simonlin1212/a-stock-data` | 用户技能 `v3.5.1+uzi.1` | release/HEAD `v3.5.1` (`281fc69`) | 已更新；本地补丁修复真实 100-row 分页 |
+| `simonlin1212/global-stock-data` | 用户技能 `v2.0.3` | release/HEAD `v2.0.3` (`c0b3ed8`) | 精确匹配 release |
+| `wbh604/UZI-Skill` | 正式评分分支包含 `fce996c` | release `v3.9.1`，`upstream/main=fce996c` | `ahead 62 / behind 0`，无需合并 |
 
 `upstream` 的 push URL 必须保持 `DISABLED`。不得由本地更新脚本创建或操作原作者 PR。
 
@@ -36,20 +36,21 @@
 
 以下变化默认只记录：README 排版、营销数字、没有真实缺口支撑的新 provider、重复 fallback、依赖升级、扩大重试或并发、不能稳定复现的参数调优。它们不应借“同步上游”进入生产路径。
 
-## 本轮重叠判断
+## 最近一轮重叠判断
 
-| `a-stock-data v3.4.0` 变化 | UZI 已有能力 | 处理 |
+| 上游变化 | UZI 已有能力 | 处理 |
 |---|---|---|
-| 解禁字段 `FREE_SHARES_TYPE/FREE_SHARES/ABLE_FREE_SHARES` | 资金流维度已消费 `unlock_schedule` | 保留在补充技能；后续若真实 UZI 缓存仍为空，再单独修 adapter |
-| 行业榜 `fid=f3` 排序 | UZI 有行业与 peer 数据源 | 保留在补充技能；不改变评分输入排序 |
-| 财联社签名电报 | UZI registry/新闻层已有 CLS 入口 | 作为独立真实备源；未证明缺口前不重复接入 |
-| 交易所龙虎榜备源 | UZI 已有 akshare、东财、Tushare 与浏览器补源 | 不复制；官方源可作为未来失败率 shadow 候选 |
-| 新浪资金流备源 | UZI 已有主力资金流与多源 fallback | 不复制，避免字段口径混用 |
-| 深交所/东财公告备源 | UZI 已有巨潮、东财、交易所及结构化事件链 | 不复制，避免公告重复计权 |
+| A 股前缀、`920` 北交所、显式 exchange 路由 | canonical router 已覆盖，但直连 provider 漂移 | 统一由 canonical router 派生 transport prefix |
+| 腾讯 `f44/f45` 总/流通市值 | UZI 已正确映射 | 不重复修改 |
+| 板块资金流和分页 | 无生产消费者 | 留在补充 Skill；不上评分 |
+| FINRA、SEC Frames、Treasury、CFTC、Nasdaq calendar | 有部分相邻源，没有同口径消费契约 | 只作按需/shadow 数据，不复制 |
+| CBOE options/Greeks | Yahoo options 已有，且 CBOE 有授权边界 | 未授权不抓取、不接生产 |
+
+完整证据和逐项取舍见 `docs/upstream-intake-audit-20260728.md`。
 
 ## Windows 操作入口
 
-`local-ops/windows/update-uzi.ps1` 现在默认仅审计：它会核对 release、哈希、当前分支和 UZI ahead/behind，但不会 reset、merge、安装依赖或覆盖技能。
+`local-ops/windows/update-uzi.ps1` 默认仅审计：它会核对 release、release commit、HEAD、release 后 commit 数、哈希、当前分支和 UZI ahead/behind，但不会 reset、merge、安装依赖或覆盖技能。下载使用 release 解析后的 immutable commit SHA。
 
 只有人工完成 release diff 与真实 smoke test 后，才显式运行：
 
@@ -58,6 +59,8 @@ powershell -ExecutionPolicy Bypass -File D:\UZI-Skill\local-ops\windows\update-u
 ```
 
 该模式也只更新两个用户级补充技能；UZI 代码仍必须走隔离分支流程。
+
+已验证的 `+uzi` 补丁必须同时匹配 latest 基版和精确 SHA256 才会被保护。新 release 会替换旧基版补丁；未知哈希不会被静默当作可信状态。
 
 ## 剩余风险
 
