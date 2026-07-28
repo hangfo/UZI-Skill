@@ -4,6 +4,15 @@
 
 ## 2026-07-28
 
+### 美股动量真实刷新与 US 证据契约
+
+- 从正式检查点 `e7241dc` 建立 `codex/us-momentum-real-refresh-20260728`。真实 Yahoo most-active/day-gainers 与 chart v8 选取 AAPL、AMD、HOOD、BMNR、MU、SNDK、SPCX，覆盖成熟趋势、中期强但回撤、单段反弹和 30 日短历史，不按当日涨幅挑结果。
+- 修复 US/G 宏观零证据被写成“中性”和 pipeline 字符串 ticker 被误路由到 CN 的问题；US/G 现在使用美联储/DXY 语义，无证据保持 `null/fallback=true`。修复 `MU` substring 匹配 `Musk` 导致无关 Tesla 新闻入流，并把 Apple/Tesla 自检收窄为真实供应链/客户关联声明。
+- 真实生产重跑 AAPL lite、AMD/MU medium 均生成报告、`critical=0`，分数保持 `50.2/48.0/52.6`；MU 当前 5 条 Yahoo 新闻均含 Micron/MU 真实实体，宏观六组无结果时不再伪造中性。HOOD/BMNR/SNDK/SPCX 继续正确识别 Stage 4、深回撤或短历史缺口。
+- 与 2026-07-20 对比：MU `52.8→52.6`、SNDK `47.6→47.6`、SPCX `38.3→38.3`，无档位变化；MU 的 -0.2 来自 07-17 到 07-27 的真实输入更新，同输入分支比较为零变化。
+- baseline=`e7241dc`、candidate=`1f5251c`：`68 raw + 7 synthetic`，lite/medium 全覆盖，`75 ok / 0 review / 0 possible_regression`，全部分数/档位变化为零。7 股 37 个真实历史窗口全部 no-change；31 轮纯计算中位 `0.073388s→0.073262s`，无性能回退。
+- 相关 direct runner `157/157`、新增契约 `10/10`、`py_compile`、`git diff --check` 通过；没有安装 pytest、没有跑 deep/update。完整结论见 `docs/us-momentum-real-refresh-validation-20260728.md`。
+
 ### 三方 release/HEAD 择优吸收与北交所路由
 
 - 在隔离分支 `codex/upstream-intake-20260728` 核对三方真值：`a-stock-data v3.5.1/281fc69` 与 `global-stock-data v2.0.3/c0b3ed8` 均为 release=HEAD；`UZI-Skill` latest release 是 `v3.9.1`，但 HEAD 为 `fce996c`。正式评分基线已经包含该 HEAD，当前 `ahead 62 / behind 0`，没有重复 merge。

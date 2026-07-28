@@ -1,5 +1,14 @@
 # UZI-Skill 交接记录 - 2026-07-08
 
+## 2026-07-28 美股动量真实刷新与证据契约
+
+- 隔离分支 `codex/us-momentum-real-refresh-20260728` 从正式 `e7241dc` 开始，代码检查点 `1f5251c`。修复 US/G 宏观缺失伪中性、pipeline 字符串 ticker 的 CN 误路由、短 ticker 新闻 substring 误匹配和普通 Apple/Tesla 比较触发供应链误报；没有改评分/阈值/估值/基金路由。
+- 真实生产重跑 AAPL lite、AMD/MU medium；报告均生成，`critical=0`。MU 当前 Yahoo 新闻从误入 Musk/Tesla 改为 5 条 Micron/MU 相关记录；宏观搜索无证据时输出 `market=U/rate_market=US/null/fallback=true`。
+- 真实热股矩阵还覆盖 HOOD、BMNR、SNDK、SPCX。AAPL/AMD/MU 分别 `50.2/48.0/52.6`；BMNR 单段反弹仍回避，HOOD Stage 4，SPCX 30 日历史仍不输出 MA200/年度精度。
+- 与 07-20 对比 MU `52.8→52.6`、SNDK `47.6→47.6`、SPCX `38.3→38.3`，无档位变化。冻结 `75/75 ok`、`0 possible_regression`、全部分数/档位零变化；7 股 37 历史窗口零回退，31 轮纯计算中位 `0.073388s→0.073262s`。
+- 详细复跑、客观评分、停止线和文件路径见 `docs/us-momentum-real-refresh-validation-20260728.md`。门禁完成后隔离分支只推个人 origin，并 fast-forward 到正式评分分支；后续继续在 `codex/scoring-validation-guardrails`。
+- 下一项只 shadow 建立真实 US 公司 alias/官方事件漏召回率；没有真实增益前不放宽 entity match、不接静态宏观默认、不调动量权重。使用 `GPT-5.6 Sol + 高推理`；纯非重叠 release 审计才降为 `GPT-5.6 Terra + 中推理`。
+
 ## 2026-07-28 三方 release/HEAD 审计
 
 - 从正式 `codex/scoring-validation-guardrails@6b295bd` 建立隔离分支 `codex/upstream-intake-20260728`。`upstream/main=fce996c` 已在 ancestry 内，当前 `ahead 62 / behind 0`；没有再 merge UZI，没有动 `main`、`codex/windows-local-stable` 或 upstream push/PR。

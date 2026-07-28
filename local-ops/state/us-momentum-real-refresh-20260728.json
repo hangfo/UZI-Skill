@@ -1,0 +1,36 @@
+{
+  "schema_version": "uzi.us_momentum_real_refresh.v1",
+  "as_of_market_date": "2026-07-27",
+  "collected_on": "2026-07-28",
+  "sources": [
+    "Yahoo Finance predefined screeners: most_actives and day_gainers",
+    "Yahoo Finance chart v8 real daily bars",
+    "UZI default production pipeline with --no-resume"
+  ],
+  "baseline": "e7241dc",
+  "candidate": "1f5251c",
+  "production_rows": [
+    {"ticker": "AAPL", "depth": "lite", "price": 336.91, "return_20d_pct": 18.7, "return_60d_pct": 24.7, "return_120d_pct": 24.8, "drawdown_pct": 0.0, "investment_score": 67.3, "overall_score": 50.2, "stage": 2},
+    {"ticker": "AMD", "depth": "medium", "price": 494.95, "return_20d_pct": -5.1, "return_60d_pct": 46.8, "return_120d_pct": 101.0, "drawdown_pct": -14.8, "investment_score": 56.5, "overall_score": 48.0, "stage": 2},
+    {"ticker": "HOOD", "depth": "medium", "price": 95.65, "return_20d_pct": -3.1, "return_60d_pct": 34.3, "return_120d_pct": 6.4, "drawdown_pct": -37.3, "investment_score": 56.0, "overall_score": 50.8, "stage": 4},
+    {"ticker": "BMNR", "depth": "lite", "price": 17.92, "return_20d_pct": 32.2, "return_60d_pct": -13.3, "return_120d_pct": -21.4, "drawdown_pct": -71.7, "investment_score": 44.0, "overall_score": 38.9, "stage": 4},
+    {"ticker": "MU", "depth": "medium", "price": 900.2, "return_20d_pct": -20.5, "return_60d_pct": 73.6, "return_120d_pct": 105.6, "drawdown_pct": -25.8, "investment_score": 68.6, "overall_score": 52.6, "stage": 2},
+    {"ticker": "SNDK", "depth": "medium", "price": 1278.23, "return_20d_pct": -38.9, "return_60d_pct": 20.1, "return_120d_pct": 92.1, "drawdown_pct": -45.3, "investment_score": 59.5, "overall_score": 47.6, "stage": 2},
+    {"ticker": "SPCX", "depth": "lite", "price": 113.5, "return_20d_pct": -25.9, "return_60d_pct": null, "return_120d_pct": null, "drawdown_pct": null, "investment_score": 38.9, "overall_score": 38.3, "stage": 0, "observations": 30}
+  ],
+  "prior_comparison": [
+    {"ticker": "MU", "prior_date": "2026-07-20", "prior_overall_score": 52.8, "current_overall_score": 52.6, "tier_changed": false},
+    {"ticker": "SNDK", "prior_date": "2026-07-20", "prior_overall_score": 47.6, "current_overall_score": 47.6, "tier_changed": false},
+    {"ticker": "SPCX", "prior_date": "2026-07-20", "prior_overall_score": 38.3, "current_overall_score": 38.3, "tier_changed": false}
+  ],
+  "real_evidence_checks": {
+    "mu_yahoo_relevant_news_count": 5,
+    "mu_unrelated_musk_only_match_removed": true,
+    "us_macro_search_returned_evidence": false,
+    "us_macro_missing_values_preserved": true,
+    "us_macro_rate_market": "US"
+  },
+  "frozen_comparison": {"total": 75, "ok": 75, "review": 0, "possible_regression": 0},
+  "history_shadow": {"rows": 37, "no_change": 37, "possible_regression": 0},
+  "performance": {"baseline_compute_median_seconds": 0.073388, "candidate_compute_median_seconds": 0.073262, "performance_warning": false}
+}
