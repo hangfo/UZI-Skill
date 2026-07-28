@@ -18,6 +18,7 @@ from typing import Any, Callable
 
 from ..base_fetcher import BaseFetcher
 from ..schema import DimResult, FetcherSpec, Quality
+from ...market_router import parse_ticker
 
 
 def _make_adapter(
@@ -112,7 +113,10 @@ FETCHER_REGISTRY: dict[str, type] = {
         legacy_module="fetch_macro",
         required=[],
         optional=["rate_cycle", "fx_trend", "geo_risk", "commodity", "growth_momentum"],
-        args_fn=lambda t, r: (r.get("0_basic", {}).get("data", {}).get("industry", "") or "综合",),
+        args_fn=lambda t, r: (
+            r.get("0_basic", {}).get("data", {}).get("industry", "") or "综合",
+            parse_ticker(t).market,
+        ),
         depends_on=["0_basic"],
     ),
 

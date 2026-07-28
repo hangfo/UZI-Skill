@@ -85,3 +85,34 @@ def test_tesla_itself_is_not_misread_as_tesla_supply_chain_claim():
     )
 
     assert not issues
+
+
+def test_comparative_tesla_mention_is_not_a_supply_chain_claim():
+    from lib.self_review import check_factcheck_redflags
+
+    issues = check_factcheck_redflags(
+        _ctx(
+            "MU",
+            "Micron Technology, Inc.",
+            "Semiconductors",
+            "Micron shares fell while Tesla and Apple moved higher.",
+        )
+    )
+
+    assert not issues
+
+
+def test_tesla_supplier_claim_still_requires_business_evidence():
+    from lib.self_review import check_factcheck_redflags
+
+    issues = check_factcheck_redflags(
+        _ctx(
+            "FAKE",
+            "Example Inc.",
+            "Software",
+            "公司已经进入 Tesla 供应链并获得订单。",
+        )
+    )
+
+    assert len(issues) == 1
+    assert "特斯拉供应链" in issues[0].issue

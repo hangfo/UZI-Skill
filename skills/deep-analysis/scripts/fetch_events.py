@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 import traceback
 from datetime import datetime, timedelta
@@ -9,6 +10,43 @@ from datetime import datetime, timedelta
 import akshare as ak  # type: ignore
 from lib.market_router import parse_ticker
 from lib.web_search import search as web_search, search_trusted
+
+
+_ENTITY_STOPWORDS = {
+    "company", "corporation", "corp", "group", "holding", "holdings",
+    "inc", "incorporated", "limited", "ltd", "markets", "plc",
+    "technology", "technologies",
+}
+
+
+def _news_matches_entity(
+    title: str,
+    summary: str,
+    ticker_code: str,
+    ticker_full: str,
+    company_name: str,
+) -> bool:
+    """Require a bounded ticker or a distinctive company-name token.
+
+    Substring matching is unsafe for short symbols: ``MU`` matched ``Musk`` and
+    let unrelated Tesla headlines into Micron's event stream.
+    """
+    text = f"{title} {summary}"
+    for symbol in {ticker_code, ticker_full}:
+        symbol = str(symbol or "").strip()
+        if symbol and re.search(rf"(?<![A-Z0-9]){re.escape(symbol)}(?![A-Z0-9])", text, re.I):
+            return True
+
+    company_tokens = {
+        token.lower()
+        for token in re.findall(r"[A-Za-z0-9]+", str(company_name or ""))
+        if len(token) >= 4 and token.lower() not in _ENTITY_STOPWORDS
+    }
+    text_lower = text.lower()
+    return any(
+        re.search(rf"(?<![a-z0-9]){re.escape(token)}(?![a-z0-9])", text_lower)
+        for token in company_tokens
+    )
 
 
 def _cninfo_direct_api(code: str, page_size: int = 30, timeout: int = 15) -> list[dict]:
@@ -256,21 +294,14 @@ def main(ticker: str) -> dict:
                 company_name = str(basic.get("name") or ti.code)
             except Exception:
                 company_name = ti.code
-            name_tokens = {
-                ti.code.lower(),
-                ti.full.lower(),
-                company_name.lower(),
-            }
-            if company_name:
-                name_tokens.update(t.lower() for t in company_name.replace("(", " ").replace(")", " ").split() if len(t) >= 4)
             ynews = yf.Ticker(ti.full if ti.market == "G" else ti.code).news or []
             for item in ynews[:12]:
                 content = item.get("content") if isinstance(item.get("content"), dict) else {}
                 title = item.get("title") or content.get("title") or ""
                 if not title:
                     continue
-                text = (title + " " + str(content.get("summary") or "")).lower()
-                if name_tokens and not any(tok and tok in text for tok in name_tokens):
+                summary = str(content.get("summary") or "")
+                if not _news_matches_entity(title, summary, ti.code, ti.full, company_name):
                     continue
                 provider = item.get("publisher") or (content.get("provider") or {}).get("displayName") or "yfinance"
                 ts = item.get("providerPublishTime") or content.get("pubDate") or ""

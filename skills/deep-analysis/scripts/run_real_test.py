@@ -55,7 +55,10 @@ FETCHER_MAP = [
     ("fetch_sentiment",       "17_sentiment",   lambda t, r: (t,)),
     ("fetch_trap_signals",    "18_trap",        lambda t, r: (t,)),
     ("fetch_contests",        "19_contests",    lambda t, r: (t,)),
-    ("fetch_macro",           "3_macro",        lambda t, r: (r.get("0_basic", {}).get("data", {}).get("industry", "") or "综合",)),
+    ("fetch_macro",           "3_macro",        lambda t, r: (
+        r.get("0_basic", {}).get("data", {}).get("industry", "") or "综合",
+        parse_ticker(t).market,
+    )),
 ]
 
 

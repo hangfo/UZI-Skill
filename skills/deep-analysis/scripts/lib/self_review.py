@@ -498,6 +498,10 @@ def check_factcheck_redflags(ctx: dict) -> list[Issue]:
         ("苹果|Apple", ["光学", "镜头", "屏幕", "代工", "结构件", "精密"], "苹果产业链", {"AAPL"}, ("apple inc",)),
         ("特斯拉|Tesla", ["电池", "零部件", "车身", "锂电"], "特斯拉供应链", {"TSLA"}, ("tesla",)),
     ]
+    association_terms = (
+        r"产业链|供应链|供应商|供货|定点|客户|订单|进入|合作|"
+        r"supply\s+chain|supplier|customer|contract|partner"
+    )
     import re
     for claim_pattern, justify_kws, label, own_tickers, own_name_markers in REDFLAGS:
         # Mentioning Apple/Tesla in the company name of Apple/Tesla itself is
@@ -506,7 +510,13 @@ def check_factcheck_redflags(ctx: dict) -> list[Issue]:
         is_own_company = ticker in own_tickers or any(m in company_name for m in own_name_markers)
         if is_own_company:
             continue
-        if re.search(claim_pattern, all_text, re.I):
+        association_claim = re.search(
+            rf"(?:{claim_pattern}).{{0,48}}(?:{association_terms})|"
+            rf"(?:{association_terms}).{{0,48}}(?:{claim_pattern})",
+            all_text,
+            re.I | re.S,
+        )
+        if association_claim:
             if not any(k in main_business for k in justify_kws):
                 issues.append(Issue(
                     severity="warning", category="consistency", dim="synthesis",

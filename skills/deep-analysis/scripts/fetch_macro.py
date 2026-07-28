@@ -5,17 +5,23 @@ import json
 import sys
 from datetime import datetime
 
-from lib.web_search import search, extract_snippets, quick_summary, search_trusted
+from lib.web_search import search, search_trusted
 
 
-def main(industry: str = "综合") -> dict:
+def main(industry: str = "综合", market: str = "A") -> dict:
     year = datetime.now().year
+    market = (market or "A").upper()
+    is_global = market in {"U", "G"}
     # v2.7.3 · 利率/政策/汇率用 3_macro 权威域（stats.gov.cn / pbc / safe / 中证网...）
     # 行业宏观 + 大宗商品用普通 search（覆盖面更广）
     trusted_queries = {
         "rate_cycle": f"{year} 中国 利率 货币政策 降息 最新",
         "us_rate": f"{year} 美联储 利率周期 最新",
-        "fx_trend": f"{year} 人民币 汇率 走势",
+        "fx_trend": (
+            f"{year} 美元指数 DXY 汇率走势"
+            if is_global
+            else f"{year} 人民币 汇率 走势"
+        ),
     }
     generic_queries = {
         "geo_risk": f"{year} 中美关系 贸易 制裁 {industry}",
@@ -40,8 +46,10 @@ def main(industry: str = "综合") -> dict:
         ]
 
     # Quick sentiment extraction from snippets (heuristic)
-    def _sentiment(bodies: list[str]) -> str:
-        text = " ".join(bodies).lower()
+    def _sentiment(bodies: list[str]) -> str | None:
+        text = " ".join(body.strip() for body in bodies if body and body.strip()).lower()
+        if not text:
+            return None
         pos = sum(1 for kw in ["降息", "宽松", "利好", "稳定", "回暖"] if kw.lower() in text)
         neg = sum(1 for kw in ["加息", "紧缩", "利空", "下行", "衰退"] if kw.lower() in text)
         if pos > neg + 1:
@@ -53,24 +61,35 @@ def main(industry: str = "综合") -> dict:
     def _bodies(key: str) -> list[str]:
         return [s.get("body", "") for s in snippets.get(key, [])]
 
-    rate_cycle = _sentiment(_bodies("rate_cycle"))
+    rate_key = "us_rate" if is_global else "rate_cycle"
+    rate_cycle = _sentiment(_bodies(rate_key))
     fx_trend = _sentiment(_bodies("fx_trend"))
     geo_risk = _sentiment(_bodies("geo_risk"))
     commodity = _sentiment(_bodies("commodity"))
+    industry_macro = _sentiment(_bodies("industry_macro"))
+    has_evidence = any(snippets.values())
 
     return {
         "data": {
-            "rate_cycle": f"{rate_cycle}（{year} 货币政策）",
-            "fx_trend": f"{fx_trend}（人民币走势）",
-            "geo_risk": f"{geo_risk}（地缘风险）",
-            "commodity": f"{commodity}（大宗周期）",
-            "industry_macro_impact": _sentiment(_bodies("industry_macro")),
+            "rate_cycle": (
+                f"{rate_cycle}（{year} {'美联储利率' if is_global else '中国货币政策'}）"
+                if rate_cycle else None
+            ),
+            "fx_trend": (
+                f"{fx_trend}（{'美元指数' if is_global else '人民币走势'}）"
+                if fx_trend else None
+            ),
+            "geo_risk": f"{geo_risk}（地缘风险）" if geo_risk else None,
+            "commodity": f"{commodity}（大宗周期）" if commodity else None,
+            "industry_macro_impact": industry_macro,
             "web_search_snippets": snippets,
             "year": year,
             "industry": industry,
+            "market": market,
+            "rate_market": "US" if is_global else "CN",
         },
         "source": "web_search:ddgs + heuristic sentiment",
-        "fallback": False,
+        "fallback": not has_evidence,
     }
 
 
