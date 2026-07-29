@@ -4,6 +4,25 @@
 
 ## 2026-07-29
 
+### SEC 默认离线、Yahoo 美股日线尾部新鲜度与真实压力验证
+
+- SEC overlay 改为默认离线；只有显式 `--allow-network` 且
+  `UZI_SEC_USER_AGENT` 含真实联系邮箱时才允许请求，SEC host 限速为 8 req/s，
+  支持 429/Retry-After 与 gzip/deflate。当前机器未配置真实身份，实际 SEC 请求为 0；
+  CBOE 仍为 0 请求、0 路由。
+- 真实 INTC/SOFI 生产验证发现 yfinance 尾部落后 Yahoo chart v8 一个交易日；
+  最小修复只从 5 日 v8 尾部追加严格更新日期，不覆盖同日复权历史。INTC 综合分
+  `44.9→43.4`、SOFI `46.5→44.5`，Stage、投资分和档位均不变。
+- 新增真实 JBLU/AMKR/GLW/ONDS 生产测试；综合分 `44.3/43.6/44.0/46.9`，
+  热门和单日大涨跌均未自动升级为买入，全部 `critical=0`。
+- 新 8 股 10 年 Yahoo 压力集共 1045 个不重叠信号；技术分-超额收益 Spearman
+  `0.031/0.044/0.012`，高分减低分平均净收益 `+0.14/-2.05/-4.10%`，
+  不支持调高动量权重。Stage 2 减 Stage 4 平均超额
+  `-0.11/+2.35/+4.48%`，只保留为风险护栏。
+- 正反顺序冻结对照均为 `105/105 ok`、`0 possible_regression`，评分和档位
+  全为零变化；direct runner `216/216`。完整记录见
+  `docs/sec-access-hardening-real-us-validation-20260729.md`。
+
 ### US entity 正式吸收门禁与 AAL 通用法人词精度修复
 
 - 复核正式 `48e20fc` 到隔离分支为纯 fast-forward；新增 AAL 真实生产审计发现 `American Airlines Group` 拆词会让 `American/airline(s)` 单独拥有 United/Delta 新闻。最小修复只禁止这些通用词单独匹配，并保留完整 `American Airlines` 短语；生产接纳 `9 -> 6`，3 条二级/跨发行人标题移除，已知相关标题 `6/6` 保留。

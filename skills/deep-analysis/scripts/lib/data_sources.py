@@ -8,6 +8,7 @@ Install: pip install akshare yfinance pandas requests
 from __future__ import annotations
 
 import os
+import re
 import time
 from datetime import datetime, timedelta
 from typing import Any
@@ -1275,14 +1276,23 @@ def _yahoo_v8_chart(symbol: str, range_: str = "2y") -> list[dict]:
 
 
 def _kline_us_chain(ti: TickerInfo) -> list[dict]:
-    """US K-line: yfinance → akshare → yahoo v8 → stooq HTTP fallback."""
+    """US K-line: yfinance + Yahoo v8 freshness tail → akshare → v8 → stooq."""
     if yf:
         try:
             t = yf.Ticker(ti.code)
             df = _retry(lambda: t.history(period="2y", interval="1d"), attempts=2)
             if df is not None and len(df) > 0:
                 df = df.reset_index()
-                return df.to_dict("records")
+                yfinance_rows = df.to_dict("records")
+                # yfinance occasionally serves a history ending one session
+                # behind while Yahoo chart v8 already has the completed close.
+                # Preserve the adjusted historical series and append only dates
+                # that are strictly newer; never replace same-date observations.
+                # Only a short tail is needed for freshness.  Pulling two
+                # years here duplicates the adjusted yfinance history and
+                # adds avoidable payload/latency to every US collection.
+                v8_tail = _yahoo_v8_chart(ti.code, range_="5d")
+                return _append_strictly_newer_kline_rows(yfinance_rows, v8_tail)
         except Exception:
             pass
     if ak:
@@ -1314,6 +1324,44 @@ def _kline_us_chain(ti: TickerInfo) -> list[dict]:
         except Exception:
             pass
     return []
+
+
+def _kline_row_date(row: dict) -> str | None:
+    value = row.get("日期")
+    if value is None:
+        value = row.get("Date")
+    if value is None:
+        value = row.get("date")
+    if value is None:
+        return None
+    if hasattr(value, "date"):
+        try:
+            return value.date().isoformat()
+        except (AttributeError, TypeError, ValueError):
+            pass
+    text = str(value).strip()
+    match = re.match(r"^(\d{4}-\d{2}-\d{2})", text)
+    return match.group(1) if match else None
+
+
+def _append_strictly_newer_kline_rows(
+    primary: list[dict],
+    supplemental: list[dict],
+) -> list[dict]:
+    if not primary:
+        return supplemental
+    if not supplemental:
+        return primary
+    primary_dates = [date for row in primary if (date := _kline_row_date(row))]
+    if not primary_dates:
+        return primary
+    latest_primary = max(primary_dates)
+    newer = [
+        row for row in supplemental
+        if (row_date := _kline_row_date(row)) and row_date > latest_primary
+    ]
+    newer.sort(key=lambda row: _kline_row_date(row) or "")
+    return [*primary, *newer]
 
 
 # ─────────────────────────────────────────────────────────────

@@ -3,15 +3,18 @@ from __future__ import annotations
 import argparse
 import concurrent.futures
 import datetime as dt
+import gzip
 import html
 import json
 import os
 import re
 import sys
+import threading
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import zlib
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
@@ -21,6 +24,10 @@ SCHEMA_VERSION = "uzi.evidence_overlay.v1"
 DEFAULT_TIMEOUT_SEC = 12
 DEFAULT_EVENT_LOOKBACK_DAYS = 730
 DEFAULT_SOURCE_RECORD_LIMIT = 60
+DEFAULT_HTTP_USER_AGENT = "UZI-Skill evidence-overlay/1.0"
+SEC_USER_AGENT_ENV = "UZI_SEC_USER_AGENT"
+SEC_REQUESTS_PER_SECOND = 8.0
+SEC_REQUEST_INTERVAL_SEC = 1.0 / SEC_REQUESTS_PER_SECOND
 SEC_TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"
 SEC_COMPANYFACTS_URL = "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json"
 SEC_SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik}.json"
@@ -57,6 +64,17 @@ OFFICIAL_EVENT_HOST_SUFFIXES = (
     "hkexnews.hk",
     "sfc.hk",
 )
+
+_SEC_RATE_LOCK = threading.Lock()
+_SEC_LAST_REQUEST_AT = 0.0
+_EMAIL_RE = re.compile(r"(?<![\w.+-])[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}(?![\w.-])")
+_SEC_PLACEHOLDER_MARKERS = (
+    "contact@example.com",
+    "your-email@example.com",
+    "example@example.com",
+    "samplecompanydomain.com",
+)
+_SEC_PLACEHOLDER_EMAIL_DOMAINS = {"example.com", "example.org", "example.net", "test.com"}
 
 SUPPORTED_TARGETS = ("missing_financials", "negative_event")
 SEC_FINANCIAL_CONCEPTS = {
@@ -213,7 +231,7 @@ def build_overlay(
     ticker: str,
     target: str,
     *,
-    network: bool = True,
+    network: bool = False,
     timeout_sec: int = DEFAULT_TIMEOUT_SEC,
     max_items: int = 5,
     lookback_days: int = DEFAULT_EVENT_LOOKBACK_DAYS,
@@ -224,6 +242,10 @@ def build_overlay(
         raise ValueError(f"unsupported target: {target}")
     started = time.perf_counter()
     market = market_for_ticker(ticker)
+    if market == "US" and network:
+        # Configuration errors must not be downgraded into an ordinary evidence
+        # gap: reject them before cache inspection or any adapter can run.
+        _declared_sec_user_agent()
     as_of_date = _parse_iso_date(as_of) if as_of else dt.date.today()
     if lookback_days < 1:
         raise ValueError("lookback_days must be positive")
@@ -1692,6 +1714,96 @@ def _fetch_json(
     return _fetch_json_request(url, timeout_sec=timeout_sec, headers=headers)
 
 
+def _url_host(url: str) -> str:
+    return (urllib.parse.urlparse(url).hostname or "").lower().rstrip(".")
+
+
+def _is_sec_url(url: str) -> bool:
+    host = _url_host(url)
+    return host == "sec.gov" or host.endswith(".sec.gov")
+
+
+def _declared_sec_user_agent() -> str:
+    value = os.environ.get(SEC_USER_AGENT_ENV, "").strip()
+    lowered = value.lower()
+    email_match = _EMAIL_RE.search(value)
+    email_domain = email_match.group(0).rsplit("@", 1)[-1].lower() if email_match else ""
+    identity_text = _EMAIL_RE.sub(" ", value)
+    if (
+        not value
+        or any(marker in lowered for marker in _SEC_PLACEHOLDER_MARKERS)
+        or not email_match
+        or email_domain in _SEC_PLACEHOLDER_EMAIL_DOMAINS
+        or not re.search(r"[A-Za-z0-9\u4e00-\u9fff]{2,}", identity_text)
+    ):
+        raise RuntimeError(
+            f"SEC network access requires {SEC_USER_AGENT_ENV} with a truthful "
+            "name or organization and a monitored contact email; placeholder "
+            "or missing identities are rejected before any request."
+        )
+    return value
+
+
+def _request_headers(
+    url: str,
+    *,
+    accept: str,
+    overrides: dict[str, str] | None = None,
+) -> dict[str, str]:
+    headers = {
+        "User-Agent": DEFAULT_HTTP_USER_AGENT,
+        "Accept": accept,
+        **(overrides or {}),
+    }
+    if _is_sec_url(url):
+        # Apply the declared contact after caller overrides so no call site can
+        # accidentally replace it with a browser or placeholder identity.
+        headers["User-Agent"] = _declared_sec_user_agent()
+        headers["Accept-Encoding"] = "gzip, deflate"
+    return headers
+
+
+def _wait_for_sec_rate_limit(url: str) -> None:
+    if not _is_sec_url(url):
+        return
+    global _SEC_LAST_REQUEST_AT
+    with _SEC_RATE_LOCK:
+        now = time.monotonic()
+        remaining = SEC_REQUEST_INTERVAL_SEC - (now - _SEC_LAST_REQUEST_AT)
+        if remaining > 0:
+            time.sleep(remaining)
+        _SEC_LAST_REQUEST_AT = time.monotonic()
+
+
+def _urlopen(req: urllib.request.Request, *, timeout_sec: int):
+    _wait_for_sec_rate_limit(req.full_url)
+    try:
+        return urllib.request.urlopen(req, timeout=timeout_sec)
+    except urllib.error.HTTPError as exc:
+        if exc.code == 429:
+            retry_after = exc.headers.get("Retry-After") if exc.headers else None
+            detail = f"; Retry-After={retry_after}" if retry_after else ""
+            raise RuntimeError(
+                f"HTTP 429 from {req.full_url}; SEC or source rate limit reached{detail}"
+            ) from exc
+        raise RuntimeError(f"HTTP {exc.code} from {req.full_url}") from exc
+    except urllib.error.URLError as exc:
+        raise RuntimeError(f"network error from {req.full_url}: {exc.reason}") from exc
+
+
+def _read_response_bytes(resp: Any) -> bytes:
+    raw = resp.read()
+    content_encoding = (resp.headers.get("Content-Encoding") or "").lower()
+    if "gzip" in content_encoding:
+        return gzip.decompress(raw)
+    if "deflate" in content_encoding:
+        try:
+            return zlib.decompress(raw)
+        except zlib.error:
+            return zlib.decompress(raw, -zlib.MAX_WBITS)
+    return raw
+
+
 def _fetch_json_request(
     url: str,
     *,
@@ -1699,20 +1811,15 @@ def _fetch_json_request(
     data: bytes | None = None,
     headers: dict[str, str] | None = None,
 ) -> Any:
-    headers = {
-        "User-Agent": os.environ.get("UZI_SEC_USER_AGENT", "UZI-Skill evidence overlay builder contact@example.com"),
-        "Accept": "application/json",
-        **(headers or {}),
-    }
-    req = urllib.request.Request(url, data=data, headers=headers)
-    try:
-        with urllib.request.urlopen(req, timeout=timeout_sec) as resp:
-            charset = resp.headers.get_content_charset() or "utf-8"
-            return json.loads(resp.read().decode(charset, errors="replace"))
-    except urllib.error.HTTPError as exc:
-        raise RuntimeError(f"HTTP {exc.code} from {url}") from exc
-    except urllib.error.URLError as exc:
-        raise RuntimeError(f"network error from {url}: {exc.reason}") from exc
+    request_headers = _request_headers(
+        url,
+        accept="application/json",
+        overrides=headers,
+    )
+    req = urllib.request.Request(url, data=data, headers=request_headers)
+    with _urlopen(req, timeout_sec=timeout_sec) as resp:
+        charset = resp.headers.get_content_charset() or "utf-8"
+        return json.loads(_read_response_bytes(resp).decode(charset, errors="replace"))
 
 
 def _post_json(url: str, payload: dict[str, Any], *, timeout_sec: int) -> dict[str, Any]:
@@ -1725,23 +1832,18 @@ def _post_json(url: str, payload: dict[str, Any], *, timeout_sec: int) -> dict[s
 
 
 def _fetch_text(url: str, *, timeout_sec: int, headers: dict[str, str] | None = None) -> str:
-    request_headers = {
-        "User-Agent": os.environ.get("UZI_SEC_USER_AGENT", "UZI-Skill evidence overlay builder contact@example.com"),
-        "Accept": "text/html,application/xhtml+xml",
-        **(headers or {}),
-    }
+    request_headers = _request_headers(
+        url,
+        accept="text/html,application/xhtml+xml",
+        overrides=headers,
+    )
     req = urllib.request.Request(url, headers=request_headers)
-    try:
-        with urllib.request.urlopen(req, timeout=timeout_sec) as resp:
-            raw = resp.read()
-            declared = resp.headers.get_content_charset()
-            if declared:
-                return raw.decode(declared, errors="replace")
-            return raw.decode("utf-8", errors="replace")
-    except urllib.error.HTTPError as exc:
-        raise RuntimeError(f"HTTP {exc.code} from {url}") from exc
-    except urllib.error.URLError as exc:
-        raise RuntimeError(f"network error from {url}: {exc.reason}") from exc
+    with _urlopen(req, timeout_sec=timeout_sec) as resp:
+        raw = _read_response_bytes(resp)
+        declared = resp.headers.get_content_charset()
+        if declared:
+            return raw.decode(declared, errors="replace")
+        return raw.decode("utf-8", errors="replace")
 
 
 def _latest_fact_values(values: list[dict[str, Any]], *, max_items: int) -> list[dict[str, Any]]:
@@ -2239,7 +2341,17 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--lookback-days", type=int, default=DEFAULT_EVENT_LOOKBACK_DAYS)
     parser.add_argument("--source-record-limit", type=int, default=DEFAULT_SOURCE_RECORD_LIMIT)
     parser.add_argument("--as-of", help="Freeze recency relative to this YYYY-MM-DD date; defaults to today.")
-    parser.add_argument("--no-network", action="store_true")
+    network_group = parser.add_mutually_exclusive_group()
+    network_group.add_argument(
+        "--allow-network",
+        action="store_true",
+        help="Explicitly allow official-source network requests; default is offline.",
+    )
+    network_group.add_argument(
+        "--no-network",
+        action="store_true",
+        help="Deprecated compatibility flag; network is already disabled by default.",
+    )
     parser.add_argument("--no-write", action="store_true")
     return parser.parse_args(argv)
 
@@ -2249,7 +2361,7 @@ def main(argv: list[str] | None = None) -> int:
     overlay = build_overlay(
         args.ticker,
         args.target,
-        network=not args.no_network,
+        network=args.allow_network and not args.no_network,
         timeout_sec=args.timeout,
         max_items=args.max_items,
         lookback_days=args.lookback_days,

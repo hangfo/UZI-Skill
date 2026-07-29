@@ -381,6 +381,7 @@ D:\UZI-Skill\.venv\Scripts\python.exe tools\branch_score_compare.py `
 D:\UZI-Skill\.venv\Scripts\python.exe tools\evidence_overlay_builder.py `
   --ticker AAPL `
   --target missing_financials `
+  --allow-network `
   --max-items 2
 ```
 
@@ -397,7 +398,9 @@ local-ops/state/evidence-overlays/<ticker>-<target>.json
 - `negative_event / A`：证监会行政处罚决定、巨潮动态 `orgId` 映射后的公司公告；`.SH` 直连上交所监管措施；`.SZ` 直连深交所监管措施与纪律处分。
 - `negative_event / HK`：HKEX issuer critical filings、HKEX disciplinary overview 的精确 `Stock Code`；SFC enforcement 列表与正文中的精确 `stock code`。
 - 缓存新闻只有在 URL 属于已知官方域名、ticker 归属可精确确认、标题命中明确 taxonomy 时才可成为正式证据；不靠泛新闻情绪或常识推断。
-- `--no-network`：只读本地缓存，用于测试和离线复跑。
+- 默认不联网；只有显式 `--allow-network` 才访问官方源。SEC 请求还要求本机
+  `UZI_SEC_USER_AGENT` 为真实姓名/机构与可联系邮箱，缺失或占位值会在零请求状态下失败。
+- `--no-network`：兼容旧命令的显式离线标记；默认行为已经是离线。
 - `--no-write`：只打印状态，不落地 overlay。
 - `--as-of YYYY-MM-DD`：冻结时效判断基准，确保跨分支、跨机器复跑一致。
 - `--lookback-days`：统一时效窗口，默认 730 天，边界日计入，未来日期和无日期记录剔除。

@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import importlib.util
 import datetime as dt
+import gzip
 import json
+import os
 import tempfile
 from pathlib import Path
 
@@ -13,6 +15,145 @@ spec = importlib.util.spec_from_file_location("evidence_overlay_builder", TOOL)
 evidence_overlay_builder = importlib.util.module_from_spec(spec)
 assert spec and spec.loader
 spec.loader.exec_module(evidence_overlay_builder)
+
+
+def test_sec_network_requires_truthful_declared_identity_before_urlopen():
+    old_value = os.environ.pop("UZI_SEC_USER_AGENT", None)
+    called = False
+    old_urlopen = evidence_overlay_builder.urllib.request.urlopen
+
+    def forbidden_urlopen(*args, **kwargs):
+        nonlocal called
+        called = True
+        raise AssertionError("urlopen must not be reached without SEC identity")
+
+    evidence_overlay_builder.urllib.request.urlopen = forbidden_urlopen
+    try:
+        try:
+            evidence_overlay_builder._fetch_json_request(
+                "https://data.sec.gov/submissions/CIK0000320193.json",
+                timeout_sec=1,
+            )
+        except RuntimeError as exc:
+            assert "truthful" in str(exc)
+        else:
+            raise AssertionError("missing SEC identity must fail closed")
+    finally:
+        evidence_overlay_builder.urllib.request.urlopen = old_urlopen
+        if old_value is not None:
+            os.environ["UZI_SEC_USER_AGENT"] = old_value
+    assert not called
+
+
+def test_sec_network_rejects_placeholder_identity():
+    old_value = os.environ.get("UZI_SEC_USER_AGENT")
+    try:
+        for value in (
+            "UZI-Skill contact@example.com",
+            "Example your-email@example.com",
+            "Sample AdminContact@samplecompanydomain.com",
+            "Your Real Name UZI-Skill/3.2 your.real.email@example.com",
+        ):
+            os.environ["UZI_SEC_USER_AGENT"] = value
+            try:
+                evidence_overlay_builder._declared_sec_user_agent()
+            except RuntimeError:
+                pass
+            else:
+                raise AssertionError(f"placeholder identity was accepted: {value}")
+    finally:
+        if old_value is None:
+            os.environ.pop("UZI_SEC_USER_AGENT", None)
+        else:
+            os.environ["UZI_SEC_USER_AGENT"] = old_value
+
+
+def test_sec_identity_is_scoped_to_sec_hosts_only():
+    old_value = os.environ.get("UZI_SEC_USER_AGENT")
+    declared = "Real Researcher UZI-Skill/3.2 researcher@real-domain.test"
+    try:
+        os.environ["UZI_SEC_USER_AGENT"] = declared
+        sec_headers = evidence_overlay_builder._request_headers(
+            "https://data.sec.gov/submissions/CIK0000320193.json",
+            accept="application/json",
+            overrides={"User-Agent": "Mozilla/5.0"},
+        )
+        ir_headers = evidence_overlay_builder._request_headers(
+            "https://investor.example.org/news",
+            accept="text/html",
+        )
+    finally:
+        if old_value is None:
+            os.environ.pop("UZI_SEC_USER_AGENT", None)
+        else:
+            os.environ["UZI_SEC_USER_AGENT"] = old_value
+    assert sec_headers["User-Agent"] == declared
+    assert sec_headers["Accept-Encoding"] == "gzip, deflate"
+    assert ir_headers["User-Agent"] == evidence_overlay_builder.DEFAULT_HTTP_USER_AGENT
+    assert declared not in json.dumps(ir_headers)
+
+
+def test_sec_rate_limit_is_host_scoped_and_leaves_headroom():
+    assert evidence_overlay_builder.SEC_REQUESTS_PER_SECOND == 8.0
+    assert evidence_overlay_builder.SEC_REQUESTS_PER_SECOND < 10.0
+    assert evidence_overlay_builder._is_sec_url("https://www.sec.gov/Archives/test")
+    assert evidence_overlay_builder._is_sec_url("https://data.sec.gov/api/xbrl/test")
+    assert not evidence_overlay_builder._is_sec_url("https://notsec.gov.example/test")
+    assert not evidence_overlay_builder._is_sec_url("https://investor.example.org/test")
+
+
+def test_sec_gzip_response_is_decoded_for_urllib_transport():
+    class Headers(dict):
+        def get_content_charset(self):
+            return "utf-8"
+
+    class Response:
+        headers = Headers({"Content-Encoding": "gzip"})
+
+        def read(self):
+            return gzip.compress('{"name":"APPLE INC"}'.encode("utf-8"))
+
+    decoded = evidence_overlay_builder._read_response_bytes(Response())
+    assert json.loads(decoded.decode("utf-8"))["name"] == "APPLE INC"
+
+
+def test_evidence_overlay_cli_network_is_explicit_opt_in():
+    assert not evidence_overlay_builder.parse_args(
+        ["--ticker", "AAPL", "--target", "missing_financials"]
+    ).allow_network
+    assert evidence_overlay_builder.parse_args(
+        [
+            "--ticker",
+            "AAPL",
+            "--target",
+            "missing_financials",
+            "--allow-network",
+        ]
+    ).allow_network
+
+
+def test_programmatic_overlay_network_is_off_by_default():
+    old_cache = evidence_overlay_builder.CACHE
+    with tempfile.TemporaryDirectory() as td:
+        try:
+            evidence_overlay_builder.CACHE = Path(td)
+            overlay = evidence_overlay_builder.build_overlay(
+                "AAPL",
+                "missing_financials",
+            )
+        finally:
+            evidence_overlay_builder.CACHE = old_cache
+    assert overlay["status"] == "gap"
+    assert any("network disabled" in row["error"] for row in overlay["errors"])
+
+
+def test_evidence_overlay_has_no_cboe_network_source_without_license():
+    plans = []
+    for market in ("US", "A", "HK"):
+        for target in evidence_overlay_builder.SUPPORTED_TARGETS:
+            plans.extend(evidence_overlay_builder.source_plan_for(market, target))
+    assert "cboe" not in json.dumps(plans).lower()
+    assert all("cboe" not in suffix for suffix in evidence_overlay_builder.OFFICIAL_EVENT_HOST_SUFFIXES)
 
 
 def test_sec_financial_fact_extraction_is_field_mapped_not_scored():

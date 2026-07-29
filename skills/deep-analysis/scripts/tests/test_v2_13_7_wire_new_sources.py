@@ -105,6 +105,7 @@ def test_fetch_sentiment_integrates_news_multi(monkeypatch):
     import lib.news_providers as np
     import lib.data_sources as ds
 
+    monkeypatch.setenv("UZI_AUX_HEAVY", "1")
     monkeypatch.setattr(ds, "fetch_basic", lambda ti: {"name": "测试股"})
     monkeypatch.setattr(fetch_sentiment, "search", lambda *a, **k: [])
     # mock hottrend
@@ -178,6 +179,57 @@ def test_kline_us_chain_falls_through_to_yahoo_v8(monkeypatch):
     rows = ds._kline_us_chain(ti)
     assert called["v8"] == 1
     assert rows[0]["收盘"] == 100
+
+
+def test_kline_us_chain_appends_only_strictly_newer_yahoo_v8_rows(monkeypatch):
+    """yfinance 落后一日时，只追加 v8 新交易日，不覆盖同日历史。"""
+    import lib.data_sources as ds
+
+    class Frame:
+        def __len__(self):
+            return 2
+
+        def reset_index(self):
+            return self
+
+        def to_dict(self, orient):
+            assert orient == "records"
+            return [
+                {"Date": "2026-07-27", "Close": 91.67},
+                {"Date": "2026-07-28", "Close": 90.00},
+            ]
+
+    class Ticker:
+        def history(self, **kwargs):
+            return Frame()
+
+    monkeypatch.setattr(
+        ds,
+        "yf",
+        type("YF", (), {"Ticker": staticmethod(lambda _code: Ticker())})(),
+    )
+    monkeypatch.setattr(
+        ds,
+        "_yahoo_v8_chart",
+        lambda *args, **kwargs: [
+            {"日期": "2026-07-28", "收盘": 86.30},
+            {"日期": "2026-07-29", "收盘": 87.10},
+        ],
+    )
+    monkeypatch.setattr(ds, "_retry", lambda fn, attempts=2: fn())
+
+    rows = ds._kline_us_chain(type("TickerInfo", (), {"code": "INTC"})())
+    assert len(rows) == 3
+    assert rows[1]["Close"] == 90.00
+    assert rows[2] == {"日期": "2026-07-29", "收盘": 87.10}
+
+
+def test_append_newer_kline_rows_keeps_primary_when_v8_is_not_fresher():
+    import lib.data_sources as ds
+
+    primary = [{"Date": "2026-07-28", "Close": 10.0}]
+    supplemental = [{"日期": "2026-07-28", "收盘": 99.0}]
+    assert ds._append_strictly_newer_kline_rows(primary, supplemental) == primary
 
 
 # ─── cfachina 接入 fetch_policy ─────────────────────────────────

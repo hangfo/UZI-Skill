@@ -9,6 +9,7 @@ silently skipped.
 from __future__ import annotations
 
 import argparse
+import importlib
 import importlib.util
 import inspect
 import os
@@ -31,7 +32,16 @@ class MonkeyPatch:
     def __init__(self) -> None:
         self._undo: list[tuple[str, Any]] = []
 
-    def setattr(self, target: Any, name: str, value: Any) -> None:
+    def setattr(self, target: Any, name: Any, value: Any = ...) -> None:
+        if isinstance(target, str):
+            if value is not ...:
+                raise TypeError("dotted-path setattr accepts target and value only")
+            module_name, attr_name = target.rsplit(".", 1)
+            target = importlib.import_module(module_name)
+            value = name
+            name = attr_name
+        elif value is ...:
+            raise TypeError("object setattr requires target, name and value")
         existed = hasattr(target, name)
         old = getattr(target, name, None)
         setattr(target, name, value)

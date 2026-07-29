@@ -279,6 +279,25 @@ must contain commit 418ae5b; use git log -1 for the latest documentation commit
 
 推荐 GPT-5.6 medium；只有修改生命周期状态机或跨源 canonical matching 时使用 high。
 
+## 2026-07-29 SEC / Yahoo 新鲜度后续交接
+
+- 隔离分支：`codex/scoring-validation-sec-access-hardening`
+- 起点：`codex/scoring-validation-guardrails@fff93f6388ed605c7cf56ad4cad7133eb7681018`
+- SEC：默认离线；联网必须显式 `--allow-network`，并从用户级环境变量
+  `UZI_SEC_USER_AGENT` 读取真实姓名/邮箱。当前未配置，真实 SEC 请求为 0。
+- CBOE：无许可，保持 0 请求、0 路由；不要只设一个 ack 变量绕过许可流程。
+- Yahoo：INTC/SOFI 的 yfinance 尾部曾落后一日；候选保留复权历史，只用 v8
+  5 日尾部追加严格更新日期，同日不覆盖。
+- 真实生产：INTC/SOFI/JBLU/AMKR/GLW/ONDS；GLW/ONDS 是修改后从无缓存完整入口，
+  全部 `critical=0`。
+- 冻结对照：`98 raw + 7 synthetic = 105`，正反顺序均
+  `105 ok / 0 review / 0 possible_regression`，同输入评分/档位零变化。
+- 回测：8 股、10 年、1045 信号；技术分 alpha 仍弱，禁止据此调动量/Stage/
+  P0/P1/估值参数。
+- 详细文档：`docs/sec-access-hardening-real-us-validation-20260729.md`
+- 下一步：用户配置真实 SEC 身份后，用 GPT-5.6 Sol high 做少量官方 filing/event
+  生命周期 shadow；没有身份则用 GPT-5.6 Terra medium 只积累自然 holdout。
+
 ## 2026-07-08 历史建议（已完成）
 
 除非中立验证 harness 证明存在决策质量回退，否则不要继续调评分权重。
