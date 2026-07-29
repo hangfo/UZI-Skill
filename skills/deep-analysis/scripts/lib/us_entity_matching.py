@@ -11,9 +11,10 @@ from typing import Any
 
 
 ENTITY_STOPWORDS = {
-    "company", "corporation", "corp", "digital", "group", "holding",
-    "holdings", "inc", "incorporated", "limited", "ltd", "markets", "motor",
-    "payments", "plc", "semiconductor", "strategy", "technology", "technologies",
+    "airline", "airlines", "american", "company", "corporation", "corp",
+    "digital", "group", "holding", "holdings", "inc", "incorporated",
+    "limited", "ltd", "markets", "motor", "payments", "plc", "semiconductor",
+    "strategy", "technology", "technologies",
 }
 COMMON_WORD_TICKERS = {"AI", "C", "F", "IT", "ON", "CAT", "GEN", "NU", "T"}
 
@@ -262,12 +263,14 @@ def _legal_entity_values(company_name: str) -> list[str]:
     base_tokens = [
         token for token in tokens
         if token.lower() not in {
-            "company", "corporation", "corp", "inc", "incorporated", "limited", "ltd", "plc",
+            "company", "corporation", "corp", "group", "holding", "holdings",
+            "inc", "incorporated", "limited", "ltd", "plc",
         }
     ]
     base_phrase = " ".join(base_tokens)
     has_non_stopword = any(token.lower() not in ENTITY_STOPWORDS for token in base_tokens)
-    values = ([base_phrase] if len(base_phrase) >= 4 and has_non_stopword else []) + distinctive
+    safe_base_phrase = len(base_tokens) >= 2 or has_non_stopword
+    values = ([base_phrase] if len(base_phrase) >= 4 and safe_base_phrase else []) + distinctive
     return list(dict.fromkeys(values))
 
 

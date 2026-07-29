@@ -310,3 +310,43 @@ def test_other_issuer_event_is_not_owned_by_named_partner():
         "NVDA",
         "NVIDIA Corporation",
     )
+
+
+def test_airline_industry_words_do_not_own_other_issuer_news():
+    from fetch_events import _news_matches_entity
+
+    assert not _news_matches_entity(
+        "United Approached Delta Last Year About Merging Airlines",
+        "",
+        "AAL",
+        "AAL",
+        "American Airlines Group, Inc.",
+    )
+    assert not _news_matches_entity(
+        "Forget United and Delta Talks, Airline Stocks Are Rising for a Different Reason",
+        "",
+        "AAL",
+        "AAL",
+        "American Airlines Group, Inc.",
+    )
+    assert not _news_matches_entity(
+        "United reportedly sought merger with Delta before approaching American",
+        "",
+        "AAL",
+        "AAL",
+        "American Airlines Group, Inc.",
+    )
+    assert _news_matches_entity(
+        "American Airlines Cuts Guidance After Fuel Costs Surge",
+        "",
+        "AAL",
+        "AAL",
+        "American Airlines Group, Inc.",
+    )
+    assert _news_matches_entity(
+        "AAL Stock Rises After Record Revenue",
+        "",
+        "AAL",
+        "AAL",
+        "American Airlines Group, Inc.",
+    )
