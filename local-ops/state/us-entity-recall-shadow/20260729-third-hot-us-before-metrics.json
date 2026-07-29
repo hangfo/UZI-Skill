@@ -1,0 +1,2458 @@
+{
+  "schema": "uzi.us_entity_recall_shadow_metrics.v1",
+  "captured_at_utc": "2026-07-29T04:36:03.056494+00:00",
+  "rows": 150,
+  "labeled_rows": 150,
+  "duplicate_rate": 0.0,
+  "latency_seconds": {
+    "median": 0.228228,
+    "p95": 0.879194,
+    "max": 0.879194
+  },
+  "matchers": {
+    "baseline_match": {
+      "counts": {
+        "ambiguous": 18,
+        "true_positive": 65,
+        "true_negative": 57,
+        "false_positive": 10
+      },
+      "accepted": 78,
+      "judged_relevant": 65,
+      "precision": 0.8666666666666667,
+      "recall": 1.0,
+      "cross_issuer_contamination_rate": 0.1282051282051282,
+      "details": [
+        {
+          "id": "8c19ea7f293c3eb6",
+          "ticker": "NU",
+          "title": "3 Financials Stocks Worth Investigating",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "A three-stock basket does not expose which issuer claims are present."
+        },
+        {
+          "id": "53471fdd66434800",
+          "ticker": "NU",
+          "title": "Should You Forget Big Banks and Bet on Fintech Instead?",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "The fintech comparison does not name the target issuer in the visible title."
+        },
+        {
+          "id": "a5f5bf6f92f22395",
+          "ticker": "NU",
+          "title": "Nu Holdings Ltd. (NU) is Attracting Investor Attention: Here is What You Should Know",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nu Holdings legal name and ticker."
+        },
+        {
+          "id": "3296d7f8244445ba",
+          "ticker": "NU",
+          "title": "Latest News In Digital Payment - Real-Time Settlement Challenges Highlight Cash Flow Optimization",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "2047ca94bf9a06eb",
+          "ticker": "NU",
+          "title": "Should You Invest $3,000 in Nu Holdings Right Now?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nu Holdings issuer discussion."
+        },
+        {
+          "id": "eae786f20972e0ae",
+          "ticker": "NU",
+          "title": "US Expansion Presents Significant Upside Potential for Nu Holdings (NU)",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nu Holdings issuer discussion and ticker."
+        },
+        {
+          "id": "c0d7d899ac3e3c17",
+          "ticker": "NU",
+          "title": "Nu Holdings Ltd. (NU) Dips More Than Broader Market: What You Should Know",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nu Holdings legal name and ticker."
+        },
+        {
+          "id": "4f31dc190cb8dd73",
+          "ticker": "NU",
+          "title": "Nubank (NU) Is Buying Banco Porto Real To Secure A Full Brazilian Banking License",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nubank acquisition and ticker."
+        },
+        {
+          "id": "29ec2b1a9d04065b",
+          "ticker": "NU",
+          "title": "MercadoLibre is Down 10% This Year But Its Relentless Growth Has One Analyst Predicting 55% Gains",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "18ed12d6448194c0",
+          "ticker": "NU",
+          "title": "OpenAI adds Nubank and BNY CEOs to board ahead of IPO",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Nubank CEO board appointment is executive-related, not necessarily an issuer event."
+        },
+        {
+          "id": "51b0d90157eefea6",
+          "ticker": "NU",
+          "title": "Amity Institute of Pharmacy, Amity University Madhya Pradesh Earns Prestigious 'A' Grade from Quality Council of India-National Accreditation Board for Education and Training (QCI-NABET), under the aegis of the Pharmacy Council of India",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "608aa812bbb660c0",
+          "ticker": "NU",
+          "title": "AARAV Launches 'The AARAV Atelier' -- A World-Class Fragrance Creative Center at its Thane Headquarters",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "5054e229fb9822c9",
+          "ticker": "NU",
+          "title": "BRO Q2 Deep Dive: AI Partnerships, Accession Integration, and Margin Strategy in Focus",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "5b6b2ae5f3b8f69a",
+          "ticker": "NU",
+          "title": "International Study Links Ambient PM2.5 Exposure to Lower Clinical Pregnancy and Live-Birth Rates Following Assisted Reproductive Technology.",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "df3cdcb2c3295a5f",
+          "ticker": "NU",
+          "title": "Illinois Tool Works (ITW) Is Up 8.5% After Raising 2026 Guidance And Boosting Share Buybacks",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "6407ad16478a09b2",
+          "ticker": "NU",
+          "title": "Sherwin-Williams (SHW) Is Up 11.2% After Strong Q2, Guidance Hike And 8% Price Increase",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "004c50f2994a20be",
+          "ticker": "NU",
+          "title": "T Mobile (TMUS) Faces Nationwide Outage That Hit Customers And Network Partners",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "bcfc223f97e52a91",
+          "ticker": "NU",
+          "title": "Is HBT Financial (HBT) Still Worth A Premium Following Its Earnings Beat And Dividend Hike?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "b6da0eb4e6b8f064",
+          "ticker": "NU",
+          "title": "Forte Biosciences (FBRX) Agrees To argenx Takeover As Tender Offer Nears",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "d69ef42f19b71067",
+          "ticker": "NU",
+          "title": "Xinhua Silk Road: 2026 Li-Ning Cup National Badminton Team Championship held in Shenyang, NE China",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "7a2dce6562ba88e9",
+          "ticker": "NU",
+          "title": "Nu Skin Enterprises to Announce Second Quarter 2026 Financial Results",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "5ef1107ed2e922c9",
+          "ticker": "NU",
+          "title": "3 Beauty Stocks Poised to Benefit From Evolving Consumer Trends",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "b2d8dc58df376b2e",
+          "ticker": "NU",
+          "title": "Can e.l.f. Beauty Extend Its Double-Digit Sales Growth Run?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "efda2d58c9f56d75",
+          "ticker": "NU",
+          "title": "Zacks.com featured highlights include Caleres, GIII Apparel, Nu Skin, Apple Hospitality and Green Dot",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "5788fc6dd43c476e",
+          "ticker": "NU",
+          "title": "5 Beauty & Cosmetics Stocks to Buy for a Stable Portfolio in 2H 2026",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "6d37e2281c21c663",
+          "ticker": "NU",
+          "title": "Nu Skin (NUS) Soars 6.9%: Is Further Upside Left in the Stock?",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "ae0f2983f98b1de7",
+          "ticker": "NU",
+          "title": "Zacks Industry Outlook Highlights Estee Lauder, e.l.f. Beauty, Helen of Troy and Nu Skin",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "43befd42fa8b79ee",
+          "ticker": "NU",
+          "title": "4 Cosmetics Stocks Worth Watching on Favorable Industry Trends",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "5c9b7b12215d6ff2",
+          "ticker": "NU",
+          "title": "5 Value Stocks With Low Price-to-Sales Ratios & Massive Upside",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "7a2a23a9afd6dd53",
+          "ticker": "NU",
+          "title": "5 Bargain Low Price-to-Sales Stocks Positioned to Deliver Solid Gains",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "85173a334ab2a373",
+          "ticker": "MARA",
+          "title": "BC-Most Active Stocks",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Most-active basket hides issuer-specific content."
+        },
+        {
+          "id": "2fc6deb7a234dac7",
+          "ticker": "MARA",
+          "title": "French contractor sues MARA over fees related to Exaion acquisition",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit MARA litigation tied to an issuer acquisition."
+        },
+        {
+          "id": "c5c253852157a424",
+          "ticker": "MARA",
+          "title": "MARA’s former French advisory team sues Bitcoin miner for unpaid fees, strategy pivot",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit MARA litigation and strategy pivot."
+        },
+        {
+          "id": "56ea8190d31cf700",
+          "ticker": "MARA",
+          "title": "Bitcoin Price Faces AI Challenge as MARA CEO Backs Data Centers Over Mining",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "CEO opinion may describe strategy but is not automatically an issuer event."
+        },
+        {
+          "id": "0eb8d75bcc92bdc4",
+          "ticker": "MARA",
+          "title": "CleanSpark Trades at a Discount: Which Tech Giant Could Be the Buyer?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "e94ea929428c8a03",
+          "ticker": "MARA",
+          "title": "MARA CEO Says Bitcoin's Payments Use Case Has 'Seen Its Day Go By' As Miners Chase AI Money",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "CEO opinion may describe strategy but is not automatically an issuer event."
+        },
+        {
+          "id": "92fe692af7adde54",
+          "ticker": "MARA",
+          "title": "Marathon Digital Holdings, Inc. (MARA) Stock Falls Amid Market Uptick: What Investors Need to Know",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit former legal name Marathon Digital Holdings and ticker."
+        },
+        {
+          "id": "acdc8a5e932b8a90",
+          "ticker": "MARA",
+          "title": "MSTR Builds a Dollar Reserve: Will This Reduce Financial Risk?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "274240042156bd76",
+          "ticker": "MARA",
+          "title": "MARA Holdings (MARA) Following Bitcoin Sales And Earnings Focus As Fair Value Debate Builds",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit MARA Holdings issuer valuation discussion."
+        },
+        {
+          "id": "288ea775ee91c0da",
+          "ticker": "MARA",
+          "title": "MARA Holdings (MARA) Stock Sees Split Analyst Revisions As Fair Value Edges Lower",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit MARA Holdings issuer analyst revisions."
+        },
+        {
+          "id": "dbf3201ece799864",
+          "ticker": "MARA",
+          "title": "Amity Institute of Pharmacy, Amity University Madhya Pradesh Earns Prestigious 'A' Grade from Quality Council of India-National Accreditation Board for Education and Training (QCI-NABET), under the aegis of the Pharmacy Council of India",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "641307a781bf03b2",
+          "ticker": "MARA",
+          "title": "AARAV Launches 'The AARAV Atelier' -- A World-Class Fragrance Creative Center at its Thane Headquarters",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "c52f097319b2f250",
+          "ticker": "MARA",
+          "title": "BRO Q2 Deep Dive: AI Partnerships, Accession Integration, and Margin Strategy in Focus",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "3c27e633d395b6b5",
+          "ticker": "MARA",
+          "title": "International Study Links Ambient PM2.5 Exposure to Lower Clinical Pregnancy and Live-Birth Rates Following Assisted Reproductive Technology.",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "a0f5bcc928befd86",
+          "ticker": "MARA",
+          "title": "Illinois Tool Works (ITW) Is Up 8.5% After Raising 2026 Guidance And Boosting Share Buybacks",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "4a1c2780d3f43d1e",
+          "ticker": "MARA",
+          "title": "Sherwin-Williams (SHW) Is Up 11.2% After Strong Q2, Guidance Hike And 8% Price Increase",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "c81ee0bd1135d416",
+          "ticker": "MARA",
+          "title": "T Mobile (TMUS) Faces Nationwide Outage That Hit Customers And Network Partners",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "cd207d971bbecddd",
+          "ticker": "MARA",
+          "title": "Is HBT Financial (HBT) Still Worth A Premium Following Its Earnings Beat And Dividend Hike?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "bac830e4839a8132",
+          "ticker": "MARA",
+          "title": "Forte Biosciences (FBRX) Agrees To argenx Takeover As Tender Offer Nears",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "818cd7e1e8b1432a",
+          "ticker": "MARA",
+          "title": "Xinhua Silk Road: 2026 Li-Ning Cup National Badminton Team Championship held in Shenyang, NE China",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "2014f757bb4c2167",
+          "ticker": "T",
+          "title": "AT&T Closes $23 Billion Spectrum Acquisition From EchoStar",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit AT&T acquisition."
+        },
+        {
+          "id": "527a02a7877eb6a8",
+          "ticker": "T",
+          "title": "AT&T closes $23 billion deal to acquire spectrum from Echostar",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit AT&T acquisition."
+        },
+        {
+          "id": "4dc4c0257434d86c",
+          "ticker": "T",
+          "title": "AT&T Closes Acquisition of Spectrum Licenses from EchoStar",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit AT&T acquisition."
+        },
+        {
+          "id": "490c63f423a4a09e",
+          "ticker": "T",
+          "title": "Dow Soars 537 Points on Strong Blue-Chip Earnings: Stock Market Today",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad market recap does not expose the target issuer claim."
+        },
+        {
+          "id": "a4b2c5c24775c798",
+          "ticker": "T",
+          "title": "D-Wave Quantum Just Announced an Expanded Deal. Should You Buy the Stock Now?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "7caac6ceb0f18b43",
+          "ticker": "T",
+          "title": "Quantum computing is helping AT&T solve network problems in seconds: D-Wave CEO",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit AT&T operational use case."
+        },
+        {
+          "id": "9aaa8f897a9f86cf",
+          "ticker": "T",
+          "title": "AT&T (T) Remains Competitive Despite Satellite Connectivity Concerns",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit AT&T issuer analysis and ticker."
+        },
+        {
+          "id": "efb63a3df3d0ad33",
+          "ticker": "T",
+          "title": "Is Trending Stock Tutor Perini Corporation (TPC) a Buy Now?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "f929f6d1a570d655",
+          "ticker": "T",
+          "title": "One Benchmark From AT&T Just Moved a Quantum Stock 20%",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit AT&T benchmark and its effect on another stock."
+        },
+        {
+          "id": "870ab166184f50c2",
+          "ticker": "T",
+          "title": "This Week In Cloud AI - Axe Compute Secures Major $1.5 Billion AI Infrastructure Deal",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "7b8ae8fe11e786e3",
+          "ticker": "T",
+          "title": "T. Rowe Price Set to Report Q2 Earnings: What's in Store for the Stock?",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "818d0ce48b3ebb6d",
+          "ticker": "T",
+          "title": "Analysts Estimate TPG Inc. (TPG) to Report a Decline in Earnings: What to Look Out for",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "fc68bf9a10e6ca03",
+          "ticker": "T",
+          "title": "Omnea triples revenue in twelve months as enterprises choose agentic operating system for procurement",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "f92f724de3147ff7",
+          "ticker": "T",
+          "title": "2 Financials Stocks with Promising Prospects and 1 We Question",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "9ea5c8a61677e676",
+          "ticker": "T",
+          "title": "Goldman, T. Rowe Debut Their First Interval Fund for the Masses",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "3de3a6542a537d71",
+          "ticker": "T",
+          "title": "T. ROWE PRICE GOLDMAN SACHS PRIVATE MARKETS FUND DEBUTS",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "5fa6514c4f273e6b",
+          "ticker": "T",
+          "title": "T. Rowe Price Just Launched the First Actively Managed Multi-Crypto Spot ETF. Here's What Crypto Investors Need to Know",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "4caac08cc71f1943",
+          "ticker": "T",
+          "title": "T. Rowe Price (TROW) Beats Stock Market Upswing: What Investors Need to Know",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "1957e4098432c3c3",
+          "ticker": "T",
+          "title": "1 Mid-Cap Stock to Target This Week and 2 Facing Challenges",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "5caceb0daef2eb44",
+          "ticker": "T",
+          "title": "T. Rowe Price (TROW) Earnings Expected to Grow: What to Know Ahead of Next Week's Release",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "7aa14fb7e34e06ae",
+          "ticker": "SOFI",
+          "title": "US Stock Futures Slip As Iran Targets American Forces Ahead Of Big Tech Earnings: SKHY, SNDK, BE, SOFI In Focus",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Multi-stock in-focus basket names SOFI but exposes no issuer-specific claim."
+        },
+        {
+          "id": "805373631ba7dd99",
+          "ticker": "SOFI",
+          "title": "SOFI Stock Rises Overnight: Company Announces New Multi-Year Partnership With Notre Dame Athletics Ahead Of Q2 Results",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit SOFI issuer partnership."
+        },
+        {
+          "id": "28558aff1121d470",
+          "ticker": "SOFI",
+          "title": "Ahead of SoFi Earnings, Here's What Barchart Data Says Comes Next for SOFI Stock",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit SoFi earnings setup."
+        },
+        {
+          "id": "28bb71691db04426",
+          "ticker": "SOFI",
+          "title": "SoFi Technologies Signs Multi-Year Partnership With Notre Dame Athletics",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit SoFi Technologies partnership."
+        },
+        {
+          "id": "0ad2f4e2434f39e6",
+          "ticker": "SOFI",
+          "title": "SoFi and Notre Dame Athletics Launch Landmark Multi-Year Partnership",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit SoFi partnership."
+        },
+        {
+          "id": "acd0f3267aad88c5",
+          "ticker": "SOFI",
+          "title": "What Should Investors Do With SoFi Technologies Ahead of Q2 Earnings?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit SoFi Technologies earnings analysis."
+        },
+        {
+          "id": "6c34efa0be1b7468",
+          "ticker": "SOFI",
+          "title": "BC-Most Active Stocks",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Most-active basket hides issuer-specific content."
+        },
+        {
+          "id": "b986681f47f22b25",
+          "ticker": "SOFI",
+          "title": "SoFi (SOFI) Reports Earnings Tomorrow: What To Expect",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit SoFi earnings preview and ticker."
+        },
+        {
+          "id": "403e53d423bb62c0",
+          "ticker": "SOFI",
+          "title": "Latest News In Digital Payment - Real-Time Settlement Challenges Highlight Cash Flow Optimization",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "69bfca411061e5f7",
+          "ticker": "SOFI",
+          "title": "SOFI Stock Down 40% YTD: Can Q2 Results Spark A Rebound?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit SOFI performance and earnings question."
+        },
+        {
+          "id": "8fc557bdf435bd9b",
+          "ticker": "JBLU",
+          "title": "JetBlue (JBLU) Is Up 12.1% After Reinstating 2026 Outlook And Setting 2028 EPS Target – What's Changed",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit JetBlue outlook and ticker."
+        },
+        {
+          "id": "1b68dad17d791068",
+          "ticker": "JBLU",
+          "title": "JetBlue Airways Corp (JBLU) Q2 2026 Earnings Call Highlights: Navigating Challenges with ...",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit JetBlue earnings call."
+        },
+        {
+          "id": "b2b917e0acf2d657",
+          "ticker": "JBLU",
+          "title": "JetBlue Advances 9% on Earnings Beat and 2028 Profit Target, Lifting Delta, United, and Southwest",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit JetBlue earnings and sector spillover."
+        },
+        {
+          "id": "913599d66fa68147",
+          "ticker": "JBLU",
+          "title": "JetBlue Eyes More Aircraft Financing If High Fuel Costs Persist",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit JetBlue financing plans."
+        },
+        {
+          "id": "51d923459bb81c88",
+          "ticker": "JBLU",
+          "title": "Boeing Beats on Cash Flow, Books New Charge on Air Force One",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "8f7e9a0e660ad21e",
+          "ticker": "JBLU",
+          "title": "JBLU Q2 Earnings Beat on Strong RASM Growth, Revenues Rise",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit JBLU earnings."
+        },
+        {
+          "id": "084c75999cced924",
+          "ticker": "JBLU",
+          "title": "JetBlue Airways Q2 Earnings Call Highlights",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit JetBlue earnings call."
+        },
+        {
+          "id": "53094c363f9e7b81",
+          "ticker": "JBLU",
+          "title": "BC-Most Active Stocks",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Most-active basket hides issuer-specific content."
+        },
+        {
+          "id": "a9eb47d956c2fbdc",
+          "ticker": "JBLU",
+          "title": "JetBlue (JBLU) Q2 Earnings: Taking a Look at Key Metrics Versus Estimates",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit JetBlue earnings and ticker."
+        },
+        {
+          "id": "a6172f028fe2f560",
+          "ticker": "JBLU",
+          "title": "JetBlue Q2 2026 earnings: wider loss as fuel costs surge 81%",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit JetBlue earnings."
+        },
+        {
+          "id": "ee6146514e8c13e6",
+          "ticker": "INTC",
+          "title": "How Far Could Marvell Technology Stock Actually Fall From Here?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "b709ed6d60e18591",
+          "ticker": "INTC",
+          "title": "Intel Is Down By 39% Since June. Time to Buy?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Intel price and valuation discussion."
+        },
+        {
+          "id": "251c72cd363d302c",
+          "ticker": "INTC",
+          "title": "Visa Announced Layoffs Ahead of Earnings Beat, as AI and Restructuring Accelerate",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "fc38e9ed1ce02eba",
+          "ticker": "INTC",
+          "title": "Update: Dow Extends Advance Following Strong Earnings Reports",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad index recap does not expose an Intel-specific claim."
+        },
+        {
+          "id": "cf806ae153cc61e2",
+          "ticker": "INTC",
+          "title": "Stocks to Watch Recap: Coca-Cola, J&J, Mercedes-Benz, UPS",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Multi-company watch recap does not expose an Intel-specific claim."
+        },
+        {
+          "id": "1b279af84eb4c9ec",
+          "ticker": "INTC",
+          "title": "Chip Stocks Extend Pullback Amid AI Bubble Fears",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Sector pullback basket does not expose an Intel-specific claim."
+        },
+        {
+          "id": "2f790d417d7f5f8f",
+          "ticker": "INTC",
+          "title": "Why cyclical stocks are poised for a comeback",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Cyclical-stock theme does not expose an Intel-specific claim."
+        },
+        {
+          "id": "1075cd850e3e1931",
+          "ticker": "INTC",
+          "title": "Intel Posted A Big Beat And Still Fell, And Its Spending Plan Is Why",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Intel earnings and spending-plan analysis."
+        },
+        {
+          "id": "a97424f4ea739cd6",
+          "ticker": "INTC",
+          "title": "Why Intel Stock Just Fell Again",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Intel price-move analysis."
+        },
+        {
+          "id": "9086b4304e4a7b5d",
+          "ticker": "INTC",
+          "title": "AMD Stock's Surge Was Already Visible In Its Own Earnings Calls",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "394e83329842d99c",
+          "ticker": "NOK",
+          "title": "European Equities Traded in US as ADRs Ease in Tuesday Trading",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad ADR market recap exposes no Nokia-specific claim."
+        },
+        {
+          "id": "897a1941c609b007",
+          "ticker": "NOK",
+          "title": "Nokia Corporation - Managers' transactions (Hammarén)",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nokia official manager transaction."
+        },
+        {
+          "id": "bc087b2371cb6553",
+          "ticker": "NOK",
+          "title": "Nokia Corporation - Managers' transactions (Ihamuotila)",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nokia official manager transaction."
+        },
+        {
+          "id": "96cebe64c82b3cc9",
+          "ticker": "NOK",
+          "title": "Nokia Corporation - Managers' transactions (Mahajan)",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nokia official manager transaction."
+        },
+        {
+          "id": "a3b1f94d1fa959af",
+          "ticker": "NOK",
+          "title": "Why Nokia (HLSE:NOKIA) Is Down 7.1% After AI-RAN Launch and Restructuring-Hit Q2 Profitability – And What's Next",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nokia restructuring and results discussion."
+        },
+        {
+          "id": "72c1255f0ae207c0",
+          "ticker": "NOK",
+          "title": "Nokia (HLSE:NOKIA) Stock May Be 24% Undervalued On AI Powered 5G Expansion",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nokia valuation discussion."
+        },
+        {
+          "id": "724b76d059eba0cc",
+          "ticker": "NOK",
+          "title": "What Nokia's Financial Results Reveal About NOK's Growth Outlook",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nokia results and ticker."
+        },
+        {
+          "id": "a57b0067bd890e52",
+          "ticker": "NOK",
+          "title": "Is NOK Stock Worth Buying as AI Growth Offsets Telecom Challenges?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit NOK issuer analysis."
+        },
+        {
+          "id": "6594ffec1d0c5bda",
+          "ticker": "NOK",
+          "title": "How Nokia is Positioning Itself for Long-Term Growth in AI Networking",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nokia strategy discussion."
+        },
+        {
+          "id": "2da399f0f0f77996",
+          "ticker": "NOK",
+          "title": "European Equities Traded in the US as American Depositary Receipts Rise in Friday Trading",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad ADR market recap exposes no Nokia-specific claim."
+        },
+        {
+          "id": "f04dc0237986651b",
+          "ticker": "FOUR",
+          "title": "NASA Chief Jared Isaacman Says 'Never Bet Against' Elon Musk, Adds 'We Can't Do It Without' SpaceX for Moon Base",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "f361dac9c577fb1c",
+          "ticker": "FOUR",
+          "title": "Can Priority's Revenue Mix Support Further Margin Expansion?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "fff16bc9a1357ac5",
+          "ticker": "FOUR",
+          "title": "Shift4 Announces Date of Second Quarter Earnings Results and Upcoming Investor Conference Participation",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Shift4 earnings and conference event."
+        },
+        {
+          "id": "58dfc628d08f3c58",
+          "ticker": "FOUR",
+          "title": "Shift4 Payments (FOUR) Launches Shift4 One, Is The Stock Still Undervalued?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Shift4 product launch and ticker."
+        },
+        {
+          "id": "dba8876eeb177066",
+          "ticker": "FOUR",
+          "title": "Shift4 Payments (FOUR) Stock May Be Fair Value Yet Fully Priced On Earnings",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Shift4 valuation discussion."
+        },
+        {
+          "id": "b8f226aedce4556b",
+          "ticker": "FOUR",
+          "title": "Could Shift4 Payments’ (FOUR) New Shift4 One Device Redefine Its Cross‑Border Commerce Strategy?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Shift4 product and strategy discussion."
+        },
+        {
+          "id": "90a642807a1f4498",
+          "ticker": "FOUR",
+          "title": "Wall Street Analysts See a 25.03% Upside in Shift4 Payments (FOUR): Can the Stock Really Move This High?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Shift4 analyst target discussion."
+        },
+        {
+          "id": "fd11dd5d7bcb917e",
+          "ticker": "FOUR",
+          "title": "Should You Hold PRTH Stock Following Its Nearly 28% 3-Months Rally?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "4c2137fa136a31a9",
+          "ticker": "FOUR",
+          "title": "Flywire Stock Jumps 32.6% YTD: Is it Still a Buy or Better to Hold?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "ee3f43ded0cc98db",
+          "ticker": "FOUR",
+          "title": "Shift4 (FOUR) Stock Is Up, What You Need To Know",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Shift4 stock move and ticker."
+        },
+        {
+          "id": "3882131610498e68",
+          "ticker": "FOUR",
+          "title": "Amity Institute of Pharmacy, Amity University Madhya Pradesh Earns Prestigious 'A' Grade from Quality Council of India-National Accreditation Board for Education and Training (QCI-NABET), under the aegis of the Pharmacy Council of India",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "5d733e3c02204773",
+          "ticker": "FOUR",
+          "title": "AARAV Launches 'The AARAV Atelier' -- A World-Class Fragrance Creative Center at its Thane Headquarters",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "c902db21130e5266",
+          "ticker": "FOUR",
+          "title": "BRO Q2 Deep Dive: AI Partnerships, Accession Integration, and Margin Strategy in Focus",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "6161a8641dcb0d8d",
+          "ticker": "FOUR",
+          "title": "International Study Links Ambient PM2.5 Exposure to Lower Clinical Pregnancy and Live-Birth Rates Following Assisted Reproductive Technology.",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "483ffaa36528fac0",
+          "ticker": "FOUR",
+          "title": "Illinois Tool Works (ITW) Is Up 8.5% After Raising 2026 Guidance And Boosting Share Buybacks",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "a5e1359b67dfea70",
+          "ticker": "FOUR",
+          "title": "Sherwin-Williams (SHW) Is Up 11.2% After Strong Q2, Guidance Hike And 8% Price Increase",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "be3e21a4b684ea49",
+          "ticker": "FOUR",
+          "title": "T Mobile (TMUS) Faces Nationwide Outage That Hit Customers And Network Partners",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "63a5efa775fa7996",
+          "ticker": "FOUR",
+          "title": "Is HBT Financial (HBT) Still Worth A Premium Following Its Earnings Beat And Dividend Hike?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "2b318bf7083e04e6",
+          "ticker": "FOUR",
+          "title": "Forte Biosciences (FBRX) Agrees To argenx Takeover As Tender Offer Nears",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "02a5f45c393ad076",
+          "ticker": "FOUR",
+          "title": "Xinhua Silk Road: 2026 Li-Ning Cup National Badminton Team Championship held in Shenyang, NE China",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "4e6f0110f6e02775",
+          "ticker": "CLS",
+          "title": "Does Owning Celestica Really Diversify Your Portfolio?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Celestica portfolio analysis."
+        },
+        {
+          "id": "037a60466f56806e",
+          "ticker": "CLS",
+          "title": "Celestica Inc (CLS) Q2 2026 Earnings Call Highlights: Record Revenue and Strong Growth Outlook",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Celestica earnings call."
+        },
+        {
+          "id": "e6c127cc6a3a3dfe",
+          "ticker": "CLS",
+          "title": "Coherent Sinks 11%, Applied Optoelectronics Falls 10%, Lumentum Drops 9% as Traders Question AI Spending Spree",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "27272fe2667bf9a1",
+          "ticker": "CLS",
+          "title": "S&P/TSX Composite Index up 140 Points at Midday With Technology Stocks The Top Gainer",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad index recap does not expose the target issuer claim."
+        },
+        {
+          "id": "de6bf37e0d8e4683",
+          "ticker": "CLS",
+          "title": "CLS Q2 Earnings Beat Estimates on Strong CCS Demand, Outlook Raised",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit CLS earnings and outlook."
+        },
+        {
+          "id": "945c5e679b639d84",
+          "ticker": "CLS",
+          "title": "4 Stocks With Strong Interest Coverage Ratios to Buy in H2 2026",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Four-stock basket does not expose which claim belongs to Celestica."
+        },
+        {
+          "id": "586674023e5beb0f",
+          "ticker": "CLS",
+          "title": "Celestica Q2 Earnings Call Highlights",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Celestica earnings call."
+        },
+        {
+          "id": "5c3940072c94ae19",
+          "ticker": "CLS",
+          "title": "Celestica Inc. Q2 2026 Earnings Call Summary",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Celestica earnings summary."
+        },
+        {
+          "id": "733b4e8f6ebd721c",
+          "ticker": "CLS",
+          "title": "Canadian Investment Regulatory Organization Trade Resumption - CLS",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit CLS trading resumption."
+        },
+        {
+          "id": "3aaa441355fc429f",
+          "ticker": "CLS",
+          "title": "How Investors May Respond To Celestica (TSX:CLS) Surging Q2 Earnings and Raised 2026 Outlook",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Celestica earnings and outlook."
+        },
+        {
+          "id": "e78b6908397cb413",
+          "ticker": "RGEN",
+          "title": "Repligen (RGEN) Held An M&A Call With BioLife Solutions.",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Repligen M&A call."
+        },
+        {
+          "id": "5ae9305ca735c06d",
+          "ticker": "RGEN",
+          "title": "Repligen Corp (RGEN) Q2 2026 Earnings Call Highlights: Strong Growth and Raised Guidance Amidst ...",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Repligen earnings call."
+        },
+        {
+          "id": "5e544457f73a4089",
+          "ticker": "RGEN",
+          "title": "Repligen Q2 Earnings Call Highlights",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Repligen earnings call."
+        },
+        {
+          "id": "9627515eb2e029c4",
+          "ticker": "RGEN",
+          "title": "Repligen Reports Q2 Revenue Growth and Raises Full-Year 2026 Guidance",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Repligen results and guidance."
+        },
+        {
+          "id": "cd37c8cf9ee5ce41",
+          "ticker": "RGEN",
+          "title": "Repligen (RGEN) Beats Q2 Earnings and Revenue Estimates",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Repligen earnings beat."
+        },
+        {
+          "id": "fa3bdbaa0c9df6fa",
+          "ticker": "RGEN",
+          "title": "Repligen's Q2 Adjusted Earnings, Revenue Increase; 2026 Outlook Raised",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Repligen earnings and guidance."
+        },
+        {
+          "id": "af221d978f3d86a4",
+          "ticker": "RGEN",
+          "title": "Repligen (NASDAQ:RGEN) Posts Better-Than-Expected Sales In Q2 CY2026",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Repligen sales and ticker."
+        },
+        {
+          "id": "4013818180c2c330",
+          "ticker": "RGEN",
+          "title": "Repligen: Q2 Earnings Snapshot",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Repligen earnings snapshot."
+        },
+        {
+          "id": "5dd0012669fc7860",
+          "ticker": "RGEN",
+          "title": "Repligen Reports Second Quarter 2026 Financial Results and Updates Full Year 2026 Financial Guidance",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Repligen financial results and guidance."
+        },
+        {
+          "id": "4ec79265bb73adc6",
+          "ticker": "RGEN",
+          "title": "Repligen (RGEN) Q2 Earnings: What To Expect",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Repligen earnings preview."
+        }
+      ],
+      "freshness_days": {
+        "median": 0.6107819038657407,
+        "p95": 22.573646487199074,
+        "within_7d_rate": 0.9133333333333333,
+        "within_30d_rate": 0.9733333333333334,
+        "within_90d_rate": 1.0
+      }
+    },
+    "candidate_match": {
+      "counts": {
+        "ambiguous": 18,
+        "true_positive": 65,
+        "true_negative": 57,
+        "false_positive": 10
+      },
+      "accepted": 78,
+      "judged_relevant": 65,
+      "precision": 0.8666666666666667,
+      "recall": 1.0,
+      "cross_issuer_contamination_rate": 0.1282051282051282,
+      "details": [
+        {
+          "id": "8c19ea7f293c3eb6",
+          "ticker": "NU",
+          "title": "3 Financials Stocks Worth Investigating",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "A three-stock basket does not expose which issuer claims are present."
+        },
+        {
+          "id": "53471fdd66434800",
+          "ticker": "NU",
+          "title": "Should You Forget Big Banks and Bet on Fintech Instead?",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "The fintech comparison does not name the target issuer in the visible title."
+        },
+        {
+          "id": "a5f5bf6f92f22395",
+          "ticker": "NU",
+          "title": "Nu Holdings Ltd. (NU) is Attracting Investor Attention: Here is What You Should Know",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nu Holdings legal name and ticker."
+        },
+        {
+          "id": "3296d7f8244445ba",
+          "ticker": "NU",
+          "title": "Latest News In Digital Payment - Real-Time Settlement Challenges Highlight Cash Flow Optimization",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "2047ca94bf9a06eb",
+          "ticker": "NU",
+          "title": "Should You Invest $3,000 in Nu Holdings Right Now?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nu Holdings issuer discussion."
+        },
+        {
+          "id": "eae786f20972e0ae",
+          "ticker": "NU",
+          "title": "US Expansion Presents Significant Upside Potential for Nu Holdings (NU)",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nu Holdings issuer discussion and ticker."
+        },
+        {
+          "id": "c0d7d899ac3e3c17",
+          "ticker": "NU",
+          "title": "Nu Holdings Ltd. (NU) Dips More Than Broader Market: What You Should Know",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nu Holdings legal name and ticker."
+        },
+        {
+          "id": "4f31dc190cb8dd73",
+          "ticker": "NU",
+          "title": "Nubank (NU) Is Buying Banco Porto Real To Secure A Full Brazilian Banking License",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nubank acquisition and ticker."
+        },
+        {
+          "id": "29ec2b1a9d04065b",
+          "ticker": "NU",
+          "title": "MercadoLibre is Down 10% This Year But Its Relentless Growth Has One Analyst Predicting 55% Gains",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "18ed12d6448194c0",
+          "ticker": "NU",
+          "title": "OpenAI adds Nubank and BNY CEOs to board ahead of IPO",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Nubank CEO board appointment is executive-related, not necessarily an issuer event."
+        },
+        {
+          "id": "51b0d90157eefea6",
+          "ticker": "NU",
+          "title": "Amity Institute of Pharmacy, Amity University Madhya Pradesh Earns Prestigious 'A' Grade from Quality Council of India-National Accreditation Board for Education and Training (QCI-NABET), under the aegis of the Pharmacy Council of India",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "608aa812bbb660c0",
+          "ticker": "NU",
+          "title": "AARAV Launches 'The AARAV Atelier' -- A World-Class Fragrance Creative Center at its Thane Headquarters",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "5054e229fb9822c9",
+          "ticker": "NU",
+          "title": "BRO Q2 Deep Dive: AI Partnerships, Accession Integration, and Margin Strategy in Focus",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "5b6b2ae5f3b8f69a",
+          "ticker": "NU",
+          "title": "International Study Links Ambient PM2.5 Exposure to Lower Clinical Pregnancy and Live-Birth Rates Following Assisted Reproductive Technology.",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "df3cdcb2c3295a5f",
+          "ticker": "NU",
+          "title": "Illinois Tool Works (ITW) Is Up 8.5% After Raising 2026 Guidance And Boosting Share Buybacks",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "6407ad16478a09b2",
+          "ticker": "NU",
+          "title": "Sherwin-Williams (SHW) Is Up 11.2% After Strong Q2, Guidance Hike And 8% Price Increase",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "004c50f2994a20be",
+          "ticker": "NU",
+          "title": "T Mobile (TMUS) Faces Nationwide Outage That Hit Customers And Network Partners",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "bcfc223f97e52a91",
+          "ticker": "NU",
+          "title": "Is HBT Financial (HBT) Still Worth A Premium Following Its Earnings Beat And Dividend Hike?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "b6da0eb4e6b8f064",
+          "ticker": "NU",
+          "title": "Forte Biosciences (FBRX) Agrees To argenx Takeover As Tender Offer Nears",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "d69ef42f19b71067",
+          "ticker": "NU",
+          "title": "Xinhua Silk Road: 2026 Li-Ning Cup National Badminton Team Championship held in Shenyang, NE China",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "7a2dce6562ba88e9",
+          "ticker": "NU",
+          "title": "Nu Skin Enterprises to Announce Second Quarter 2026 Financial Results",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "5ef1107ed2e922c9",
+          "ticker": "NU",
+          "title": "3 Beauty Stocks Poised to Benefit From Evolving Consumer Trends",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "b2d8dc58df376b2e",
+          "ticker": "NU",
+          "title": "Can e.l.f. Beauty Extend Its Double-Digit Sales Growth Run?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "efda2d58c9f56d75",
+          "ticker": "NU",
+          "title": "Zacks.com featured highlights include Caleres, GIII Apparel, Nu Skin, Apple Hospitality and Green Dot",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "5788fc6dd43c476e",
+          "ticker": "NU",
+          "title": "5 Beauty & Cosmetics Stocks to Buy for a Stable Portfolio in 2H 2026",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "6d37e2281c21c663",
+          "ticker": "NU",
+          "title": "Nu Skin (NUS) Soars 6.9%: Is Further Upside Left in the Stock?",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "ae0f2983f98b1de7",
+          "ticker": "NU",
+          "title": "Zacks Industry Outlook Highlights Estee Lauder, e.l.f. Beauty, Helen of Troy and Nu Skin",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "43befd42fa8b79ee",
+          "ticker": "NU",
+          "title": "4 Cosmetics Stocks Worth Watching on Favorable Industry Trends",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "5c9b7b12215d6ff2",
+          "ticker": "NU",
+          "title": "5 Value Stocks With Low Price-to-Sales Ratios & Massive Upside",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "7a2a23a9afd6dd53",
+          "ticker": "NU",
+          "title": "5 Bargain Low Price-to-Sales Stocks Positioned to Deliver Solid Gains",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "85173a334ab2a373",
+          "ticker": "MARA",
+          "title": "BC-Most Active Stocks",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Most-active basket hides issuer-specific content."
+        },
+        {
+          "id": "2fc6deb7a234dac7",
+          "ticker": "MARA",
+          "title": "French contractor sues MARA over fees related to Exaion acquisition",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit MARA litigation tied to an issuer acquisition."
+        },
+        {
+          "id": "c5c253852157a424",
+          "ticker": "MARA",
+          "title": "MARA’s former French advisory team sues Bitcoin miner for unpaid fees, strategy pivot",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit MARA litigation and strategy pivot."
+        },
+        {
+          "id": "56ea8190d31cf700",
+          "ticker": "MARA",
+          "title": "Bitcoin Price Faces AI Challenge as MARA CEO Backs Data Centers Over Mining",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "CEO opinion may describe strategy but is not automatically an issuer event."
+        },
+        {
+          "id": "0eb8d75bcc92bdc4",
+          "ticker": "MARA",
+          "title": "CleanSpark Trades at a Discount: Which Tech Giant Could Be the Buyer?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "e94ea929428c8a03",
+          "ticker": "MARA",
+          "title": "MARA CEO Says Bitcoin's Payments Use Case Has 'Seen Its Day Go By' As Miners Chase AI Money",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "CEO opinion may describe strategy but is not automatically an issuer event."
+        },
+        {
+          "id": "92fe692af7adde54",
+          "ticker": "MARA",
+          "title": "Marathon Digital Holdings, Inc. (MARA) Stock Falls Amid Market Uptick: What Investors Need to Know",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit former legal name Marathon Digital Holdings and ticker."
+        },
+        {
+          "id": "acdc8a5e932b8a90",
+          "ticker": "MARA",
+          "title": "MSTR Builds a Dollar Reserve: Will This Reduce Financial Risk?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "274240042156bd76",
+          "ticker": "MARA",
+          "title": "MARA Holdings (MARA) Following Bitcoin Sales And Earnings Focus As Fair Value Debate Builds",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit MARA Holdings issuer valuation discussion."
+        },
+        {
+          "id": "288ea775ee91c0da",
+          "ticker": "MARA",
+          "title": "MARA Holdings (MARA) Stock Sees Split Analyst Revisions As Fair Value Edges Lower",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit MARA Holdings issuer analyst revisions."
+        },
+        {
+          "id": "dbf3201ece799864",
+          "ticker": "MARA",
+          "title": "Amity Institute of Pharmacy, Amity University Madhya Pradesh Earns Prestigious 'A' Grade from Quality Council of India-National Accreditation Board for Education and Training (QCI-NABET), under the aegis of the Pharmacy Council of India",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "641307a781bf03b2",
+          "ticker": "MARA",
+          "title": "AARAV Launches 'The AARAV Atelier' -- A World-Class Fragrance Creative Center at its Thane Headquarters",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "c52f097319b2f250",
+          "ticker": "MARA",
+          "title": "BRO Q2 Deep Dive: AI Partnerships, Accession Integration, and Margin Strategy in Focus",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "3c27e633d395b6b5",
+          "ticker": "MARA",
+          "title": "International Study Links Ambient PM2.5 Exposure to Lower Clinical Pregnancy and Live-Birth Rates Following Assisted Reproductive Technology.",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "a0f5bcc928befd86",
+          "ticker": "MARA",
+          "title": "Illinois Tool Works (ITW) Is Up 8.5% After Raising 2026 Guidance And Boosting Share Buybacks",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "4a1c2780d3f43d1e",
+          "ticker": "MARA",
+          "title": "Sherwin-Williams (SHW) Is Up 11.2% After Strong Q2, Guidance Hike And 8% Price Increase",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "c81ee0bd1135d416",
+          "ticker": "MARA",
+          "title": "T Mobile (TMUS) Faces Nationwide Outage That Hit Customers And Network Partners",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "cd207d971bbecddd",
+          "ticker": "MARA",
+          "title": "Is HBT Financial (HBT) Still Worth A Premium Following Its Earnings Beat And Dividend Hike?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "bac830e4839a8132",
+          "ticker": "MARA",
+          "title": "Forte Biosciences (FBRX) Agrees To argenx Takeover As Tender Offer Nears",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "818cd7e1e8b1432a",
+          "ticker": "MARA",
+          "title": "Xinhua Silk Road: 2026 Li-Ning Cup National Badminton Team Championship held in Shenyang, NE China",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "2014f757bb4c2167",
+          "ticker": "T",
+          "title": "AT&T Closes $23 Billion Spectrum Acquisition From EchoStar",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit AT&T acquisition."
+        },
+        {
+          "id": "527a02a7877eb6a8",
+          "ticker": "T",
+          "title": "AT&T closes $23 billion deal to acquire spectrum from Echostar",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit AT&T acquisition."
+        },
+        {
+          "id": "4dc4c0257434d86c",
+          "ticker": "T",
+          "title": "AT&T Closes Acquisition of Spectrum Licenses from EchoStar",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit AT&T acquisition."
+        },
+        {
+          "id": "490c63f423a4a09e",
+          "ticker": "T",
+          "title": "Dow Soars 537 Points on Strong Blue-Chip Earnings: Stock Market Today",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad market recap does not expose the target issuer claim."
+        },
+        {
+          "id": "a4b2c5c24775c798",
+          "ticker": "T",
+          "title": "D-Wave Quantum Just Announced an Expanded Deal. Should You Buy the Stock Now?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "7caac6ceb0f18b43",
+          "ticker": "T",
+          "title": "Quantum computing is helping AT&T solve network problems in seconds: D-Wave CEO",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit AT&T operational use case."
+        },
+        {
+          "id": "9aaa8f897a9f86cf",
+          "ticker": "T",
+          "title": "AT&T (T) Remains Competitive Despite Satellite Connectivity Concerns",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit AT&T issuer analysis and ticker."
+        },
+        {
+          "id": "efb63a3df3d0ad33",
+          "ticker": "T",
+          "title": "Is Trending Stock Tutor Perini Corporation (TPC) a Buy Now?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "f929f6d1a570d655",
+          "ticker": "T",
+          "title": "One Benchmark From AT&T Just Moved a Quantum Stock 20%",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit AT&T benchmark and its effect on another stock."
+        },
+        {
+          "id": "870ab166184f50c2",
+          "ticker": "T",
+          "title": "This Week In Cloud AI - Axe Compute Secures Major $1.5 Billion AI Infrastructure Deal",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "7b8ae8fe11e786e3",
+          "ticker": "T",
+          "title": "T. Rowe Price Set to Report Q2 Earnings: What's in Store for the Stock?",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "818d0ce48b3ebb6d",
+          "ticker": "T",
+          "title": "Analysts Estimate TPG Inc. (TPG) to Report a Decline in Earnings: What to Look Out for",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "fc68bf9a10e6ca03",
+          "ticker": "T",
+          "title": "Omnea triples revenue in twelve months as enterprises choose agentic operating system for procurement",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "f92f724de3147ff7",
+          "ticker": "T",
+          "title": "2 Financials Stocks with Promising Prospects and 1 We Question",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "9ea5c8a61677e676",
+          "ticker": "T",
+          "title": "Goldman, T. Rowe Debut Their First Interval Fund for the Masses",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "3de3a6542a537d71",
+          "ticker": "T",
+          "title": "T. ROWE PRICE GOLDMAN SACHS PRIVATE MARKETS FUND DEBUTS",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "5fa6514c4f273e6b",
+          "ticker": "T",
+          "title": "T. Rowe Price Just Launched the First Actively Managed Multi-Crypto Spot ETF. Here's What Crypto Investors Need to Know",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "4caac08cc71f1943",
+          "ticker": "T",
+          "title": "T. Rowe Price (TROW) Beats Stock Market Upswing: What Investors Need to Know",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "1957e4098432c3c3",
+          "ticker": "T",
+          "title": "1 Mid-Cap Stock to Target This Week and 2 Facing Challenges",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "5caceb0daef2eb44",
+          "ticker": "T",
+          "title": "T. Rowe Price (TROW) Earnings Expected to Grow: What to Know Ahead of Next Week's Release",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "7aa14fb7e34e06ae",
+          "ticker": "SOFI",
+          "title": "US Stock Futures Slip As Iran Targets American Forces Ahead Of Big Tech Earnings: SKHY, SNDK, BE, SOFI In Focus",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Multi-stock in-focus basket names SOFI but exposes no issuer-specific claim."
+        },
+        {
+          "id": "805373631ba7dd99",
+          "ticker": "SOFI",
+          "title": "SOFI Stock Rises Overnight: Company Announces New Multi-Year Partnership With Notre Dame Athletics Ahead Of Q2 Results",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit SOFI issuer partnership."
+        },
+        {
+          "id": "28558aff1121d470",
+          "ticker": "SOFI",
+          "title": "Ahead of SoFi Earnings, Here's What Barchart Data Says Comes Next for SOFI Stock",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit SoFi earnings setup."
+        },
+        {
+          "id": "28bb71691db04426",
+          "ticker": "SOFI",
+          "title": "SoFi Technologies Signs Multi-Year Partnership With Notre Dame Athletics",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit SoFi Technologies partnership."
+        },
+        {
+          "id": "0ad2f4e2434f39e6",
+          "ticker": "SOFI",
+          "title": "SoFi and Notre Dame Athletics Launch Landmark Multi-Year Partnership",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit SoFi partnership."
+        },
+        {
+          "id": "acd0f3267aad88c5",
+          "ticker": "SOFI",
+          "title": "What Should Investors Do With SoFi Technologies Ahead of Q2 Earnings?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit SoFi Technologies earnings analysis."
+        },
+        {
+          "id": "6c34efa0be1b7468",
+          "ticker": "SOFI",
+          "title": "BC-Most Active Stocks",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Most-active basket hides issuer-specific content."
+        },
+        {
+          "id": "b986681f47f22b25",
+          "ticker": "SOFI",
+          "title": "SoFi (SOFI) Reports Earnings Tomorrow: What To Expect",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit SoFi earnings preview and ticker."
+        },
+        {
+          "id": "403e53d423bb62c0",
+          "ticker": "SOFI",
+          "title": "Latest News In Digital Payment - Real-Time Settlement Challenges Highlight Cash Flow Optimization",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "69bfca411061e5f7",
+          "ticker": "SOFI",
+          "title": "SOFI Stock Down 40% YTD: Can Q2 Results Spark A Rebound?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit SOFI performance and earnings question."
+        },
+        {
+          "id": "8fc557bdf435bd9b",
+          "ticker": "JBLU",
+          "title": "JetBlue (JBLU) Is Up 12.1% After Reinstating 2026 Outlook And Setting 2028 EPS Target – What's Changed",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit JetBlue outlook and ticker."
+        },
+        {
+          "id": "1b68dad17d791068",
+          "ticker": "JBLU",
+          "title": "JetBlue Airways Corp (JBLU) Q2 2026 Earnings Call Highlights: Navigating Challenges with ...",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit JetBlue earnings call."
+        },
+        {
+          "id": "b2b917e0acf2d657",
+          "ticker": "JBLU",
+          "title": "JetBlue Advances 9% on Earnings Beat and 2028 Profit Target, Lifting Delta, United, and Southwest",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit JetBlue earnings and sector spillover."
+        },
+        {
+          "id": "913599d66fa68147",
+          "ticker": "JBLU",
+          "title": "JetBlue Eyes More Aircraft Financing If High Fuel Costs Persist",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit JetBlue financing plans."
+        },
+        {
+          "id": "51d923459bb81c88",
+          "ticker": "JBLU",
+          "title": "Boeing Beats on Cash Flow, Books New Charge on Air Force One",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "8f7e9a0e660ad21e",
+          "ticker": "JBLU",
+          "title": "JBLU Q2 Earnings Beat on Strong RASM Growth, Revenues Rise",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit JBLU earnings."
+        },
+        {
+          "id": "084c75999cced924",
+          "ticker": "JBLU",
+          "title": "JetBlue Airways Q2 Earnings Call Highlights",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit JetBlue earnings call."
+        },
+        {
+          "id": "53094c363f9e7b81",
+          "ticker": "JBLU",
+          "title": "BC-Most Active Stocks",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Most-active basket hides issuer-specific content."
+        },
+        {
+          "id": "a9eb47d956c2fbdc",
+          "ticker": "JBLU",
+          "title": "JetBlue (JBLU) Q2 Earnings: Taking a Look at Key Metrics Versus Estimates",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit JetBlue earnings and ticker."
+        },
+        {
+          "id": "a6172f028fe2f560",
+          "ticker": "JBLU",
+          "title": "JetBlue Q2 2026 earnings: wider loss as fuel costs surge 81%",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit JetBlue earnings."
+        },
+        {
+          "id": "ee6146514e8c13e6",
+          "ticker": "INTC",
+          "title": "How Far Could Marvell Technology Stock Actually Fall From Here?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "b709ed6d60e18591",
+          "ticker": "INTC",
+          "title": "Intel Is Down By 39% Since June. Time to Buy?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Intel price and valuation discussion."
+        },
+        {
+          "id": "251c72cd363d302c",
+          "ticker": "INTC",
+          "title": "Visa Announced Layoffs Ahead of Earnings Beat, as AI and Restructuring Accelerate",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "fc38e9ed1ce02eba",
+          "ticker": "INTC",
+          "title": "Update: Dow Extends Advance Following Strong Earnings Reports",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad index recap does not expose an Intel-specific claim."
+        },
+        {
+          "id": "cf806ae153cc61e2",
+          "ticker": "INTC",
+          "title": "Stocks to Watch Recap: Coca-Cola, J&J, Mercedes-Benz, UPS",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Multi-company watch recap does not expose an Intel-specific claim."
+        },
+        {
+          "id": "1b279af84eb4c9ec",
+          "ticker": "INTC",
+          "title": "Chip Stocks Extend Pullback Amid AI Bubble Fears",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Sector pullback basket does not expose an Intel-specific claim."
+        },
+        {
+          "id": "2f790d417d7f5f8f",
+          "ticker": "INTC",
+          "title": "Why cyclical stocks are poised for a comeback",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Cyclical-stock theme does not expose an Intel-specific claim."
+        },
+        {
+          "id": "1075cd850e3e1931",
+          "ticker": "INTC",
+          "title": "Intel Posted A Big Beat And Still Fell, And Its Spending Plan Is Why",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Intel earnings and spending-plan analysis."
+        },
+        {
+          "id": "a97424f4ea739cd6",
+          "ticker": "INTC",
+          "title": "Why Intel Stock Just Fell Again",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Intel price-move analysis."
+        },
+        {
+          "id": "9086b4304e4a7b5d",
+          "ticker": "INTC",
+          "title": "AMD Stock's Surge Was Already Visible In Its Own Earnings Calls",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "394e83329842d99c",
+          "ticker": "NOK",
+          "title": "European Equities Traded in US as ADRs Ease in Tuesday Trading",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad ADR market recap exposes no Nokia-specific claim."
+        },
+        {
+          "id": "897a1941c609b007",
+          "ticker": "NOK",
+          "title": "Nokia Corporation - Managers' transactions (Hammarén)",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nokia official manager transaction."
+        },
+        {
+          "id": "bc087b2371cb6553",
+          "ticker": "NOK",
+          "title": "Nokia Corporation - Managers' transactions (Ihamuotila)",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nokia official manager transaction."
+        },
+        {
+          "id": "96cebe64c82b3cc9",
+          "ticker": "NOK",
+          "title": "Nokia Corporation - Managers' transactions (Mahajan)",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nokia official manager transaction."
+        },
+        {
+          "id": "a3b1f94d1fa959af",
+          "ticker": "NOK",
+          "title": "Why Nokia (HLSE:NOKIA) Is Down 7.1% After AI-RAN Launch and Restructuring-Hit Q2 Profitability – And What's Next",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nokia restructuring and results discussion."
+        },
+        {
+          "id": "72c1255f0ae207c0",
+          "ticker": "NOK",
+          "title": "Nokia (HLSE:NOKIA) Stock May Be 24% Undervalued On AI Powered 5G Expansion",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nokia valuation discussion."
+        },
+        {
+          "id": "724b76d059eba0cc",
+          "ticker": "NOK",
+          "title": "What Nokia's Financial Results Reveal About NOK's Growth Outlook",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nokia results and ticker."
+        },
+        {
+          "id": "a57b0067bd890e52",
+          "ticker": "NOK",
+          "title": "Is NOK Stock Worth Buying as AI Growth Offsets Telecom Challenges?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit NOK issuer analysis."
+        },
+        {
+          "id": "6594ffec1d0c5bda",
+          "ticker": "NOK",
+          "title": "How Nokia is Positioning Itself for Long-Term Growth in AI Networking",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Nokia strategy discussion."
+        },
+        {
+          "id": "2da399f0f0f77996",
+          "ticker": "NOK",
+          "title": "European Equities Traded in the US as American Depositary Receipts Rise in Friday Trading",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad ADR market recap exposes no Nokia-specific claim."
+        },
+        {
+          "id": "f04dc0237986651b",
+          "ticker": "FOUR",
+          "title": "NASA Chief Jared Isaacman Says 'Never Bet Against' Elon Musk, Adds 'We Can't Do It Without' SpaceX for Moon Base",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "f361dac9c577fb1c",
+          "ticker": "FOUR",
+          "title": "Can Priority's Revenue Mix Support Further Margin Expansion?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "fff16bc9a1357ac5",
+          "ticker": "FOUR",
+          "title": "Shift4 Announces Date of Second Quarter Earnings Results and Upcoming Investor Conference Participation",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Shift4 earnings and conference event."
+        },
+        {
+          "id": "58dfc628d08f3c58",
+          "ticker": "FOUR",
+          "title": "Shift4 Payments (FOUR) Launches Shift4 One, Is The Stock Still Undervalued?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Shift4 product launch and ticker."
+        },
+        {
+          "id": "dba8876eeb177066",
+          "ticker": "FOUR",
+          "title": "Shift4 Payments (FOUR) Stock May Be Fair Value Yet Fully Priced On Earnings",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Shift4 valuation discussion."
+        },
+        {
+          "id": "b8f226aedce4556b",
+          "ticker": "FOUR",
+          "title": "Could Shift4 Payments’ (FOUR) New Shift4 One Device Redefine Its Cross‑Border Commerce Strategy?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Shift4 product and strategy discussion."
+        },
+        {
+          "id": "90a642807a1f4498",
+          "ticker": "FOUR",
+          "title": "Wall Street Analysts See a 25.03% Upside in Shift4 Payments (FOUR): Can the Stock Really Move This High?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Shift4 analyst target discussion."
+        },
+        {
+          "id": "fd11dd5d7bcb917e",
+          "ticker": "FOUR",
+          "title": "Should You Hold PRTH Stock Following Its Nearly 28% 3-Months Rally?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "4c2137fa136a31a9",
+          "ticker": "FOUR",
+          "title": "Flywire Stock Jumps 32.6% YTD: Is it Still a Buy or Better to Hold?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "ee3f43ded0cc98db",
+          "ticker": "FOUR",
+          "title": "Shift4 (FOUR) Stock Is Up, What You Need To Know",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Shift4 stock move and ticker."
+        },
+        {
+          "id": "3882131610498e68",
+          "ticker": "FOUR",
+          "title": "Amity Institute of Pharmacy, Amity University Madhya Pradesh Earns Prestigious 'A' Grade from Quality Council of India-National Accreditation Board for Education and Training (QCI-NABET), under the aegis of the Pharmacy Council of India",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "5d733e3c02204773",
+          "ticker": "FOUR",
+          "title": "AARAV Launches 'The AARAV Atelier' -- A World-Class Fragrance Creative Center at its Thane Headquarters",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "c902db21130e5266",
+          "ticker": "FOUR",
+          "title": "BRO Q2 Deep Dive: AI Partnerships, Accession Integration, and Margin Strategy in Focus",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "6161a8641dcb0d8d",
+          "ticker": "FOUR",
+          "title": "International Study Links Ambient PM2.5 Exposure to Lower Clinical Pregnancy and Live-Birth Rates Following Assisted Reproductive Technology.",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "483ffaa36528fac0",
+          "ticker": "FOUR",
+          "title": "Illinois Tool Works (ITW) Is Up 8.5% After Raising 2026 Guidance And Boosting Share Buybacks",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "a5e1359b67dfea70",
+          "ticker": "FOUR",
+          "title": "Sherwin-Williams (SHW) Is Up 11.2% After Strong Q2, Guidance Hike And 8% Price Increase",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "be3e21a4b684ea49",
+          "ticker": "FOUR",
+          "title": "T Mobile (TMUS) Faces Nationwide Outage That Hit Customers And Network Partners",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "63a5efa775fa7996",
+          "ticker": "FOUR",
+          "title": "Is HBT Financial (HBT) Still Worth A Premium Following Its Earnings Beat And Dividend Hike?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "2b318bf7083e04e6",
+          "ticker": "FOUR",
+          "title": "Forte Biosciences (FBRX) Agrees To argenx Takeover As Tender Offer Nears",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "02a5f45c393ad076",
+          "ticker": "FOUR",
+          "title": "Xinhua Silk Road: 2026 Li-Ning Cup National Badminton Team Championship held in Shenyang, NE China",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "4e6f0110f6e02775",
+          "ticker": "CLS",
+          "title": "Does Owning Celestica Really Diversify Your Portfolio?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Celestica portfolio analysis."
+        },
+        {
+          "id": "037a60466f56806e",
+          "ticker": "CLS",
+          "title": "Celestica Inc (CLS) Q2 2026 Earnings Call Highlights: Record Revenue and Strong Growth Outlook",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Celestica earnings call."
+        },
+        {
+          "id": "e6c127cc6a3a3dfe",
+          "ticker": "CLS",
+          "title": "Coherent Sinks 11%, Applied Optoelectronics Falls 10%, Lumentum Drops 9% as Traders Question AI Spending Spree",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad theme, or lacks target-issuer evidence."
+        },
+        {
+          "id": "27272fe2667bf9a1",
+          "ticker": "CLS",
+          "title": "S&P/TSX Composite Index up 140 Points at Midday With Technology Stocks The Top Gainer",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad index recap does not expose the target issuer claim."
+        },
+        {
+          "id": "de6bf37e0d8e4683",
+          "ticker": "CLS",
+          "title": "CLS Q2 Earnings Beat Estimates on Strong CCS Demand, Outlook Raised",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit CLS earnings and outlook."
+        },
+        {
+          "id": "945c5e679b639d84",
+          "ticker": "CLS",
+          "title": "4 Stocks With Strong Interest Coverage Ratios to Buy in H2 2026",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Four-stock basket does not expose which claim belongs to Celestica."
+        },
+        {
+          "id": "586674023e5beb0f",
+          "ticker": "CLS",
+          "title": "Celestica Q2 Earnings Call Highlights",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Celestica earnings call."
+        },
+        {
+          "id": "5c3940072c94ae19",
+          "ticker": "CLS",
+          "title": "Celestica Inc. Q2 2026 Earnings Call Summary",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Celestica earnings summary."
+        },
+        {
+          "id": "733b4e8f6ebd721c",
+          "ticker": "CLS",
+          "title": "Canadian Investment Regulatory Organization Trade Resumption - CLS",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit CLS trading resumption."
+        },
+        {
+          "id": "3aaa441355fc429f",
+          "ticker": "CLS",
+          "title": "How Investors May Respond To Celestica (TSX:CLS) Surging Q2 Earnings and Raised 2026 Outlook",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Celestica earnings and outlook."
+        },
+        {
+          "id": "e78b6908397cb413",
+          "ticker": "RGEN",
+          "title": "Repligen (RGEN) Held An M&A Call With BioLife Solutions.",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Repligen M&A call."
+        },
+        {
+          "id": "5ae9305ca735c06d",
+          "ticker": "RGEN",
+          "title": "Repligen Corp (RGEN) Q2 2026 Earnings Call Highlights: Strong Growth and Raised Guidance Amidst ...",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Repligen earnings call."
+        },
+        {
+          "id": "5e544457f73a4089",
+          "ticker": "RGEN",
+          "title": "Repligen Q2 Earnings Call Highlights",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Repligen earnings call."
+        },
+        {
+          "id": "9627515eb2e029c4",
+          "ticker": "RGEN",
+          "title": "Repligen Reports Q2 Revenue Growth and Raises Full-Year 2026 Guidance",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Repligen results and guidance."
+        },
+        {
+          "id": "cd37c8cf9ee5ce41",
+          "ticker": "RGEN",
+          "title": "Repligen (RGEN) Beats Q2 Earnings and Revenue Estimates",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Repligen earnings beat."
+        },
+        {
+          "id": "fa3bdbaa0c9df6fa",
+          "ticker": "RGEN",
+          "title": "Repligen's Q2 Adjusted Earnings, Revenue Increase; 2026 Outlook Raised",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Repligen earnings and guidance."
+        },
+        {
+          "id": "af221d978f3d86a4",
+          "ticker": "RGEN",
+          "title": "Repligen (NASDAQ:RGEN) Posts Better-Than-Expected Sales In Q2 CY2026",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Repligen sales and ticker."
+        },
+        {
+          "id": "4013818180c2c330",
+          "ticker": "RGEN",
+          "title": "Repligen: Q2 Earnings Snapshot",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Repligen earnings snapshot."
+        },
+        {
+          "id": "5dd0012669fc7860",
+          "ticker": "RGEN",
+          "title": "Repligen Reports Second Quarter 2026 Financial Results and Updates Full Year 2026 Financial Guidance",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Repligen financial results and guidance."
+        },
+        {
+          "id": "4ec79265bb73adc6",
+          "ticker": "RGEN",
+          "title": "Repligen (RGEN) Q2 Earnings: What To Expect",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Repligen earnings preview."
+        }
+      ],
+      "freshness_days": {
+        "median": 0.6107819038657407,
+        "p95": 22.573646487199074,
+        "within_7d_rate": 0.9133333333333333,
+        "within_30d_rate": 0.9733333333333334,
+        "within_90d_rate": 1.0
+      }
+    }
+  }
+}

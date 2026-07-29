@@ -1,0 +1,73 @@
+{
+  "schema": "uzi.us_entity_recall_shadow_profiles.v1",
+  "profiles": {
+    "NU": {
+      "legal_name": "Nu Holdings Ltd.",
+      "selection_reason": "Most-active constituent with a two-letter ticker and a consumer brand that differs from the listed legal name; stresses both false-positive control and brand recall.",
+      "search_queries": ["Nubank", "Nu Skin"],
+      "aliases": [
+        {
+          "value": "Nubank",
+          "kind": "issuer_brand_candidate",
+          "source_url": "https://international.nubank.com.br/company/nubank-to-invest-r-45-billion-in-brazil-in-2026/",
+          "binding": "Issuer-controlled Nu International release describes Nubank operations as driving Nu Holdings results."
+        }
+      ]
+    },
+    "MARA": {
+      "legal_name": "MARA Holdings, Inc.",
+      "selection_reason": "Most-active constituent that changed its legal name from Marathon Digital Holdings; stresses recall of a former issuer name without substring expansion.",
+      "search_queries": ["Marathon Digital Holdings"],
+      "aliases": [
+        {
+          "value": "Marathon Digital Holdings",
+          "kind": "former_legal_name_candidate",
+          "source_url": "https://ir.mara.com/sec-filings/all-sec-filings/content/0001493152-24-035093/form8-k.htm",
+          "binding": "Issuer-hosted 8-K states the legal name changed from Marathon Digital Holdings, Inc. to MARA Holdings, Inc. on 2024-08-29."
+        }
+      ]
+    },
+    "T": {
+      "legal_name": "AT&T Inc.",
+      "selection_reason": "Most-active constituent with a one-letter ticker; stresses whether a bare common letter can contaminate issuer attribution.",
+      "search_queries": ["T. Rowe Price"],
+      "aliases": []
+    },
+    "SOFI": {
+      "legal_name": "SoFi Technologies, Inc.",
+      "selection_reason": "Most-active consumer-finance brand whose capitalization and legal suffix vary across news publishers.",
+      "aliases": []
+    },
+    "JBLU": {
+      "legal_name": "JetBlue Airways Corporation",
+      "selection_reason": "Appears in both day-gainers and most-active lists; a consumer brand is embedded in, but shorter than, the legal name.",
+      "aliases": []
+    },
+    "INTC": {
+      "legal_name": "Intel Corporation",
+      "selection_reason": "Highest-volume name in the live screen and a dense cross-issuer semiconductor news environment.",
+      "aliases": []
+    },
+    "NOK": {
+      "legal_name": "Nokia Corporation",
+      "selection_reason": "High-volume sponsored ADR; stresses issuer matching across US listing labels and the foreign legal issuer name.",
+      "aliases": []
+    },
+    "FOUR": {
+      "legal_name": "Shift4 Payments, Inc.",
+      "selection_reason": "Day-gainer with a common-word ticker but a distinctive issuer brand; controls ticker qualification and legal-name recall.",
+      "search_queries": ["four stocks"],
+      "aliases": []
+    },
+    "CLS": {
+      "legal_name": "Celestica Inc.",
+      "selection_reason": "Day-gainer and long-horizon momentum name with supplier/customer news contamination risk.",
+      "aliases": []
+    },
+    "RGEN": {
+      "legal_name": "Repligen Corporation",
+      "selection_reason": "Day-gainer in life sciences with a distinctive legal name and lower news density, serving as a clean recall control.",
+      "aliases": []
+    }
+  }
+}

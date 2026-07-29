@@ -13,9 +13,9 @@ from typing import Any
 ENTITY_STOPWORDS = {
     "company", "corporation", "corp", "digital", "group", "holding",
     "holdings", "inc", "incorporated", "limited", "ltd", "markets", "motor",
-    "plc", "semiconductor", "strategy", "technology", "technologies",
+    "payments", "plc", "semiconductor", "strategy", "technology", "technologies",
 }
-COMMON_WORD_TICKERS = {"AI", "C", "F", "IT", "ON", "CAT", "GEN"}
+COMMON_WORD_TICKERS = {"AI", "C", "F", "IT", "ON", "CAT", "GEN", "NU", "T"}
 
 
 US_ENTITY_PROFILES: dict[str, dict[str, Any]] = {
@@ -23,6 +23,36 @@ US_ENTITY_PROFILES: dict[str, dict[str, Any]] = {
         "legal_name": "Micron Technology, Inc.",
         "selection_reason": "短 ticker；验证 MU 不回退为 Musk substring 污染。",
         "aliases": [],
+    },
+    "NU": {
+        "legal_name": "Nu Holdings Ltd.",
+        "selection_reason": "Two-letter ticker collides with Nu Skin; source-bound issuer names preserve recall.",
+        "aliases": [
+            {
+                "value": "Nu Holdings",
+                "kind": "issuer_legal_name",
+                "source_url": "https://www.investidores.nu/financials/filings/",
+                "binding": "Nubank investor relations identifies shareholders of Nu Holdings on its filings page",
+            },
+            {
+                "value": "Nubank",
+                "kind": "issuer_brand",
+                "source_url": "https://international.nubank.com.br/company/nubank-to-invest-r-45-billion-in-brazil-in-2026/",
+                "binding": "Issuer-controlled Nu International release ties Nubank operations to Nu Holdings results",
+            },
+        ],
+    },
+    "T": {
+        "legal_name": "AT&T Inc.",
+        "selection_reason": "One-letter ticker collides with T. Rowe Price; use the issuer brand or qualified ticker only.",
+        "aliases": [
+            {
+                "value": "AT&T",
+                "kind": "issuer_brand",
+                "source_url": "https://investors.att.com/resources/faqs",
+                "binding": "AT&T investor relations states that AT&T's NYSE ticker symbol is T",
+            },
+        ],
     },
     "MSTR": {
         "legal_name": "Strategy Inc.",
@@ -251,10 +281,16 @@ def _secondary_only(text: str, value: str) -> bool:
         return True
     patterns = (
         rf"\bformer\s+{escaped}\b",
+        rf"\bformer\b.{{0,80}}\(\s*(?:NYSE|NASDAQ)\s*:\s*{escaped}\s*\)\s+"
+        rf"(?:CEO|CFO|COO|CTO|Chair(?:man|woman)?|Executive)\b",
         rf"\b(?:recognized|named)\b.{{0,100}}\b{escaped}\b",
         rf"\bdespite\s+{escaped}\s+(?:recognition|mention)\b",
         rf"\baccording\s+to\s+{escaped}\b",
         rf"\b(?:supplier|partner|customer)\b.{{0,80}}\b(?:to|of|for)\b.{{0,50}}\b{escaped}\b",
+        rf"\b[A-Z][A-Za-z0-9&.-]+(?:\s+[A-Z][A-Za-z0-9&.-]+){{0,3}}"
+        rf"(?:['’]s)?\s+(?:deal|agreement|contract)\s+with\s+{escaped}\b",
+        rf"^(?!(?i:{escaped})\b)[^.!?]{{1,100}}\b{escaped}\s+"
+        rf"(?:deal|agreement|contract)\b",
     )
     return any(re.search(pattern, text, re.I) for pattern in patterns)
 
@@ -297,11 +333,15 @@ def matches_us_news_entity(
     text = f"{title} {summary}".strip()
     ticker = str(ticker_code or ticker_full or "").upper()
     if ticker in COMMON_WORD_TICKERS:
-        if _qualified_common_ticker(text, ticker):
+        if _qualified_common_ticker(text, ticker) and not _secondary_only(text, ticker):
             return True
     else:
         for symbol in {ticker_code, ticker_full}:
-            if symbol and _bounded(text, str(symbol).strip()):
+            if (
+                symbol
+                and _bounded(text, str(symbol).strip())
+                and not _secondary_only(text, str(symbol).strip())
+            ):
                 return True
 
     profile = profile_for_ticker(ticker)

@@ -139,6 +139,86 @@ def test_common_word_tickers_require_issuer_evidence():
         assert _news_matches_entity(title, "", ticker, ticker, company) is expected
 
 
+def test_short_ticker_cross_issuer_controls_use_real_yahoo_titles():
+    from fetch_events import _news_matches_entity
+
+    assert not _news_matches_entity(
+        "Nu Skin Enterprises to Announce Second Quarter 2026 Financial Results",
+        "",
+        "NU",
+        "NU",
+        "Nu Holdings Ltd.",
+    )
+    assert not _news_matches_entity(
+        "T. Rowe Price Set to Report Q2 Earnings: What's in Store for the Stock?",
+        "",
+        "T",
+        "T",
+        "AT&T Inc.",
+    )
+    assert _news_matches_entity(
+        "Should You Invest $3,000 in Nu Holdings Right Now?",
+        "",
+        "NU",
+        "NU",
+        "Nu Holdings Ltd.",
+    )
+    assert _news_matches_entity(
+        "AT&T Closes $23 Billion Spectrum Acquisition From EchoStar",
+        "",
+        "T",
+        "T",
+        "AT&T Inc.",
+    )
+
+
+def test_former_executive_ticker_reference_does_not_reassign_other_issuer_news():
+    from fetch_events import _news_matches_entity
+
+    title = (
+        "NASA Chief Jared Isaacman Says 'Never Bet Against' Elon Musk, "
+        "Adds 'We Can't Do It Without' SpaceX for Moon Base"
+    )
+    summary = (
+        "NASA Administrator and former Shift4 Payments Inc. (NYSE:FOUR) CEO "
+        "Jared Isaacman has backed Elon Musk and Space Exploration Technologies "
+        "Corp.'s (NASDAQ:SPCX) goal of establishing space-based compute capacity."
+    )
+    assert not _news_matches_entity(
+        title,
+        summary,
+        "FOUR",
+        "FOUR",
+        "Shift4 Payments, Inc.",
+    )
+
+
+def test_other_issuer_deal_coverage_is_not_reassigned_to_counterparty():
+    from fetch_events import _news_matches_entity
+
+    assert not _news_matches_entity(
+        "D-Wave Quantum Just Announced an Expanded Deal. Should You Buy the Stock Now?",
+        "D-Wave Quantum's deal with AT&T could be a sign of things to come for the quantum computing company.",
+        "T",
+        "T",
+        "AT&T Inc.",
+    )
+    assert not _news_matches_entity(
+        "D-Wave Quantum Stock Hits Pause After AT&T Deal Rally",
+        "D-Wave Quantum stock fell as investors took profits following its AT&T agreement.",
+        "T",
+        "T",
+        "AT&T Inc.",
+    )
+    assert _news_matches_entity(
+        "AT&T closes $23 billion deal to acquire spectrum from Echostar",
+        "",
+        "T",
+        "T",
+        "AT&T Inc.",
+    )
+
+
 def test_source_bound_brands_recover_real_issuer_news():
     from fetch_events import _news_matches_entity
 

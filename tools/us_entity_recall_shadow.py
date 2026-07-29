@@ -276,58 +276,73 @@ def fetch_snapshot(profiles: dict[str, dict[str, Any]] | None = None) -> dict[st
     session = requests.Session()
     session.headers.update({"User-Agent": "Mozilla/5.0 (compatible; UZI-Skill Yahoo shadow)"})
     for ticker, profile in profiles.items():
-        started = time.perf_counter()
-        response = session.get(
-            YAHOO_SEARCH_URL,
-            params={
-                "q": ticker,
-                "quotesCount": 1,
-                "newsCount": 10,
-                "enableFuzzyQuery": "false",
-            },
-            timeout=20,
-        )
-        response.raise_for_status()
-        payload = response.json()
-        latencies[ticker] = round(time.perf_counter() - started, 6)
-        for rank, item in enumerate(payload.get("news") or []):
-            title = str(item.get("title") or "").strip()
-            url = str(item.get("link") or "").strip()
-            published_epoch = item.get("providerPublishTime")
-            published_utc = None
-            if isinstance(published_epoch, (int, float)):
-                published_utc = datetime.fromtimestamp(published_epoch, timezone.utc).isoformat()
-            summary = str(item.get("summary") or "").strip()
-            rows.append(
-                {
-                    "id": _row_id(ticker, url, title),
-                    "ticker": ticker,
-                    "rank": rank,
-                    "title": title,
-                    "summary": summary,
-                    "url": url,
-                    "canonical_url": _canonical_url(url),
-                    "publisher": item.get("publisher"),
-                    "published_utc": published_utc,
-                    "related_tickers": item.get("relatedTickers") or [],
-                    "baseline_match": _news_matches_entity(
-                        title, summary, ticker, ticker, profile["legal_name"]
-                    ),
-                    "candidate_match": candidate_matches(
-                        title,
-                        summary,
-                        ticker,
-                        profile,
-                        related_tickers=item.get("relatedTickers") or [],
-                        publisher=str(item.get("publisher") or ""),
-                    ),
-                }
+        queries = list(dict.fromkeys([ticker, *(profile.get("search_queries") or [])]))
+        seen_ids: set[str] = set()
+        query_latencies: list[float] = []
+        for query in queries:
+            started = time.perf_counter()
+            response = session.get(
+                YAHOO_SEARCH_URL,
+                params={
+                    "q": query,
+                    "quotesCount": 1,
+                    "newsCount": 10,
+                    "enableFuzzyQuery": "false",
+                },
+                timeout=20,
             )
+            response.raise_for_status()
+            payload = response.json()
+            query_latencies.append(time.perf_counter() - started)
+            for rank, item in enumerate(payload.get("news") or []):
+                title = str(item.get("title") or "").strip()
+                url = str(item.get("link") or "").strip()
+                row_id = _row_id(ticker, url, title)
+                if row_id in seen_ids:
+                    continue
+                seen_ids.add(row_id)
+                published_epoch = item.get("providerPublishTime")
+                published_utc = None
+                if isinstance(published_epoch, (int, float)):
+                    published_utc = datetime.fromtimestamp(published_epoch, timezone.utc).isoformat()
+                summary = str(item.get("summary") or "").strip()
+                rows.append(
+                    {
+                        "id": row_id,
+                        "ticker": ticker,
+                        "search_query": query,
+                        "rank": rank,
+                        "title": title,
+                        "summary": summary,
+                        "url": url,
+                        "canonical_url": _canonical_url(url),
+                        "publisher": item.get("publisher"),
+                        "published_utc": published_utc,
+                        "related_tickers": item.get("relatedTickers") or [],
+                        "baseline_match": _news_matches_entity(
+                            title, summary, ticker, ticker, profile["legal_name"]
+                        ),
+                        "candidate_match": candidate_matches(
+                            title,
+                            summary,
+                            ticker,
+                            profile,
+                            related_tickers=item.get("relatedTickers") or [],
+                            publisher=str(item.get("publisher") or ""),
+                        ),
+                    }
+                )
+        latencies[ticker] = round(sum(query_latencies), 6)
     return {
         "schema": "uzi.us_entity_recall_shadow.v1",
         "captured_at_utc": captured_at.isoformat(),
         "source": YAHOO_SEARCH_URL,
-        "request": {"quotesCount": 1, "newsCount": 10, "enableFuzzyQuery": "false"},
+        "request": {
+            "quotesCount": 1,
+            "newsCount": 10,
+            "enableFuzzyQuery": "false",
+            "query_policy": "ticker plus optional source-bound profile search_queries; de-duplicate within ticker",
+        },
         "profiles": profiles,
         "sec_access": {
             "attempted": False,
