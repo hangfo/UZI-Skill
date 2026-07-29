@@ -1,0 +1,292 @@
+{
+  "schema": "uzi.us_entity_recall_shadow_labels.v1",
+  "method": "Manual title-level issuer relevance review. A row is relevant only when the issuer, its controlled business, or its sourced brand is a material subject. Incidental peer/index/authority mentions are irrelevant. Titles that require unavailable full-body context are ambiguous and excluded from precision/recall denominators.",
+  "default_truth": "irrelevant",
+  "default_reason": "Title is about another issuer or contains only an incidental sector/peer/provider association.",
+  "labels": {
+    "48565d431ef44dc8": {
+      "truth": "ambiguous",
+      "reason": "Broad AI/chip rotation title; full-body issuer materiality is not established from frozen Yahoo metadata."
+    },
+    "46d190ebc34a7f16": {
+      "truth": "relevant",
+      "reason": "Micron is the named issuer and primary subject."
+    },
+    "931c3c9123c46b05": {
+      "truth": "ambiguous",
+      "reason": "Live-market roundup may discuss Micron, but the frozen title does not establish issuer materiality."
+    },
+    "ecc1496aa49e9cbb": {
+      "truth": "ambiguous",
+      "reason": "Broad market update lacks enough frozen context to judge Micron materiality."
+    },
+    "56b0dd74f5604433": {
+      "truth": "ambiguous",
+      "reason": "Multi-company recap lacks enough frozen context to judge Micron materiality."
+    },
+    "40a5ab1fb2caf48e": {
+      "truth": "relevant",
+      "reason": "Micron is the named issuer and primary subject."
+    },
+    "56e7a2c2b6319c89": {
+      "truth": "ambiguous",
+      "reason": "Sector rotation title lacks enough frozen context to judge Micron materiality."
+    },
+    "71c8966cec62425b": {
+      "truth": "relevant",
+      "reason": "C3.ai is the named issuer and primary subject."
+    },
+    "5f82e3b18a1b449d": {
+      "truth": "relevant",
+      "reason": "C3.ai is the named issuer and primary subject."
+    },
+    "a4e5a842658f7339": {
+      "truth": "relevant",
+      "reason": "C3.ai is the named issuer and primary subject."
+    },
+    "495535425f9acbc2": {
+      "truth": "relevant",
+      "reason": "C3.ai is the named issuer and primary subject."
+    },
+    "3c1cd823888de0e9": {
+      "truth": "relevant",
+      "reason": "C3.ai is directly compared as a named issuer."
+    },
+    "68c5ea3afef58f58": {
+      "truth": "relevant",
+      "reason": "C3.ai and its CEO transaction are the primary subject."
+    },
+    "4024b5603cb5a858": {
+      "truth": "relevant",
+      "reason": "C3.ai is the named issuer and primary subject."
+    },
+    "945004559664f3fe": {
+      "truth": "ambiguous",
+      "reason": "Generic multi-stock title does not identify which issuer discussion is material."
+    },
+    "64773cb85f3b95ea": {
+      "truth": "ambiguous",
+      "reason": "Generic rate-fix title lacks enough frozen context to bind the notice to Citigroup."
+    },
+    "6465b4ec4491d9a8": {
+      "truth": "relevant",
+      "reason": "Citi is the issuer brand and the new trade solution is the primary subject."
+    },
+    "0eda2ec6bd3058e9": {
+      "truth": "relevant",
+      "reason": "Ford is the named issuer and primary subject."
+    },
+    "2037301905d35aa3": {
+      "truth": "relevant",
+      "reason": "Ford is the named issuer and primary subject."
+    },
+    "9275b4821243a96b": {
+      "truth": "relevant",
+      "reason": "Ford is the named issuer and primary subject."
+    },
+    "0dc7badcf5ca4389": {
+      "truth": "relevant",
+      "reason": "Ford is the named issuer and primary subject."
+    },
+    "5a19d3b5e7918afa": {
+      "truth": "relevant",
+      "reason": "Qualified F-stock context and Ford confirmation bind the title."
+    },
+    "c13194944f83efae": {
+      "truth": "relevant",
+      "reason": "Ford and NYSE:F are the primary subject."
+    },
+    "9caf720c0ff6ebc6": {
+      "truth": "relevant",
+      "reason": "Ford Motor Company is the named issuer."
+    },
+    "d6fdaad2e0cf3904": {
+      "truth": "relevant",
+      "reason": "Ford is a directly named issuer in the after-hours recap."
+    },
+    "c6dbc9d1897640f2": {
+      "truth": "relevant",
+      "reason": "Ford Motor is the named issuer and primary subject."
+    },
+    "2ccdc53319e5734a": {
+      "truth": "relevant",
+      "reason": "Ford is the named issuer and primary subject."
+    },
+    "1d0fd007b693f3aa": {
+      "truth": "relevant",
+      "reason": "Alphabet and GOOGL are the named issuer and security."
+    },
+    "9885a612c0050f73": {
+      "truth": "ambiguous",
+      "reason": "Mag-7 spending discussion may cover Alphabet materially, but the frozen title is not issuer-specific."
+    },
+    "545c965709de38dc": {
+      "truth": "ambiguous",
+      "reason": "Broad market/earnings roundup lacks enough frozen context to judge Alphabet materiality."
+    },
+    "bf112d6abe95f0bd": {
+      "truth": "ambiguous",
+      "reason": "Broad AI-trade warning lacks enough frozen context to judge Alphabet materiality."
+    },
+    "f02429ac2889db4c": {
+      "truth": "relevant",
+      "reason": "Yahoo binds the item to META and the event is the imminent Meta earnings release."
+    },
+    "8535c029769e6385": {
+      "truth": "ambiguous",
+      "reason": "Broad market/earnings roundup lacks enough frozen context to judge Meta materiality."
+    },
+    "643c0b78b00ee8c5": {
+      "truth": "relevant",
+      "reason": "Robinhood is the named issuer and primary subject."
+    },
+    "83ad52ace48499b4": {
+      "truth": "relevant",
+      "reason": "Robinhood Markets insider transaction is issuer-specific."
+    },
+    "4b491a921e4e9169": {
+      "truth": "relevant",
+      "reason": "Robinhood is directly compared as a named issuer."
+    },
+    "83cf5be2d2071c0b": {
+      "truth": "relevant",
+      "reason": "Robinhood Chain is a named issuer platform."
+    },
+    "a4d085153d7ab282": {
+      "truth": "relevant",
+      "reason": "Robinhood business mix and earnings are the primary subject."
+    },
+    "6a677c491c088925": {
+      "truth": "relevant",
+      "reason": "Robinhood and HOOD are the named issuer and security."
+    },
+    "3c0bb87791cf7b4c": {
+      "truth": "relevant",
+      "reason": "Robinhood blockchain product is the primary subject."
+    },
+    "d658c07d0c438f67": {
+      "truth": "relevant",
+      "reason": "Robinhood CEO account compromise is an issuer-related event."
+    },
+    "2d6462af9745baa3": {
+      "truth": "relevant",
+      "reason": "ON Semiconductor and ON are the named issuer and security."
+    },
+    "aeae21638180d2b7": {
+      "truth": "relevant",
+      "reason": "ON Semiconductor and ON are the named issuer and security."
+    },
+    "789ddeabc201aebd": {
+      "truth": "relevant",
+      "reason": "ON Semiconductor and ON are the named issuer and security."
+    },
+    "ce258f9c1856b39f": {
+      "truth": "relevant",
+      "reason": "ON is directly compared as a named semiconductor issuer."
+    },
+    "2aeb98f4804fb39c": {
+      "truth": "relevant",
+      "reason": "Officially bound onsemi brand is directly named in the multi-issuer event."
+    },
+    "2c5c50525e838345": {
+      "truth": "ambiguous",
+      "reason": "Generic multi-stock title does not identify which issuer discussion is material."
+    },
+    "02ce9fbc3d1cf29c": {
+      "truth": "relevant",
+      "reason": "ON Semiconductor and ON are the named issuer and security."
+    },
+    "f12067d047dfc0bc": {
+      "truth": "relevant",
+      "reason": "ON Semiconductor and ON are the named issuer and security."
+    },
+    "6688b9b669cae3d6": {
+      "truth": "relevant",
+      "reason": "Gartner and IT are the named issuer and security."
+    },
+    "2718f5f06a9276f0": {
+      "truth": "relevant",
+      "reason": "Gartner's own spending forecast is the primary subject."
+    },
+    "99b63e3254657864": {
+      "truth": "relevant",
+      "reason": "The analyst report is specifically about Gartner, Inc."
+    },
+    "67d5d9e71c715cc3": {
+      "truth": "relevant",
+      "reason": "The price-target action is specifically about Gartner."
+    },
+    "566050faffed817c": {
+      "truth": "relevant",
+      "reason": "Caterpillar is a directly named issuer."
+    },
+    "42999c264c342cd0": {
+      "truth": "relevant",
+      "reason": "Caterpillar and CAT are the named issuer and security."
+    },
+    "e5ebb5160b6a9324": {
+      "truth": "relevant",
+      "reason": "Caterpillar and CAT are the named issuer and security."
+    },
+    "59982038fba77708": {
+      "truth": "relevant",
+      "reason": "Caterpillar and CAT are the named issuer and security."
+    },
+    "74b7259bf718caeb": {
+      "truth": "relevant",
+      "reason": "Caterpillar and CAT are the named issuer and security."
+    },
+    "15747bbfbeb7e077": {
+      "truth": "relevant",
+      "reason": "Caterpillar and CAT are the named issuer and security."
+    },
+    "472ec22fa24bacec": {
+      "truth": "relevant",
+      "reason": "Block is the named issuer and primary subject."
+    },
+    "e81d7382053596f6": {
+      "truth": "ambiguous",
+      "reason": "Generic CEO roundup may include Block, but issuer materiality is not established in the frozen title."
+    },
+    "b53f1a6faeb26f53": {
+      "truth": "relevant",
+      "reason": "Cash App is an officially bound Block business brand and the primary subject."
+    },
+    "df41c53fd17fea41": {
+      "truth": "relevant",
+      "reason": "Norton is an officially bound Gen brand and the primary subject."
+    },
+    "d5ecb3956833669d": {
+      "truth": "relevant",
+      "reason": "MoneyLion is a Gen-controlled business and the primary subject."
+    },
+    "98296649286439e7": {
+      "truth": "relevant",
+      "reason": "Gen issuer threat report is the primary subject."
+    },
+    "475a5dd9954e1df0": {
+      "truth": "relevant",
+      "reason": "Gen issuer results announcement is the primary subject."
+    },
+    "55538f36b58ae7a5": {
+      "truth": "relevant",
+      "reason": "Gen Digital is directly compared as a named issuer."
+    },
+    "0313b9e065383c51": {
+      "truth": "relevant",
+      "reason": "GEN security performance is the primary subject."
+    },
+    "05a84fe24b7e1173": {
+      "truth": "relevant",
+      "reason": "Norton is an officially bound Gen brand and the primary subject."
+    },
+    "7b299743447f6112": {
+      "truth": "relevant",
+      "reason": "Gen Digital and GEN are the named issuer and security."
+    },
+    "7be28cdfe1e3dbb1": {
+      "truth": "relevant",
+      "reason": "MoneyLion is a Gen-controlled business and the primary subject."
+    }
+  }
+}

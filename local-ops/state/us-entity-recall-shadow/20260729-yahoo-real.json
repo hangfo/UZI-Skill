@@ -1,0 +1,2443 @@
+{
+  "schema": "uzi.us_entity_recall_shadow.v1",
+  "captured_at_utc": "2026-07-29T02:44:32.973135+00:00",
+  "source": "https://query1.finance.yahoo.com/v1/finance/search",
+  "request": {
+    "quotesCount": 1,
+    "newsCount": 10,
+    "enableFuzzyQuery": "false"
+  },
+  "profiles": {
+    "MU": {
+      "legal_name": "Micron Technology, Inc.",
+      "selection_reason": "短 ticker；验证 MU 不回退为 Musk substring 污染。",
+      "aliases": []
+    },
+    "AI": {
+      "legal_name": "C3.ai, Inc.",
+      "selection_reason": "短 ticker 且 AI 是普通词；验证跨发行人污染。",
+      "aliases": [
+        {
+          "value": "C3.ai",
+          "kind": "issuer_brand",
+          "source_url": "https://ir.c3.ai/",
+          "binding": "C3.ai issuer investor-relations site"
+        }
+      ]
+    },
+    "C": {
+      "legal_name": "Citigroup Inc.",
+      "selection_reason": "单字符 ticker；验证普通字母不能独立作为实体证据。",
+      "aliases": [
+        {
+          "value": "Citi",
+          "kind": "issuer_brand",
+          "source_url": "https://www.citigroup.com/global/news/press-release/2026/citi-2026-investor-day",
+          "binding": "Citigroup official release binds Citigroup Inc. (NYSE: C) to Citi"
+        }
+      ]
+    },
+    "F": {
+      "legal_name": "Ford Motor Company",
+      "selection_reason": "单字符 ticker；以强法人品牌作为控制。",
+      "aliases": []
+    },
+    "GOOGL": {
+      "legal_name": "Alphabet Inc.",
+      "provider_symbols": [
+        "GOOGL",
+        "GOOG"
+      ],
+      "selection_reason": "品牌名与法人名不同；检验 Google 召回。",
+      "aliases": [
+        {
+          "value": "Google",
+          "kind": "controlled_subsidiary",
+          "source_url": "https://abc.xyz/investor/news/news-details/2026/Google-Completes-Acquisition-of-Wiz-2026-ta7OaU2uA0/default.aspx",
+          "binding": "Alphabet IR states Google is a subsidiary of Alphabet Inc."
+        }
+      ]
+    },
+    "META": {
+      "legal_name": "Meta Platforms, Inc.",
+      "selection_reason": "法人名与多品牌组合；检验品牌边界。",
+      "aliases": [
+        {
+          "value": "Facebook",
+          "kind": "reportable_segment_brand",
+          "source_url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-Fourth-Quarter-and-Full-Year-2025-Results/",
+          "binding": "Meta IR Family of Apps includes Facebook"
+        },
+        {
+          "value": "Instagram",
+          "kind": "reportable_segment_brand",
+          "source_url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-Fourth-Quarter-and-Full-Year-2025-Results/",
+          "binding": "Meta IR Family of Apps includes Instagram"
+        },
+        {
+          "value": "WhatsApp",
+          "kind": "reportable_segment_brand",
+          "source_url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-Fourth-Quarter-and-Full-Year-2025-Results/",
+          "binding": "Meta IR Family of Apps includes WhatsApp"
+        }
+      ]
+    },
+    "HOOD": {
+      "legal_name": "Robinhood Markets, Inc.",
+      "selection_reason": "消费者品牌与法人后缀不同；验证 Robinhood token。",
+      "aliases": []
+    },
+    "ON": {
+      "legal_name": "ON Semiconductor Corporation",
+      "selection_reason": "普通词 ticker；同时覆盖官方 onsemi 品牌。",
+      "aliases": [
+        {
+          "value": "onsemi",
+          "kind": "issuer_brand",
+          "source_url": "https://investor.onsemi.com/news-releases/news-release-details/onsemi-reports-fourth-quarter-and-full-year-2025-results-0",
+          "binding": "onsemi IR binds Nasdaq: ON to the onsemi brand"
+        }
+      ]
+    },
+    "IT": {
+      "legal_name": "Gartner, Inc.",
+      "selection_reason": "普通词 ticker；验证 IT 不应匹配普通代词。",
+      "aliases": []
+    },
+    "CAT": {
+      "legal_name": "Caterpillar Inc.",
+      "selection_reason": "常见词 ticker；以强法人品牌作为控制。",
+      "aliases": []
+    },
+    "XYZ": {
+      "legal_name": "Block, Inc.",
+      "selection_reason": "公司更名且多品牌；检验 Square/Cash App 召回。",
+      "aliases": [
+        {
+          "value": "Square",
+          "kind": "issuer_business_brand",
+          "source_url": "https://investors.block.xyz/investor-news/news-details/2021/Square-Inc.-Changes-Name-to-Block/default.aspx",
+          "binding": "Block IR states Square remains its Seller business brand"
+        },
+        {
+          "value": "Cash App",
+          "kind": "issuer_business_brand",
+          "source_url": "https://investors.block.xyz/overview/default.aspx",
+          "binding": "Block IR lists Cash App as a Block brand"
+        }
+      ]
+    },
+    "GEN": {
+      "legal_name": "Gen Digital Inc.",
+      "selection_reason": "NortonLifeLock 更名且多品牌；检验 Norton/Avast/LifeLock 召回。",
+      "aliases": [
+        {
+          "value": "Gen",
+          "kind": "issuer_short_brand",
+          "source_url": "https://investor.gendigital.com/news/news-details/2022/Introducing-Gen-The-Company-to-Power-Digital-Freedom/default.aspx",
+          "binding": "Gen IR introduces Gen as Nasdaq: GEN issuer short brand"
+        },
+        {
+          "value": "Norton",
+          "kind": "issuer_brand",
+          "source_url": "https://investor.gendigital.com/news/news-details/2022/Introducing-Gen-The-Company-to-Power-Digital-Freedom/default.aspx",
+          "binding": "Gen IR states Norton is a trusted Gen brand"
+        },
+        {
+          "value": "Avast",
+          "kind": "issuer_brand",
+          "source_url": "https://investor.gendigital.com/news/news-details/2022/Introducing-Gen-The-Company-to-Power-Digital-Freedom/default.aspx",
+          "binding": "Gen IR states Avast is a trusted Gen brand"
+        },
+        {
+          "value": "LifeLock",
+          "kind": "issuer_brand",
+          "source_url": "https://investor.gendigital.com/news/news-details/2022/Introducing-Gen-The-Company-to-Power-Digital-Freedom/default.aspx",
+          "binding": "Gen IR states LifeLock is a trusted Gen brand"
+        },
+        {
+          "value": "NortonLifeLock",
+          "kind": "former_legal_name",
+          "source_url": "https://investor.gendigital.com/news/news-details/2022/Introducing-Gen-The-Company-to-Power-Digital-Freedom/default.aspx",
+          "binding": "Gen IR documents NortonLifeLock Inc. changing its name to Gen Digital Inc."
+        },
+        {
+          "value": "MoneyLion",
+          "kind": "controlled_business",
+          "source_url": "https://investor.gendigital.com/news/news-details/2025/Gen-Completes-Acquisition-of-MoneyLion-Accelerating-the-Companys-Leadership-in-Financial-Wellness/default.aspx",
+          "binding": "Gen IR states Gen completed its acquisition of MoneyLion"
+        }
+      ]
+    }
+  },
+  "sec_access": {
+    "attempted": false,
+    "status": "gap",
+    "reason": "No truthful SEC contact identity was configured; SEC network requests were not made."
+  },
+  "latency_seconds": {
+    "MU": 0.958799,
+    "AI": 0.04649,
+    "C": 0.293183,
+    "F": 0.2174,
+    "GOOGL": 0.066878,
+    "META": 0.155323,
+    "HOOD": 0.20961,
+    "ON": 0.185948,
+    "IT": 0.170873,
+    "CAT": 0.150494,
+    "XYZ": 0.162848,
+    "GEN": 0.198527
+  },
+  "rows": [
+    {
+      "id": "48565d431ef44dc8",
+      "ticker": "MU",
+      "rank": 0,
+      "title": "Cramer Sees Echoes of Dot-Com Bust as Wall Street Flees AI Stocks for Safety",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/c2d39088-c6d5-3d65-8d21-2fc3c3af8c89/cramer-sees-echoes-of-dot-com.html",
+      "canonical_url": "https://finance.yahoo.com/m/c2d39088-c6d5-3d65-8d21-2fc3c3af8c89/cramer-sees-echoes-of-dot-com.html",
+      "publisher": "BeInCrypto",
+      "published_utc": "2026-07-29T01:01:08+00:00",
+      "related_tickers": [
+        "KO",
+        "GOOG",
+        "WMT",
+        "MU",
+        "WDC",
+        "SNDK",
+        "SKHY"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "66c8e8de01a698de",
+      "ticker": "MU",
+      "rank": 1,
+      "title": "What The Options Market Is Signaling About The Volatility In SanDisk Stock",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/d3c2678a-0090-3187-a9ed-e9b71e145609/what-the-options-market-is.html",
+      "canonical_url": "https://finance.yahoo.com/m/d3c2678a-0090-3187-a9ed-e9b71e145609/what-the-options-market-is.html",
+      "publisher": "Trefis",
+      "published_utc": "2026-07-28T23:55:29+00:00",
+      "related_tickers": [
+        "SNDK",
+        "STX",
+        "NTAP",
+        "HPE",
+        "MU",
+        "WDC"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "959d5d5a69b5d193",
+      "ticker": "MU",
+      "rank": 2,
+      "title": "SK Hynix Stock Drops on Disappointing Earnings",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/1bcb0e32-6b8f-3e3e-a260-8c97f099a1c6/sk-hynix-stock-drops-on.html",
+      "canonical_url": "https://finance.yahoo.com/m/1bcb0e32-6b8f-3e3e-a260-8c97f099a1c6/sk-hynix-stock-drops-on.html",
+      "publisher": "Barrons.com",
+      "published_utc": "2026-07-28T23:24:00+00:00",
+      "related_tickers": [
+        "SKHY",
+        "GOOG",
+        "MU",
+        "005930.KS"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "dafa73dfcdbee602",
+      "ticker": "MU",
+      "rank": 3,
+      "title": "SK Hynix's Record Profit Misses Investors' Lofty AI Expectations",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/sk-hynixs-record-profit-misses-investors-lofty-ai-expectations-225142990.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/sk-hynixs-record-profit-misses-investors-lofty-ai-expectations-225142990.html",
+      "publisher": "Bloomberg",
+      "published_utc": "2026-07-28T22:51:42+00:00",
+      "related_tickers": [
+        "NVDA",
+        "SKHY",
+        "005930.KS",
+        "005935.KS",
+        "006800.KS",
+        "006805.KS",
+        "00680K.KS",
+        "MU"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "46d190ebc34a7f16",
+      "ticker": "MU",
+      "rank": 4,
+      "title": "Micron Stock Dives As Semiconductor Sell-Off Gains Steam",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/1c5cce9f-dae9-3b6f-bb75-c8638c18164e/micron-stock-dives-as.html",
+      "canonical_url": "https://finance.yahoo.com/m/1c5cce9f-dae9-3b6f-bb75-c8638c18164e/micron-stock-dives-as.html",
+      "publisher": "Investor's Business Daily",
+      "published_utc": "2026-07-28T21:09:26+00:00",
+      "related_tickers": [
+        "MU",
+        "SKHY",
+        "SNDK"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "931c3c9123c46b05",
+      "ticker": "MU",
+      "rank": 5,
+      "title": "Stock Market Today: Dow Gains 500 Points; SpaceX, SK Hynix Make These Moves (Live Coverage)",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/34f57721-8495-3628-bd2a-4209897b008c/stock-market-today%3A-dow-gains.html",
+      "canonical_url": "https://finance.yahoo.com/m/34f57721-8495-3628-bd2a-4209897b008c/stock-market-today%3A-dow-gains.html",
+      "publisher": "Investor's Business Daily",
+      "published_utc": "2026-07-28T20:36:49+00:00",
+      "related_tickers": [
+        "SPCX",
+        "SKHY",
+        "^RUT",
+        "SNDK",
+        "^DJI",
+        "MU",
+        "^GSPC",
+        "^IXIC",
+        "AAPL",
+        "NVDA"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "ecc1496aa49e9cbb",
+      "ticker": "MU",
+      "rank": 6,
+      "title": "Update: Dow Extends Advance Following Strong Earnings Reports",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/dow-extends-advance-following-strong-203202788.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/dow-extends-advance-following-strong-203202788.html",
+      "publisher": "MT Newswires",
+      "published_utc": "2026-07-28T20:32:02+00:00",
+      "related_tickers": [
+        "^GSPC",
+        "^SPX",
+        "INTC",
+        "AMD",
+        "SNDK",
+        "MU",
+        "^DJI",
+        "^IXIC",
+        "SHW",
+        "KO",
+        "BA"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "56b0dd74f5604433",
+      "ticker": "MU",
+      "rank": 7,
+      "title": "Stocks to Watch Recap: Coca-Cola, J&J, Mercedes-Benz, UPS",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/4d6ce079-4a9d-34a4-8bbf-afc81b73a054/stocks-to-watch-recap%3A.html",
+      "canonical_url": "https://finance.yahoo.com/m/4d6ce079-4a9d-34a4-8bbf-afc81b73a054/stocks-to-watch-recap%3A.html",
+      "publisher": "The Wall Street Journal",
+      "published_utc": "2026-07-28T20:31:02+00:00",
+      "related_tickers": [
+        "KO",
+        "JNJ",
+        "MU",
+        "UL",
+        "005935.KS",
+        "PHG",
+        "MBG.DE",
+        "005930.KS",
+        "SKHY",
+        "INTC"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "40a5ab1fb2caf48e",
+      "ticker": "MU",
+      "rank": 8,
+      "title": "Micron Stock Is Leading a Brutal New Chip Slump",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/5f283eb5-e7d9-37a7-8c7f-ee54ed0abf7f/micron-stock-is-leading-a.html",
+      "canonical_url": "https://finance.yahoo.com/m/5f283eb5-e7d9-37a7-8c7f-ee54ed0abf7f/micron-stock-is-leading-a.html",
+      "publisher": "Barrons.com",
+      "published_utc": "2026-07-28T20:31:00+00:00",
+      "related_tickers": [
+        "MU",
+        "WDC",
+        "AMD",
+        "^IXIC",
+        "SNDK"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "56e7a2c2b6319c89",
+      "ticker": "MU",
+      "rank": 9,
+      "title": "Investors Rotate Out of Chip Stocks",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/e1152bb5-3448-3d11-b97f-8a790994b770/investors-rotate-out-of-chip.html",
+      "canonical_url": "https://finance.yahoo.com/m/e1152bb5-3448-3d11-b97f-8a790994b770/investors-rotate-out-of-chip.html",
+      "publisher": "The Wall Street Journal",
+      "published_utc": "2026-07-28T20:21:00+00:00",
+      "related_tickers": [
+        "WDAY",
+        "^KS11",
+        "^IXIC",
+        "SNDK",
+        "MU",
+        "^SOX"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "eaf66642395116fc",
+      "ticker": "AI",
+      "rank": 0,
+      "title": "BigBear.ai Before Q2 Earnings: Buy, Sell or Hold the Stock?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/bigbear-ai-q2-earnings-buy-140600906.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/bigbear-ai-q2-earnings-buy-140600906.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-28T14:06:00+00:00",
+      "related_tickers": [
+        "BBAI",
+        "PSN",
+        "AI"
+      ],
+      "baseline_match": true,
+      "candidate_match": false
+    },
+    {
+      "id": "71c8966cec62425b",
+      "ticker": "AI",
+      "rank": 1,
+      "title": "Does C3.ai’s (AI) Lawsuit Win Quietly Recast Its Risk Profile in the AI Software Race?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/does-c3-ai-ai-lawsuit-031938800.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/does-c3-ai-ai-lawsuit-031938800.html",
+      "publisher": "Simply Wall St.",
+      "published_utc": "2026-07-26T03:19:38+00:00",
+      "related_tickers": [
+        "AI"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "5f82e3b18a1b449d",
+      "ticker": "AI",
+      "rank": 2,
+      "title": "C3.ai (AI) Stock May Be 22% Overvalued On Current AI Expectations",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/c3-ai-ai-stock-may-121017728.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/c3-ai-ai-stock-may-121017728.html",
+      "publisher": "Simply Wall St.",
+      "published_utc": "2026-07-25T12:10:17+00:00",
+      "related_tickers": [
+        "AI"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "a4e5a842658f7339",
+      "ticker": "AI",
+      "rank": 3,
+      "title": "C3.ai (AI) Gets Relief From Lawsuit Exit As Valuation Questions Linger",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/c3-ai-ai-gets-relief-071236775.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/c3-ai-ai-gets-relief-071236775.html",
+      "publisher": "Simply Wall St.",
+      "published_utc": "2026-07-25T07:12:36+00:00",
+      "related_tickers": [
+        "AI"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "495535425f9acbc2",
+      "ticker": "AI",
+      "rank": 4,
+      "title": "C3.ai, Inc. (AI) is Attracting Investor Attention: Here is What You Should Know",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/c3-ai-inc-ai-attracting-130004318.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/c3-ai-inc-ai-attracting-130004318.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-24T13:00:04+00:00",
+      "related_tickers": [
+        "AI",
+        "^GSPC"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "3c1cd823888de0e9",
+      "ticker": "AI",
+      "rank": 5,
+      "title": "Nebius vs. C3.ai: Which AI Growth Stock is the Better Buy?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/nebius-vs-c3-ai-ai-151500056.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/nebius-vs-c3-ai-ai-151500056.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-20T15:15:00+00:00",
+      "related_tickers": [
+        "NBIS",
+        "AI"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "78082183e1061072",
+      "ticker": "AI",
+      "rank": 6,
+      "title": "Will Faster Product Innovation Help BBAI Win More Enterprise Clients?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/faster-product-innovation-help-bbai-135800161.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/faster-product-innovation-help-bbai-135800161.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-20T13:58:00+00:00",
+      "related_tickers": [
+        "BBAI",
+        "AI"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "68c5ea3afef58f58",
+      "ticker": "AI",
+      "rank": 7,
+      "title": "What Does the C3.ai CEO's Sale of Company Shares Worth $4.2 Million Mean for Investors?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/1c64facf-ed25-3a8a-8632-662c30187d44/what-does-the-c3.ai-ceo%27s.html",
+      "canonical_url": "https://finance.yahoo.com/m/1c64facf-ed25-3a8a-8632-662c30187d44/what-does-the-c3.ai-ceo%27s.html",
+      "publisher": "Motley Fool",
+      "published_utc": "2026-07-18T17:50:01+00:00",
+      "related_tickers": [
+        "AI"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "4024b5603cb5a858",
+      "ticker": "AI",
+      "rank": 8,
+      "title": "C3.ai, Inc. (AI) Stock Moves -1.01%: What You Should Know",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/c3-ai-inc-ai-stock-215002878.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/c3-ai-inc-ai-stock-215002878.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-17T21:50:02+00:00",
+      "related_tickers": [
+        "AI",
+        "^DJI",
+        "^GSPC"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "945004559664f3fe",
+      "ticker": "AI",
+      "rank": 9,
+      "title": "3 Unpopular Stocks Walking a Fine Line",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/3-unpopular-stocks-walking-fine-095346080.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/3-unpopular-stocks-walking-fine-095346080.html",
+      "publisher": "StockStory",
+      "published_utc": "2026-07-17T09:53:46+00:00",
+      "related_tickers": [
+        "AI",
+        "BEN",
+        "ENR"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "f5dece63609c0a22",
+      "ticker": "C",
+      "rank": 0,
+      "title": "What Will SK Hynix’s Share Conversion Mean for Its US Premium?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/sk-hynix-share-conversion-mean-005605511.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/sk-hynix-share-conversion-mean-005605511.html",
+      "publisher": "Bloomberg",
+      "published_utc": "2026-07-29T00:56:05+00:00",
+      "related_tickers": [
+        "SKHY",
+        "C",
+        "C-PR",
+        "TSM"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "685627763783c52c",
+      "ticker": "C",
+      "rank": 1,
+      "title": "Whitney Warns of Economic Reckoning This Year, Sees Fed on Hold",
+      "summary": "",
+      "url": "https://finance.yahoo.com/economy/policy/articles/whitney-warns-economic-reckoning-sees-193218596.html",
+      "canonical_url": "https://finance.yahoo.com/economy/policy/articles/whitney-warns-economic-reckoning-sees-193218596.html",
+      "publisher": "Bloomberg",
+      "published_utc": "2026-07-28T19:32:18+00:00",
+      "related_tickers": [
+        "GS",
+        "CM",
+        "MS",
+        "MS-PQ",
+        "JPM",
+        "C",
+        "C-PR",
+        "PNC"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "9bccfdc1393d7295",
+      "ticker": "C",
+      "rank": 2,
+      "title": "Saudi Prince Alwaleed Takes 5% Stake in EV-Maker Lucid",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/saudi-prince-alwaleed-takes-5-173605647.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/saudi-prince-alwaleed-takes-5-173605647.html",
+      "publisher": "Bloomberg",
+      "published_utc": "2026-07-28T17:36:05+00:00",
+      "related_tickers": [
+        "LCID",
+        "C",
+        "C-PR",
+        "SNAP",
+        "SPCX"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "64773cb85f3b95ea",
+      "ticker": "C",
+      "rank": 3,
+      "title": "FRN Variable Rate Fix",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/options/articles/frn-variable-rate-fix-151700701.html",
+      "canonical_url": "https://finance.yahoo.com/markets/options/articles/frn-variable-rate-fix-151700701.html",
+      "publisher": "Business Wire",
+      "published_utc": "2026-07-28T15:17:00+00:00",
+      "related_tickers": [
+        "XO10",
+        "C"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "6465b4ec4491d9a8",
+      "ticker": "C",
+      "rank": 4,
+      "title": "Citi Is Now Live With a Trade Digitization Solution Integrating Supply Chain Solutions",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/articles/citi-now-live-trade-digitization-130000420.html",
+      "canonical_url": "https://finance.yahoo.com/technology/articles/citi-now-live-trade-digitization-130000420.html",
+      "publisher": "Business Wire",
+      "published_utc": "2026-07-28T13:00:00+00:00",
+      "related_tickers": [
+        "C",
+        "C-PR"
+      ],
+      "baseline_match": false,
+      "candidate_match": true
+    },
+    {
+      "id": "ff707625cefe1dd9",
+      "ticker": "C",
+      "rank": 5,
+      "title": "Wall Street Banks Eyed as Overlooked Beneficiaries of AI Trade",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/wall-street-banks-eyed-overlooked-121507633.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/wall-street-banks-eyed-overlooked-121507633.html",
+      "publisher": "Bloomberg",
+      "published_utc": "2026-07-28T12:15:07+00:00",
+      "related_tickers": [
+        "BAC",
+        "WFC",
+        "MS",
+        "MS-PQ",
+        "JPM",
+        "C",
+        "C-PR",
+        "SPCX",
+        "GS"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "f2cbd094d9216256",
+      "ticker": "C",
+      "rank": 6,
+      "title": "Market Chatter: Goldman Sachs Names Former Citi Banker Head of Japan Credit Business",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/market-chatter-goldman-sachs-names-093029348.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/market-chatter-goldman-sachs-names-093029348.html",
+      "publisher": "MT Newswires",
+      "published_utc": "2026-07-28T09:30:29+00:00",
+      "related_tickers": [
+        "GS",
+        "C"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "5538902e64db7b0f",
+      "ticker": "C",
+      "rank": 7,
+      "title": "Most US Banks Beat Earnings Forecasts Amid Favorable Revenue Trends, Raymond James Says",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/most-us-banks-beat-earnings-200839605.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/most-us-banks-beat-earnings-200839605.html",
+      "publisher": "MT Newswires",
+      "published_utc": "2026-07-27T20:08:39+00:00",
+      "related_tickers": [
+        "BAC",
+        "WFC",
+        "C",
+        "JPM",
+        "GS",
+        "MS"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "ccb7082052d340ac",
+      "ticker": "C",
+      "rank": 8,
+      "title": "Eli Lilly (LLY) Stock Gets Fair Value Bump As Analysts Lift Targets On GLP1 Outlook",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/eli-lilly-lly-stock-gets-190817651.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/eli-lilly-lly-stock-gets-190817651.html",
+      "publisher": "Simply Wall St.",
+      "published_utc": "2026-07-27T19:08:17+00:00",
+      "related_tickers": [
+        "LLY",
+        "C"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "836e2629fd9122aa",
+      "ticker": "C",
+      "rank": 9,
+      "title": "Should You Invest in Bank of America Following Impressive Q2 Results?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/invest-bank-america-following-impressive-150300010.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/invest-bank-america-following-impressive-150300010.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-27T15:03:00+00:00",
+      "related_tickers": [
+        "BAC",
+        "JPM",
+        "C",
+        "C-PR"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "0eda2ec6bd3058e9",
+      "ticker": "F",
+      "rank": 0,
+      "title": "Ford Motor Q2 Earnings Call Highlights",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/0866cfe6-ccea-3b0b-947f-0e2ab570a645/ford-motor-q2-earnings-call.html",
+      "canonical_url": "https://finance.yahoo.com/m/0866cfe6-ccea-3b0b-947f-0e2ab570a645/ford-motor-q2-earnings-call.html",
+      "publisher": "MarketBeat",
+      "published_utc": "2026-07-29T00:03:56+00:00",
+      "related_tickers": [
+        "F",
+        "FCX"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "2037301905d35aa3",
+      "ticker": "F",
+      "rank": 1,
+      "title": "Ford Wants to Turn Car Customization Into the Next Big Thing—Exec Says Think ‘Nike Dropping a Sneaker’",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/articles/ford-wants-turn-car-customization-233035232.html",
+      "canonical_url": "https://finance.yahoo.com/technology/articles/ford-wants-turn-car-customization-233035232.html",
+      "publisher": "Benzinga",
+      "published_utc": "2026-07-28T23:30:35+00:00",
+      "related_tickers": [
+        "F",
+        "NKE"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "9275b4821243a96b",
+      "ticker": "F",
+      "rank": 2,
+      "title": "Ford’s Sales and Revenue Are Down. The Automaker Isn’t Sweating It",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/37d97add-52bb-3eb4-b985-87abbff09772/ford%E2%80%99s-sales-and-revenue-are.html",
+      "canonical_url": "https://finance.yahoo.com/m/37d97add-52bb-3eb4-b985-87abbff09772/ford%E2%80%99s-sales-and-revenue-are.html",
+      "publisher": "The Wall Street Journal",
+      "published_utc": "2026-07-28T23:03:00+00:00",
+      "related_tickers": [
+        "F"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "0dc7badcf5ca4389",
+      "ticker": "F",
+      "rank": 3,
+      "title": "Ford Motor (F) Reports Q2 Earnings: What Key Metrics Have to Say",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/ford-motor-f-reports-q2-220003538.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/ford-motor-f-reports-q2-220003538.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-28T22:00:03+00:00",
+      "related_tickers": [
+        "F"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "5a19d3b5e7918afa",
+      "ticker": "F",
+      "rank": 4,
+      "title": "F Stock Jumps 8% After-Hours On Q2 Earnings Beat — Ford Also Raises 2026 Profit Outlook",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/187bcd38-f7a0-365f-821e-23f9d01ef5cd/f-stock-jumps-8%25-after-hours.html",
+      "canonical_url": "https://finance.yahoo.com/m/187bcd38-f7a0-365f-821e-23f9d01ef5cd/f-stock-jumps-8%25-after-hours.html",
+      "publisher": "Stocktwits",
+      "published_utc": "2026-07-28T21:30:57+00:00",
+      "related_tickers": [
+        "F"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "c13194944f83efae",
+      "ticker": "F",
+      "rank": 5,
+      "title": "Ford (NYSE:F) Misses Q2 CY2026 Revenue Estimates, But Stock Soars 6.6%",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/ford-nyse-f-misses-q2-212537378.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/ford-nyse-f-misses-q2-212537378.html",
+      "publisher": "StockStory",
+      "published_utc": "2026-07-28T21:25:37+00:00",
+      "related_tickers": [
+        "F"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "9caf720c0ff6ebc6",
+      "ticker": "F",
+      "rank": 6,
+      "title": "Ford Motor Company (F) Beats Q2 Earnings Estimates",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/ford-motor-company-f-beats-212004009.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/ford-motor-company-f-beats-212004009.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-28T21:20:04+00:00",
+      "related_tickers": [
+        "F",
+        "FSS"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "d6fdaad2e0cf3904",
+      "ticker": "F",
+      "rank": 7,
+      "title": "Ford, Visa, Seagate: After-Hours Stocks to Watch",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/ee13ff3d-4791-33d3-8132-1999a19f7010/ford%2C-visa%2C-seagate%3A.html",
+      "canonical_url": "https://finance.yahoo.com/m/ee13ff3d-4791-33d3-8132-1999a19f7010/ford%2C-visa%2C-seagate%3A.html",
+      "publisher": "The Wall Street Journal",
+      "published_utc": "2026-07-28T20:53:55+00:00",
+      "related_tickers": [
+        "V",
+        "F",
+        "STX",
+        "BE",
+        "MDLZ"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "c6dbc9d1897640f2",
+      "ticker": "F",
+      "rank": 8,
+      "title": "Ford Motor Lifts Guidance on Forecast of Higher U.S. Automobile Pricing",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/173053b7-af19-3328-bc5b-cd5eb7533bc4/ford-motor-lifts-guidance-on.html",
+      "canonical_url": "https://finance.yahoo.com/m/173053b7-af19-3328-bc5b-cd5eb7533bc4/ford-motor-lifts-guidance-on.html",
+      "publisher": "The Wall Street Journal",
+      "published_utc": "2026-07-28T20:46:00+00:00",
+      "related_tickers": [
+        "F"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "2ccdc53319e5734a",
+      "ticker": "F",
+      "rank": 9,
+      "title": "Ford stock surges 4% as Q2 beats expectations and sparks guidance upgrade",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/ford-stock-surges-4-q2-204202086.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/ford-stock-surges-4-q2-204202086.html",
+      "publisher": "Investing.com",
+      "published_utc": "2026-07-28T20:42:02+00:00",
+      "related_tickers": [
+        "F"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "7c6ecca9c7ed4ad9",
+      "ticker": "GOOGL",
+      "rank": 0,
+      "title": "Satya Nadella's Microsoft Needs Power. Joe Creed's Caterpillar Sells It.",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/8eafe29a-b710-33ba-a720-837f2e3c52b0/satya-nadella%27s-microsoft.html",
+      "canonical_url": "https://finance.yahoo.com/m/8eafe29a-b710-33ba-a720-837f2e3c52b0/satya-nadella%27s-microsoft.html",
+      "publisher": "Motley Fool",
+      "published_utc": "2026-07-29T01:35:00+00:00",
+      "related_tickers": [
+        "MSFT",
+        "CAT",
+        "CVX",
+        "ORCL",
+        "META",
+        "GOOG"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "c8c4e529431fec91",
+      "ticker": "GOOGL",
+      "rank": 1,
+      "title": "Cramer Sees Echoes of Dot-Com Bust as Wall Street Flees AI Stocks for Safety",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/c2d39088-c6d5-3d65-8d21-2fc3c3af8c89/cramer-sees-echoes-of-dot-com.html",
+      "canonical_url": "https://finance.yahoo.com/m/c2d39088-c6d5-3d65-8d21-2fc3c3af8c89/cramer-sees-echoes-of-dot-com.html",
+      "publisher": "BeInCrypto",
+      "published_utc": "2026-07-29T01:01:08+00:00",
+      "related_tickers": [
+        "KO",
+        "GOOG",
+        "WMT",
+        "MU",
+        "WDC",
+        "SNDK",
+        "SKHY"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "052efd8ce547c479",
+      "ticker": "GOOGL",
+      "rank": 2,
+      "title": "The Best Semiconductor Stocks to Buy",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/e9ce88a8-4025-348b-9542-74fbf6827f8b/the-best-semiconductor-stocks.html",
+      "canonical_url": "https://finance.yahoo.com/m/e9ce88a8-4025-348b-9542-74fbf6827f8b/the-best-semiconductor-stocks.html",
+      "publisher": "Kiplinger",
+      "published_utc": "2026-07-28T23:30:38+00:00",
+      "related_tickers": [
+        "GOOG",
+        "AMZN",
+        "META",
+        "MSFT"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "59ce7ce2ad255c0c",
+      "ticker": "GOOGL",
+      "rank": 3,
+      "title": "SK Hynix Stock Drops on Disappointing Earnings",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/1bcb0e32-6b8f-3e3e-a260-8c97f099a1c6/sk-hynix-stock-drops-on.html",
+      "canonical_url": "https://finance.yahoo.com/m/1bcb0e32-6b8f-3e3e-a260-8c97f099a1c6/sk-hynix-stock-drops-on.html",
+      "publisher": "Barrons.com",
+      "published_utc": "2026-07-28T23:24:00+00:00",
+      "related_tickers": [
+        "SKHY",
+        "GOOG",
+        "MU",
+        "005930.KS"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "1d0fd007b693f3aa",
+      "ticker": "GOOGL",
+      "rank": 4,
+      "title": "Does Alphabet’s AI Spending And Cash Squeeze Shift The Bull Case For Alphabet (GOOGL)?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/does-alphabet-ai-spending-cash-231409074.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/does-alphabet-ai-spending-cash-231409074.html",
+      "publisher": "Simply Wall St.",
+      "published_utc": "2026-07-28T23:14:09+00:00",
+      "related_tickers": [
+        "GOOG"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "5a65b9fa8df9799a",
+      "ticker": "GOOGL",
+      "rank": 5,
+      "title": "Hong Kong Data Center Loan Sale Shows Banks Hitting Sector Limits",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/hong-kong-data-center-loan-231158626.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/hong-kong-data-center-loan-231158626.html",
+      "publisher": "Bloomberg",
+      "published_utc": "2026-07-28T23:11:58+00:00",
+      "related_tickers": [
+        "MS",
+        "MS-PQ",
+        "META",
+        "GOOG",
+        "ACA.PA",
+        "VOYA",
+        "VOYA-PB"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "1b5aa4594a77fc06",
+      "ticker": "GOOGL",
+      "rank": 6,
+      "title": "Etsy (ETSY) Is Up 5.9% After New AI Agent Partnerships Reshape Buyer–Seller Interactions – Has The Bull Case Changed?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/etsy-etsy-5-9-ai-221121539.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/etsy-etsy-5-9-ai-221121539.html",
+      "publisher": "Simply Wall St.",
+      "published_utc": "2026-07-28T22:11:21+00:00",
+      "related_tickers": [
+        "ETSY",
+        "MSFT",
+        "GOOG"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "9885a612c0050f73",
+      "ticker": "GOOGL",
+      "rank": 7,
+      "title": "Market Talk: Investors trying to 'bully' Mag 7 to lower AI spending",
+      "summary": "",
+      "url": "https://finance.yahoo.com/video/market-talk-investors-trying-bully-213719213.html",
+      "canonical_url": "https://finance.yahoo.com/video/market-talk-investors-trying-bully-213719213.html",
+      "publisher": "Reuters Videos",
+      "published_utc": "2026-07-28T21:37:19+00:00",
+      "related_tickers": [
+        "GOOG",
+        "MSFT",
+        "AMZN"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "545c965709de38dc",
+      "ticker": "GOOGL",
+      "rank": 8,
+      "title": "US stocks mixed ahead key tech earnings, Fed",
+      "summary": "",
+      "url": "https://finance.yahoo.com/news/ai-anxiety-sparks-tech-rout-023132715.html",
+      "canonical_url": "https://finance.yahoo.com/news/ai-anxiety-sparks-tech-rout-023132715.html",
+      "publisher": "Reuters",
+      "published_utc": "2026-07-28T20:50:17+00:00",
+      "related_tickers": [
+        "JPY=X",
+        "JPYUSD=X",
+        "CL=F",
+        "^DJI",
+        "^GSPC",
+        "SDR.L",
+        "^IXIC",
+        "GOOG",
+        "MSFT",
+        "AMZN",
+        "META",
+        "AAPL",
+        "TSLA",
+        "EUR=X",
+        "EURUSD=X"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "bf112d6abe95f0bd",
+      "ticker": "GOOGL",
+      "rank": 9,
+      "title": "‘Big Short’ investor warns AI has become one dangerous trade",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/b17ab89b-5169-301b-a706-fad3ad93b9b6/%E2%80%98big-short%E2%80%99-investor-warns-ai.html",
+      "canonical_url": "https://finance.yahoo.com/m/b17ab89b-5169-301b-a706-fad3ad93b9b6/%E2%80%98big-short%E2%80%99-investor-warns-ai.html",
+      "publisher": "TheStreet",
+      "published_utc": "2026-07-28T20:33:00+00:00",
+      "related_tickers": [
+        "GOOG"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "0790105b15bd7b8f",
+      "ticker": "META",
+      "rank": 0,
+      "title": "Anthropic clarifies stance on open-weight AI models",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/0592188c-8a75-312d-8795-af842b466b33/anthropic-clarifies-stance-on.html",
+      "canonical_url": "https://finance.yahoo.com/m/0592188c-8a75-312d-8795-af842b466b33/anthropic-clarifies-stance-on.html",
+      "publisher": "TheStreet",
+      "published_utc": "2026-07-29T02:33:00+00:00",
+      "related_tickers": [
+        "NVDA",
+        "MSFT",
+        "META",
+        "GOOG",
+        "PLTR"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "60e669538bba310e",
+      "ticker": "META",
+      "rank": 1,
+      "title": "Satya Nadella's Microsoft Needs Power. Joe Creed's Caterpillar Sells It.",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/8eafe29a-b710-33ba-a720-837f2e3c52b0/satya-nadella%27s-microsoft.html",
+      "canonical_url": "https://finance.yahoo.com/m/8eafe29a-b710-33ba-a720-837f2e3c52b0/satya-nadella%27s-microsoft.html",
+      "publisher": "Motley Fool",
+      "published_utc": "2026-07-29T01:35:00+00:00",
+      "related_tickers": [
+        "MSFT",
+        "CAT",
+        "CVX",
+        "ORCL",
+        "META",
+        "GOOG"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "64fe636008552758",
+      "ticker": "META",
+      "rank": 2,
+      "title": "Kimi K3: DeepSeek 2.0, or is this Time Different?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/kimi-k3-deepseek-2-0-012400513.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/kimi-k3-deepseek-2-0-012400513.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-29T01:24:00+00:00",
+      "related_tickers": [
+        "GOOGL",
+        "NVDA",
+        "GOOG",
+        "META",
+        "AMZN"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "cd67fde0bd3404a7",
+      "ticker": "META",
+      "rank": 3,
+      "title": "The Best Semiconductor Stocks to Buy",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/e9ce88a8-4025-348b-9542-74fbf6827f8b/the-best-semiconductor-stocks.html",
+      "canonical_url": "https://finance.yahoo.com/m/e9ce88a8-4025-348b-9542-74fbf6827f8b/the-best-semiconductor-stocks.html",
+      "publisher": "Kiplinger",
+      "published_utc": "2026-07-28T23:30:38+00:00",
+      "related_tickers": [
+        "GOOG",
+        "AMZN",
+        "META",
+        "MSFT"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "1270ba36e99c937c",
+      "ticker": "META",
+      "rank": 4,
+      "title": "Hong Kong Data Center Loan Sale Shows Banks Hitting Sector Limits",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/hong-kong-data-center-loan-231158626.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/hong-kong-data-center-loan-231158626.html",
+      "publisher": "Bloomberg",
+      "published_utc": "2026-07-28T23:11:58+00:00",
+      "related_tickers": [
+        "MS",
+        "MS-PQ",
+        "META",
+        "GOOG",
+        "ACA.PA",
+        "VOYA",
+        "VOYA-PB"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "ef0cf1d3f47c79c8",
+      "ticker": "META",
+      "rank": 5,
+      "title": "Dow Ends Higher For Third Straight Session As Oil Cools, Nasdaq Slides On Chipmaker Rout — PYPL, SPCX, AAPL, V, F Stocks In Focus",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/19716b81-bb1f-3883-839f-6f95477f2cc5/dow-ends-higher-for-third.html",
+      "canonical_url": "https://finance.yahoo.com/m/19716b81-bb1f-3883-839f-6f95477f2cc5/dow-ends-higher-for-third.html",
+      "publisher": "Stocktwits",
+      "published_utc": "2026-07-28T22:44:01+00:00",
+      "related_tickers": [
+        "^GSPC",
+        "^NDX",
+        "^DJI",
+        "^IXIC",
+        "CL=F",
+        "KO",
+        "SPY",
+        "QQQ",
+        "MSFT",
+        "AMZN",
+        "META",
+        "DIA",
+        "PYPL",
+        "SPCX",
+        "AAPL",
+        "^RUT"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "f02429ac2889db4c",
+      "ticker": "META",
+      "rank": 6,
+      "title": "Markets brace for Fed decision and Big Tech earnings",
+      "summary": "",
+      "url": "https://finance.yahoo.com/video/markets-brace-fed-decision-big-220000833.html",
+      "canonical_url": "https://finance.yahoo.com/video/markets-brace-fed-decision-big-220000833.html",
+      "publisher": "Yahoo Finance Video",
+      "published_utc": "2026-07-28T22:00:00+00:00",
+      "related_tickers": [
+        "MSFT",
+        "META"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "5d7d19154414243e",
+      "ticker": "META",
+      "rank": 7,
+      "title": "Coca-Cola Stock Is Rocking Like the 1990s, With a Higher P/E Than Most of the Magnificent 7",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/2a64dcfb-563e-346f-bfb5-03778e6fe251/coca-cola-stock-is-rocking.html",
+      "canonical_url": "https://finance.yahoo.com/m/2a64dcfb-563e-346f-bfb5-03778e6fe251/coca-cola-stock-is-rocking.html",
+      "publisher": "Barrons.com",
+      "published_utc": "2026-07-28T21:30:00+00:00",
+      "related_tickers": [
+        "KO",
+        "AAPL",
+        "AXP",
+        "BRK-B",
+        "META",
+        "PG",
+        "NVDA",
+        "MSFT",
+        "TSLA"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "5f1368c5845a04ab",
+      "ticker": "META",
+      "rank": 8,
+      "title": "Visa Announced Layoffs Ahead of Earnings Beat, as AI and Restructuring Accelerate",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/e050b06c-401c-3510-a760-dd9c4f08ccb7/visa-announced-layoffs-ahead.html",
+      "canonical_url": "https://finance.yahoo.com/m/e050b06c-401c-3510-a760-dd9c4f08ccb7/visa-announced-layoffs-ahead.html",
+      "publisher": "Barrons.com",
+      "published_utc": "2026-07-28T21:12:00+00:00",
+      "related_tickers": [
+        "V",
+        "CSCO",
+        "INTC",
+        "^GSPC",
+        "META"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "ecdd8e9657c76f0f",
+      "ticker": "META",
+      "rank": 9,
+      "title": "Freddie Mac Announces Release Date for Second Quarter 2026 Financial Results",
+      "summary": "",
+      "url": "https://finance.yahoo.com/real-estate/articles/freddie-mac-announces-release-date-210700913.html",
+      "canonical_url": "https://finance.yahoo.com/real-estate/articles/freddie-mac-announces-release-date-210700913.html",
+      "publisher": "GlobeNewswire",
+      "published_utc": "2026-07-28T21:07:00+00:00",
+      "related_tickers": [
+        "FMCC",
+        "FMCCG",
+        "FMCCH",
+        "FMCCI",
+        "FMCCJ",
+        "FMCCK",
+        "FMCCL",
+        "FMCCM",
+        "FMCCN",
+        "FMCCO",
+        "FMCCP",
+        "FMCCS",
+        "FMCCT",
+        "FMCKI",
+        "FMCKJ",
+        "FMCKK",
+        "FMCKL",
+        "FMCKM",
+        "FMCKN",
+        "FMCKO",
+        "FMCKP",
+        "FREGP",
+        "FREJN",
+        "FREJO",
+        "FREJP",
+        "META"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "643c0b78b00ee8c5",
+      "ticker": "HOOD",
+      "rank": 0,
+      "title": "Analysts hike Robinhood stock price target ahead of July 29 earnings",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/75319763-ba7e-3e14-bcf4-17e22183cdee/analysts-hike-robinhood-stock.html",
+      "canonical_url": "https://finance.yahoo.com/m/75319763-ba7e-3e14-bcf4-17e22183cdee/analysts-hike-robinhood-stock.html",
+      "publisher": "TheStreet",
+      "published_utc": "2026-07-28T22:30:00+00:00",
+      "related_tickers": [
+        "HOOD"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "83ad52ace48499b4",
+      "ticker": "HOOD",
+      "rank": 1,
+      "title": "Robinhood Markets Insider Sold Shares Worth $4,680,523, According to a Recent SEC Filing",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/robinhood-markets-insider-sold-shares-204331329.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/robinhood-markets-insider-sold-shares-204331329.html",
+      "publisher": "MT Newswires",
+      "published_utc": "2026-07-28T20:43:31+00:00",
+      "related_tickers": [
+        "HOOD"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "0ab0ba8423e177e5",
+      "ticker": "HOOD",
+      "rank": 2,
+      "title": "SpaceX Erased Tesla’s Marketcap in Little Over a Month",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/d088faf0-50f5-3ef8-bada-4c5cfe1341af/spacex-erased-tesla%E2%80%99s.html",
+      "canonical_url": "https://finance.yahoo.com/m/d088faf0-50f5-3ef8-bada-4c5cfe1341af/spacex-erased-tesla%E2%80%99s.html",
+      "publisher": "Moby",
+      "published_utc": "2026-07-28T20:13:39+00:00",
+      "related_tickers": [
+        "NVDA",
+        "SPCX",
+        "TSLA",
+        "HOOD"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "4b491a921e4e9169",
+      "ticker": "HOOD",
+      "rank": 3,
+      "title": "Coinbase and Robinhood are locked in a heated battle ahead of Q2 earnings—but only one is being called the industry’s ‘first hyperscaler’",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/crypto/articles/coinbase-robinhood-locked-heated-battle-200700382.html",
+      "canonical_url": "https://finance.yahoo.com/markets/crypto/articles/coinbase-robinhood-locked-heated-battle-200700382.html",
+      "publisher": "Fortune",
+      "published_utc": "2026-07-28T20:07:00+00:00",
+      "related_tickers": [
+        "COIN",
+        "HOOD"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "83cf5be2d2071c0b",
+      "ticker": "HOOD",
+      "rank": 4,
+      "title": "Robinhood Chain’s Trading Volumes Slump As Memecoin Interest Fades",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/b814a6d1-657f-3634-a5bf-53c179c20d3f/robinhood-chain%E2%80%99s-trading.html",
+      "canonical_url": "https://finance.yahoo.com/m/b814a6d1-657f-3634-a5bf-53c179c20d3f/robinhood-chain%E2%80%99s-trading.html",
+      "publisher": "CryptoProwl",
+      "published_utc": "2026-07-28T19:43:00+00:00",
+      "related_tickers": [
+        "HOOD",
+        "DOGE-USD",
+        "ETH-USD"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "a4d085153d7ab282",
+      "ticker": "HOOD",
+      "rank": 5,
+      "title": "Can Stock Trading and Prediction Markets Offset Robinhood’s Crypto Slump?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/30c843ee-aa08-3bbd-9d6e-cb618fb36b72/can-stock-trading-and.html",
+      "canonical_url": "https://finance.yahoo.com/m/30c843ee-aa08-3bbd-9d6e-cb618fb36b72/can-stock-trading-and.html",
+      "publisher": "Barrons.com",
+      "published_utc": "2026-07-28T18:05:00+00:00",
+      "related_tickers": [
+        "HOOD"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "6a677c491c088925",
+      "ticker": "HOOD",
+      "rank": 6,
+      "title": "Robinhood (HOOD) To Report Earnings Tomorrow: Here Is What To Expect",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/robinhood-hood-report-earnings-tomorrow-170902107.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/robinhood-hood-report-earnings-tomorrow-170902107.html",
+      "publisher": "StockStory",
+      "published_utc": "2026-07-28T17:09:02+00:00",
+      "related_tickers": [
+        "HOOD"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "3c0bb87791cf7b4c",
+      "ticker": "HOOD",
+      "rank": 7,
+      "title": "How Robinhood Built a $450M Blockchain in Three Weeks",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/2136f8a0-218a-3343-a19e-c37805257913/how-robinhood-built-a-%24450m.html",
+      "canonical_url": "https://finance.yahoo.com/m/2136f8a0-218a-3343-a19e-c37805257913/how-robinhood-built-a-%24450m.html",
+      "publisher": "Coinage Coop",
+      "published_utc": "2026-07-28T16:57:00+00:00",
+      "related_tickers": [
+        "HOOD"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "d658c07d0c438f67",
+      "ticker": "HOOD",
+      "rank": 8,
+      "title": "Robinhood CEO Vlad Tenev says X account was hacked",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/robinhood-ceo-vlad-tenev-says-155400027.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/robinhood-ceo-vlad-tenev-says-155400027.html",
+      "publisher": "Reuters",
+      "published_utc": "2026-07-28T15:54:00+00:00",
+      "related_tickers": [
+        "HOOD"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "2d6462af9745baa3",
+      "ticker": "ON",
+      "rank": 0,
+      "title": "ON Semiconductor Corp. (ON) Stock Sinks As Market Gains: Here's Why",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/semiconductor-corp-stock-sinks-market-215004633.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/semiconductor-corp-stock-sinks-market-215004633.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-28T21:50:04+00:00",
+      "related_tickers": [
+        "ON",
+        "^GSPC",
+        "^DJI",
+        "^IXIC"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "aeae21638180d2b7",
+      "ticker": "ON",
+      "rank": 1,
+      "title": "ON Semiconductor (ON) Heads Into Earnings As AI Power Optimism Keeps Valuation In Focus",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/semiconductor-heads-earnings-ai-power-100838094.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/semiconductor-heads-earnings-ai-power-100838094.html",
+      "publisher": "Simply Wall St.",
+      "published_utc": "2026-07-28T10:08:38+00:00",
+      "related_tickers": [
+        "ON"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "789ddeabc201aebd",
+      "ticker": "ON",
+      "rank": 2,
+      "title": "ON Semiconductor Corp. (ON) Earnings Expected to Grow: What to Know Ahead of Next Week's Release",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/semiconductor-corp-earnings-expected-grow-140002386.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/semiconductor-corp-earnings-expected-grow-140002386.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-27T14:00:02+00:00",
+      "related_tickers": [
+        "ON"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "ce258f9c1856b39f",
+      "ticker": "ON",
+      "rank": 3,
+      "title": "TXN vs. ON: Which Semiconductor Stock Is the Better Buy Right Now?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/txn-vs-semiconductor-stock-better-125700966.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/txn-vs-semiconductor-stock-better-125700966.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-27T12:57:00+00:00",
+      "related_tickers": [
+        "TXN",
+        "ON"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "2aeb98f4804fb39c",
+      "ticker": "ON",
+      "rank": 4,
+      "title": "Micron, onsemi, Seagate, Western Digital, and Vishay Intertechnology Shares Are Falling, What You Need To Know",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/micron-onsemi-seagate-western-digital-220908037.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/micron-onsemi-seagate-western-digital-220908037.html",
+      "publisher": "StockStory",
+      "published_utc": "2026-07-24T22:09:08+00:00",
+      "related_tickers": [
+        "MU",
+        "ON",
+        "STX",
+        "WDC",
+        "VSH"
+      ],
+      "baseline_match": false,
+      "candidate_match": true
+    },
+    {
+      "id": "2c5c50525e838345",
+      "ticker": "ON",
+      "rank": 5,
+      "title": "1 Profitable Stock with Impressive Fundamentals and 2 We Find Risky",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/1-profitable-stock-impressive-fundamentals-100108500.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/1-profitable-stock-impressive-fundamentals-100108500.html",
+      "publisher": "StockStory",
+      "published_utc": "2026-07-24T10:01:08+00:00",
+      "related_tickers": [
+        "ON",
+        "TREX",
+        "SEZL"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "0bc996a3e65c0031",
+      "ticker": "ON",
+      "rank": 6,
+      "title": "MaxLinear (MXL) Tops Q2 Earnings and Revenue Estimates",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/maxlinear-mxl-tops-q2-earnings-222008577.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/maxlinear-mxl-tops-q2-earnings-222008577.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-23T22:20:08+00:00",
+      "related_tickers": [
+        "MXL",
+        "ON"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "1039856991c75ad7",
+      "ticker": "ON",
+      "rank": 7,
+      "title": "TXN Keeps Climbing. Should You Climb On?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/dd59a580-a1bf-3283-929b-2ff4dad7c88e/txn-keeps-climbing.-should.html",
+      "canonical_url": "https://finance.yahoo.com/m/dd59a580-a1bf-3283-929b-2ff4dad7c88e/txn-keeps-climbing.-should.html",
+      "publisher": "Trefis",
+      "published_utc": "2026-07-23T12:38:10+00:00",
+      "related_tickers": [
+        "TXN",
+        "AVGO",
+        "ADI",
+        "NXPI",
+        "MCHP",
+        "MCHPP",
+        "ON"
+      ],
+      "baseline_match": true,
+      "candidate_match": false
+    },
+    {
+      "id": "02ce9fbc3d1cf29c",
+      "ticker": "ON",
+      "rank": 8,
+      "title": "ON Semiconductor Corp. (ON) Gains As Market Dips: What You Should Know",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/semiconductor-corp-gains-market-dips-215003664.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/semiconductor-corp-gains-market-dips-215003664.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-22T21:50:03+00:00",
+      "related_tickers": [
+        "ON",
+        "^GSPC",
+        "^DJI"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "f12067d047dfc0bc",
+      "ticker": "ON",
+      "rank": 9,
+      "title": "ON Semiconductor Corporation (ON) Is a Trending Stock: Facts to Know Before Betting on It",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/semiconductor-corporation-trending-stock-facts-130003487.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/semiconductor-corporation-trending-stock-facts-130003487.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-21T13:00:03+00:00",
+      "related_tickers": [
+        "ON",
+        "^GSPC"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "11c3fc5ea3170f87",
+      "ticker": "IT",
+      "rank": 0,
+      "title": "Lumen (LUMN) Stock Looks Richer After Fresh AI Connectivity Recognition",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/lumen-lumn-stock-looks-richer-221213268.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/lumen-lumn-stock-looks-richer-221213268.html",
+      "publisher": "Simply Wall St.",
+      "published_utc": "2026-07-28T22:12:13+00:00",
+      "related_tickers": [
+        "LUMN",
+        "IT"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "6688b9b669cae3d6",
+      "ticker": "IT",
+      "rank": 1,
+      "title": "Gartner (IT) Reports Next Week: Wall Street Expects Earnings Growth",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/gartner-reports-next-week-wall-140004135.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/gartner-reports-next-week-wall-140004135.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-28T14:00:04+00:00",
+      "related_tickers": [
+        "IT"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "b0ee4f2aa52430e7",
+      "ticker": "IT",
+      "rank": 2,
+      "title": "Tecnotree Recognized in Two Gartner® Hype Cycle™ Reports for CSP Algorithmic Pricing",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/tecnotree-recognized-two-gartner-hype-124600571.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/tecnotree-recognized-two-gartner-hype-124600571.html",
+      "publisher": "Business Wire",
+      "published_utc": "2026-07-28T12:46:00+00:00",
+      "related_tickers": [
+        "TEM1V.HE",
+        "IT"
+      ],
+      "baseline_match": true,
+      "candidate_match": false
+    },
+    {
+      "id": "2718f5f06a9276f0",
+      "ticker": "IT",
+      "rank": 3,
+      "title": "Gartner raises 2026 IT spending forecast on AI demand",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/c2a3724c-0ae5-34b8-99ab-6f610ec18032/gartner-raises-2026-it.html",
+      "canonical_url": "https://finance.yahoo.com/m/c2a3724c-0ae5-34b8-99ab-6f610ec18032/gartner-raises-2026-it.html",
+      "publisher": "CFO Dive",
+      "published_utc": "2026-07-28T07:00:00+00:00",
+      "related_tickers": [
+        "IT"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "99b63e3254657864",
+      "ticker": "IT",
+      "rank": 4,
+      "title": "Analyst Report: Gartner, Inc.",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/e68293d3-60df-3fcc-b118-3ae6c7e0ed22/analyst-report%3A-gartner%2C-inc..html",
+      "canonical_url": "https://finance.yahoo.com/m/e68293d3-60df-3fcc-b118-3ae6c7e0ed22/analyst-report%3A-gartner%2C-inc..html",
+      "publisher": "Morningstar Research",
+      "published_utc": "2026-07-27T23:25:06+00:00",
+      "related_tickers": [
+        "IT"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "374368ecae4bc66b",
+      "ticker": "IT",
+      "rank": 5,
+      "title": "Securden Recognized in the 2026 Gartner® Research: Reduce Cybersecurity Attacks With Least Privilege Endpoint Strategies",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/securden-recognized-2026-gartner-research-130000646.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/securden-recognized-2026-gartner-research-130000646.html",
+      "publisher": "PR Newswire",
+      "published_utc": "2026-07-27T13:00:00+00:00",
+      "related_tickers": [
+        "IT"
+      ],
+      "baseline_match": true,
+      "candidate_match": false
+    },
+    {
+      "id": "0fc7e1e82a0509b8",
+      "ticker": "IT",
+      "rank": 6,
+      "title": "Flexera is Only Vendor Named a Customers’ Choice in the 2026 Gartner® Peer Insights™ Voice of the Customer for Software Asset Management Tools Report",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/articles/flexera-only-vendor-named-customers-133000811.html",
+      "canonical_url": "https://finance.yahoo.com/technology/articles/flexera-only-vendor-named-customers-133000811.html",
+      "publisher": "GlobeNewswire",
+      "published_utc": "2026-07-23T13:30:00+00:00",
+      "related_tickers": [
+        "IT"
+      ],
+      "baseline_match": true,
+      "candidate_match": false
+    },
+    {
+      "id": "67d5d9e71c715cc3",
+      "ticker": "IT",
+      "rank": 7,
+      "title": "Jefferies Adjusts Price Target on Gartner to $140 From $167, Maintains Hold Rating",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/jefferies-adjusts-price-target-gartner-131839737.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/jefferies-adjusts-price-target-gartner-131839737.html",
+      "publisher": "MT Newswires",
+      "published_utc": "2026-07-23T13:18:39+00:00",
+      "related_tickers": [
+        "IT"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "d1ee31f9274efff8",
+      "ticker": "IT",
+      "rank": 8,
+      "title": "Vitria Technology Sets the Standard for Event Intelligence Solutions as Knowledge-Driven AIOps Reaches the Enterprise Mainstream",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/vitria-technology-sets-standard-event-124400243.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/vitria-technology-sets-standard-event-124400243.html",
+      "publisher": "PR Newswire",
+      "published_utc": "2026-07-23T12:44:00+00:00",
+      "related_tickers": [
+        "IT"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "1200236b6e6f8973",
+      "ticker": "IT",
+      "rank": 9,
+      "title": "SoundHound AI (SOUN) Stock Could Trade At A Premium Despite Gartner Recognition",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/soundhound-ai-soun-stock-could-081315716.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/soundhound-ai-soun-stock-could-081315716.html",
+      "publisher": "Simply Wall St.",
+      "published_utc": "2026-07-23T08:13:15+00:00",
+      "related_tickers": [
+        "SOUN",
+        "IT"
+      ],
+      "baseline_match": true,
+      "candidate_match": false
+    },
+    {
+      "id": "566050faffed817c",
+      "ticker": "CAT",
+      "rank": 0,
+      "title": "Satya Nadella's Microsoft Needs Power. Joe Creed's Caterpillar Sells It.",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/8eafe29a-b710-33ba-a720-837f2e3c52b0/satya-nadella%27s-microsoft.html",
+      "canonical_url": "https://finance.yahoo.com/m/8eafe29a-b710-33ba-a720-837f2e3c52b0/satya-nadella%27s-microsoft.html",
+      "publisher": "Motley Fool",
+      "published_utc": "2026-07-29T01:35:00+00:00",
+      "related_tickers": [
+        "MSFT",
+        "CAT",
+        "CVX",
+        "ORCL",
+        "META",
+        "GOOG"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "42999c264c342cd0",
+      "ticker": "CAT",
+      "rank": 1,
+      "title": "What Makes Caterpillar (CAT) a New Buy Stock",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/makes-caterpillar-cat-buy-stock-160003259.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/makes-caterpillar-cat-buy-stock-160003259.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-28T16:00:03+00:00",
+      "related_tickers": [
+        "CAT"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "e5ebb5160b6a9324",
+      "ticker": "CAT",
+      "rank": 2,
+      "title": "Caterpillar (CAT) Earnings Expected to Grow: What to Know Ahead of Next Week's Release",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/caterpillar-cat-earnings-expected-grow-140007195.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/caterpillar-cat-earnings-expected-grow-140007195.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-28T14:00:07+00:00",
+      "related_tickers": [
+        "CAT",
+        "TEX"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "4845849a13aaf4ce",
+      "ticker": "CAT",
+      "rank": 3,
+      "title": "After Ford Soars 44% on AI Fever, Traders Want Proof It’s Real",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/ford-soars-44-ai-fever-125343578.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/ford-soars-44-ai-fever-125343578.html",
+      "publisher": "Bloomberg",
+      "published_utc": "2026-07-28T12:53:43+00:00",
+      "related_tickers": [
+        "F",
+        "APTV",
+        "BAC",
+        "BNP.PA",
+        "CAT",
+        "300750.SZ",
+        "STLA",
+        "MS",
+        "MS-PQ",
+        "TSLA",
+        "GM",
+        "BWA"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "2fba548ad1d93719",
+      "ticker": "CAT",
+      "rank": 4,
+      "title": "Jefferies Global Best Ideas List Has 5 US Dividend Stocks With Huge Total Return Potential",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/a56e73ad-a768-334c-a27b-0dba54c3f37e/jefferies-global-best-ideas.html",
+      "canonical_url": "https://finance.yahoo.com/m/a56e73ad-a768-334c-a27b-0dba54c3f37e/jefferies-global-best-ideas.html",
+      "publisher": "24/7 Wall St.",
+      "published_utc": "2026-07-28T12:50:38+00:00",
+      "related_tickers": [
+        "JEF",
+        "BAC",
+        "MLM",
+        "CAT",
+        "TMO",
+        "AHR",
+        "NVDA"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "59982038fba77708",
+      "ticker": "CAT",
+      "rank": 5,
+      "title": "Caterpillar (CAT) Stock Looks Slightly Above Fair Value Today",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/caterpillar-cat-stock-looks-slightly-010819341.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/caterpillar-cat-stock-looks-slightly-010819341.html",
+      "publisher": "Simply Wall St.",
+      "published_utc": "2026-07-28T01:08:19+00:00",
+      "related_tickers": [
+        "CAT"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "74b7259bf718caeb",
+      "ticker": "CAT",
+      "rank": 6,
+      "title": "Caterpillar (CAT) Faces Rare Earth Squeeze As China Export Curbs Reset Supply Chains",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/caterpillar-cat-faces-rare-earth-001607398.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/caterpillar-cat-faces-rare-earth-001607398.html",
+      "publisher": "Simply Wall St.",
+      "published_utc": "2026-07-28T00:16:07+00:00",
+      "related_tickers": [
+        "CAT"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "24a8ad82b13f212a",
+      "ticker": "CAT",
+      "rank": 7,
+      "title": "Review & Preview: Brace Yourself",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/697d69ce-e6b9-3ab7-b6db-ad01615c2e8c/review-%26-preview%3A-brace.html",
+      "canonical_url": "https://finance.yahoo.com/m/697d69ce-e6b9-3ab7-b6db-ad01615c2e8c/review-%26-preview%3A-brace.html",
+      "publisher": "Barrons.com",
+      "published_utc": "2026-07-27T23:55:00+00:00",
+      "related_tickers": [
+        "CAT",
+        "MSFT",
+        "META",
+        "^DJI",
+        "^GSPC",
+        "^IXIC",
+        "CL=F"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "15747bbfbeb7e077",
+      "ticker": "CAT",
+      "rank": 8,
+      "title": "Caterpillar (CAT) Stock Sinks As Market Gains: What You Should Know",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/caterpillar-cat-stock-sinks-market-214504886.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/caterpillar-cat-stock-sinks-market-214504886.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-27T21:45:04+00:00",
+      "related_tickers": [
+        "CAT",
+        "^GSPC",
+        "^DJI",
+        "^IXIC"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "a59848b1c3b2b5c4",
+      "ticker": "CAT",
+      "rank": 9,
+      "title": "Stock Market Today: Dow Up As These Stocks Test Entries; This AI Play Fights Back Before Key Event (Live Coverage)",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/de8b5436-c73d-31ce-a62f-9df4d32cb08d/stock-market-today%3A-dow-up-as.html",
+      "canonical_url": "https://finance.yahoo.com/m/de8b5436-c73d-31ce-a62f-9df4d32cb08d/stock-market-today%3A-dow-up-as.html",
+      "publisher": "Investor's Business Daily",
+      "published_utc": "2026-07-27T20:34:28+00:00",
+      "related_tickers": [
+        "CLS",
+        "CRM",
+        "WDAY",
+        "MSFT",
+        "^DJI",
+        "AXP",
+        "SHW",
+        "NVDA",
+        "CAT"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "ed0be6a76530ab19",
+      "ticker": "XYZ",
+      "rank": 0,
+      "title": "Visa Stock Rises as Report Signals 2,600 Job Cuts",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/visa-stock-rises-report-signals-202251642.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/visa-stock-rises-report-signals-202251642.html",
+      "publisher": "GuruFocus.com",
+      "published_utc": "2026-07-28T20:22:51+00:00",
+      "related_tickers": [
+        "V",
+        "MA",
+        "XYZ"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "472ec22fa24bacec",
+      "ticker": "XYZ",
+      "rank": 1,
+      "title": "Block vs. PayPal: Which Fintech Stock Is a Better Buy Right Now?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/block-vs-paypal-fintech-stock-180400689.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/block-vs-paypal-fintech-stock-180400689.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-28T18:04:00+00:00",
+      "related_tickers": [
+        "PYPL",
+        "XYZ"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "bd8fdee93d215318",
+      "ticker": "XYZ",
+      "rank": 2,
+      "title": "Judge Blocks Minnesota's Prediction Market Ban",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/caa61e41-1bf3-3ea8-a2da-4d31b06d6a26/judge-blocks-minnesota%27s.html",
+      "canonical_url": "https://finance.yahoo.com/m/caa61e41-1bf3-3ea8-a2da-4d31b06d6a26/judge-blocks-minnesota%27s.html",
+      "publisher": "Bankless",
+      "published_utc": "2026-07-28T17:05:35+00:00",
+      "related_tickers": [
+        "KLSH.PVT",
+        "POLA.PVT",
+        "XYZ"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "c4e6288c318e924f",
+      "ticker": "XYZ",
+      "rank": 3,
+      "title": "PROG Holdings Q2 Preview: Leveraging Strengths Amid Market Woes",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/prog-holdings-q2-preview-leveraging-154400123.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/prog-holdings-q2-preview-leveraging-154400123.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-28T15:44:00+00:00",
+      "related_tickers": [
+        "PRG",
+        "XYZ",
+        "VIRT"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "cfa55bb7d1f66316",
+      "ticker": "XYZ",
+      "rank": 4,
+      "title": "Visa trims 7% of workforce as fintech belt-tightening spreads",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/visa-trims-7-workforce-fintech-132338677.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/visa-trims-7-workforce-fintech-132338677.html",
+      "publisher": "Investing.com",
+      "published_utc": "2026-07-28T13:23:38+00:00",
+      "related_tickers": [
+        "V",
+        "XYZ"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "4d6b8c6e3547b046",
+      "ticker": "XYZ",
+      "rank": 5,
+      "title": "Visa to Cut 7% of Workforce as CEO Seeks to Revamp Company",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/visa-cut-7-workforce-ceo-125035066.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/visa-cut-7-workforce-ceo-125035066.html",
+      "publisher": "Bloomberg",
+      "published_utc": "2026-07-28T12:50:35+00:00",
+      "related_tickers": [
+        "V",
+        "PYPL",
+        "XYZ"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "14e0486b70ea5016",
+      "ticker": "XYZ",
+      "rank": 6,
+      "title": "AI Across Sezzle: Can It Help Scale Efficiency and Product Velocity?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/ai-across-sezzle-help-scale-163400034.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/ai-across-sezzle-help-scale-163400034.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-27T16:34:00+00:00",
+      "related_tickers": [
+        "SEZL",
+        "XYZ"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "6808991f31504da0",
+      "ticker": "XYZ",
+      "rank": 7,
+      "title": "Can Bitcoin Price Reach $500,000? Coinbase Is Preparing for Its Biggest Security Threat",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/6f05b9ac-ad30-3588-8c61-781ee025c723/can-bitcoin-price-reach.html",
+      "canonical_url": "https://finance.yahoo.com/m/6f05b9ac-ad30-3588-8c61-781ee025c723/can-bitcoin-price-reach.html",
+      "publisher": "CCN",
+      "published_utc": "2026-07-27T16:12:44+00:00",
+      "related_tickers": [
+        "COIN",
+        "BTC-USD",
+        "BLK",
+        "XYZ",
+        "MSTR"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "e81d7382053596f6",
+      "ticker": "XYZ",
+      "rank": 8,
+      "title": "Meet The 2 S&P 500 CEOs Paid Less Than $500 A Year",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/753e5944-47cb-3ece-a9ef-82dba1747821/meet-the-2-s%26p-500-ceos-paid.html",
+      "canonical_url": "https://finance.yahoo.com/m/753e5944-47cb-3ece-a9ef-82dba1747821/meet-the-2-s%26p-500-ceos-paid.html",
+      "publisher": "Investor's Business Daily",
+      "published_utc": "2026-07-27T11:42:37+00:00",
+      "related_tickers": [
+        "AXON",
+        "VOO",
+        "^GSPC",
+        "XYZ",
+        "SMCI"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "b53f1a6faeb26f53",
+      "ticker": "XYZ",
+      "rank": 9,
+      "title": "The Dark Sides Of Cash App You'll Wish You Knew About Sooner",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/f63cffd4-a0b3-3c1a-aefc-0a74e3987534/the-dark-sides-of-cash-app.html",
+      "canonical_url": "https://finance.yahoo.com/m/f63cffd4-a0b3-3c1a-aefc-0a74e3987534/the-dark-sides-of-cash-app.html",
+      "publisher": "Money Digest",
+      "published_utc": "2026-07-26T14:07:00+00:00",
+      "related_tickers": [
+        "XYZ",
+        "BTC-USD"
+      ],
+      "baseline_match": false,
+      "candidate_match": true
+    },
+    {
+      "id": "df41c53fd17fea41",
+      "ticker": "GEN",
+      "rank": 0,
+      "title": "Norton Study Reveals Emerging Risks for Kids Online, Prompting Parents to Have a New Kind of \"The Talk\"",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/norton-study-reveals-emerging-risks-130000284.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/norton-study-reveals-emerging-risks-130000284.html",
+      "publisher": "PR Newswire",
+      "published_utc": "2026-07-28T13:00:00+00:00",
+      "related_tickers": [
+        "GEN",
+        "GENVR"
+      ],
+      "baseline_match": false,
+      "candidate_match": true
+    },
+    {
+      "id": "d5ecb3956833669d",
+      "ticker": "GEN",
+      "rank": 1,
+      "title": "MoneyLion One Launches Premium Banking Helping Everyday Americans Earn More from Every Paycheck",
+      "summary": "",
+      "url": "https://finance.yahoo.com/small-business/articles/moneylion-one-launches-premium-banking-130000036.html",
+      "canonical_url": "https://finance.yahoo.com/small-business/articles/moneylion-one-launches-premium-banking-130000036.html",
+      "publisher": "PR Newswire",
+      "published_utc": "2026-07-20T13:00:00+00:00",
+      "related_tickers": [
+        "GEN",
+        "GENVR"
+      ],
+      "baseline_match": false,
+      "candidate_match": true
+    },
+    {
+      "id": "98296649286439e7",
+      "ticker": "GEN",
+      "rank": 2,
+      "title": "Gen Half-Year Threat Report: Attackers are Moving Closer to the Systems People Trust",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/gen-half-threat-report-attackers-130000780.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/gen-half-threat-report-attackers-130000780.html",
+      "publisher": "PR Newswire",
+      "published_utc": "2026-07-15T13:00:00+00:00",
+      "related_tickers": [
+        "GEN",
+        "GENVR"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "475a5dd9954e1df0",
+      "ticker": "GEN",
+      "rank": 3,
+      "title": "Gen to Announce Fiscal 2027 First Quarter Results on August 6, 2026",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/gen-announce-fiscal-2027-first-200500401.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/gen-announce-fiscal-2027-first-200500401.html",
+      "publisher": "PR Newswire",
+      "published_utc": "2026-07-14T20:05:00+00:00",
+      "related_tickers": [
+        "GEN",
+        "GENVR"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "0fd0d9ca9ff4f4a8",
+      "ticker": "GEN",
+      "rank": 4,
+      "title": "CVLT Grew. The Stock Did Not. Someone Is Wrong",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/b986d0e7-6e19-3d03-b1b6-a7d3687b6b5a/cvlt-grew.-the-stock-did-not..html",
+      "canonical_url": "https://finance.yahoo.com/m/b986d0e7-6e19-3d03-b1b6-a7d3687b6b5a/cvlt-grew.-the-stock-did-not..html",
+      "publisher": "Trefis",
+      "published_utc": "2026-07-10T00:40:42+00:00",
+      "related_tickers": [
+        "CVLT",
+        "^GSPC",
+        "PATH",
+        "AIBZ",
+        "S",
+        "TYL",
+        "GEN",
+        "GENVR"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "55538f36b58ae7a5",
+      "ticker": "GEN",
+      "rank": 5,
+      "title": "Own ServiceNow For AI? Gen Digital's Numbers Speak Louder",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/01c68afb-041e-3b21-9fb0-5bcb5320e99c/own-servicenow-for-ai%3F-gen.html",
+      "canonical_url": "https://finance.yahoo.com/m/01c68afb-041e-3b21-9fb0-5bcb5320e99c/own-servicenow-for-ai%3F-gen.html",
+      "publisher": "Trefis",
+      "published_utc": "2026-07-08T11:27:46+00:00",
+      "related_tickers": [
+        "NOW",
+        "MDB",
+        "WDAY",
+        "GEN",
+        "GENVR",
+        "OKTA",
+        "DT",
+        "CRM",
+        "TEAM"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "0313b9e065383c51",
+      "ticker": "GEN",
+      "rank": 6,
+      "title": "GEN Grew. The Stock Did Not. Someone Is Wrong",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/2e501f70-fdd8-3aee-bb9c-96d8397a6ba0/gen-grew.-the-stock-did-not..html",
+      "canonical_url": "https://finance.yahoo.com/m/2e501f70-fdd8-3aee-bb9c-96d8397a6ba0/gen-grew.-the-stock-did-not..html",
+      "publisher": "Trefis",
+      "published_utc": "2026-07-07T12:10:40+00:00",
+      "related_tickers": [
+        "DT",
+        "MDB",
+        "U",
+        "OKTA",
+        "PCTY",
+        "GEN",
+        "GENVR",
+        "^GSPC"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "05a84fe24b7e1173",
+      "ticker": "GEN",
+      "rank": 7,
+      "title": "Norton Genie Expands to Claude, Bringing AI-Powered Scam Detection into Everyday Conversations",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/norton-genie-expands-claude-bringing-130100984.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/norton-genie-expands-claude-bringing-130100984.html",
+      "publisher": "PR Newswire",
+      "published_utc": "2026-06-30T13:01:00+00:00",
+      "related_tickers": [
+        "GEN",
+        "GENVR"
+      ],
+      "baseline_match": false,
+      "candidate_match": true
+    },
+    {
+      "id": "7b299743447f6112",
+      "ticker": "GEN",
+      "rank": 8,
+      "title": "Gen Digital Stock: Is GEN Underperforming the Technology Sector?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/0a26e847-c7cd-3864-82f3-60f0705858d9/gen-digital-stock%3A-is-gen.html",
+      "canonical_url": "https://finance.yahoo.com/m/0a26e847-c7cd-3864-82f3-60f0705858d9/gen-digital-stock%3A-is-gen.html",
+      "publisher": "Barchart",
+      "published_utc": "2026-06-19T00:41:17+00:00",
+      "related_tickers": [
+        "GEN",
+        "CHKP",
+        "XLK"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "7be28cdfe1e3dbb1",
+      "ticker": "GEN",
+      "rank": 9,
+      "title": "MoneyLion Survey Finds Summer Financial Pressure Hits Gen Z The Hardest",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/articles/moneylion-survey-finds-summer-financial-130000952.html",
+      "canonical_url": "https://finance.yahoo.com/markets/articles/moneylion-survey-finds-summer-financial-130000952.html",
+      "publisher": "PR Newswire",
+      "published_utc": "2026-06-18T13:00:00+00:00",
+      "related_tickers": [
+        "GEN",
+        "GENVR"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    }
+  ]
+}

@@ -2,6 +2,17 @@
 
 > 当前文档记录 `codex/scoring-validation-guardrails` 分支上的评分验证、branch-vs-branch harness、证据冻结与文档治理改动。它是开发追溯文档，不是 agent 指令入口；影响 agent 行为的规则仍以 `AGENTS.md` 和相关 harness 文档为准。
 
+## 2026-07-29
+
+### 美股发行人 alias / entity matching 真实召回 shadow
+
+- 从正式检查点 `48e20fc4c9fe9823ab055155511be3bc503cb78b` 建立隔离分支 `codex/scoring-validation-us-entity-recall-shadow`。冻结 119 条实时 Yahoo 新闻，覆盖短 ticker `MU/AI/C/F`、品牌/法人差异 `GOOGL/META/HOOD`、歧义 ticker `ON/IT/CAT`，以及 Block/Gen Digital 的更名和多品牌案例。
+- 基线 `TP=51/FP=6/FN=7`，precision `89.47%`、recall `87.93%`、跨发行人污染率 `10.53%`；候选 `TP=57/FP=0/FN=1`，precision `100%`、recall `98.28%`、污染率 `0`。剩余 FN 是无 Meta/ticker/品牌实体证据的泛 Big Tech 标题，继续 fail closed。
+- 新增发行人官方来源绑定的 alias registry，并把 common-word ticker 限定为证券上下文；未放宽 substring。修复 BigBear.ai→AI、普通介词 on→ON、供应商“Gartner recognition”→IT 等污染，同时恢复 Citi、onsemi、Cash App、Norton、MoneyLion 的真实召回；MU 继续不匹配 Musk。
+- 当前没有 SEC 真实联系信息，因此 SEC 请求 fail closed 并记录 access gap；CBOE 未联网。真实生产 AI lite、GEN medium 和 MU 事件抓取通过，`critical=0`。
+- `py_compile`、direct runner `108/108` 通过；冻结对照 `79 ok / 0 review / 0 possible_regression`，分数和档位变化全为 0。正向及交换顺序均无 performance warning，只判无性能回退。
+- 没有重装依赖、没有跑 deep/update，没有修改评分权重、动量、P0/P1 阈值或估值参数。完整结论见 `docs/us-entity-recall-shadow-validation-20260729.md`；本轮只推隔离分支，不自动合回正式分支。
+
 ## 2026-07-28
 
 ### 美股动量真实刷新与 US 证据契约

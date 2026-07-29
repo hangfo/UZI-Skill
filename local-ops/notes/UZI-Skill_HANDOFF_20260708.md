@@ -1,5 +1,14 @@
 # UZI-Skill 交接记录 - 2026-07-08
 
+## 2026-07-29 美股实体 alias 真实召回 shadow
+
+- 当前隔离分支为 `codex/scoring-validation-us-entity-recall-shadow`，起点是正式检查点 `48e20fc4c9fe9823ab055155511be3bc503cb78b`。正式 `codex/scoring-validation-guardrails`、`main`、`codex/windows-local-stable` 均未修改；`upstream/main=fce996c`，upstream push 仍为 `DISABLED`。
+- 119 条实时 Yahoo 冻结新闻覆盖 `MU/AI/C/F/GOOGL/META/HOOD/ON/IT/CAT/XYZ/GEN`。基线 precision/recall/污染率为 `89.47%/87.93%/10.53%`，候选为 `100%/98.28%/0`；基线 6 FP 和 7 FN 收敛为 0 FP、1 FN。
+- alias 只接受发行人官方 investor-relations 的明确绑定；common-word ticker 必须有证券上下文。Citi、Google、Meta Family of Apps、onsemi、Cash App、Norton/Avast/LifeLock、MoneyLion 均保留来源和 binding。没有 SEC 真实联系信息，SEC 未请求；CBOE 未联网。
+- 真实 AI lite、GEN medium 和 MU event fetch 通过；BigBear.ai、普通介词 on、Gartner 供应商稿与 Musk 不再污染。direct runner `108/108`，冻结 `79/79 ok`，`0 possible_regression`，分数/档位零变化，交换顺序性能无告警。
+- 完整报告：`docs/us-entity-recall-shadow-validation-20260729.md`。冻结数据在 `local-ops/state/us-entity-recall-shadow/`，分支对照在 `local-ops/state/branch-score-compare/20260729-us-entity-recall-shadow-*.md`。
+- 建议：值得吸收，但本轮不自动合回正式分支。下一轮先用 `GPT-5.6 Terra + 中推理` 在独立时点复采 Yahoo 并盲审标注；只有出现新的发行人关系/事件消费链重叠才升级到 `GPT-5.6 Sol + 高推理`。
+
 ## 2026-07-28 美股动量真实刷新与证据契约
 
 - 隔离分支 `codex/us-momentum-real-refresh-20260728` 从正式 `e7241dc` 开始，代码检查点 `1f5251c`。修复 US/G 宏观缺失伪中性、pipeline 字符串 ticker 的 CN 误路由、短 ticker 新闻 substring 误匹配和普通 Apple/Tesla 比较触发供应链误报；没有改评分/阈值/估值/基金路由。
