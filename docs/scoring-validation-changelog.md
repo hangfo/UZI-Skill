@@ -4,6 +4,14 @@
 
 ## 2026-07-29
 
+### US entity 正式吸收门禁与 AAL 通用法人词精度修复
+
+- 复核正式 `48e20fc` 到隔离分支为纯 fast-forward；新增 AAL 真实生产审计发现 `American Airlines Group` 拆词会让 `American/airline(s)` 单独拥有 United/Delta 新闻。最小修复只禁止这些通用词单独匹配，并保留完整 `American Airlines` 短语；生产接纳 `9 -> 6`，3 条二级/跨发行人标题移除，已知相关标题 `6/6` 保留。
+- 三批冻结 Yahoo 集共 349 行保持 `TP=166/FP=0/FN=1`、precision `100%`、recall `99.40%`、污染 `0`、重复率 `0`。唯一 FN 仍是无发行人实体证据的泛 Big Tech 标题，继续 fail-closed。
+- 最新真实生产 `AAL/PLUG/INCY/PLTR` 分别为 `43.7/39.5/54.2/49.3`，投资分 `46.8/34.2/75.2/56.0`，Stage `2/1/2/4`；热门度和单日涨幅没有自动升级交易档位。
+- 新增 8 股真实 Yahoo 历史压力样本共 1103 个不重叠信号，结果方向较强但存在当前热门股选择与幸存者偏差，不覆盖 37 股主回测的中性结论，不据此调权重、动量、Stage、事件或估值参数。
+- 正式基线对候选 `3b8840b` 加四只最新缓存为 `92 raw + 7 synthetic = 99`，正反顺序均 `99/99 ok`、`0 possible_regression`，全部评分/档位零变化且无性能告警；direct `128/128`、`py_compile`、`git diff --check` 通过。SEC 无真实联系人未请求，CBOE 未联网。完整结论见 `docs/us-entity-formal-integration-momentum-stress-20260729.md`。
+
 ### entity 合并审计与真实动量收益 walk-forward
 
 - 独立复核三批真实 Yahoo 冻结集共 349 行：逐批候选 precision 均为 `100%`，recall 为 `98.28%/100%/100%`，污染率均为 `0`；行级合计 `TP=166/FP=0/FN=1`，唯一争议 FN 是无发行人主语的泛 Big Tech 日程标题，继续 fail-closed。

@@ -1,5 +1,15 @@
 # UZI-Skill 交接记录 - 2026-07-08
 
+## 2026-07-29 US entity 正式吸收门禁与热门股压力验证
+
+- 隔离分支代码提交 `3b8840b` 相对正式 `48e20fc4c9fe9823ab055155511be3bc503cb78b` 为纯 fast-forward；upstream/main 保持 `fce996c`，upstream push 为 `DISABLED`，`main` 和 `codex/windows-local-stable` 未修改。
+- AAL 真实生产事件从 9 条净化到 6 条：United/Delta 合并传闻和泛航空股标题不再由 `American/airline(s)` 通用拆词拥有；完整 `American Airlines` 与 `AAL Stock` 仍召回。窄审计观察 precision `66.7% -> 100%`、recall `100% -> 100%`。
+- 三批 349 条 Yahoo 冻结集保持 `TP=166/FP=0/FN=1`、precision `100%`、recall `99.40%`、污染和重复率均 `0`。唯一 FN 无发行人实体证据，继续 fail-closed。
+- 最新真实生产：AAL lite `43.7/46.8/Stage 2/回避`，PLUG lite `39.5/34.2/Stage 1/回避`，INCY medium `54.2/75.2/Stage 2/关注但综合观望偏空`，PLTR medium `49.3/56.0/Stage 4/谨慎观察`。
+- 8 股历史压力集 1103 个真实信号表现较强，但有当前热门股选择与幸存者偏差；不覆盖 37 股主回测，不调评分、动量、Stage、事件阈值或估值参数。
+- 正式对候选加四股缓存为 `99/99 ok`、0 review、0 possible_regression，评分/档位零变化；正向 `3.529s -> 3.948s`，交换顺序 `4.572s -> 3.352s`，无性能告警。direct `128/128`。
+- 完整文档：`docs/us-entity-formal-integration-momentum-stress-20260729.md`。下一步 `GPT-5.6 Sol + 高推理` 只做按历史时点冻结且包含退市股的无幸存者偏差 US 宇宙；数据条件不满足则停止动量优化，改为持续监控真实 entity FP/FN。
+
 ## 2026-07-29 entity 合并审计与真实收益回测
 
 - 当前分支仍为 `codex/scoring-validation-us-entity-recall-shadow`；正式分支/个人 origin 保持 `48e20fc4c9fe9823ab055155511be3bc503cb78b`，本分支起点为 `a48f4b3b74f07a41ba1ef3b6b32b516602150a39`。不要自动合回正式分支。
