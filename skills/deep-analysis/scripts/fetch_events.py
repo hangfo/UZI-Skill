@@ -2,21 +2,14 @@
 from __future__ import annotations
 
 import json
-import re
 import sys
 import traceback
 from datetime import datetime, timedelta
 
 import akshare as ak  # type: ignore
 from lib.market_router import parse_ticker
+from lib.us_entity_matching import aliases_for_ticker, matches_us_news_entity
 from lib.web_search import search as web_search, search_trusted
-
-
-_ENTITY_STOPWORDS = {
-    "company", "corporation", "corp", "group", "holding", "holdings",
-    "inc", "incorporated", "limited", "ltd", "markets", "plc",
-    "technology", "technologies",
-}
 
 
 def _news_matches_entity(
@@ -26,26 +19,17 @@ def _news_matches_entity(
     ticker_full: str,
     company_name: str,
 ) -> bool:
-    """Require a bounded ticker or a distinctive company-name token.
+    """Require bounded issuer evidence or a source-bound issuer alias.
 
     Substring matching is unsafe for short symbols: ``MU`` matched ``Musk`` and
-    let unrelated Tesla headlines into Micron's event stream.
+    plain word boundaries are still unsafe for symbols such as ``AI`` or ``IT``.
     """
-    text = f"{title} {summary}"
-    for symbol in {ticker_code, ticker_full}:
-        symbol = str(symbol or "").strip()
-        if symbol and re.search(rf"(?<![A-Z0-9]){re.escape(symbol)}(?![A-Z0-9])", text, re.I):
-            return True
-
-    company_tokens = {
-        token.lower()
-        for token in re.findall(r"[A-Za-z0-9]+", str(company_name or ""))
-        if len(token) >= 4 and token.lower() not in _ENTITY_STOPWORDS
-    }
-    text_lower = text.lower()
-    return any(
-        re.search(rf"(?<![a-z0-9]){re.escape(token)}(?![a-z0-9])", text_lower)
-        for token in company_tokens
+    return matches_us_news_entity(
+        title,
+        summary,
+        ticker_code,
+        ticker_full,
+        company_name,
     )
 
 
@@ -326,7 +310,12 @@ def main(ticker: str) -> dict:
                 "recent_news_label": f"{len(news)} 条 Yahoo 新闻" if news else "—",
                 "catalyst": [],
                 "warnings": [],
-                "_note": "global/US/HK fallback uses yfinance news; official filings still depend on market-specific adapters",
+                "_entity_aliases": aliases_for_ticker(ti.code),
+                "_note": (
+                    "global/US fallback uses yfinance news with bounded issuer matching; "
+                    "aliases require issuer-controlled source binding; official filings "
+                    "still depend on market-specific adapters"
+                ),
             },
             "source": "yfinance:news",
             "fallback": not bool(news),

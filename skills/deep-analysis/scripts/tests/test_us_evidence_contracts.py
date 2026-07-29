@@ -80,3 +80,94 @@ def test_short_ticker_does_not_match_inside_unrelated_words():
         "MU",
         "Micron Technology, Inc.",
     )
+
+
+def test_common_word_tickers_require_issuer_evidence():
+    from fetch_events import _news_matches_entity
+
+    cases = [
+        (
+            "AI",
+            "BigBear.ai Before Q2 Earnings: Buy, Sell or Hold the Stock?",
+            "C3.ai, Inc.",
+            False,
+        ),
+        (
+            "AI",
+            "C3.ai (AI) Gets Relief From Lawsuit Exit",
+            "C3.ai, Inc.",
+            True,
+        ),
+        (
+            "ON",
+            "TXN Keeps Climbing. Should You Climb On?",
+            "ON Semiconductor Corporation",
+            False,
+        ),
+        (
+            "ON",
+            "Micron, onsemi, Seagate stocks dive",
+            "ON Semiconductor Corporation",
+            True,
+        ),
+        (
+            "IT",
+            "Securden Recognized in Gartner Magic Quadrant",
+            "Gartner, Inc.",
+            False,
+        ),
+        (
+            "IT",
+            "Gartner (IT) Earnings Expected to Grow",
+            "Gartner, Inc.",
+            True,
+        ),
+        (
+            "CAT",
+            "The cat sat on a loader",
+            "Caterpillar Inc.",
+            False,
+        ),
+        (
+            "CAT",
+            "Caterpillar (CAT) Faces Rare Earth Squeeze",
+            "Caterpillar Inc.",
+            True,
+        ),
+    ]
+    for ticker, title, company, expected in cases:
+        assert _news_matches_entity(title, "", ticker, ticker, company) is expected
+
+
+def test_source_bound_brands_recover_real_issuer_news():
+    from fetch_events import _news_matches_entity
+
+    cases = [
+        ("C", "Citi Is Now Live With a Trade Digitization Solution", "Citigroup Inc."),
+        ("GOOGL", "Google Completes Acquisition of Wiz", "Alphabet Inc."),
+        ("GOOG", "Google Completes Acquisition of Wiz", "Alphabet Inc."),
+        ("XYZ", "The Dark Sides Of Cash App", "Block, Inc."),
+        ("GEN", "Norton Study Reveals Emerging Risks for Kids Online", "Gen Digital Inc."),
+        ("GEN", "MoneyLion One Launches Premium Banking", "Gen Digital Inc."),
+    ]
+    for ticker, title, company in cases:
+        assert _news_matches_entity(title, "", ticker, ticker, company)
+
+
+def test_source_bound_aliases_do_not_enable_generic_gen_or_google_mentions():
+    from fetch_events import _news_matches_entity
+
+    assert not _news_matches_entity(
+        "Gen Z investors turn cautious",
+        "",
+        "GEN",
+        "GEN",
+        "Gen Digital Inc.",
+    )
+    assert not _news_matches_entity(
+        "Publisher cites Google Trends in retail survey",
+        "",
+        "META",
+        "META",
+        "Meta Platforms, Inc.",
+    )
