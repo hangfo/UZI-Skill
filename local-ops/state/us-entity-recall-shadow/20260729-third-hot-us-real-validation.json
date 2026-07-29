@@ -1,0 +1,53 @@
+{
+  "schema": "uzi.us_entity_recall_real_validation.v1",
+  "captured_at": "2026-07-29",
+  "sources": {
+    "screeners": "https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved",
+    "history": "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}",
+    "news": "https://query1.finance.yahoo.com/v1/finance/search",
+    "sec_attempted": false,
+    "sec_gap": "No truthful SEC contact identity was configured.",
+    "cboe_attempted": false
+  },
+  "returns_percent": {
+    "NU": {"1m": 10.33, "3m": -0.75, "6m": -20.08, "1y": 15.23},
+    "MARA": {"1m": -19.05, "3m": 5.28, "6m": 17.94, "1y": -31.41},
+    "T": {"1m": 7.48, "3m": -4.31, "6m": 4.14, "1y": -11.52},
+    "SOFI": {"1m": -5.59, "3m": -10.02, "6m": -34.57, "1y": -19.70},
+    "JBLU": {"1m": -9.50, "3m": 9.92, "6m": 6.89, "1y": 24.54},
+    "INTC": {"1m": -28.56, "3m": 7.86, "6m": 115.74, "1y": 343.28},
+    "NOK": {"1m": -28.67, "3m": -13.75, "6m": 34.30, "1y": 117.84},
+    "FOUR": {"1m": 4.87, "3m": 11.04, "6m": -22.17, "1y": -53.02},
+    "CLS": {"1m": -5.72, "3m": -24.63, "6m": 3.24, "1y": 83.56},
+    "RGEN": {"1m": -10.85, "3m": 10.80, "6m": -19.76, "1y": 9.54}
+  },
+  "production": {
+    "NU": {"depth": "medium", "score": 51.6, "verdict": "观望偏空", "news_after": 6, "critical": 0},
+    "MARA": {"depth": "medium", "score": 42.5, "verdict": "谨慎", "news_after": 8, "critical": 0},
+    "T": {"depth": "lite", "score": 47.6, "verdict": "谨慎", "news_before": 7, "news_after": 5, "critical": 0},
+    "FOUR": {"depth": "lite", "score": 44.1, "verdict": "谨慎", "news_before": 7, "news_after": 6, "critical": 0}
+  },
+  "prior_comparison": {
+    "KNSA": {"depth": "medium", "score": 66.9},
+    "OSCR": {"depth": "lite", "score": 46.2},
+    "ITRI": {"depth": "lite", "score": 59.0},
+    "MSTR": {"depth": "medium", "score": 36.3}
+  },
+  "entity_metrics": {
+    "rows": 150,
+    "before": {"precision": 0.8666666666666667, "recall": 1.0, "contamination": 0.1282051282051282},
+    "after": {"precision": 1.0, "recall": 1.0, "contamination": 0.0}
+  },
+  "branch_compare": {
+    "baseline": "48e20fc4c9fe9823ab055155511be3bc503cb78b",
+    "candidate": "91cb6eb22f8cac4970617c8036c5b3bc022426df",
+    "ok": 79,
+    "review": 0,
+    "possible_regression": 0,
+    "score_deltas": 0,
+    "tier_changes": 0,
+    "forward_seconds": {"baseline": 3.1, "candidate": 2.6},
+    "swapped_seconds": {"baseline": 2.0, "candidate": 2.0},
+    "performance_warnings": 0
+  }
+}

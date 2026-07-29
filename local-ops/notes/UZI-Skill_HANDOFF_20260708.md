@@ -1,5 +1,13 @@
 # UZI-Skill 交接记录 - 2026-07-08
 
+## 2026-07-29 第三批 US entity holdout 与短 ticker 污染修复
+
+- 当前隔离分支 `codex/scoring-validation-us-entity-recall-shadow`，正式基线仍为 `48e20fc4c9fe9823ab055155511be3bc503cb78b`，候选代码检查点 `91cb6eb22f8cac4970617c8036c5b3bc022426df`。`main`、`codex/windows-local-stable`、正式分支均未修改；upstream push 仍为 `DISABLED`。
+- 150 条真实 Yahoo 标题：修改前 precision/recall/污染率 `86.67%/100%/12.82%`，修改后 `100%/100%/0`。10 个 FP 是 4 条 Nu Skin→NU 和 6 条 T. Rowe Price→T；0 FN。官方 IR 只绑定 `Nu Holdings/Nubank/AT&T`，没有放宽 substring。
+- 真实生产 NU medium `51.6`、MARA medium `42.5`、T lite `47.6`、FOUR lite `44.1`，均 `critical=0`。生产事件净化移除 Shift4 前 CEO/SpaceX 1 条和 D-Wave 主体/AT&T 对手方 2 条，评分与档位不变。
+- 验证：`113/113` direct tests；`79/79 ok`、0 review、0 possible_regression；全部评分/档位零变化；正反顺序无 performance warning。SEC 无真实联系人未请求，CBOE 未联网。
+- 建议值得吸收但不要自动合回。下一步用 `GPT-5.6 Terra + 中推理` 做独立标签/合并审计；只有正式分支冲突或新真实实体消费冲突时才用 `GPT-5.6 Sol + 高推理`。完整报告：`docs/us-entity-recall-third-holdout-validation-20260729.md`。
+
 ## 2026-07-29 美股实体召回独立复采与热门股门禁
 
 - 当前隔离分支 `codex/scoring-validation-us-entity-recall-shadow`，正式基线仍为 `48e20fc4c9fe9823ab055155511be3bc503cb78b`，候选代码检查点 `1a3b60b`。`main`、`codex/windows-local-stable`、正式评分分支均未修改；upstream push 保持 `DISABLED`。

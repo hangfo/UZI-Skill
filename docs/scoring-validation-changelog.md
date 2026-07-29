@@ -4,6 +4,14 @@
 
 ## 2026-07-29
 
+### NU/T 短 ticker 邻近发行人污染与第三批真实 holdout
+
+- 第三批冻结 150 条真实 Yahoo 标题，覆盖 `NU/MARA/T/SOFI/JBLU/INTC/NOK/FOUR/CLS/RGEN`，并用官方绑定品牌/旧名及 Nu Skin、T. Rowe Price 做反向真实检索。修改前 precision/recall/污染率为 `86.67%/100%/12.82%`，修改后为 `100%/100%/0`，10 条跨发行人误报全部消失，0 false negative。
+- `NU/T` 裸 ticker 改为必须有证券语境；用官方 IR 绑定的 `Nu Holdings/Nubank/AT&T` 保住召回。生产流另外排除 Shift4 前 CEO/SpaceX 新闻和两条以 D-Wave 为主体、AT&T 仅为 deal 对手方的新闻；未放宽 substring，未加入创始人姓名。
+- 真实生产 NU medium `51.6`、MARA medium `42.5`、T lite `47.6`、FOUR lite `44.1`，均未因热门度或单日涨幅进入买入档，`critical=0`；T 事件 `7→5`、FOUR `7→6`，评分与档位不变。
+- `113/113` direct tests、`py_compile`、`git diff --check` 通过。正式 `48e20fc` 对候选 `91cb6eb` 为 `79/79 ok`、`0 possible_regression`，评分/档位零变化；正向 `3.1s→2.6s`、交换顺序 `2.0s→2.0s`，0 performance warning。
+- SEC 无真实联系身份，生产请求 fail closed；CBOE 未联网。建议吸收但不自动合回正式分支；完整结论见 `docs/us-entity-recall-third-holdout-validation-20260729.md`。
+
 ### 美股实体召回独立复采、MSTR 更名与 NVIDIA 关系污染
 
 - 在既有隔离分支继续复采 80 条 Yahoo 真实新闻，覆盖 `MSTR/KNSA/OSCR/IQV/LCID/NVDA/ITRI/MU`。独立集从 precision/recall/污染率 `97.73%/97.73%/2.27%` 改善为 `100%/100%/0`；上一轮 119 条集仍为 `100%/98.28%/0`，无回退。
