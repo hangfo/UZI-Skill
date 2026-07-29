@@ -4,6 +4,14 @@
 
 ## 2026-07-29
 
+### 美股实体召回独立复采、MSTR 更名与 NVIDIA 关系污染
+
+- 在既有隔离分支继续复采 80 条 Yahoo 真实新闻，覆盖 `MSTR/KNSA/OSCR/IQV/LCID/NVDA/ITRI/MU`。独立集从 precision/recall/污染率 `97.73%/97.73%/2.27%` 改善为 `100%/100%/0`；上一轮 119 条集仍为 `100%/98.28%/0`，无回退。
+- 发行人官网证明 Strategy 于 2025 年由 MicroStrategy 更名；只加入完整前法人名和受限 `Strategy Announces/Reports/...` 事件模板，不加入 Saylor。修复 `Nvidia Partner SK Hynix...` 及 supplier-to-Nvidia 摘要的反向发行人污染。
+- 真实 Yahoo 涨幅/活跃榜与 1/3/6/12 月日线选取 KNSA/OSCR/IQV/ITRI/LCID/NVDA/MU，另保留 MSTR 更名压力样本；只有 1 个观察的 IOND 明确剔除。真实生产 KNSA medium `66.9/观察`、OSCR lite `46.2/回避`、ITRI lite `59.0/谨慎观察`、MSTR medium `36.3/回避`，均 `critical=0`。
+- `110/110` direct tests、`py_compile`、`git diff --check` 通过。正式 `48e20fc` 对候选 `1a3b60b` 为 `77/77 ok`、`0 possible_regression`，评分/档位零变化；正反顺序均无 performance warning，只判无实质性能回退。
+- SEC 因无真实联系人继续 fail closed；CBOE 未联网。完整结论见 `docs/us-entity-recall-hot-followup-validation-20260729.md`。隔离分支只推个人 origin，不自动合回正式分支。
+
 ### 美股发行人 alias / entity matching 真实召回 shadow
 
 - 从正式检查点 `48e20fc4c9fe9823ab055155511be3bc503cb78b` 建立隔离分支 `codex/scoring-validation-us-entity-recall-shadow`。冻结 119 条实时 Yahoo 新闻，覆盖短 ticker `MU/AI/C/F`、品牌/法人差异 `GOOGL/META/HOOD`、歧义 ticker `ON/IT/CAT`，以及 Block/Gen Digital 的更名和多品牌案例。

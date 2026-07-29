@@ -1,5 +1,14 @@
 # UZI-Skill 交接记录 - 2026-07-08
 
+## 2026-07-29 美股实体召回独立复采与热门股门禁
+
+- 当前隔离分支 `codex/scoring-validation-us-entity-recall-shadow`，正式基线仍为 `48e20fc4c9fe9823ab055155511be3bc503cb78b`，候选代码检查点 `1a3b60b`。`main`、`codex/windows-local-stable`、正式评分分支均未修改；upstream push 保持 `DISABLED`。
+- 新增独立 80 条真实 Yahoo 集 `MSTR/KNSA/OSCR/IQV/LCID/NVDA/ITRI/MU`。修改前 precision/recall/污染率 `97.73%/97.73%/2.27%`，修改后 `100%/100%/0`；旧 119 条集继续 `100%/98.28%/0`。
+- 修复仅包括官方可证的 `MicroStrategy→Strategy` 更名与明确 partner/supplier/customer 反向污染。`Strategy` 是 stopword，只接受发行人事件模板；不加入 Saylor 等人物名，不放宽 substring。
+- 真实生产 KNSA medium `66.9/观察`、OSCR lite `46.2/回避`、ITRI lite `59.0/谨慎观察`、MSTR medium `36.3/回避`，报告均生成、`critical=0`。IOND 只有 1 个历史观察，未被误称为动量股。
+- direct runner `110/110`；冻结 `77/77 ok`、`0 review`、`0 possible_regression`，评分/档位零变化；正反顺序均无性能告警。SEC 无真实联系人未请求，CBOE 未联网。
+- 完整报告：`docs/us-entity-recall-hot-followup-validation-20260729.md`。建议推送隔离分支但不自动合回；下一步用 `GPT-5.6 Terra + 中推理` 做独立标签复核和合回前审计，若发生代码冲突再用 `GPT-5.6 Sol + 高推理`。
+
 ## 2026-07-29 美股实体 alias 真实召回 shadow
 
 - 当前隔离分支为 `codex/scoring-validation-us-entity-recall-shadow`，起点是正式检查点 `48e20fc4c9fe9823ab055155511be3bc503cb78b`。正式 `codex/scoring-validation-guardrails`、`main`、`codex/windows-local-stable` 均未修改；`upstream/main=fce996c`，upstream push 仍为 `DISABLED`。
