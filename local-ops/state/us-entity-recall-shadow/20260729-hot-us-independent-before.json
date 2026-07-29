@@ -1,0 +1,1518 @@
+{
+  "schema": "uzi.us_entity_recall_shadow.v1",
+  "captured_at_utc": "2026-07-29T03:55:10.321021+00:00",
+  "source": "https://query1.finance.yahoo.com/v1/finance/search",
+  "request": {
+    "quotesCount": 1,
+    "newsCount": 10,
+    "enableFuzzyQuery": "false"
+  },
+  "profiles": {
+    "MSTR": {
+      "legal_name": "Strategy Inc.",
+      "selection_reason": "2025 年由 MicroStrategy 更名为 Strategy；普通词新名与明确前法人名形成精度/召回双重压力。",
+      "aliases": [
+        {
+          "value": "MicroStrategy",
+          "kind": "former_legal_name_candidate",
+          "source_url": "https://www.strategy.com/company",
+          "binding": "Issuer official company page states that it rebranded from MicroStrategy to Strategy in February 2025."
+        }
+      ]
+    },
+    "KNSA": {
+      "legal_name": "Kiniksa Pharmaceuticals International, plc",
+      "selection_reason": "2026-07-28 涨幅榜且 3/6/12 月真实动量均强，用作强法人名召回控制。",
+      "aliases": []
+    },
+    "OSCR": {
+      "legal_name": "Oscar Health, Inc.",
+      "selection_reason": "6 个月涨幅约 161%，同时 Oscar 是常见人名，用作品牌词边界控制。",
+      "aliases": []
+    },
+    "IQV": {
+      "legal_name": "IQVIA Holdings Inc.",
+      "selection_reason": "当日涨幅榜且 3/6 月动量强，用作独特造词法人名控制。",
+      "aliases": []
+    },
+    "LCID": {
+      "legal_name": "Lucid Group, Inc.",
+      "selection_reason": "当日涨幅约 21.5% 但 6/12 月仍为负，用作短期反弹而非持续动量控制。",
+      "aliases": []
+    },
+    "NVDA": {
+      "legal_name": "NVIDIA Corporation",
+      "selection_reason": "活跃成交大盘科技股，用作大量跨发行人关联新闻污染控制。",
+      "aliases": []
+    },
+    "ITRI": {
+      "legal_name": "Itron, Inc.",
+      "selection_reason": "当日涨幅约 26.2% 且由真实财报触发，用作事件密集型控制。",
+      "aliases": []
+    },
+    "MU": {
+      "legal_name": "Micron Technology, Inc.",
+      "selection_reason": "高成交量且 6/12 月动量强；继续验证 MU 不匹配 Musk。",
+      "aliases": []
+    }
+  },
+  "sec_access": {
+    "attempted": false,
+    "status": "gap",
+    "reason": "No truthful SEC contact identity was configured; SEC network requests were not made."
+  },
+  "latency_seconds": {
+    "MSTR": 0.940748,
+    "KNSA": 0.264807,
+    "OSCR": 0.254501,
+    "IQV": 0.247025,
+    "LCID": 0.257443,
+    "NVDA": 0.261736,
+    "ITRI": 0.284336,
+    "MU": 0.274684
+  },
+  "rows": [
+    {
+      "id": "3157afec52e4d736",
+      "ticker": "MSTR",
+      "rank": 0,
+      "title": "Bitcoin, Ethereum, XRP, Dogecoin Gain Ahead of Fed Rate Cut Decision: Analyst Asks Investors to 'Mark Your Calendar' for Next BTC Bottom",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/crypto/articles/bitcoin-ethereum-xrp-dogecoin-gain-020400354.html",
+      "canonical_url": "https://finance.yahoo.com/markets/crypto/articles/bitcoin-ethereum-xrp-dogecoin-gain-020400354.html",
+      "publisher": "Benzinga",
+      "published_utc": "2026-07-29T02:04:00+00:00",
+      "related_tickers": [
+        "BTC-USD",
+        "ETH-USD",
+        "XRP-USD",
+        "DOGE-USD",
+        "MSTR",
+        "BMNR",
+        "SOL-USD"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "e2ed1f5596334da2",
+      "ticker": "MSTR",
+      "rank": 1,
+      "title": "Michael Saylor warns Bitcoin's biggest threat is here",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/4c1bd931-e0af-376b-841a-42bf36de9ef4/michael-saylor-warns.html",
+      "canonical_url": "https://finance.yahoo.com/m/4c1bd931-e0af-376b-841a-42bf36de9ef4/michael-saylor-warns.html",
+      "publisher": "TheStreet",
+      "published_utc": "2026-07-28T22:23:00+00:00",
+      "related_tickers": [
+        "BTC-USD",
+        "MSTR"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "1f1b7703fdd90067",
+      "ticker": "MSTR",
+      "rank": 2,
+      "title": "Michael Saylor: Bitcoin Code Is a Constitution, Changes Are Attacks on 'Economic Rights'",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/60eac3b7-1665-3f9b-9337-069a8c668bed/michael-saylor%3A-bitcoin-code.html",
+      "canonical_url": "https://finance.yahoo.com/m/60eac3b7-1665-3f9b-9337-069a8c668bed/michael-saylor%3A-bitcoin-code.html",
+      "publisher": "decrypt",
+      "published_utc": "2026-07-28T19:36:03+00:00",
+      "related_tickers": [
+        "BTC-USD",
+        "MSTR"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "42f4cec769c9bd86",
+      "ticker": "MSTR",
+      "rank": 3,
+      "title": "Michael Saylor Says Bitcoin Has Won, So Why Did MicroStrategy Stop Buying BTC?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/07e26ea0-6298-3103-805d-5429112f387b/michael-saylor-says-bitcoin.html",
+      "canonical_url": "https://finance.yahoo.com/m/07e26ea0-6298-3103-805d-5429112f387b/michael-saylor-says-bitcoin.html",
+      "publisher": "BeInCrypto",
+      "published_utc": "2026-07-28T18:10:26+00:00",
+      "related_tickers": [
+        "MSTR",
+        "BTC-USD"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "9c73c913c63ad738",
+      "ticker": "MSTR",
+      "rank": 4,
+      "title": "These Are the 3 Worst-Performing Stocks on the Nasdaq-100 in 2026. Could They Be Underrated Buys Right Now?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/7917f40d-15eb-3ebd-b471-802e3707c082/these-are-the-3.html",
+      "canonical_url": "https://finance.yahoo.com/m/7917f40d-15eb-3ebd-b471-802e3707c082/these-are-the-3.html",
+      "publisher": "Motley Fool",
+      "published_utc": "2026-07-28T17:02:06+00:00",
+      "related_tickers": [
+        "^IXIC",
+        "INTU",
+        "NVDA",
+        "APP",
+        "MSTR"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "aad809df3741bb76",
+      "ticker": "MSTR",
+      "rank": 5,
+      "title": "Atlassian’s (TEAM) Strategic Position in the AI Landscape",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/atlassian-team-strategic-position-ai-153927709.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/atlassian-team-strategic-position-ai-153927709.html",
+      "publisher": "Insider Monkey",
+      "published_utc": "2026-07-28T15:39:27+00:00",
+      "related_tickers": [
+        "TEAM",
+        "MSTR"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "4cf3fb3eea270713",
+      "ticker": "MSTR",
+      "rank": 6,
+      "title": "Night View Capital Trimmed Oracle (ORCL) After Robust Cloud Gains",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/night-view-capital-trimmed-oracle-153652990.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/night-view-capital-trimmed-oracle-153652990.html",
+      "publisher": "Insider Monkey",
+      "published_utc": "2026-07-28T15:36:52+00:00",
+      "related_tickers": [
+        "ORCL",
+        "ORCL-PD",
+        "MSTR"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "b8f5258bfdf146f2",
+      "ticker": "MSTR",
+      "rank": 7,
+      "title": "Autodesk (ADSK) Holds Stable Position in the Market",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/autodesk-adsk-holds-stable-position-153506549.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/autodesk-adsk-holds-stable-position-153506549.html",
+      "publisher": "Insider Monkey",
+      "published_utc": "2026-07-28T15:35:06+00:00",
+      "related_tickers": [
+        "ADSK",
+        "MSTR"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "92af413946aeabad",
+      "ticker": "MSTR",
+      "rank": 8,
+      "title": "ServiceNow (NOW) Looks Appealing Amid Workflow Automation and AI Adoption",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/servicenow-now-looks-appealing-amid-153333170.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/servicenow-now-looks-appealing-amid-153333170.html",
+      "publisher": "Insider Monkey",
+      "published_utc": "2026-07-28T15:33:33+00:00",
+      "related_tickers": [
+        "NOW",
+        "MSTR"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "4565fbb6807f5814",
+      "ticker": "MSTR",
+      "rank": 9,
+      "title": "Salesforce’s (CRM) Impact on AI Deployment in Corporate Environments",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/salesforce-crm-impact-ai-deployment-153219870.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/salesforce-crm-impact-ai-deployment-153219870.html",
+      "publisher": "Insider Monkey",
+      "published_utc": "2026-07-28T15:32:19+00:00",
+      "related_tickers": [
+        "CRM",
+        "MSTR"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "9d04420592fc2017",
+      "ticker": "KNSA",
+      "rank": 0,
+      "title": "Kiniksa Pharmaceuticals, Ltd. Q2 2026 Earnings Call Summary",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/74179e0f-1272-311b-b5c7-f1d1db0d1687/kiniksa-pharmaceuticals%2C-ltd..html",
+      "canonical_url": "https://finance.yahoo.com/m/74179e0f-1272-311b-b5c7-f1d1db0d1687/kiniksa-pharmaceuticals%2C-ltd..html",
+      "publisher": "Moby",
+      "published_utc": "2026-07-28T19:21:01+00:00",
+      "related_tickers": [
+        "NVDA",
+        "KNSA"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "df5cd14364fe73a4",
+      "ticker": "KNSA",
+      "rank": 1,
+      "title": "Top Midday Gainers",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/top-midday-gainers-182654365.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/top-midday-gainers-182654365.html",
+      "publisher": "MT Newswires",
+      "published_utc": "2026-07-28T18:26:54+00:00",
+      "related_tickers": [
+        "KNSA",
+        "IQV",
+        "INCY"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "bdf8dcccf9f5c505",
+      "ticker": "KNSA",
+      "rank": 2,
+      "title": "Kiniksa's Arcalyst Growth Outlook Strengthens, Wedbush Says",
+      "summary": "",
+      "url": "https://finance.yahoo.com/healthcare/articles/kiniksa-apos-arcalyst-growth-outlook-154038344.html",
+      "canonical_url": "https://finance.yahoo.com/healthcare/articles/kiniksa-apos-arcalyst-growth-outlook-154038344.html",
+      "publisher": "MT Newswires",
+      "published_utc": "2026-07-28T15:40:38+00:00",
+      "related_tickers": [
+        "KNSA"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "0639af00798476a1",
+      "ticker": "KNSA",
+      "rank": 3,
+      "title": "Alkermes Q2 Earnings Break Even, Revenues Beat Estimates, Stock Down",
+      "summary": "",
+      "url": "https://finance.yahoo.com/healthcare/articles/alkermes-q2-earnings-break-even-152100202.html",
+      "canonical_url": "https://finance.yahoo.com/healthcare/articles/alkermes-q2-earnings-break-even-152100202.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-28T15:21:00+00:00",
+      "related_tickers": [
+        "ALKS",
+        "HRMY",
+        "LQDA",
+        "KNSA"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "ba07d5335c04540e",
+      "ticker": "KNSA",
+      "rank": 4,
+      "title": "Wedbush Raises Price Target on Kiniksa Pharmaceuticals to $99 From $72, Maintains Outperform Rating",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/wedbush-raises-price-target-kiniksa-144107338.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/wedbush-raises-price-target-kiniksa-144107338.html",
+      "publisher": "MT Newswires",
+      "published_utc": "2026-07-28T14:41:07+00:00",
+      "related_tickers": [
+        "KNSA"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "a929882d3360368e",
+      "ticker": "KNSA",
+      "rank": 5,
+      "title": "Kiniksa Reports Strong Q2 Results, Raises 2026 ARCALYST Sales Guidance",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/655d36f1-b954-3063-8462-3dfc03aca6a4/kiniksa-reports-strong-q2.html",
+      "canonical_url": "https://finance.yahoo.com/m/655d36f1-b954-3063-8462-3dfc03aca6a4/kiniksa-reports-strong-q2.html",
+      "publisher": "InvestorsHub",
+      "published_utc": "2026-07-28T14:09:49+00:00",
+      "related_tickers": [
+        "KNSA"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "4928446c7c1b22be",
+      "ticker": "KNSA",
+      "rank": 6,
+      "title": "Kiniksa Pharmaceuticals International Q2 Earnings Call Highlights",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/fd8fafa9-6bd7-336c-a6b4-edae33cd0c15/kiniksa-pharmaceuticals.html",
+      "canonical_url": "https://finance.yahoo.com/m/fd8fafa9-6bd7-336c-a6b4-edae33cd0c15/kiniksa-pharmaceuticals.html",
+      "publisher": "MarketBeat",
+      "published_utc": "2026-07-28T14:04:15+00:00",
+      "related_tickers": [
+        "KNSA"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "a5d180252151876f",
+      "ticker": "KNSA",
+      "rank": 7,
+      "title": "Kiniksa Pharmaceuticals International, plc (KNSA) Q2 Earnings Match Estimates",
+      "summary": "",
+      "url": "https://finance.yahoo.com/healthcare/articles/kiniksa-pharmaceuticals-international-plc-knsa-125003346.html",
+      "canonical_url": "https://finance.yahoo.com/healthcare/articles/kiniksa-pharmaceuticals-international-plc-knsa-125003346.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-28T12:50:03+00:00",
+      "related_tickers": [
+        "KNSA",
+        "TWST"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "bb9c8caf0fda12a9",
+      "ticker": "KNSA",
+      "rank": 8,
+      "title": "Kiniksa Pharmaceuticals International Q2 Net Income, Revenue Increase",
+      "summary": "",
+      "url": "https://finance.yahoo.com/healthcare/articles/kiniksa-pharmaceuticals-international-q2-net-115020683.html",
+      "canonical_url": "https://finance.yahoo.com/healthcare/articles/kiniksa-pharmaceuticals-international-q2-net-115020683.html",
+      "publisher": "MT Newswires",
+      "published_utc": "2026-07-28T11:50:20+00:00",
+      "related_tickers": [
+        "KNSA",
+        "FDS"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "51e5656dc342b153",
+      "ticker": "KNSA",
+      "rank": 9,
+      "title": "Kiniksa Pharmaceuticals Reports Second Quarter 2026 Financial Results and Recent Portfolio Execution",
+      "summary": "",
+      "url": "https://finance.yahoo.com/healthcare/articles/kiniksa-pharmaceuticals-reports-second-quarter-113000941.html",
+      "canonical_url": "https://finance.yahoo.com/healthcare/articles/kiniksa-pharmaceuticals-reports-second-quarter-113000941.html",
+      "publisher": "GlobeNewswire",
+      "published_utc": "2026-07-28T11:30:00+00:00",
+      "related_tickers": [
+        "KNSA"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "89c2aa9dc471dc4e",
+      "ticker": "OSCR",
+      "rank": 0,
+      "title": "Oscar Health Flashes Buy Signal As Medicaid Weighs On Centene",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/f6c80654-82af-350d-902b-761d9eef475c/oscar-health-flashes-buy.html",
+      "canonical_url": "https://finance.yahoo.com/m/f6c80654-82af-350d-902b-761d9eef475c/oscar-health-flashes-buy.html",
+      "publisher": "Investor's Business Daily",
+      "published_utc": "2026-07-28T17:59:24+00:00",
+      "related_tickers": [
+        "CNC",
+        "OSCR",
+        "^GSPC",
+        "MOH"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "8aa7cd6d8634a5d2",
+      "ticker": "OSCR",
+      "rank": 1,
+      "title": "Oscar Health, Inc. to Host 2026 Investor Day",
+      "summary": "",
+      "url": "https://finance.yahoo.com/healthcare/articles/oscar-health-inc-host-2026-120000125.html",
+      "canonical_url": "https://finance.yahoo.com/healthcare/articles/oscar-health-inc-host-2026-120000125.html",
+      "publisher": "Business Wire",
+      "published_utc": "2026-07-28T12:00:00+00:00",
+      "related_tickers": [
+        "OSCR"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "f29a700eec00d0c1",
+      "ticker": "OSCR",
+      "rank": 2,
+      "title": "3 Big Reasons to Love Oscar Health (OSCR)",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/3-big-reasons-love-oscar-233302831.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/3-big-reasons-love-oscar-233302831.html",
+      "publisher": "StockStory",
+      "published_utc": "2026-07-27T23:33:02+00:00",
+      "related_tickers": [
+        "OSCR"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "0ff7dd628f66c962",
+      "ticker": "OSCR",
+      "rank": 3,
+      "title": "Has Oscar Health (OSCR) Run Too Far After Its 68% 90 Day Rally?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/oscar-health-oscr-run-too-061021697.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/oscar-health-oscr-run-too-061021697.html",
+      "publisher": "Simply Wall St.",
+      "published_utc": "2026-07-25T06:10:21+00:00",
+      "related_tickers": [
+        "OSCR"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "193f44c65d4b8cc5",
+      "ticker": "OSCR",
+      "rank": 4,
+      "title": "1 Surging  Stock to Own for Decades and 2 We Find Risky",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/1-surging-stock-own-decades-165708284.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/1-surging-stock-own-decades-165708284.html",
+      "publisher": "StockStory",
+      "published_utc": "2026-07-24T16:57:08+00:00",
+      "related_tickers": [
+        "FBNC",
+        "OSCR",
+        "RSI"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "b015c2355cdd08f2",
+      "ticker": "OSCR",
+      "rank": 5,
+      "title": "Oscar Health (OSCR) Stock Still Looks Undervalued As Its 270% Run Raises Questions",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/oscar-health-oscr-stock-still-100844567.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/oscar-health-oscr-stock-still-100844567.html",
+      "publisher": "Simply Wall St.",
+      "published_utc": "2026-07-24T10:08:44+00:00",
+      "related_tickers": [
+        "OSCR"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "5b4c5a1c6205bb6c",
+      "ticker": "OSCR",
+      "rank": 6,
+      "title": "Oscar Health, Inc. (OSCR) Registers a Bigger Fall Than the Market: Important Facts to Note",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/oscar-health-inc-oscr-registers-220004444.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/oscar-health-inc-oscr-registers-220004444.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-22T22:00:04+00:00",
+      "related_tickers": [
+        "OSCR",
+        "^GSPC",
+        "^DJI",
+        "^IXIC"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "d170e95f1487d4ba",
+      "ticker": "OSCR",
+      "rank": 7,
+      "title": "Goosehead Insurance (GSHD) Q2 Earnings and Revenues Beat Estimates",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/goosehead-insurance-gshd-q2-earnings-215506004.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/goosehead-insurance-gshd-q2-earnings-215506004.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-22T21:55:06+00:00",
+      "related_tickers": [
+        "GSHD",
+        "OSCR"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "d820bd66b07ba3c7",
+      "ticker": "OSCR",
+      "rank": 8,
+      "title": "5 Insurance Stocks Poised to Outperform Q2 Earnings Expectations",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/5-insurance-stocks-poised-outperform-142100583.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/5-insurance-stocks-poised-outperform-142100583.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-22T14:21:00+00:00",
+      "related_tickers": [
+        "WTW",
+        "CINF",
+        "OSCR",
+        "RGA",
+        "AFL"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "7c2e8f398f2c30f8",
+      "ticker": "OSCR",
+      "rank": 9,
+      "title": "Oscar Health, Inc. (OSCR) Is a Trending Stock: Facts to Know Before Betting on It",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/oscar-health-inc-oscr-trending-130025870.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/oscar-health-inc-oscr-trending-130025870.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-17T13:00:25+00:00",
+      "related_tickers": [
+        "OSCR",
+        "^GSPC"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "78d1684b1c5d3b74",
+      "ticker": "IQV",
+      "rank": 0,
+      "title": "IQVIA (IQV) Shares Skyrocket, What You Need To Know",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/iqvia-iqv-shares-skyrocket-know-033302821.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/iqvia-iqv-shares-skyrocket-know-033302821.html",
+      "publisher": "StockStory",
+      "published_utc": "2026-07-29T03:33:02+00:00",
+      "related_tickers": [
+        "IQV"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "0f6afb585a0201db",
+      "ticker": "IQV",
+      "rank": 1,
+      "title": "IQVIA Holdings (IQV) Soars on Revenue Growth Outlook, Strong Q2",
+      "summary": "",
+      "url": "https://finance.yahoo.com/healthcare/articles/iqvia-holdings-iqv-soars-revenue-025556777.html",
+      "canonical_url": "https://finance.yahoo.com/healthcare/articles/iqvia-holdings-iqv-soars-revenue-025556777.html",
+      "publisher": "Insider Monkey",
+      "published_utc": "2026-07-29T02:55:56+00:00",
+      "related_tickers": [
+        "IQV"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "cda969ecca69d8e4",
+      "ticker": "IQV",
+      "rank": 2,
+      "title": "IQVIA (IQV) Q2 Earnings: Taking a Look at Key Metrics Versus Estimates",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/iqvia-iqv-q2-earnings-taking-013001756.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/iqvia-iqv-q2-earnings-taking-013001756.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-29T01:30:01+00:00",
+      "related_tickers": [
+        "IQV"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "ac39c841cc360d30",
+      "ticker": "IQV",
+      "rank": 3,
+      "title": "IQVIA Holdings Inc (IQV) Q2 2026 Earnings Call Highlights: Strong Revenue Growth and AI-Driven ...",
+      "summary": "",
+      "url": "https://finance.yahoo.com/healthcare/articles/iqvia-holdings-inc-iqv-q2-210045582.html",
+      "canonical_url": "https://finance.yahoo.com/healthcare/articles/iqvia-holdings-inc-iqv-q2-210045582.html",
+      "publisher": "GuruFocus.com",
+      "published_utc": "2026-07-28T21:00:45+00:00",
+      "related_tickers": [
+        "IQV"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "7222a2d77deecd19",
+      "ticker": "IQV",
+      "rank": 4,
+      "title": "US Equity Markets Mixed as Oil Drops, Chip Shares Slide",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/us-equity-markets-mixed-oil-201043968.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/us-equity-markets-mixed-oil-201043968.html",
+      "publisher": "MT Newswires",
+      "published_utc": "2026-07-28T20:10:43+00:00",
+      "related_tickers": [
+        "CL=F",
+        "GLW",
+        "^SPX",
+        "^IXIC",
+        "^DJI",
+        "IQV"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "9e2e54abf00fdc78",
+      "ticker": "IQV",
+      "rank": 5,
+      "title": "Sector Update: Healthcare Stocks Gain Late Afternoon",
+      "summary": "",
+      "url": "https://finance.yahoo.com/healthcare/articles/sector-healthcare-stocks-gain-afternoon-193954328.html",
+      "canonical_url": "https://finance.yahoo.com/healthcare/articles/sector-healthcare-stocks-gain-afternoon-193954328.html",
+      "publisher": "MT Newswires",
+      "published_utc": "2026-07-28T19:39:54+00:00",
+      "related_tickers": [
+        "GSK",
+        "SEER",
+        "ZBH",
+        "IQV",
+        "XLV",
+        "3692.HK"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "a2187f2fa37e64a7",
+      "ticker": "IQV",
+      "rank": 6,
+      "title": "IQVIA Q2 Earnings Call Highlights",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/35b3a2e0-40d6-39c5-811e-e7f526f05300/iqvia-q2-earnings-call.html",
+      "canonical_url": "https://finance.yahoo.com/m/35b3a2e0-40d6-39c5-811e-e7f526f05300/iqvia-q2-earnings-call.html",
+      "publisher": "MarketBeat",
+      "published_utc": "2026-07-28T19:04:22+00:00",
+      "related_tickers": [
+        "IQV"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "e2d5b34d1002f6e4",
+      "ticker": "IQV",
+      "rank": 7,
+      "title": "This Healthcare Stock Is Today’s Best in the S&P 500",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/1fa9b4b1-46c9-3c24-a2b1-0e34b1045eb5/this-healthcare-stock-is.html",
+      "canonical_url": "https://finance.yahoo.com/m/1fa9b4b1-46c9-3c24-a2b1-0e34b1045eb5/this-healthcare-stock-is.html",
+      "publisher": "Barrons.com",
+      "published_utc": "2026-07-28T18:30:00+00:00",
+      "related_tickers": [
+        "IQV",
+        "^GSPC"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "8123a3c116c62029",
+      "ticker": "IQV",
+      "rank": 8,
+      "title": "Top Midday Gainers",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/top-midday-gainers-182654365.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/top-midday-gainers-182654365.html",
+      "publisher": "MT Newswires",
+      "published_utc": "2026-07-28T18:26:54+00:00",
+      "related_tickers": [
+        "KNSA",
+        "IQV",
+        "INCY"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "43dfcf8aa077b526",
+      "ticker": "IQV",
+      "rank": 9,
+      "title": "IQVIA Holdings Inc. Q2 2026 Earnings Call Summary",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/3ee726f7-1645-3d55-a6ff-3d1754e6fbc5/iqvia-holdings-inc.-q2-2026.html",
+      "canonical_url": "https://finance.yahoo.com/m/3ee726f7-1645-3d55-a6ff-3d1754e6fbc5/iqvia-holdings-inc.-q2-2026.html",
+      "publisher": "Moby",
+      "published_utc": "2026-07-28T17:49:05+00:00",
+      "related_tickers": [
+        "NVDA",
+        "IQV"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "ad5e2305351366b8",
+      "ticker": "LCID",
+      "rank": 0,
+      "title": "Lucid Group (LCID) Soars 21% as Saudi Prince Backing Eases Financial Health Worries",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/lucid-group-lcid-soars-21-014628543.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/lucid-group-lcid-soars-21-014628543.html",
+      "publisher": "Insider Monkey",
+      "published_utc": "2026-07-29T01:46:28+00:00",
+      "related_tickers": [
+        "LCID"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "00f625426ccad818",
+      "ticker": "LCID",
+      "rank": 1,
+      "title": "Why Lucid Stock Soared 21.5% Today",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/fbb563c2-d29b-3f22-b0eb-6bf9190ff387/why-lucid-stock-soared-21.5%25.html",
+      "canonical_url": "https://finance.yahoo.com/m/fbb563c2-d29b-3f22-b0eb-6bf9190ff387/why-lucid-stock-soared-21.5%25.html",
+      "publisher": "Motley Fool",
+      "published_utc": "2026-07-28T23:45:16+00:00",
+      "related_tickers": [
+        "NVDA",
+        "LCID"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "8834495b8a9af3a0",
+      "ticker": "LCID",
+      "rank": 2,
+      "title": "Lucid Stock Popped 21%. Thank a Saudi Prince.",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/53bcf24d-dd73-35bf-bb53-d3a2abfe4807/lucid-stock-popped-21%25.-thank.html",
+      "canonical_url": "https://finance.yahoo.com/m/53bcf24d-dd73-35bf-bb53-d3a2abfe4807/lucid-stock-popped-21%25.-thank.html",
+      "publisher": "Barrons.com",
+      "published_utc": "2026-07-28T21:06:00+00:00",
+      "related_tickers": [
+        "LCID",
+        "^GSPC"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "08c9b715c847a4aa",
+      "ticker": "LCID",
+      "rank": 3,
+      "title": "Why Is LCID Stock Soaring 23% Today?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/181895dd-deee-3e6b-a447-f21fdd82d86d/why-is-lcid-stock-soaring-23%25.html",
+      "canonical_url": "https://finance.yahoo.com/m/181895dd-deee-3e6b-a447-f21fdd82d86d/why-is-lcid-stock-soaring-23%25.html",
+      "publisher": "Stocktwits",
+      "published_utc": "2026-07-28T19:50:11+00:00",
+      "related_tickers": [
+        "LCID"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "d373e8a0f3df2f3f",
+      "ticker": "LCID",
+      "rank": 4,
+      "title": "Lucid Is Now Up 33% in a Month, Easily Beating Tesla and Rivian. What Will It Take to Get LCID Stock Back to $10?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/040bb62b-5d62-36b2-a208-9510c16faad7/lucid-is-now-up-33%25-in-a.html",
+      "canonical_url": "https://finance.yahoo.com/m/040bb62b-5d62-36b2-a208-9510c16faad7/lucid-is-now-up-33%25-in-a.html",
+      "publisher": "24/7 Wall St.",
+      "published_utc": "2026-07-28T19:07:04+00:00",
+      "related_tickers": [
+        "LCID",
+        "TSLA",
+        "RIVN",
+        "DRIV",
+        "UBER",
+        "POLA.PVT"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "195d0e86576622d1",
+      "ticker": "LCID",
+      "rank": 5,
+      "title": "Why General Motors Stock Could Keep Climbing As A One-Time Bill Fades",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/33a66e52-398e-3633-a19b-135ee3b8f8dd/why-general-motors-stock.html",
+      "canonical_url": "https://finance.yahoo.com/m/33a66e52-398e-3633-a19b-135ee3b8f8dd/why-general-motors-stock.html",
+      "publisher": "Trefis",
+      "published_utc": "2026-07-28T18:43:42+00:00",
+      "related_tickers": [
+        "GM",
+        "^GSPC",
+        "LCID",
+        "RIVN",
+        "F",
+        "ALLY",
+        "TSLA",
+        "BILL"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "0c29832615d08e08",
+      "ticker": "LCID",
+      "rank": 6,
+      "title": "Sector Update: Consumer Stocks Rise Tuesday Afternoon",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/sector-consumer-stocks-rise-tuesday-174133671.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/sector-consumer-stocks-rise-tuesday-174133671.html",
+      "publisher": "MT Newswires",
+      "published_utc": "2026-07-28T17:41:33+00:00",
+      "related_tickers": [
+        "LCID",
+        "XLP",
+        "XLY",
+        "UPS",
+        "KO"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "35904782725c544f",
+      "ticker": "LCID",
+      "rank": 7,
+      "title": "Saudi Prince Alwaleed Takes 5% Stake in EV-Maker Lucid",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/saudi-prince-alwaleed-takes-5-173605647.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/saudi-prince-alwaleed-takes-5-173605647.html",
+      "publisher": "Bloomberg",
+      "published_utc": "2026-07-28T17:36:05+00:00",
+      "related_tickers": [
+        "LCID",
+        "C",
+        "C-PR",
+        "SNAP",
+        "SPCX"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "4ad6111954334564",
+      "ticker": "LCID",
+      "rank": 8,
+      "title": "Is This Wall Street Bank Insane to Believe Tesla Will Nearly Double From Current Prices? Maybe Not.",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/6948006c-6ed1-37dd-bbac-453f9d833243/is-this-wall-street-bank.html",
+      "canonical_url": "https://finance.yahoo.com/m/6948006c-6ed1-37dd-bbac-453f9d833243/is-this-wall-street-bank.html",
+      "publisher": "24/7 Wall St.",
+      "published_utc": "2026-07-28T16:41:57+00:00",
+      "related_tickers": [
+        "TSLA",
+        "RIVN",
+        "SPY",
+        "LCID",
+        "GM"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "c414f308d04e9223",
+      "ticker": "LCID",
+      "rank": 9,
+      "title": "Lucid Group Shares Rise After HRH Prince Alwaleed Discloses 5% Stake",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/lucid-group-shares-rise-hrh-145734144.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/lucid-group-shares-rise-hrh-145734144.html",
+      "publisher": "MT Newswires",
+      "published_utc": "2026-07-28T14:57:34+00:00",
+      "related_tickers": [
+        "LCID"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "7fed6fa9d5b33a7a",
+      "ticker": "NVDA",
+      "rank": 0,
+      "title": "Nvidia (NVDA) Pours $5 Billion Into Safe AI And Expands Data Center Reach",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/nvidia-nvda-pours-5-billion-031308100.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/nvidia-nvda-pours-5-billion-031308100.html",
+      "publisher": "Simply Wall St.",
+      "published_utc": "2026-07-29T03:13:08+00:00",
+      "related_tickers": [
+        "NVDA",
+        "HUT",
+        "SNPS",
+        "SIE.DE",
+        "CDNS"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "0bd273862e1b81f8",
+      "ticker": "NVDA",
+      "rank": 1,
+      "title": "Why Costco, Verizon, Kroger, and Other Safe Dividend Stocks Are Rising",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/6808bf1d-ac29-3645-98c4-2d060b33923a/why-costco%2C-verizon%2C-kroger%2C.html",
+      "canonical_url": "https://finance.yahoo.com/m/6808bf1d-ac29-3645-98c4-2d060b33923a/why-costco%2C-verizon%2C-kroger%2C.html",
+      "publisher": "Motley Fool",
+      "published_utc": "2026-07-29T03:03:10+00:00",
+      "related_tickers": [
+        "COST",
+        "VZ",
+        "KR",
+        "GOOG",
+        "NVDA"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "90e224e02ed1cf04",
+      "ticker": "NVDA",
+      "rank": 2,
+      "title": "The Smartest Dividend Stock to Buy With $1,000 Right Now (Spoiler: It Yields 5.6%.)",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/128a8224-c3ee-3ed5-b8d4-4ae0be70cca7/the-smartest-dividend-stock.html",
+      "canonical_url": "https://finance.yahoo.com/m/128a8224-c3ee-3ed5-b8d4-4ae0be70cca7/the-smartest-dividend-stock.html",
+      "publisher": "Motley Fool",
+      "published_utc": "2026-07-29T02:50:00+00:00",
+      "related_tickers": [
+        "^GSPC",
+        "NVDA"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "5be3caa82bfece9b",
+      "ticker": "NVDA",
+      "rank": 3,
+      "title": "Anthropic clarifies stance on open-weight AI models",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/0592188c-8a75-312d-8795-af842b466b33/anthropic-clarifies-stance-on.html",
+      "canonical_url": "https://finance.yahoo.com/m/0592188c-8a75-312d-8795-af842b466b33/anthropic-clarifies-stance-on.html",
+      "publisher": "TheStreet",
+      "published_utc": "2026-07-29T02:33:00+00:00",
+      "related_tickers": [
+        "NVDA",
+        "MSFT",
+        "META",
+        "GOOG",
+        "PLTR"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "d007e829b6004ece",
+      "ticker": "NVDA",
+      "rank": 4,
+      "title": "Apple Hits $5 Trillion Market Cap: Will Earnings Extend the Rally?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/8929e400-a8ee-3b53-a277-58be44321158/apple-hits-%245-trillion-market.html",
+      "canonical_url": "https://finance.yahoo.com/m/8929e400-a8ee-3b53-a277-58be44321158/apple-hits-%245-trillion-market.html",
+      "publisher": "BeInCrypto",
+      "published_utc": "2026-07-29T02:19:50+00:00",
+      "related_tickers": [
+        "AAPL",
+        "NVDA"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "7c077bbf310e36ba",
+      "ticker": "NVDA",
+      "rank": 5,
+      "title": "Nvidia, oil and the Fed are fighting over the market",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/c672e570-9d2a-3cfe-a11a-1e82beb50600/nvidia%2C-oil-and-the-fed-are.html",
+      "canonical_url": "https://finance.yahoo.com/m/c672e570-9d2a-3cfe-a11a-1e82beb50600/nvidia%2C-oil-and-the-fed-are.html",
+      "publisher": "TheStreet",
+      "published_utc": "2026-07-29T02:17:00+00:00",
+      "related_tickers": [
+        "NVDA"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "ed282e0388939ca3",
+      "ticker": "NVDA",
+      "rank": 6,
+      "title": "SK hynix posts 1,200% net profit boost on AI chip boom",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/sk-hynix-posts-1-200-015118972.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/sk-hynix-posts-1-200-015118972.html",
+      "publisher": "AFP",
+      "published_utc": "2026-07-29T01:51:18+00:00",
+      "related_tickers": [
+        "SKHY",
+        "NVDA"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "ad041bb8ae649ce4",
+      "ticker": "NVDA",
+      "rank": 7,
+      "title": "Kimi K3: DeepSeek 2.0, or is this Time Different?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/kimi-k3-deepseek-2-0-012400513.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/kimi-k3-deepseek-2-0-012400513.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-29T01:24:00+00:00",
+      "related_tickers": [
+        "GOOGL",
+        "NVDA",
+        "GOOG",
+        "META",
+        "AMZN"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "4df1b31b8e86ebef",
+      "ticker": "NVDA",
+      "rank": 8,
+      "title": "Should You Buy Astera Labs Stock Before Aug. 4?",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/71f22137-196d-3451-af70-54f1eb023fb5/should-you-buy-astera-labs.html",
+      "canonical_url": "https://finance.yahoo.com/m/71f22137-196d-3451-af70-54f1eb023fb5/should-you-buy-astera-labs.html",
+      "publisher": "Motley Fool",
+      "published_utc": "2026-07-29T01:20:00+00:00",
+      "related_tickers": [
+        "ALAB",
+        "NVDA"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "0da196041c37d22d",
+      "ticker": "NVDA",
+      "rank": 9,
+      "title": "Nvidia Partner SK Hynix Misses Q2 Sales Target But Profit Surprises",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/6ad9c396-e77c-37fe-a5f4-682e6bf81ad4/nvidia-partner-sk-hynix.html",
+      "canonical_url": "https://finance.yahoo.com/m/6ad9c396-e77c-37fe-a5f4-682e6bf81ad4/nvidia-partner-sk-hynix.html",
+      "publisher": "Investor's Business Daily",
+      "published_utc": "2026-07-29T00:47:21+00:00",
+      "related_tickers": [
+        "SKHY",
+        "NVDA"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "0ff67f4c2269890a",
+      "ticker": "ITRI",
+      "rank": 0,
+      "title": "Why Is Itron (ITRI) Stock Rocketing Higher Today",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/why-itron-itri-stock-rocketing-032502693.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/why-itron-itri-stock-rocketing-032502693.html",
+      "publisher": "StockStory",
+      "published_utc": "2026-07-29T03:25:02+00:00",
+      "related_tickers": [
+        "ITRI"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "34256ff479c9d958",
+      "ticker": "ITRI",
+      "rank": 1,
+      "title": "Why Itron (ITRI) Is Up 27.2% After Margin Beat And Raised EPS Outlook Despite Lower Sales",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/why-itron-itri-27-2-011032873.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/why-itron-itri-27-2-011032873.html",
+      "publisher": "Simply Wall St.",
+      "published_utc": "2026-07-29T01:10:32+00:00",
+      "related_tickers": [
+        "ITRI"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "a0dd5c3e70658c59",
+      "ticker": "ITRI",
+      "rank": 2,
+      "title": "Itron (ITRI) Soars 26% After Earnings Beat, Raised Growth Outlook",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/itron-itri-soars-26-earnings-003009308.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/itron-itri-soars-26-earnings-003009308.html",
+      "publisher": "Insider Monkey",
+      "published_utc": "2026-07-29T00:30:09+00:00",
+      "related_tickers": [
+        "ITRI"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "8dc3d21618ad6e44",
+      "ticker": "ITRI",
+      "rank": 3,
+      "title": "Itron Inc (ITRI) Q2 2026 Earnings Call Highlights: Record Gross Margin and Strong Free Cash ...",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/itron-inc-itri-q2-2026-210314219.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/itron-inc-itri-q2-2026-210314219.html",
+      "publisher": "GuruFocus.com",
+      "published_utc": "2026-07-28T21:03:14+00:00",
+      "related_tickers": [
+        "ITRI"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "9187782bda623a6c",
+      "ticker": "ITRI",
+      "rank": 4,
+      "title": "Why Itron Stock Soared 26% Higher Today",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/aa8f0dda-1a03-3846-81ad-60f7f2717038/why-itron-stock-soared-26%25.html",
+      "canonical_url": "https://finance.yahoo.com/m/aa8f0dda-1a03-3846-81ad-60f7f2717038/why-itron-stock-soared-26%25.html",
+      "publisher": "Motley Fool",
+      "published_utc": "2026-07-28T20:53:06+00:00",
+      "related_tickers": [
+        "ITRI",
+        "NVDA"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "8f3a2332fe251a37",
+      "ticker": "ITRI",
+      "rank": 5,
+      "title": "Itron Q2 Earnings Call Highlights",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/384c7cef-88f9-32de-9161-74492f9cc7e7/itron-q2-earnings-call.html",
+      "canonical_url": "https://finance.yahoo.com/m/384c7cef-88f9-32de-9161-74492f9cc7e7/itron-q2-earnings-call.html",
+      "publisher": "MarketBeat",
+      "published_utc": "2026-07-28T15:04:32+00:00",
+      "related_tickers": [
+        "ITRI"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "13ab72b3526a849a",
+      "ticker": "ITRI",
+      "rank": 6,
+      "title": "Itron Reports Q2 Earnings and Raises Full-Year 2026 EPS Outlook",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/c243641c-7f16-3d2d-af06-b5c5534529b4/itron-reports-q2-earnings-and.html",
+      "canonical_url": "https://finance.yahoo.com/m/c243641c-7f16-3d2d-af06-b5c5534529b4/itron-reports-q2-earnings-and.html",
+      "publisher": "InvestorsHub",
+      "published_utc": "2026-07-28T14:11:12+00:00",
+      "related_tickers": [
+        "ITRI"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "314023e62762971e",
+      "ticker": "ITRI",
+      "rank": 7,
+      "title": "Itron (ITRI) Reports Q2 Earnings: What Key Metrics Have to Say",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/itron-itri-reports-q2-earnings-140003067.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/itron-itri-reports-q2-earnings-140003067.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-28T14:00:03+00:00",
+      "related_tickers": [
+        "ITRI"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "1241be7df3a6cf6e",
+      "ticker": "ITRI",
+      "rank": 8,
+      "title": "Itron (ITRI) Beats Q2 Earnings Estimates",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/itron-itri-beats-q2-earnings-134501465.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/itron-itri-beats-q2-earnings-134501465.html",
+      "publisher": "Zacks",
+      "published_utc": "2026-07-28T13:45:01+00:00",
+      "related_tickers": [
+        "ITRI",
+        "FTV"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "7e8cbd2e22334124",
+      "ticker": "ITRI",
+      "rank": 9,
+      "title": "Itron (NASDAQ:ITRI) Reports Sales Below Analyst Estimates In Q2 CY2026 Earnings",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/itron-nasdaq-itri-reports-sales-124130905.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/itron-nasdaq-itri-reports-sales-124130905.html",
+      "publisher": "StockStory",
+      "published_utc": "2026-07-28T12:41:30+00:00",
+      "related_tickers": [
+        "ITRI"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "b166f90301d05351",
+      "ticker": "MU",
+      "rank": 0,
+      "title": "SK Hynix’s Q2 Miss Triggers Memory Stock Rout: MU, SNDK Slip But STX Holds Up In Green After Q4 Strong Report",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/60aea8d8-2a46-3ebc-b81b-2e521a68f565/sk-hynix%E2%80%99s-q2-miss-triggers.html",
+      "canonical_url": "https://finance.yahoo.com/m/60aea8d8-2a46-3ebc-b81b-2e521a68f565/sk-hynix%E2%80%99s-q2-miss-triggers.html",
+      "publisher": "Stocktwits",
+      "published_utc": "2026-07-29T02:21:05+00:00",
+      "related_tickers": [
+        "STX",
+        "SKHY",
+        "MU",
+        "SNDK"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "48565d431ef44dc8",
+      "ticker": "MU",
+      "rank": 1,
+      "title": "Cramer Sees Echoes of Dot-Com Bust as Wall Street Flees AI Stocks for Safety",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/c2d39088-c6d5-3d65-8d21-2fc3c3af8c89/cramer-sees-echoes-of-dot-com.html",
+      "canonical_url": "https://finance.yahoo.com/m/c2d39088-c6d5-3d65-8d21-2fc3c3af8c89/cramer-sees-echoes-of-dot-com.html",
+      "publisher": "BeInCrypto",
+      "published_utc": "2026-07-29T01:01:08+00:00",
+      "related_tickers": [
+        "KO",
+        "GOOG",
+        "WMT",
+        "MU",
+        "WDC",
+        "SNDK",
+        "SKHY"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "66c8e8de01a698de",
+      "ticker": "MU",
+      "rank": 2,
+      "title": "What The Options Market Is Signaling About The Volatility In SanDisk Stock",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/d3c2678a-0090-3187-a9ed-e9b71e145609/what-the-options-market-is.html",
+      "canonical_url": "https://finance.yahoo.com/m/d3c2678a-0090-3187-a9ed-e9b71e145609/what-the-options-market-is.html",
+      "publisher": "Trefis",
+      "published_utc": "2026-07-28T23:55:29+00:00",
+      "related_tickers": [
+        "SNDK",
+        "STX",
+        "NTAP",
+        "HPE",
+        "MU",
+        "WDC"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "959d5d5a69b5d193",
+      "ticker": "MU",
+      "rank": 3,
+      "title": "SK Hynix Stock Drops on Disappointing Earnings",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/1bcb0e32-6b8f-3e3e-a260-8c97f099a1c6/sk-hynix-stock-drops-on.html",
+      "canonical_url": "https://finance.yahoo.com/m/1bcb0e32-6b8f-3e3e-a260-8c97f099a1c6/sk-hynix-stock-drops-on.html",
+      "publisher": "Barrons.com",
+      "published_utc": "2026-07-28T23:24:00+00:00",
+      "related_tickers": [
+        "SKHY",
+        "GOOG",
+        "MU",
+        "005930.KS"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "dafa73dfcdbee602",
+      "ticker": "MU",
+      "rank": 4,
+      "title": "SK Hynix's Record Profit Misses Investors' Lofty AI Expectations",
+      "summary": "",
+      "url": "https://finance.yahoo.com/technology/ai/articles/sk-hynixs-record-profit-misses-investors-lofty-ai-expectations-225142990.html",
+      "canonical_url": "https://finance.yahoo.com/technology/ai/articles/sk-hynixs-record-profit-misses-investors-lofty-ai-expectations-225142990.html",
+      "publisher": "Bloomberg",
+      "published_utc": "2026-07-28T22:51:42+00:00",
+      "related_tickers": [
+        "NVDA",
+        "SKHY",
+        "005930.KS",
+        "005935.KS",
+        "006800.KS",
+        "006805.KS",
+        "00680K.KS",
+        "MU"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "46d190ebc34a7f16",
+      "ticker": "MU",
+      "rank": 5,
+      "title": "Micron Stock Dives As Semiconductor Sell-Off Gains Steam",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/1c5cce9f-dae9-3b6f-bb75-c8638c18164e/micron-stock-dives-as.html",
+      "canonical_url": "https://finance.yahoo.com/m/1c5cce9f-dae9-3b6f-bb75-c8638c18164e/micron-stock-dives-as.html",
+      "publisher": "Investor's Business Daily",
+      "published_utc": "2026-07-28T21:09:26+00:00",
+      "related_tickers": [
+        "MU",
+        "SKHY",
+        "SNDK"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    },
+    {
+      "id": "931c3c9123c46b05",
+      "ticker": "MU",
+      "rank": 6,
+      "title": "Stock Market Today: Dow Gains 500 Points; SpaceX, SK Hynix Make These Moves (Live Coverage)",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/34f57721-8495-3628-bd2a-4209897b008c/stock-market-today%3A-dow-gains.html",
+      "canonical_url": "https://finance.yahoo.com/m/34f57721-8495-3628-bd2a-4209897b008c/stock-market-today%3A-dow-gains.html",
+      "publisher": "Investor's Business Daily",
+      "published_utc": "2026-07-28T20:36:49+00:00",
+      "related_tickers": [
+        "SPCX",
+        "SKHY",
+        "^RUT",
+        "SNDK",
+        "^DJI",
+        "MU",
+        "^GSPC",
+        "^IXIC",
+        "AAPL",
+        "NVDA"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "ecc1496aa49e9cbb",
+      "ticker": "MU",
+      "rank": 7,
+      "title": "Update: Dow Extends Advance Following Strong Earnings Reports",
+      "summary": "",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/dow-extends-advance-following-strong-203202788.html",
+      "canonical_url": "https://finance.yahoo.com/markets/stocks/articles/dow-extends-advance-following-strong-203202788.html",
+      "publisher": "MT Newswires",
+      "published_utc": "2026-07-28T20:32:02+00:00",
+      "related_tickers": [
+        "^GSPC",
+        "^SPX",
+        "INTC",
+        "AMD",
+        "SNDK",
+        "MU",
+        "^DJI",
+        "^IXIC",
+        "SHW",
+        "KO",
+        "BA"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "56b0dd74f5604433",
+      "ticker": "MU",
+      "rank": 8,
+      "title": "Stocks to Watch Recap: Coca-Cola, J&J, Mercedes-Benz, UPS",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/4d6ce079-4a9d-34a4-8bbf-afc81b73a054/stocks-to-watch-recap%3A.html",
+      "canonical_url": "https://finance.yahoo.com/m/4d6ce079-4a9d-34a4-8bbf-afc81b73a054/stocks-to-watch-recap%3A.html",
+      "publisher": "The Wall Street Journal",
+      "published_utc": "2026-07-28T20:31:02+00:00",
+      "related_tickers": [
+        "KO",
+        "JNJ",
+        "MU",
+        "UL",
+        "005935.KS",
+        "PHG",
+        "MBG.DE",
+        "005930.KS",
+        "SKHY",
+        "INTC"
+      ],
+      "baseline_match": false,
+      "candidate_match": false
+    },
+    {
+      "id": "40a5ab1fb2caf48e",
+      "ticker": "MU",
+      "rank": 9,
+      "title": "Micron Stock Is Leading a Brutal New Chip Slump",
+      "summary": "",
+      "url": "https://finance.yahoo.com/m/5f283eb5-e7d9-37a7-8c7f-ee54ed0abf7f/micron-stock-is-leading-a.html",
+      "canonical_url": "https://finance.yahoo.com/m/5f283eb5-e7d9-37a7-8c7f-ee54ed0abf7f/micron-stock-is-leading-a.html",
+      "publisher": "Barrons.com",
+      "published_utc": "2026-07-28T20:31:00+00:00",
+      "related_tickers": [
+        "MU",
+        "WDC",
+        "AMD",
+        "^IXIC",
+        "SNDK"
+      ],
+      "baseline_match": true,
+      "candidate_match": true
+    }
+  ]
+}

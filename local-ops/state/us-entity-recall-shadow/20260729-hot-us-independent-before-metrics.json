@@ -1,0 +1,1340 @@
+{
+  "schema": "uzi.us_entity_recall_shadow_metrics.v1",
+  "captured_at_utc": "2026-07-29T03:55:10.321021+00:00",
+  "rows": 80,
+  "labeled_rows": 80,
+  "duplicate_rate": 0.0,
+  "latency_seconds": {
+    "median": 0.2632715,
+    "p95": 0.940748,
+    "max": 0.940748
+  },
+  "matchers": {
+    "baseline_match": {
+      "counts": {
+        "true_negative": 20,
+        "ambiguous": 15,
+        "false_negative": 1,
+        "true_positive": 43,
+        "false_positive": 1
+      },
+      "accepted": 44,
+      "judged_relevant": 44,
+      "precision": 0.9772727272727273,
+      "recall": 0.9772727272727273,
+      "cross_issuer_contamination_rate": 0.022727272727272728,
+      "details": [
+        {
+          "id": "3157afec52e4d736",
+          "ticker": "MSTR",
+          "title": "Bitcoin, Ethereum, XRP, Dogecoin Gain Ahead of Fed Rate Cut Decision: Analyst Asks Investors to 'Mark Your Calendar' for Next BTC Bottom",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "e2ed1f5596334da2",
+          "ticker": "MSTR",
+          "title": "Michael Saylor warns Bitcoin's biggest threat is here",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Michael Saylor is strongly associated with the issuer, but a founder opinion is not automatically a company event."
+        },
+        {
+          "id": "1f1b7703fdd90067",
+          "ticker": "MSTR",
+          "title": "Michael Saylor: Bitcoin Code Is a Constitution, Changes Are Attacks on 'Economic Rights'",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Michael Saylor is strongly associated with the issuer, but a founder opinion is not automatically a company event."
+        },
+        {
+          "id": "42f4cec769c9bd86",
+          "ticker": "MSTR",
+          "title": "Michael Saylor Says Bitcoin Has Won, So Why Did MicroStrategy Stop Buying BTC?",
+          "truth": "relevant",
+          "verdict": "false_negative",
+          "reason": "The title explicitly names the former legal name MicroStrategy and its Bitcoin purchase activity."
+        },
+        {
+          "id": "9c73c913c63ad738",
+          "ticker": "MSTR",
+          "title": "These Are the 3 Worst-Performing Stocks on the Nasdaq-100 in 2026. Could They Be Underrated Buys Right Now?",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "The title describes a basket but does not identify which constituents are discussed."
+        },
+        {
+          "id": "aad809df3741bb76",
+          "ticker": "MSTR",
+          "title": "Atlassian’s (TEAM) Strategic Position in the AI Landscape",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "4cf3fb3eea270713",
+          "ticker": "MSTR",
+          "title": "Night View Capital Trimmed Oracle (ORCL) After Robust Cloud Gains",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "b8f5258bfdf146f2",
+          "ticker": "MSTR",
+          "title": "Autodesk (ADSK) Holds Stable Position in the Market",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "92af413946aeabad",
+          "ticker": "MSTR",
+          "title": "ServiceNow (NOW) Looks Appealing Amid Workflow Automation and AI Adoption",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "4565fbb6807f5814",
+          "ticker": "MSTR",
+          "title": "Salesforce’s (CRM) Impact on AI Deployment in Corporate Environments",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "9d04420592fc2017",
+          "ticker": "KNSA",
+          "title": "Kiniksa Pharmaceuticals, Ltd. Q2 2026 Earnings Call Summary",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Kiniksa earnings coverage."
+        },
+        {
+          "id": "df5cd14364fe73a4",
+          "ticker": "KNSA",
+          "title": "Top Midday Gainers",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Generic gainers title does not expose issuer identity."
+        },
+        {
+          "id": "bdf8dcccf9f5c505",
+          "ticker": "KNSA",
+          "title": "Kiniksa's Arcalyst Growth Outlook Strengthens, Wedbush Says",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Kiniksa product and analyst coverage."
+        },
+        {
+          "id": "0639af00798476a1",
+          "ticker": "KNSA",
+          "title": "Alkermes Q2 Earnings Break Even, Revenues Beat Estimates, Stock Down",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "ba07d5335c04540e",
+          "ticker": "KNSA",
+          "title": "Wedbush Raises Price Target on Kiniksa Pharmaceuticals to $99 From $72, Maintains Outperform Rating",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Kiniksa analyst action."
+        },
+        {
+          "id": "a929882d3360368e",
+          "ticker": "KNSA",
+          "title": "Kiniksa Reports Strong Q2 Results, Raises 2026 ARCALYST Sales Guidance",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Kiniksa results and guidance."
+        },
+        {
+          "id": "4928446c7c1b22be",
+          "ticker": "KNSA",
+          "title": "Kiniksa Pharmaceuticals International Q2 Earnings Call Highlights",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Kiniksa earnings coverage."
+        },
+        {
+          "id": "a5d180252151876f",
+          "ticker": "KNSA",
+          "title": "Kiniksa Pharmaceuticals International, plc (KNSA) Q2 Earnings Match Estimates",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit legal name and ticker."
+        },
+        {
+          "id": "bb9c8caf0fda12a9",
+          "ticker": "KNSA",
+          "title": "Kiniksa Pharmaceuticals International Q2 Net Income, Revenue Increase",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Kiniksa financial results."
+        },
+        {
+          "id": "51e5656dc342b153",
+          "ticker": "KNSA",
+          "title": "Kiniksa Pharmaceuticals Reports Second Quarter 2026 Financial Results and Recent Portfolio Execution",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Issuer financial results title."
+        },
+        {
+          "id": "89c2aa9dc471dc4e",
+          "ticker": "OSCR",
+          "title": "Oscar Health Flashes Buy Signal As Medicaid Weighs On Centene",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Oscar Health trading signal."
+        },
+        {
+          "id": "8aa7cd6d8634a5d2",
+          "ticker": "OSCR",
+          "title": "Oscar Health, Inc. to Host 2026 Investor Day",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit issuer investor event."
+        },
+        {
+          "id": "f29a700eec00d0c1",
+          "ticker": "OSCR",
+          "title": "3 Big Reasons to Love Oscar Health (OSCR)",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Oscar Health analysis."
+        },
+        {
+          "id": "0ff7dd628f66c962",
+          "ticker": "OSCR",
+          "title": "Has Oscar Health (OSCR) Run Too Far After Its 68% 90 Day Rally?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Oscar Health valuation/momentum analysis."
+        },
+        {
+          "id": "193f44c65d4b8cc5",
+          "ticker": "OSCR",
+          "title": "1 Surging  Stock to Own for Decades and 2 We Find Risky",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Basket title hides which stock maps to which view."
+        },
+        {
+          "id": "b015c2355cdd08f2",
+          "ticker": "OSCR",
+          "title": "Oscar Health (OSCR) Stock Still Looks Undervalued As Its 270% Run Raises Questions",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Oscar Health valuation/momentum analysis."
+        },
+        {
+          "id": "5b4c5a1c6205bb6c",
+          "ticker": "OSCR",
+          "title": "Oscar Health, Inc. (OSCR) Registers a Bigger Fall Than the Market: Important Facts to Note",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit legal name and ticker."
+        },
+        {
+          "id": "d170e95f1487d4ba",
+          "ticker": "OSCR",
+          "title": "Goosehead Insurance (GSHD) Q2 Earnings and Revenues Beat Estimates",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "d820bd66b07ba3c7",
+          "ticker": "OSCR",
+          "title": "5 Insurance Stocks Poised to Outperform Q2 Earnings Expectations",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Generic basket title does not expose Oscar Health."
+        },
+        {
+          "id": "7c2e8f398f2c30f8",
+          "ticker": "OSCR",
+          "title": "Oscar Health, Inc. (OSCR) Is a Trending Stock: Facts to Know Before Betting on It",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit legal name and ticker."
+        },
+        {
+          "id": "78d1684b1c5d3b74",
+          "ticker": "IQV",
+          "title": "IQVIA (IQV) Shares Skyrocket, What You Need To Know",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit IQVIA move."
+        },
+        {
+          "id": "0f6afb585a0201db",
+          "ticker": "IQV",
+          "title": "IQVIA Holdings (IQV) Soars on Revenue Growth Outlook, Strong Q2",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit IQVIA results and outlook."
+        },
+        {
+          "id": "cda969ecca69d8e4",
+          "ticker": "IQV",
+          "title": "IQVIA (IQV) Q2 Earnings: Taking a Look at Key Metrics Versus Estimates",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit IQVIA earnings."
+        },
+        {
+          "id": "ac39c841cc360d30",
+          "ticker": "IQV",
+          "title": "IQVIA Holdings Inc (IQV) Q2 2026 Earnings Call Highlights: Strong Revenue Growth and AI-Driven ...",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit IQVIA legal name and earnings."
+        },
+        {
+          "id": "7222a2d77deecd19",
+          "ticker": "IQV",
+          "title": "US Equity Markets Mixed as Oil Drops, Chip Shares Slide",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad market title hides the issuer-specific discussion."
+        },
+        {
+          "id": "9e2e54abf00fdc78",
+          "ticker": "IQV",
+          "title": "Sector Update: Healthcare Stocks Gain Late Afternoon",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Sector update title hides the issuer-specific discussion."
+        },
+        {
+          "id": "a2187f2fa37e64a7",
+          "ticker": "IQV",
+          "title": "IQVIA Q2 Earnings Call Highlights",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit IQVIA earnings."
+        },
+        {
+          "id": "e2d5b34d1002f6e4",
+          "ticker": "IQV",
+          "title": "This Healthcare Stock Is Today’s Best in the S&P 500",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "The title does not name the healthcare stock."
+        },
+        {
+          "id": "8123a3c116c62029",
+          "ticker": "IQV",
+          "title": "Top Midday Gainers",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Generic gainers title does not expose issuer identity."
+        },
+        {
+          "id": "43dfcf8aa077b526",
+          "ticker": "IQV",
+          "title": "IQVIA Holdings Inc. Q2 2026 Earnings Call Summary",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit IQVIA legal name and earnings."
+        },
+        {
+          "id": "ad5e2305351366b8",
+          "ticker": "LCID",
+          "title": "Lucid Group (LCID) Soars 21% as Saudi Prince Backing Eases Financial Health Worries",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Lucid move and catalyst."
+        },
+        {
+          "id": "00f625426ccad818",
+          "ticker": "LCID",
+          "title": "Why Lucid Stock Soared 21.5% Today",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Lucid move."
+        },
+        {
+          "id": "8834495b8a9af3a0",
+          "ticker": "LCID",
+          "title": "Lucid Stock Popped 21%. Thank a Saudi Prince.",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Lucid move and catalyst."
+        },
+        {
+          "id": "08c9b715c847a4aa",
+          "ticker": "LCID",
+          "title": "Why Is LCID Stock Soaring 23% Today?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit ticker and move."
+        },
+        {
+          "id": "d373e8a0f3df2f3f",
+          "ticker": "LCID",
+          "title": "Lucid Is Now Up 33% in a Month, Easily Beating Tesla and Rivian. What Will It Take to Get LCID Stock Back to $10?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Lucid relative performance."
+        },
+        {
+          "id": "195d0e86576622d1",
+          "ticker": "LCID",
+          "title": "Why General Motors Stock Could Keep Climbing As A One-Time Bill Fades",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "0c29832615d08e08",
+          "ticker": "LCID",
+          "title": "Sector Update: Consumer Stocks Rise Tuesday Afternoon",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "35904782725c544f",
+          "ticker": "LCID",
+          "title": "Saudi Prince Alwaleed Takes 5% Stake in EV-Maker Lucid",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Lucid ownership event."
+        },
+        {
+          "id": "4ad6111954334564",
+          "ticker": "LCID",
+          "title": "Is This Wall Street Bank Insane to Believe Tesla Will Nearly Double From Current Prices? Maybe Not.",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "c414f308d04e9223",
+          "ticker": "LCID",
+          "title": "Lucid Group Shares Rise After HRH Prince Alwaleed Discloses 5% Stake",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Lucid ownership event."
+        },
+        {
+          "id": "7fed6fa9d5b33a7a",
+          "ticker": "NVDA",
+          "title": "Nvidia (NVDA) Pours $5 Billion Into Safe AI And Expands Data Center Reach",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit NVIDIA investment and expansion."
+        },
+        {
+          "id": "0bd273862e1b81f8",
+          "ticker": "NVDA",
+          "title": "Why Costco, Verizon, Kroger, and Other Safe Dividend Stocks Are Rising",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "90e224e02ed1cf04",
+          "ticker": "NVDA",
+          "title": "The Smartest Dividend Stock to Buy With $1,000 Right Now (Spoiler: It Yields 5.6%.)",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "5be3caa82bfece9b",
+          "ticker": "NVDA",
+          "title": "Anthropic clarifies stance on open-weight AI models",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Anthropic title does not expose NVIDIA's role."
+        },
+        {
+          "id": "d007e829b6004ece",
+          "ticker": "NVDA",
+          "title": "Apple Hits $5 Trillion Market Cap: Will Earnings Extend the Rally?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "7c077bbf310e36ba",
+          "ticker": "NVDA",
+          "title": "Nvidia, oil and the Fed are fighting over the market",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "NVIDIA is an explicit subject of the market story."
+        },
+        {
+          "id": "ed282e0388939ca3",
+          "ticker": "NVDA",
+          "title": "SK hynix posts 1,200% net profit boost on AI chip boom",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "ad041bb8ae649ce4",
+          "ticker": "NVDA",
+          "title": "Kimi K3: DeepSeek 2.0, or is this Time Different?",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "The title does not expose NVIDIA's role in the model comparison."
+        },
+        {
+          "id": "4df1b31b8e86ebef",
+          "ticker": "NVDA",
+          "title": "Should You Buy Astera Labs Stock Before Aug. 4?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "0da196041c37d22d",
+          "ticker": "NVDA",
+          "title": "Nvidia Partner SK Hynix Misses Q2 Sales Target But Profit Surprises",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "SK Hynix is the event issuer; NVIDIA appears only as a partner qualifier."
+        },
+        {
+          "id": "0ff67f4c2269890a",
+          "ticker": "ITRI",
+          "title": "Why Is Itron (ITRI) Stock Rocketing Higher Today",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Itron move."
+        },
+        {
+          "id": "34256ff479c9d958",
+          "ticker": "ITRI",
+          "title": "Why Itron (ITRI) Is Up 27.2% After Margin Beat And Raised EPS Outlook Despite Lower Sales",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Itron results and outlook."
+        },
+        {
+          "id": "a0dd5c3e70658c59",
+          "ticker": "ITRI",
+          "title": "Itron (ITRI) Soars 26% After Earnings Beat, Raised Growth Outlook",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Itron results and outlook."
+        },
+        {
+          "id": "8dc3d21618ad6e44",
+          "ticker": "ITRI",
+          "title": "Itron Inc (ITRI) Q2 2026 Earnings Call Highlights: Record Gross Margin and Strong Free Cash ...",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Itron legal name and earnings."
+        },
+        {
+          "id": "9187782bda623a6c",
+          "ticker": "ITRI",
+          "title": "Why Itron Stock Soared 26% Higher Today",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Itron move."
+        },
+        {
+          "id": "8f3a2332fe251a37",
+          "ticker": "ITRI",
+          "title": "Itron Q2 Earnings Call Highlights",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Itron earnings."
+        },
+        {
+          "id": "13ab72b3526a849a",
+          "ticker": "ITRI",
+          "title": "Itron Reports Q2 Earnings and Raises Full-Year 2026 EPS Outlook",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Itron results and guidance."
+        },
+        {
+          "id": "314023e62762971e",
+          "ticker": "ITRI",
+          "title": "Itron (ITRI) Reports Q2 Earnings: What Key Metrics Have to Say",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Itron earnings."
+        },
+        {
+          "id": "1241be7df3a6cf6e",
+          "ticker": "ITRI",
+          "title": "Itron (ITRI) Beats Q2 Earnings Estimates",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Itron earnings."
+        },
+        {
+          "id": "7e8cbd2e22334124",
+          "ticker": "ITRI",
+          "title": "Itron (NASDAQ:ITRI) Reports Sales Below Analyst Estimates In Q2 CY2026 Earnings",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit legal name, exchange ticker, and earnings."
+        },
+        {
+          "id": "b166f90301d05351",
+          "ticker": "MU",
+          "title": "SK Hynix’s Q2 Miss Triggers Memory Stock Rout: MU, SNDK Slip But STX Holds Up In Green After Q4 Strong Report",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "MU is explicitly named as part of the memory-stock selloff."
+        },
+        {
+          "id": "48565d431ef44dc8",
+          "ticker": "MU",
+          "title": "Cramer Sees Echoes of Dot-Com Bust as Wall Street Flees AI Stocks for Safety",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "66c8e8de01a698de",
+          "ticker": "MU",
+          "title": "What The Options Market Is Signaling About The Volatility In SanDisk Stock",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "959d5d5a69b5d193",
+          "ticker": "MU",
+          "title": "SK Hynix Stock Drops on Disappointing Earnings",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "dafa73dfcdbee602",
+          "ticker": "MU",
+          "title": "SK Hynix's Record Profit Misses Investors' Lofty AI Expectations",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "46d190ebc34a7f16",
+          "ticker": "MU",
+          "title": "Micron Stock Dives As Semiconductor Sell-Off Gains Steam",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Micron move."
+        },
+        {
+          "id": "931c3c9123c46b05",
+          "ticker": "MU",
+          "title": "Stock Market Today: Dow Gains 500 Points; SpaceX, SK Hynix Make These Moves (Live Coverage)",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Live market roundup does not expose Micron's role in the title."
+        },
+        {
+          "id": "ecc1496aa49e9cbb",
+          "ticker": "MU",
+          "title": "Update: Dow Extends Advance Following Strong Earnings Reports",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad market title does not expose Micron's role."
+        },
+        {
+          "id": "56b0dd74f5604433",
+          "ticker": "MU",
+          "title": "Stocks to Watch Recap: Coca-Cola, J&J, Mercedes-Benz, UPS",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad recap title does not expose Micron's role."
+        },
+        {
+          "id": "40a5ab1fb2caf48e",
+          "ticker": "MU",
+          "title": "Micron Stock Is Leading a Brutal New Chip Slump",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Micron move."
+        }
+      ],
+      "freshness_days": {
+        "median": 0.3676773266319444,
+        "p95": 4.740582419224537,
+        "within_7d_rate": 0.9875,
+        "within_30d_rate": 1.0,
+        "within_90d_rate": 1.0
+      }
+    },
+    "candidate_match": {
+      "counts": {
+        "true_negative": 20,
+        "ambiguous": 15,
+        "false_negative": 1,
+        "true_positive": 43,
+        "false_positive": 1
+      },
+      "accepted": 44,
+      "judged_relevant": 44,
+      "precision": 0.9772727272727273,
+      "recall": 0.9772727272727273,
+      "cross_issuer_contamination_rate": 0.022727272727272728,
+      "details": [
+        {
+          "id": "3157afec52e4d736",
+          "ticker": "MSTR",
+          "title": "Bitcoin, Ethereum, XRP, Dogecoin Gain Ahead of Fed Rate Cut Decision: Analyst Asks Investors to 'Mark Your Calendar' for Next BTC Bottom",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "e2ed1f5596334da2",
+          "ticker": "MSTR",
+          "title": "Michael Saylor warns Bitcoin's biggest threat is here",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Michael Saylor is strongly associated with the issuer, but a founder opinion is not automatically a company event."
+        },
+        {
+          "id": "1f1b7703fdd90067",
+          "ticker": "MSTR",
+          "title": "Michael Saylor: Bitcoin Code Is a Constitution, Changes Are Attacks on 'Economic Rights'",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Michael Saylor is strongly associated with the issuer, but a founder opinion is not automatically a company event."
+        },
+        {
+          "id": "42f4cec769c9bd86",
+          "ticker": "MSTR",
+          "title": "Michael Saylor Says Bitcoin Has Won, So Why Did MicroStrategy Stop Buying BTC?",
+          "truth": "relevant",
+          "verdict": "false_negative",
+          "reason": "The title explicitly names the former legal name MicroStrategy and its Bitcoin purchase activity."
+        },
+        {
+          "id": "9c73c913c63ad738",
+          "ticker": "MSTR",
+          "title": "These Are the 3 Worst-Performing Stocks on the Nasdaq-100 in 2026. Could They Be Underrated Buys Right Now?",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "The title describes a basket but does not identify which constituents are discussed."
+        },
+        {
+          "id": "aad809df3741bb76",
+          "ticker": "MSTR",
+          "title": "Atlassian’s (TEAM) Strategic Position in the AI Landscape",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "4cf3fb3eea270713",
+          "ticker": "MSTR",
+          "title": "Night View Capital Trimmed Oracle (ORCL) After Robust Cloud Gains",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "b8f5258bfdf146f2",
+          "ticker": "MSTR",
+          "title": "Autodesk (ADSK) Holds Stable Position in the Market",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "92af413946aeabad",
+          "ticker": "MSTR",
+          "title": "ServiceNow (NOW) Looks Appealing Amid Workflow Automation and AI Adoption",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "4565fbb6807f5814",
+          "ticker": "MSTR",
+          "title": "Salesforce’s (CRM) Impact on AI Deployment in Corporate Environments",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "9d04420592fc2017",
+          "ticker": "KNSA",
+          "title": "Kiniksa Pharmaceuticals, Ltd. Q2 2026 Earnings Call Summary",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Kiniksa earnings coverage."
+        },
+        {
+          "id": "df5cd14364fe73a4",
+          "ticker": "KNSA",
+          "title": "Top Midday Gainers",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Generic gainers title does not expose issuer identity."
+        },
+        {
+          "id": "bdf8dcccf9f5c505",
+          "ticker": "KNSA",
+          "title": "Kiniksa's Arcalyst Growth Outlook Strengthens, Wedbush Says",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Kiniksa product and analyst coverage."
+        },
+        {
+          "id": "0639af00798476a1",
+          "ticker": "KNSA",
+          "title": "Alkermes Q2 Earnings Break Even, Revenues Beat Estimates, Stock Down",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "ba07d5335c04540e",
+          "ticker": "KNSA",
+          "title": "Wedbush Raises Price Target on Kiniksa Pharmaceuticals to $99 From $72, Maintains Outperform Rating",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Kiniksa analyst action."
+        },
+        {
+          "id": "a929882d3360368e",
+          "ticker": "KNSA",
+          "title": "Kiniksa Reports Strong Q2 Results, Raises 2026 ARCALYST Sales Guidance",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Kiniksa results and guidance."
+        },
+        {
+          "id": "4928446c7c1b22be",
+          "ticker": "KNSA",
+          "title": "Kiniksa Pharmaceuticals International Q2 Earnings Call Highlights",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Kiniksa earnings coverage."
+        },
+        {
+          "id": "a5d180252151876f",
+          "ticker": "KNSA",
+          "title": "Kiniksa Pharmaceuticals International, plc (KNSA) Q2 Earnings Match Estimates",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit legal name and ticker."
+        },
+        {
+          "id": "bb9c8caf0fda12a9",
+          "ticker": "KNSA",
+          "title": "Kiniksa Pharmaceuticals International Q2 Net Income, Revenue Increase",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Kiniksa financial results."
+        },
+        {
+          "id": "51e5656dc342b153",
+          "ticker": "KNSA",
+          "title": "Kiniksa Pharmaceuticals Reports Second Quarter 2026 Financial Results and Recent Portfolio Execution",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Issuer financial results title."
+        },
+        {
+          "id": "89c2aa9dc471dc4e",
+          "ticker": "OSCR",
+          "title": "Oscar Health Flashes Buy Signal As Medicaid Weighs On Centene",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Oscar Health trading signal."
+        },
+        {
+          "id": "8aa7cd6d8634a5d2",
+          "ticker": "OSCR",
+          "title": "Oscar Health, Inc. to Host 2026 Investor Day",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit issuer investor event."
+        },
+        {
+          "id": "f29a700eec00d0c1",
+          "ticker": "OSCR",
+          "title": "3 Big Reasons to Love Oscar Health (OSCR)",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Oscar Health analysis."
+        },
+        {
+          "id": "0ff7dd628f66c962",
+          "ticker": "OSCR",
+          "title": "Has Oscar Health (OSCR) Run Too Far After Its 68% 90 Day Rally?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Oscar Health valuation/momentum analysis."
+        },
+        {
+          "id": "193f44c65d4b8cc5",
+          "ticker": "OSCR",
+          "title": "1 Surging  Stock to Own for Decades and 2 We Find Risky",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Basket title hides which stock maps to which view."
+        },
+        {
+          "id": "b015c2355cdd08f2",
+          "ticker": "OSCR",
+          "title": "Oscar Health (OSCR) Stock Still Looks Undervalued As Its 270% Run Raises Questions",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Oscar Health valuation/momentum analysis."
+        },
+        {
+          "id": "5b4c5a1c6205bb6c",
+          "ticker": "OSCR",
+          "title": "Oscar Health, Inc. (OSCR) Registers a Bigger Fall Than the Market: Important Facts to Note",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit legal name and ticker."
+        },
+        {
+          "id": "d170e95f1487d4ba",
+          "ticker": "OSCR",
+          "title": "Goosehead Insurance (GSHD) Q2 Earnings and Revenues Beat Estimates",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "d820bd66b07ba3c7",
+          "ticker": "OSCR",
+          "title": "5 Insurance Stocks Poised to Outperform Q2 Earnings Expectations",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Generic basket title does not expose Oscar Health."
+        },
+        {
+          "id": "7c2e8f398f2c30f8",
+          "ticker": "OSCR",
+          "title": "Oscar Health, Inc. (OSCR) Is a Trending Stock: Facts to Know Before Betting on It",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit legal name and ticker."
+        },
+        {
+          "id": "78d1684b1c5d3b74",
+          "ticker": "IQV",
+          "title": "IQVIA (IQV) Shares Skyrocket, What You Need To Know",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit IQVIA move."
+        },
+        {
+          "id": "0f6afb585a0201db",
+          "ticker": "IQV",
+          "title": "IQVIA Holdings (IQV) Soars on Revenue Growth Outlook, Strong Q2",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit IQVIA results and outlook."
+        },
+        {
+          "id": "cda969ecca69d8e4",
+          "ticker": "IQV",
+          "title": "IQVIA (IQV) Q2 Earnings: Taking a Look at Key Metrics Versus Estimates",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit IQVIA earnings."
+        },
+        {
+          "id": "ac39c841cc360d30",
+          "ticker": "IQV",
+          "title": "IQVIA Holdings Inc (IQV) Q2 2026 Earnings Call Highlights: Strong Revenue Growth and AI-Driven ...",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit IQVIA legal name and earnings."
+        },
+        {
+          "id": "7222a2d77deecd19",
+          "ticker": "IQV",
+          "title": "US Equity Markets Mixed as Oil Drops, Chip Shares Slide",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad market title hides the issuer-specific discussion."
+        },
+        {
+          "id": "9e2e54abf00fdc78",
+          "ticker": "IQV",
+          "title": "Sector Update: Healthcare Stocks Gain Late Afternoon",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Sector update title hides the issuer-specific discussion."
+        },
+        {
+          "id": "a2187f2fa37e64a7",
+          "ticker": "IQV",
+          "title": "IQVIA Q2 Earnings Call Highlights",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit IQVIA earnings."
+        },
+        {
+          "id": "e2d5b34d1002f6e4",
+          "ticker": "IQV",
+          "title": "This Healthcare Stock Is Today’s Best in the S&P 500",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "The title does not name the healthcare stock."
+        },
+        {
+          "id": "8123a3c116c62029",
+          "ticker": "IQV",
+          "title": "Top Midday Gainers",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Generic gainers title does not expose issuer identity."
+        },
+        {
+          "id": "43dfcf8aa077b526",
+          "ticker": "IQV",
+          "title": "IQVIA Holdings Inc. Q2 2026 Earnings Call Summary",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit IQVIA legal name and earnings."
+        },
+        {
+          "id": "ad5e2305351366b8",
+          "ticker": "LCID",
+          "title": "Lucid Group (LCID) Soars 21% as Saudi Prince Backing Eases Financial Health Worries",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Lucid move and catalyst."
+        },
+        {
+          "id": "00f625426ccad818",
+          "ticker": "LCID",
+          "title": "Why Lucid Stock Soared 21.5% Today",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Lucid move."
+        },
+        {
+          "id": "8834495b8a9af3a0",
+          "ticker": "LCID",
+          "title": "Lucid Stock Popped 21%. Thank a Saudi Prince.",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Lucid move and catalyst."
+        },
+        {
+          "id": "08c9b715c847a4aa",
+          "ticker": "LCID",
+          "title": "Why Is LCID Stock Soaring 23% Today?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit ticker and move."
+        },
+        {
+          "id": "d373e8a0f3df2f3f",
+          "ticker": "LCID",
+          "title": "Lucid Is Now Up 33% in a Month, Easily Beating Tesla and Rivian. What Will It Take to Get LCID Stock Back to $10?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Lucid relative performance."
+        },
+        {
+          "id": "195d0e86576622d1",
+          "ticker": "LCID",
+          "title": "Why General Motors Stock Could Keep Climbing As A One-Time Bill Fades",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "0c29832615d08e08",
+          "ticker": "LCID",
+          "title": "Sector Update: Consumer Stocks Rise Tuesday Afternoon",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "35904782725c544f",
+          "ticker": "LCID",
+          "title": "Saudi Prince Alwaleed Takes 5% Stake in EV-Maker Lucid",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Lucid ownership event."
+        },
+        {
+          "id": "4ad6111954334564",
+          "ticker": "LCID",
+          "title": "Is This Wall Street Bank Insane to Believe Tesla Will Nearly Double From Current Prices? Maybe Not.",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "c414f308d04e9223",
+          "ticker": "LCID",
+          "title": "Lucid Group Shares Rise After HRH Prince Alwaleed Discloses 5% Stake",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Lucid ownership event."
+        },
+        {
+          "id": "7fed6fa9d5b33a7a",
+          "ticker": "NVDA",
+          "title": "Nvidia (NVDA) Pours $5 Billion Into Safe AI And Expands Data Center Reach",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit NVIDIA investment and expansion."
+        },
+        {
+          "id": "0bd273862e1b81f8",
+          "ticker": "NVDA",
+          "title": "Why Costco, Verizon, Kroger, and Other Safe Dividend Stocks Are Rising",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "90e224e02ed1cf04",
+          "ticker": "NVDA",
+          "title": "The Smartest Dividend Stock to Buy With $1,000 Right Now (Spoiler: It Yields 5.6%.)",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "5be3caa82bfece9b",
+          "ticker": "NVDA",
+          "title": "Anthropic clarifies stance on open-weight AI models",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Anthropic title does not expose NVIDIA's role."
+        },
+        {
+          "id": "d007e829b6004ece",
+          "ticker": "NVDA",
+          "title": "Apple Hits $5 Trillion Market Cap: Will Earnings Extend the Rally?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "7c077bbf310e36ba",
+          "ticker": "NVDA",
+          "title": "Nvidia, oil and the Fed are fighting over the market",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "NVIDIA is an explicit subject of the market story."
+        },
+        {
+          "id": "ed282e0388939ca3",
+          "ticker": "NVDA",
+          "title": "SK hynix posts 1,200% net profit boost on AI chip boom",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "ad041bb8ae649ce4",
+          "ticker": "NVDA",
+          "title": "Kimi K3: DeepSeek 2.0, or is this Time Different?",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "The title does not expose NVIDIA's role in the model comparison."
+        },
+        {
+          "id": "4df1b31b8e86ebef",
+          "ticker": "NVDA",
+          "title": "Should You Buy Astera Labs Stock Before Aug. 4?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "0da196041c37d22d",
+          "ticker": "NVDA",
+          "title": "Nvidia Partner SK Hynix Misses Q2 Sales Target But Profit Surprises",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "SK Hynix is the event issuer; NVIDIA appears only as a partner qualifier."
+        },
+        {
+          "id": "0ff67f4c2269890a",
+          "ticker": "ITRI",
+          "title": "Why Is Itron (ITRI) Stock Rocketing Higher Today",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Itron move."
+        },
+        {
+          "id": "34256ff479c9d958",
+          "ticker": "ITRI",
+          "title": "Why Itron (ITRI) Is Up 27.2% After Margin Beat And Raised EPS Outlook Despite Lower Sales",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Itron results and outlook."
+        },
+        {
+          "id": "a0dd5c3e70658c59",
+          "ticker": "ITRI",
+          "title": "Itron (ITRI) Soars 26% After Earnings Beat, Raised Growth Outlook",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Itron results and outlook."
+        },
+        {
+          "id": "8dc3d21618ad6e44",
+          "ticker": "ITRI",
+          "title": "Itron Inc (ITRI) Q2 2026 Earnings Call Highlights: Record Gross Margin and Strong Free Cash ...",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Itron legal name and earnings."
+        },
+        {
+          "id": "9187782bda623a6c",
+          "ticker": "ITRI",
+          "title": "Why Itron Stock Soared 26% Higher Today",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Itron move."
+        },
+        {
+          "id": "8f3a2332fe251a37",
+          "ticker": "ITRI",
+          "title": "Itron Q2 Earnings Call Highlights",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Itron earnings."
+        },
+        {
+          "id": "13ab72b3526a849a",
+          "ticker": "ITRI",
+          "title": "Itron Reports Q2 Earnings and Raises Full-Year 2026 EPS Outlook",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Itron results and guidance."
+        },
+        {
+          "id": "314023e62762971e",
+          "ticker": "ITRI",
+          "title": "Itron (ITRI) Reports Q2 Earnings: What Key Metrics Have to Say",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Itron earnings."
+        },
+        {
+          "id": "1241be7df3a6cf6e",
+          "ticker": "ITRI",
+          "title": "Itron (ITRI) Beats Q2 Earnings Estimates",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Itron earnings."
+        },
+        {
+          "id": "7e8cbd2e22334124",
+          "ticker": "ITRI",
+          "title": "Itron (NASDAQ:ITRI) Reports Sales Below Analyst Estimates In Q2 CY2026 Earnings",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit legal name, exchange ticker, and earnings."
+        },
+        {
+          "id": "b166f90301d05351",
+          "ticker": "MU",
+          "title": "SK Hynix’s Q2 Miss Triggers Memory Stock Rout: MU, SNDK Slip But STX Holds Up In Green After Q4 Strong Report",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "MU is explicitly named as part of the memory-stock selloff."
+        },
+        {
+          "id": "48565d431ef44dc8",
+          "ticker": "MU",
+          "title": "Cramer Sees Echoes of Dot-Com Bust as Wall Street Flees AI Stocks for Safety",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "66c8e8de01a698de",
+          "ticker": "MU",
+          "title": "What The Options Market Is Signaling About The Volatility In SanDisk Stock",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "959d5d5a69b5d193",
+          "ticker": "MU",
+          "title": "SK Hynix Stock Drops on Disappointing Earnings",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "dafa73dfcdbee602",
+          "ticker": "MU",
+          "title": "SK Hynix's Record Profit Misses Investors' Lofty AI Expectations",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence."
+        },
+        {
+          "id": "46d190ebc34a7f16",
+          "ticker": "MU",
+          "title": "Micron Stock Dives As Semiconductor Sell-Off Gains Steam",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Micron move."
+        },
+        {
+          "id": "931c3c9123c46b05",
+          "ticker": "MU",
+          "title": "Stock Market Today: Dow Gains 500 Points; SpaceX, SK Hynix Make These Moves (Live Coverage)",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Live market roundup does not expose Micron's role in the title."
+        },
+        {
+          "id": "ecc1496aa49e9cbb",
+          "ticker": "MU",
+          "title": "Update: Dow Extends Advance Following Strong Earnings Reports",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad market title does not expose Micron's role."
+        },
+        {
+          "id": "56b0dd74f5604433",
+          "ticker": "MU",
+          "title": "Stocks to Watch Recap: Coca-Cola, J&J, Mercedes-Benz, UPS",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad recap title does not expose Micron's role."
+        },
+        {
+          "id": "40a5ab1fb2caf48e",
+          "ticker": "MU",
+          "title": "Micron Stock Is Leading a Brutal New Chip Slump",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Explicit Micron move."
+        }
+      ],
+      "freshness_days": {
+        "median": 0.3676773266319444,
+        "p95": 4.740582419224537,
+        "within_7d_rate": 0.9875,
+        "within_30d_rate": 1.0,
+        "within_90d_rate": 1.0
+      }
+    }
+  }
+}

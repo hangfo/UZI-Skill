@@ -258,13 +258,24 @@ def candidate_matches(
     )
 
 
-def fetch_snapshot() -> dict[str, Any]:
+def _load_profiles(path: Path | None) -> dict[str, dict[str, Any]]:
+    if path is None:
+        return PROFILES
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    profiles = payload.get("profiles", payload)
+    if not isinstance(profiles, dict) or not profiles:
+        raise ValueError("profiles file must contain a non-empty object")
+    return {str(ticker).upper(): dict(profile) for ticker, profile in profiles.items()}
+
+
+def fetch_snapshot(profiles: dict[str, dict[str, Any]] | None = None) -> dict[str, Any]:
     captured_at = datetime.now(timezone.utc)
     rows: list[dict[str, Any]] = []
     latencies: dict[str, float] = {}
+    profiles = profiles or PROFILES
     session = requests.Session()
     session.headers.update({"User-Agent": "Mozilla/5.0 (compatible; UZI-Skill Yahoo shadow)"})
-    for ticker, profile in PROFILES.items():
+    for ticker, profile in profiles.items():
         started = time.perf_counter()
         response = session.get(
             YAHOO_SEARCH_URL,
@@ -317,7 +328,7 @@ def fetch_snapshot() -> dict[str, Any]:
         "captured_at_utc": captured_at.isoformat(),
         "source": YAHOO_SEARCH_URL,
         "request": {"quotesCount": 1, "newsCount": 10, "enableFuzzyQuery": "false"},
-        "profiles": PROFILES,
+        "profiles": profiles,
         "sec_access": {
             "attempted": False,
             "status": "gap",
@@ -365,7 +376,7 @@ def evaluate(snapshot: dict[str, Any], labels: dict[str, Any]) -> dict[str, Any]
             if truth not in {"relevant", "irrelevant", "ambiguous"}:
                 raise ValueError(f"invalid truth for {row['id']}: {truth}")
             if matcher_key == "candidate_match":
-                profile = PROFILES[row["ticker"]]
+                profile = (snapshot.get("profiles") or PROFILES)[row["ticker"]]
                 matched = candidate_matches(
                     row.get("title", ""),
                     row.get("summary", ""),
@@ -449,11 +460,16 @@ def main() -> int:
     parser.add_argument("--snapshot", type=Path, required=True)
     parser.add_argument("--labels", type=Path)
     parser.add_argument("--metrics-out", type=Path)
+    parser.add_argument(
+        "--profiles",
+        type=Path,
+        help="Optional JSON profile set for an independent holdout capture.",
+    )
     parser.add_argument("--fetch", action="store_true")
     args = parser.parse_args()
 
     if args.fetch:
-        snapshot = fetch_snapshot()
+        snapshot = fetch_snapshot(_load_profiles(args.profiles))
         args.snapshot.parent.mkdir(parents=True, exist_ok=True)
         args.snapshot.write_text(json.dumps(snapshot, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     else:

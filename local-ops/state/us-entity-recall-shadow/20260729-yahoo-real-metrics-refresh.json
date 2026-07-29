@@ -1,0 +1,1963 @@
+{
+  "schema": "uzi.us_entity_recall_shadow_metrics.v1",
+  "captured_at_utc": "2026-07-29T02:44:32.973135+00:00",
+  "rows": 119,
+  "labeled_rows": 119,
+  "duplicate_rate": 0.0,
+  "latency_seconds": {
+    "median": 0.1784105,
+    "p95": 0.958799,
+    "max": 0.958799
+  },
+  "matchers": {
+    "baseline_match": {
+      "counts": {
+        "ambiguous": 12,
+        "true_negative": 43,
+        "true_positive": 51,
+        "false_positive": 6,
+        "false_negative": 7
+      },
+      "accepted": 57,
+      "judged_relevant": 58,
+      "precision": 0.8947368421052632,
+      "recall": 0.8793103448275862,
+      "cross_issuer_contamination_rate": 0.10526315789473684,
+      "details": [
+        {
+          "id": "48565d431ef44dc8",
+          "ticker": "MU",
+          "title": "Cramer Sees Echoes of Dot-Com Bust as Wall Street Flees AI Stocks for Safety",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad AI/chip rotation title; full-body issuer materiality is not established from frozen Yahoo metadata."
+        },
+        {
+          "id": "66c8e8de01a698de",
+          "ticker": "MU",
+          "title": "What The Options Market Is Signaling About The Volatility In SanDisk Stock",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "959d5d5a69b5d193",
+          "ticker": "MU",
+          "title": "SK Hynix Stock Drops on Disappointing Earnings",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "dafa73dfcdbee602",
+          "ticker": "MU",
+          "title": "SK Hynix's Record Profit Misses Investors' Lofty AI Expectations",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "46d190ebc34a7f16",
+          "ticker": "MU",
+          "title": "Micron Stock Dives As Semiconductor Sell-Off Gains Steam",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Micron is the named issuer and primary subject."
+        },
+        {
+          "id": "931c3c9123c46b05",
+          "ticker": "MU",
+          "title": "Stock Market Today: Dow Gains 500 Points; SpaceX, SK Hynix Make These Moves (Live Coverage)",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Live-market roundup may discuss Micron, but the frozen title does not establish issuer materiality."
+        },
+        {
+          "id": "ecc1496aa49e9cbb",
+          "ticker": "MU",
+          "title": "Update: Dow Extends Advance Following Strong Earnings Reports",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad market update lacks enough frozen context to judge Micron materiality."
+        },
+        {
+          "id": "56b0dd74f5604433",
+          "ticker": "MU",
+          "title": "Stocks to Watch Recap: Coca-Cola, J&J, Mercedes-Benz, UPS",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Multi-company recap lacks enough frozen context to judge Micron materiality."
+        },
+        {
+          "id": "40a5ab1fb2caf48e",
+          "ticker": "MU",
+          "title": "Micron Stock Is Leading a Brutal New Chip Slump",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Micron is the named issuer and primary subject."
+        },
+        {
+          "id": "56e7a2c2b6319c89",
+          "ticker": "MU",
+          "title": "Investors Rotate Out of Chip Stocks",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Sector rotation title lacks enough frozen context to judge Micron materiality."
+        },
+        {
+          "id": "eaf66642395116fc",
+          "ticker": "AI",
+          "title": "BigBear.ai Before Q2 Earnings: Buy, Sell or Hold the Stock?",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "71c8966cec62425b",
+          "ticker": "AI",
+          "title": "Does C3.ai’s (AI) Lawsuit Win Quietly Recast Its Risk Profile in the AI Software Race?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "C3.ai is the named issuer and primary subject."
+        },
+        {
+          "id": "5f82e3b18a1b449d",
+          "ticker": "AI",
+          "title": "C3.ai (AI) Stock May Be 22% Overvalued On Current AI Expectations",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "C3.ai is the named issuer and primary subject."
+        },
+        {
+          "id": "a4e5a842658f7339",
+          "ticker": "AI",
+          "title": "C3.ai (AI) Gets Relief From Lawsuit Exit As Valuation Questions Linger",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "C3.ai is the named issuer and primary subject."
+        },
+        {
+          "id": "495535425f9acbc2",
+          "ticker": "AI",
+          "title": "C3.ai, Inc. (AI) is Attracting Investor Attention: Here is What You Should Know",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "C3.ai is the named issuer and primary subject."
+        },
+        {
+          "id": "3c1cd823888de0e9",
+          "ticker": "AI",
+          "title": "Nebius vs. C3.ai: Which AI Growth Stock is the Better Buy?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "C3.ai is directly compared as a named issuer."
+        },
+        {
+          "id": "78082183e1061072",
+          "ticker": "AI",
+          "title": "Will Faster Product Innovation Help BBAI Win More Enterprise Clients?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "68c5ea3afef58f58",
+          "ticker": "AI",
+          "title": "What Does the C3.ai CEO's Sale of Company Shares Worth $4.2 Million Mean for Investors?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "C3.ai and its CEO transaction are the primary subject."
+        },
+        {
+          "id": "4024b5603cb5a858",
+          "ticker": "AI",
+          "title": "C3.ai, Inc. (AI) Stock Moves -1.01%: What You Should Know",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "C3.ai is the named issuer and primary subject."
+        },
+        {
+          "id": "945004559664f3fe",
+          "ticker": "AI",
+          "title": "3 Unpopular Stocks Walking a Fine Line",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Generic multi-stock title does not identify which issuer discussion is material."
+        },
+        {
+          "id": "f5dece63609c0a22",
+          "ticker": "C",
+          "title": "What Will SK Hynix’s Share Conversion Mean for Its US Premium?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "685627763783c52c",
+          "ticker": "C",
+          "title": "Whitney Warns of Economic Reckoning This Year, Sees Fed on Hold",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "9bccfdc1393d7295",
+          "ticker": "C",
+          "title": "Saudi Prince Alwaleed Takes 5% Stake in EV-Maker Lucid",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "64773cb85f3b95ea",
+          "ticker": "C",
+          "title": "FRN Variable Rate Fix",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Generic rate-fix title lacks enough frozen context to bind the notice to Citigroup."
+        },
+        {
+          "id": "6465b4ec4491d9a8",
+          "ticker": "C",
+          "title": "Citi Is Now Live With a Trade Digitization Solution Integrating Supply Chain Solutions",
+          "truth": "relevant",
+          "verdict": "false_negative",
+          "reason": "Citi is the issuer brand and the new trade solution is the primary subject."
+        },
+        {
+          "id": "ff707625cefe1dd9",
+          "ticker": "C",
+          "title": "Wall Street Banks Eyed as Overlooked Beneficiaries of AI Trade",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "f2cbd094d9216256",
+          "ticker": "C",
+          "title": "Market Chatter: Goldman Sachs Names Former Citi Banker Head of Japan Credit Business",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "5538902e64db7b0f",
+          "ticker": "C",
+          "title": "Most US Banks Beat Earnings Forecasts Amid Favorable Revenue Trends, Raymond James Says",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "ccb7082052d340ac",
+          "ticker": "C",
+          "title": "Eli Lilly (LLY) Stock Gets Fair Value Bump As Analysts Lift Targets On GLP1 Outlook",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "836e2629fd9122aa",
+          "ticker": "C",
+          "title": "Should You Invest in Bank of America Following Impressive Q2 Results?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "0eda2ec6bd3058e9",
+          "ticker": "F",
+          "title": "Ford Motor Q2 Earnings Call Highlights",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Ford is the named issuer and primary subject."
+        },
+        {
+          "id": "2037301905d35aa3",
+          "ticker": "F",
+          "title": "Ford Wants to Turn Car Customization Into the Next Big Thing—Exec Says Think ‘Nike Dropping a Sneaker’",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Ford is the named issuer and primary subject."
+        },
+        {
+          "id": "9275b4821243a96b",
+          "ticker": "F",
+          "title": "Ford’s Sales and Revenue Are Down. The Automaker Isn’t Sweating It",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Ford is the named issuer and primary subject."
+        },
+        {
+          "id": "0dc7badcf5ca4389",
+          "ticker": "F",
+          "title": "Ford Motor (F) Reports Q2 Earnings: What Key Metrics Have to Say",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Ford is the named issuer and primary subject."
+        },
+        {
+          "id": "5a19d3b5e7918afa",
+          "ticker": "F",
+          "title": "F Stock Jumps 8% After-Hours On Q2 Earnings Beat — Ford Also Raises 2026 Profit Outlook",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Qualified F-stock context and Ford confirmation bind the title."
+        },
+        {
+          "id": "c13194944f83efae",
+          "ticker": "F",
+          "title": "Ford (NYSE:F) Misses Q2 CY2026 Revenue Estimates, But Stock Soars 6.6%",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Ford and NYSE:F are the primary subject."
+        },
+        {
+          "id": "9caf720c0ff6ebc6",
+          "ticker": "F",
+          "title": "Ford Motor Company (F) Beats Q2 Earnings Estimates",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Ford Motor Company is the named issuer."
+        },
+        {
+          "id": "d6fdaad2e0cf3904",
+          "ticker": "F",
+          "title": "Ford, Visa, Seagate: After-Hours Stocks to Watch",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Ford is a directly named issuer in the after-hours recap."
+        },
+        {
+          "id": "c6dbc9d1897640f2",
+          "ticker": "F",
+          "title": "Ford Motor Lifts Guidance on Forecast of Higher U.S. Automobile Pricing",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Ford Motor is the named issuer and primary subject."
+        },
+        {
+          "id": "2ccdc53319e5734a",
+          "ticker": "F",
+          "title": "Ford stock surges 4% as Q2 beats expectations and sparks guidance upgrade",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Ford is the named issuer and primary subject."
+        },
+        {
+          "id": "7c6ecca9c7ed4ad9",
+          "ticker": "GOOGL",
+          "title": "Satya Nadella's Microsoft Needs Power. Joe Creed's Caterpillar Sells It.",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "c8c4e529431fec91",
+          "ticker": "GOOGL",
+          "title": "Cramer Sees Echoes of Dot-Com Bust as Wall Street Flees AI Stocks for Safety",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "052efd8ce547c479",
+          "ticker": "GOOGL",
+          "title": "The Best Semiconductor Stocks to Buy",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "59ce7ce2ad255c0c",
+          "ticker": "GOOGL",
+          "title": "SK Hynix Stock Drops on Disappointing Earnings",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "1d0fd007b693f3aa",
+          "ticker": "GOOGL",
+          "title": "Does Alphabet’s AI Spending And Cash Squeeze Shift The Bull Case For Alphabet (GOOGL)?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Alphabet and GOOGL are the named issuer and security."
+        },
+        {
+          "id": "5a65b9fa8df9799a",
+          "ticker": "GOOGL",
+          "title": "Hong Kong Data Center Loan Sale Shows Banks Hitting Sector Limits",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "1b5aa4594a77fc06",
+          "ticker": "GOOGL",
+          "title": "Etsy (ETSY) Is Up 5.9% After New AI Agent Partnerships Reshape Buyer–Seller Interactions – Has The Bull Case Changed?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "9885a612c0050f73",
+          "ticker": "GOOGL",
+          "title": "Market Talk: Investors trying to 'bully' Mag 7 to lower AI spending",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Mag-7 spending discussion may cover Alphabet materially, but the frozen title is not issuer-specific."
+        },
+        {
+          "id": "545c965709de38dc",
+          "ticker": "GOOGL",
+          "title": "US stocks mixed ahead key tech earnings, Fed",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad market/earnings roundup lacks enough frozen context to judge Alphabet materiality."
+        },
+        {
+          "id": "bf112d6abe95f0bd",
+          "ticker": "GOOGL",
+          "title": "‘Big Short’ investor warns AI has become one dangerous trade",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad AI-trade warning lacks enough frozen context to judge Alphabet materiality."
+        },
+        {
+          "id": "0790105b15bd7b8f",
+          "ticker": "META",
+          "title": "Anthropic clarifies stance on open-weight AI models",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "60e669538bba310e",
+          "ticker": "META",
+          "title": "Satya Nadella's Microsoft Needs Power. Joe Creed's Caterpillar Sells It.",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "64fe636008552758",
+          "ticker": "META",
+          "title": "Kimi K3: DeepSeek 2.0, or is this Time Different?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "cd67fde0bd3404a7",
+          "ticker": "META",
+          "title": "The Best Semiconductor Stocks to Buy",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "1270ba36e99c937c",
+          "ticker": "META",
+          "title": "Hong Kong Data Center Loan Sale Shows Banks Hitting Sector Limits",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "ef0cf1d3f47c79c8",
+          "ticker": "META",
+          "title": "Dow Ends Higher For Third Straight Session As Oil Cools, Nasdaq Slides On Chipmaker Rout — PYPL, SPCX, AAPL, V, F Stocks In Focus",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "f02429ac2889db4c",
+          "ticker": "META",
+          "title": "Markets brace for Fed decision and Big Tech earnings",
+          "truth": "relevant",
+          "verdict": "false_negative",
+          "reason": "Yahoo binds the item to META and the event is the imminent Meta earnings release."
+        },
+        {
+          "id": "5d7d19154414243e",
+          "ticker": "META",
+          "title": "Coca-Cola Stock Is Rocking Like the 1990s, With a Higher P/E Than Most of the Magnificent 7",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "5f1368c5845a04ab",
+          "ticker": "META",
+          "title": "Visa Announced Layoffs Ahead of Earnings Beat, as AI and Restructuring Accelerate",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "ecdd8e9657c76f0f",
+          "ticker": "META",
+          "title": "Freddie Mac Announces Release Date for Second Quarter 2026 Financial Results",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "643c0b78b00ee8c5",
+          "ticker": "HOOD",
+          "title": "Analysts hike Robinhood stock price target ahead of July 29 earnings",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Robinhood is the named issuer and primary subject."
+        },
+        {
+          "id": "83ad52ace48499b4",
+          "ticker": "HOOD",
+          "title": "Robinhood Markets Insider Sold Shares Worth $4,680,523, According to a Recent SEC Filing",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Robinhood Markets insider transaction is issuer-specific."
+        },
+        {
+          "id": "0ab0ba8423e177e5",
+          "ticker": "HOOD",
+          "title": "SpaceX Erased Tesla’s Marketcap in Little Over a Month",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "4b491a921e4e9169",
+          "ticker": "HOOD",
+          "title": "Coinbase and Robinhood are locked in a heated battle ahead of Q2 earnings—but only one is being called the industry’s ‘first hyperscaler’",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Robinhood is directly compared as a named issuer."
+        },
+        {
+          "id": "83cf5be2d2071c0b",
+          "ticker": "HOOD",
+          "title": "Robinhood Chain’s Trading Volumes Slump As Memecoin Interest Fades",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Robinhood Chain is a named issuer platform."
+        },
+        {
+          "id": "a4d085153d7ab282",
+          "ticker": "HOOD",
+          "title": "Can Stock Trading and Prediction Markets Offset Robinhood’s Crypto Slump?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Robinhood business mix and earnings are the primary subject."
+        },
+        {
+          "id": "6a677c491c088925",
+          "ticker": "HOOD",
+          "title": "Robinhood (HOOD) To Report Earnings Tomorrow: Here Is What To Expect",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Robinhood and HOOD are the named issuer and security."
+        },
+        {
+          "id": "3c0bb87791cf7b4c",
+          "ticker": "HOOD",
+          "title": "How Robinhood Built a $450M Blockchain in Three Weeks",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Robinhood blockchain product is the primary subject."
+        },
+        {
+          "id": "d658c07d0c438f67",
+          "ticker": "HOOD",
+          "title": "Robinhood CEO Vlad Tenev says X account was hacked",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Robinhood CEO account compromise is an issuer-related event."
+        },
+        {
+          "id": "2d6462af9745baa3",
+          "ticker": "ON",
+          "title": "ON Semiconductor Corp. (ON) Stock Sinks As Market Gains: Here's Why",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "ON Semiconductor and ON are the named issuer and security."
+        },
+        {
+          "id": "aeae21638180d2b7",
+          "ticker": "ON",
+          "title": "ON Semiconductor (ON) Heads Into Earnings As AI Power Optimism Keeps Valuation In Focus",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "ON Semiconductor and ON are the named issuer and security."
+        },
+        {
+          "id": "789ddeabc201aebd",
+          "ticker": "ON",
+          "title": "ON Semiconductor Corp. (ON) Earnings Expected to Grow: What to Know Ahead of Next Week's Release",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "ON Semiconductor and ON are the named issuer and security."
+        },
+        {
+          "id": "ce258f9c1856b39f",
+          "ticker": "ON",
+          "title": "TXN vs. ON: Which Semiconductor Stock Is the Better Buy Right Now?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "ON is directly compared as a named semiconductor issuer."
+        },
+        {
+          "id": "2aeb98f4804fb39c",
+          "ticker": "ON",
+          "title": "Micron, onsemi, Seagate, Western Digital, and Vishay Intertechnology Shares Are Falling, What You Need To Know",
+          "truth": "relevant",
+          "verdict": "false_negative",
+          "reason": "Officially bound onsemi brand is directly named in the multi-issuer event."
+        },
+        {
+          "id": "2c5c50525e838345",
+          "ticker": "ON",
+          "title": "1 Profitable Stock with Impressive Fundamentals and 2 We Find Risky",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Generic multi-stock title does not identify which issuer discussion is material."
+        },
+        {
+          "id": "0bc996a3e65c0031",
+          "ticker": "ON",
+          "title": "MaxLinear (MXL) Tops Q2 Earnings and Revenue Estimates",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "1039856991c75ad7",
+          "ticker": "ON",
+          "title": "TXN Keeps Climbing. Should You Climb On?",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "02ce9fbc3d1cf29c",
+          "ticker": "ON",
+          "title": "ON Semiconductor Corp. (ON) Gains As Market Dips: What You Should Know",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "ON Semiconductor and ON are the named issuer and security."
+        },
+        {
+          "id": "f12067d047dfc0bc",
+          "ticker": "ON",
+          "title": "ON Semiconductor Corporation (ON) Is a Trending Stock: Facts to Know Before Betting on It",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "ON Semiconductor and ON are the named issuer and security."
+        },
+        {
+          "id": "11c3fc5ea3170f87",
+          "ticker": "IT",
+          "title": "Lumen (LUMN) Stock Looks Richer After Fresh AI Connectivity Recognition",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "6688b9b669cae3d6",
+          "ticker": "IT",
+          "title": "Gartner (IT) Reports Next Week: Wall Street Expects Earnings Growth",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Gartner and IT are the named issuer and security."
+        },
+        {
+          "id": "b0ee4f2aa52430e7",
+          "ticker": "IT",
+          "title": "Tecnotree Recognized in Two Gartner® Hype Cycle™ Reports for CSP Algorithmic Pricing",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "2718f5f06a9276f0",
+          "ticker": "IT",
+          "title": "Gartner raises 2026 IT spending forecast on AI demand",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Gartner's own spending forecast is the primary subject."
+        },
+        {
+          "id": "99b63e3254657864",
+          "ticker": "IT",
+          "title": "Analyst Report: Gartner, Inc.",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "The analyst report is specifically about Gartner, Inc."
+        },
+        {
+          "id": "374368ecae4bc66b",
+          "ticker": "IT",
+          "title": "Securden Recognized in the 2026 Gartner® Research: Reduce Cybersecurity Attacks With Least Privilege Endpoint Strategies",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "0fc7e1e82a0509b8",
+          "ticker": "IT",
+          "title": "Flexera is Only Vendor Named a Customers’ Choice in the 2026 Gartner® Peer Insights™ Voice of the Customer for Software Asset Management Tools Report",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "67d5d9e71c715cc3",
+          "ticker": "IT",
+          "title": "Jefferies Adjusts Price Target on Gartner to $140 From $167, Maintains Hold Rating",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "The price-target action is specifically about Gartner."
+        },
+        {
+          "id": "d1ee31f9274efff8",
+          "ticker": "IT",
+          "title": "Vitria Technology Sets the Standard for Event Intelligence Solutions as Knowledge-Driven AIOps Reaches the Enterprise Mainstream",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "1200236b6e6f8973",
+          "ticker": "IT",
+          "title": "SoundHound AI (SOUN) Stock Could Trade At A Premium Despite Gartner Recognition",
+          "truth": "irrelevant",
+          "verdict": "false_positive",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "566050faffed817c",
+          "ticker": "CAT",
+          "title": "Satya Nadella's Microsoft Needs Power. Joe Creed's Caterpillar Sells It.",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Caterpillar is a directly named issuer."
+        },
+        {
+          "id": "42999c264c342cd0",
+          "ticker": "CAT",
+          "title": "What Makes Caterpillar (CAT) a New Buy Stock",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Caterpillar and CAT are the named issuer and security."
+        },
+        {
+          "id": "e5ebb5160b6a9324",
+          "ticker": "CAT",
+          "title": "Caterpillar (CAT) Earnings Expected to Grow: What to Know Ahead of Next Week's Release",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Caterpillar and CAT are the named issuer and security."
+        },
+        {
+          "id": "4845849a13aaf4ce",
+          "ticker": "CAT",
+          "title": "After Ford Soars 44% on AI Fever, Traders Want Proof It’s Real",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "2fba548ad1d93719",
+          "ticker": "CAT",
+          "title": "Jefferies Global Best Ideas List Has 5 US Dividend Stocks With Huge Total Return Potential",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "59982038fba77708",
+          "ticker": "CAT",
+          "title": "Caterpillar (CAT) Stock Looks Slightly Above Fair Value Today",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Caterpillar and CAT are the named issuer and security."
+        },
+        {
+          "id": "74b7259bf718caeb",
+          "ticker": "CAT",
+          "title": "Caterpillar (CAT) Faces Rare Earth Squeeze As China Export Curbs Reset Supply Chains",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Caterpillar and CAT are the named issuer and security."
+        },
+        {
+          "id": "24a8ad82b13f212a",
+          "ticker": "CAT",
+          "title": "Review & Preview: Brace Yourself",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "15747bbfbeb7e077",
+          "ticker": "CAT",
+          "title": "Caterpillar (CAT) Stock Sinks As Market Gains: What You Should Know",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Caterpillar and CAT are the named issuer and security."
+        },
+        {
+          "id": "a59848b1c3b2b5c4",
+          "ticker": "CAT",
+          "title": "Stock Market Today: Dow Up As These Stocks Test Entries; This AI Play Fights Back Before Key Event (Live Coverage)",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "ed0be6a76530ab19",
+          "ticker": "XYZ",
+          "title": "Visa Stock Rises as Report Signals 2,600 Job Cuts",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "472ec22fa24bacec",
+          "ticker": "XYZ",
+          "title": "Block vs. PayPal: Which Fintech Stock Is a Better Buy Right Now?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Block is the named issuer and primary subject."
+        },
+        {
+          "id": "bd8fdee93d215318",
+          "ticker": "XYZ",
+          "title": "Judge Blocks Minnesota's Prediction Market Ban",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "c4e6288c318e924f",
+          "ticker": "XYZ",
+          "title": "PROG Holdings Q2 Preview: Leveraging Strengths Amid Market Woes",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "cfa55bb7d1f66316",
+          "ticker": "XYZ",
+          "title": "Visa trims 7% of workforce as fintech belt-tightening spreads",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "4d6b8c6e3547b046",
+          "ticker": "XYZ",
+          "title": "Visa to Cut 7% of Workforce as CEO Seeks to Revamp Company",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "14e0486b70ea5016",
+          "ticker": "XYZ",
+          "title": "AI Across Sezzle: Can It Help Scale Efficiency and Product Velocity?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "6808991f31504da0",
+          "ticker": "XYZ",
+          "title": "Can Bitcoin Price Reach $500,000? Coinbase Is Preparing for Its Biggest Security Threat",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "e81d7382053596f6",
+          "ticker": "XYZ",
+          "title": "Meet The 2 S&P 500 CEOs Paid Less Than $500 A Year",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Generic CEO roundup may include Block, but issuer materiality is not established in the frozen title."
+        },
+        {
+          "id": "b53f1a6faeb26f53",
+          "ticker": "XYZ",
+          "title": "The Dark Sides Of Cash App You'll Wish You Knew About Sooner",
+          "truth": "relevant",
+          "verdict": "false_negative",
+          "reason": "Cash App is an officially bound Block business brand and the primary subject."
+        },
+        {
+          "id": "df41c53fd17fea41",
+          "ticker": "GEN",
+          "title": "Norton Study Reveals Emerging Risks for Kids Online, Prompting Parents to Have a New Kind of \"The Talk\"",
+          "truth": "relevant",
+          "verdict": "false_negative",
+          "reason": "Norton is an officially bound Gen brand and the primary subject."
+        },
+        {
+          "id": "d5ecb3956833669d",
+          "ticker": "GEN",
+          "title": "MoneyLion One Launches Premium Banking Helping Everyday Americans Earn More from Every Paycheck",
+          "truth": "relevant",
+          "verdict": "false_negative",
+          "reason": "MoneyLion is a Gen-controlled business and the primary subject."
+        },
+        {
+          "id": "98296649286439e7",
+          "ticker": "GEN",
+          "title": "Gen Half-Year Threat Report: Attackers are Moving Closer to the Systems People Trust",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Gen issuer threat report is the primary subject."
+        },
+        {
+          "id": "475a5dd9954e1df0",
+          "ticker": "GEN",
+          "title": "Gen to Announce Fiscal 2027 First Quarter Results on August 6, 2026",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Gen issuer results announcement is the primary subject."
+        },
+        {
+          "id": "0fd0d9ca9ff4f4a8",
+          "ticker": "GEN",
+          "title": "CVLT Grew. The Stock Did Not. Someone Is Wrong",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "55538f36b58ae7a5",
+          "ticker": "GEN",
+          "title": "Own ServiceNow For AI? Gen Digital's Numbers Speak Louder",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Gen Digital is directly compared as a named issuer."
+        },
+        {
+          "id": "0313b9e065383c51",
+          "ticker": "GEN",
+          "title": "GEN Grew. The Stock Did Not. Someone Is Wrong",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "GEN security performance is the primary subject."
+        },
+        {
+          "id": "05a84fe24b7e1173",
+          "ticker": "GEN",
+          "title": "Norton Genie Expands to Claude, Bringing AI-Powered Scam Detection into Everyday Conversations",
+          "truth": "relevant",
+          "verdict": "false_negative",
+          "reason": "Norton is an officially bound Gen brand and the primary subject."
+        },
+        {
+          "id": "7b299743447f6112",
+          "ticker": "GEN",
+          "title": "Gen Digital Stock: Is GEN Underperforming the Technology Sector?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Gen Digital and GEN are the named issuer and security."
+        },
+        {
+          "id": "7be28cdfe1e3dbb1",
+          "ticker": "GEN",
+          "title": "MoneyLion Survey Finds Summer Financial Pressure Hits Gen Z The Hardest",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "MoneyLion is a Gen-controlled business and the primary subject."
+        }
+      ],
+      "freshness_days": {
+        "median": 0.4587149668402778,
+        "p95": 19.086006633506944,
+        "within_7d_rate": 0.8739495798319328,
+        "within_30d_rate": 0.9831932773109243,
+        "within_90d_rate": 1.0
+      }
+    },
+    "candidate_match": {
+      "counts": {
+        "ambiguous": 12,
+        "true_negative": 49,
+        "true_positive": 57,
+        "false_negative": 1
+      },
+      "accepted": 57,
+      "judged_relevant": 58,
+      "precision": 1.0,
+      "recall": 0.9827586206896551,
+      "cross_issuer_contamination_rate": 0.0,
+      "details": [
+        {
+          "id": "48565d431ef44dc8",
+          "ticker": "MU",
+          "title": "Cramer Sees Echoes of Dot-Com Bust as Wall Street Flees AI Stocks for Safety",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad AI/chip rotation title; full-body issuer materiality is not established from frozen Yahoo metadata."
+        },
+        {
+          "id": "66c8e8de01a698de",
+          "ticker": "MU",
+          "title": "What The Options Market Is Signaling About The Volatility In SanDisk Stock",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "959d5d5a69b5d193",
+          "ticker": "MU",
+          "title": "SK Hynix Stock Drops on Disappointing Earnings",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "dafa73dfcdbee602",
+          "ticker": "MU",
+          "title": "SK Hynix's Record Profit Misses Investors' Lofty AI Expectations",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "46d190ebc34a7f16",
+          "ticker": "MU",
+          "title": "Micron Stock Dives As Semiconductor Sell-Off Gains Steam",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Micron is the named issuer and primary subject."
+        },
+        {
+          "id": "931c3c9123c46b05",
+          "ticker": "MU",
+          "title": "Stock Market Today: Dow Gains 500 Points; SpaceX, SK Hynix Make These Moves (Live Coverage)",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Live-market roundup may discuss Micron, but the frozen title does not establish issuer materiality."
+        },
+        {
+          "id": "ecc1496aa49e9cbb",
+          "ticker": "MU",
+          "title": "Update: Dow Extends Advance Following Strong Earnings Reports",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad market update lacks enough frozen context to judge Micron materiality."
+        },
+        {
+          "id": "56b0dd74f5604433",
+          "ticker": "MU",
+          "title": "Stocks to Watch Recap: Coca-Cola, J&J, Mercedes-Benz, UPS",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Multi-company recap lacks enough frozen context to judge Micron materiality."
+        },
+        {
+          "id": "40a5ab1fb2caf48e",
+          "ticker": "MU",
+          "title": "Micron Stock Is Leading a Brutal New Chip Slump",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Micron is the named issuer and primary subject."
+        },
+        {
+          "id": "56e7a2c2b6319c89",
+          "ticker": "MU",
+          "title": "Investors Rotate Out of Chip Stocks",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Sector rotation title lacks enough frozen context to judge Micron materiality."
+        },
+        {
+          "id": "eaf66642395116fc",
+          "ticker": "AI",
+          "title": "BigBear.ai Before Q2 Earnings: Buy, Sell or Hold the Stock?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "71c8966cec62425b",
+          "ticker": "AI",
+          "title": "Does C3.ai’s (AI) Lawsuit Win Quietly Recast Its Risk Profile in the AI Software Race?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "C3.ai is the named issuer and primary subject."
+        },
+        {
+          "id": "5f82e3b18a1b449d",
+          "ticker": "AI",
+          "title": "C3.ai (AI) Stock May Be 22% Overvalued On Current AI Expectations",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "C3.ai is the named issuer and primary subject."
+        },
+        {
+          "id": "a4e5a842658f7339",
+          "ticker": "AI",
+          "title": "C3.ai (AI) Gets Relief From Lawsuit Exit As Valuation Questions Linger",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "C3.ai is the named issuer and primary subject."
+        },
+        {
+          "id": "495535425f9acbc2",
+          "ticker": "AI",
+          "title": "C3.ai, Inc. (AI) is Attracting Investor Attention: Here is What You Should Know",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "C3.ai is the named issuer and primary subject."
+        },
+        {
+          "id": "3c1cd823888de0e9",
+          "ticker": "AI",
+          "title": "Nebius vs. C3.ai: Which AI Growth Stock is the Better Buy?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "C3.ai is directly compared as a named issuer."
+        },
+        {
+          "id": "78082183e1061072",
+          "ticker": "AI",
+          "title": "Will Faster Product Innovation Help BBAI Win More Enterprise Clients?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "68c5ea3afef58f58",
+          "ticker": "AI",
+          "title": "What Does the C3.ai CEO's Sale of Company Shares Worth $4.2 Million Mean for Investors?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "C3.ai and its CEO transaction are the primary subject."
+        },
+        {
+          "id": "4024b5603cb5a858",
+          "ticker": "AI",
+          "title": "C3.ai, Inc. (AI) Stock Moves -1.01%: What You Should Know",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "C3.ai is the named issuer and primary subject."
+        },
+        {
+          "id": "945004559664f3fe",
+          "ticker": "AI",
+          "title": "3 Unpopular Stocks Walking a Fine Line",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Generic multi-stock title does not identify which issuer discussion is material."
+        },
+        {
+          "id": "f5dece63609c0a22",
+          "ticker": "C",
+          "title": "What Will SK Hynix’s Share Conversion Mean for Its US Premium?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "685627763783c52c",
+          "ticker": "C",
+          "title": "Whitney Warns of Economic Reckoning This Year, Sees Fed on Hold",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "9bccfdc1393d7295",
+          "ticker": "C",
+          "title": "Saudi Prince Alwaleed Takes 5% Stake in EV-Maker Lucid",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "64773cb85f3b95ea",
+          "ticker": "C",
+          "title": "FRN Variable Rate Fix",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Generic rate-fix title lacks enough frozen context to bind the notice to Citigroup."
+        },
+        {
+          "id": "6465b4ec4491d9a8",
+          "ticker": "C",
+          "title": "Citi Is Now Live With a Trade Digitization Solution Integrating Supply Chain Solutions",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Citi is the issuer brand and the new trade solution is the primary subject."
+        },
+        {
+          "id": "ff707625cefe1dd9",
+          "ticker": "C",
+          "title": "Wall Street Banks Eyed as Overlooked Beneficiaries of AI Trade",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "f2cbd094d9216256",
+          "ticker": "C",
+          "title": "Market Chatter: Goldman Sachs Names Former Citi Banker Head of Japan Credit Business",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "5538902e64db7b0f",
+          "ticker": "C",
+          "title": "Most US Banks Beat Earnings Forecasts Amid Favorable Revenue Trends, Raymond James Says",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "ccb7082052d340ac",
+          "ticker": "C",
+          "title": "Eli Lilly (LLY) Stock Gets Fair Value Bump As Analysts Lift Targets On GLP1 Outlook",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "836e2629fd9122aa",
+          "ticker": "C",
+          "title": "Should You Invest in Bank of America Following Impressive Q2 Results?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "0eda2ec6bd3058e9",
+          "ticker": "F",
+          "title": "Ford Motor Q2 Earnings Call Highlights",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Ford is the named issuer and primary subject."
+        },
+        {
+          "id": "2037301905d35aa3",
+          "ticker": "F",
+          "title": "Ford Wants to Turn Car Customization Into the Next Big Thing—Exec Says Think ‘Nike Dropping a Sneaker’",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Ford is the named issuer and primary subject."
+        },
+        {
+          "id": "9275b4821243a96b",
+          "ticker": "F",
+          "title": "Ford’s Sales and Revenue Are Down. The Automaker Isn’t Sweating It",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Ford is the named issuer and primary subject."
+        },
+        {
+          "id": "0dc7badcf5ca4389",
+          "ticker": "F",
+          "title": "Ford Motor (F) Reports Q2 Earnings: What Key Metrics Have to Say",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Ford is the named issuer and primary subject."
+        },
+        {
+          "id": "5a19d3b5e7918afa",
+          "ticker": "F",
+          "title": "F Stock Jumps 8% After-Hours On Q2 Earnings Beat — Ford Also Raises 2026 Profit Outlook",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Qualified F-stock context and Ford confirmation bind the title."
+        },
+        {
+          "id": "c13194944f83efae",
+          "ticker": "F",
+          "title": "Ford (NYSE:F) Misses Q2 CY2026 Revenue Estimates, But Stock Soars 6.6%",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Ford and NYSE:F are the primary subject."
+        },
+        {
+          "id": "9caf720c0ff6ebc6",
+          "ticker": "F",
+          "title": "Ford Motor Company (F) Beats Q2 Earnings Estimates",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Ford Motor Company is the named issuer."
+        },
+        {
+          "id": "d6fdaad2e0cf3904",
+          "ticker": "F",
+          "title": "Ford, Visa, Seagate: After-Hours Stocks to Watch",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Ford is a directly named issuer in the after-hours recap."
+        },
+        {
+          "id": "c6dbc9d1897640f2",
+          "ticker": "F",
+          "title": "Ford Motor Lifts Guidance on Forecast of Higher U.S. Automobile Pricing",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Ford Motor is the named issuer and primary subject."
+        },
+        {
+          "id": "2ccdc53319e5734a",
+          "ticker": "F",
+          "title": "Ford stock surges 4% as Q2 beats expectations and sparks guidance upgrade",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Ford is the named issuer and primary subject."
+        },
+        {
+          "id": "7c6ecca9c7ed4ad9",
+          "ticker": "GOOGL",
+          "title": "Satya Nadella's Microsoft Needs Power. Joe Creed's Caterpillar Sells It.",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "c8c4e529431fec91",
+          "ticker": "GOOGL",
+          "title": "Cramer Sees Echoes of Dot-Com Bust as Wall Street Flees AI Stocks for Safety",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "052efd8ce547c479",
+          "ticker": "GOOGL",
+          "title": "The Best Semiconductor Stocks to Buy",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "59ce7ce2ad255c0c",
+          "ticker": "GOOGL",
+          "title": "SK Hynix Stock Drops on Disappointing Earnings",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "1d0fd007b693f3aa",
+          "ticker": "GOOGL",
+          "title": "Does Alphabet’s AI Spending And Cash Squeeze Shift The Bull Case For Alphabet (GOOGL)?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Alphabet and GOOGL are the named issuer and security."
+        },
+        {
+          "id": "5a65b9fa8df9799a",
+          "ticker": "GOOGL",
+          "title": "Hong Kong Data Center Loan Sale Shows Banks Hitting Sector Limits",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "1b5aa4594a77fc06",
+          "ticker": "GOOGL",
+          "title": "Etsy (ETSY) Is Up 5.9% After New AI Agent Partnerships Reshape Buyer–Seller Interactions – Has The Bull Case Changed?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "9885a612c0050f73",
+          "ticker": "GOOGL",
+          "title": "Market Talk: Investors trying to 'bully' Mag 7 to lower AI spending",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Mag-7 spending discussion may cover Alphabet materially, but the frozen title is not issuer-specific."
+        },
+        {
+          "id": "545c965709de38dc",
+          "ticker": "GOOGL",
+          "title": "US stocks mixed ahead key tech earnings, Fed",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad market/earnings roundup lacks enough frozen context to judge Alphabet materiality."
+        },
+        {
+          "id": "bf112d6abe95f0bd",
+          "ticker": "GOOGL",
+          "title": "‘Big Short’ investor warns AI has become one dangerous trade",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Broad AI-trade warning lacks enough frozen context to judge Alphabet materiality."
+        },
+        {
+          "id": "0790105b15bd7b8f",
+          "ticker": "META",
+          "title": "Anthropic clarifies stance on open-weight AI models",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "60e669538bba310e",
+          "ticker": "META",
+          "title": "Satya Nadella's Microsoft Needs Power. Joe Creed's Caterpillar Sells It.",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "64fe636008552758",
+          "ticker": "META",
+          "title": "Kimi K3: DeepSeek 2.0, or is this Time Different?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "cd67fde0bd3404a7",
+          "ticker": "META",
+          "title": "The Best Semiconductor Stocks to Buy",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "1270ba36e99c937c",
+          "ticker": "META",
+          "title": "Hong Kong Data Center Loan Sale Shows Banks Hitting Sector Limits",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "ef0cf1d3f47c79c8",
+          "ticker": "META",
+          "title": "Dow Ends Higher For Third Straight Session As Oil Cools, Nasdaq Slides On Chipmaker Rout — PYPL, SPCX, AAPL, V, F Stocks In Focus",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "f02429ac2889db4c",
+          "ticker": "META",
+          "title": "Markets brace for Fed decision and Big Tech earnings",
+          "truth": "relevant",
+          "verdict": "false_negative",
+          "reason": "Yahoo binds the item to META and the event is the imminent Meta earnings release."
+        },
+        {
+          "id": "5d7d19154414243e",
+          "ticker": "META",
+          "title": "Coca-Cola Stock Is Rocking Like the 1990s, With a Higher P/E Than Most of the Magnificent 7",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "5f1368c5845a04ab",
+          "ticker": "META",
+          "title": "Visa Announced Layoffs Ahead of Earnings Beat, as AI and Restructuring Accelerate",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "ecdd8e9657c76f0f",
+          "ticker": "META",
+          "title": "Freddie Mac Announces Release Date for Second Quarter 2026 Financial Results",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "643c0b78b00ee8c5",
+          "ticker": "HOOD",
+          "title": "Analysts hike Robinhood stock price target ahead of July 29 earnings",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Robinhood is the named issuer and primary subject."
+        },
+        {
+          "id": "83ad52ace48499b4",
+          "ticker": "HOOD",
+          "title": "Robinhood Markets Insider Sold Shares Worth $4,680,523, According to a Recent SEC Filing",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Robinhood Markets insider transaction is issuer-specific."
+        },
+        {
+          "id": "0ab0ba8423e177e5",
+          "ticker": "HOOD",
+          "title": "SpaceX Erased Tesla’s Marketcap in Little Over a Month",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "4b491a921e4e9169",
+          "ticker": "HOOD",
+          "title": "Coinbase and Robinhood are locked in a heated battle ahead of Q2 earnings—but only one is being called the industry’s ‘first hyperscaler’",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Robinhood is directly compared as a named issuer."
+        },
+        {
+          "id": "83cf5be2d2071c0b",
+          "ticker": "HOOD",
+          "title": "Robinhood Chain’s Trading Volumes Slump As Memecoin Interest Fades",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Robinhood Chain is a named issuer platform."
+        },
+        {
+          "id": "a4d085153d7ab282",
+          "ticker": "HOOD",
+          "title": "Can Stock Trading and Prediction Markets Offset Robinhood’s Crypto Slump?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Robinhood business mix and earnings are the primary subject."
+        },
+        {
+          "id": "6a677c491c088925",
+          "ticker": "HOOD",
+          "title": "Robinhood (HOOD) To Report Earnings Tomorrow: Here Is What To Expect",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Robinhood and HOOD are the named issuer and security."
+        },
+        {
+          "id": "3c0bb87791cf7b4c",
+          "ticker": "HOOD",
+          "title": "How Robinhood Built a $450M Blockchain in Three Weeks",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Robinhood blockchain product is the primary subject."
+        },
+        {
+          "id": "d658c07d0c438f67",
+          "ticker": "HOOD",
+          "title": "Robinhood CEO Vlad Tenev says X account was hacked",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Robinhood CEO account compromise is an issuer-related event."
+        },
+        {
+          "id": "2d6462af9745baa3",
+          "ticker": "ON",
+          "title": "ON Semiconductor Corp. (ON) Stock Sinks As Market Gains: Here's Why",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "ON Semiconductor and ON are the named issuer and security."
+        },
+        {
+          "id": "aeae21638180d2b7",
+          "ticker": "ON",
+          "title": "ON Semiconductor (ON) Heads Into Earnings As AI Power Optimism Keeps Valuation In Focus",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "ON Semiconductor and ON are the named issuer and security."
+        },
+        {
+          "id": "789ddeabc201aebd",
+          "ticker": "ON",
+          "title": "ON Semiconductor Corp. (ON) Earnings Expected to Grow: What to Know Ahead of Next Week's Release",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "ON Semiconductor and ON are the named issuer and security."
+        },
+        {
+          "id": "ce258f9c1856b39f",
+          "ticker": "ON",
+          "title": "TXN vs. ON: Which Semiconductor Stock Is the Better Buy Right Now?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "ON is directly compared as a named semiconductor issuer."
+        },
+        {
+          "id": "2aeb98f4804fb39c",
+          "ticker": "ON",
+          "title": "Micron, onsemi, Seagate, Western Digital, and Vishay Intertechnology Shares Are Falling, What You Need To Know",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Officially bound onsemi brand is directly named in the multi-issuer event."
+        },
+        {
+          "id": "2c5c50525e838345",
+          "ticker": "ON",
+          "title": "1 Profitable Stock with Impressive Fundamentals and 2 We Find Risky",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Generic multi-stock title does not identify which issuer discussion is material."
+        },
+        {
+          "id": "0bc996a3e65c0031",
+          "ticker": "ON",
+          "title": "MaxLinear (MXL) Tops Q2 Earnings and Revenue Estimates",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "1039856991c75ad7",
+          "ticker": "ON",
+          "title": "TXN Keeps Climbing. Should You Climb On?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "02ce9fbc3d1cf29c",
+          "ticker": "ON",
+          "title": "ON Semiconductor Corp. (ON) Gains As Market Dips: What You Should Know",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "ON Semiconductor and ON are the named issuer and security."
+        },
+        {
+          "id": "f12067d047dfc0bc",
+          "ticker": "ON",
+          "title": "ON Semiconductor Corporation (ON) Is a Trending Stock: Facts to Know Before Betting on It",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "ON Semiconductor and ON are the named issuer and security."
+        },
+        {
+          "id": "11c3fc5ea3170f87",
+          "ticker": "IT",
+          "title": "Lumen (LUMN) Stock Looks Richer After Fresh AI Connectivity Recognition",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "6688b9b669cae3d6",
+          "ticker": "IT",
+          "title": "Gartner (IT) Reports Next Week: Wall Street Expects Earnings Growth",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Gartner and IT are the named issuer and security."
+        },
+        {
+          "id": "b0ee4f2aa52430e7",
+          "ticker": "IT",
+          "title": "Tecnotree Recognized in Two Gartner® Hype Cycle™ Reports for CSP Algorithmic Pricing",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "2718f5f06a9276f0",
+          "ticker": "IT",
+          "title": "Gartner raises 2026 IT spending forecast on AI demand",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Gartner's own spending forecast is the primary subject."
+        },
+        {
+          "id": "99b63e3254657864",
+          "ticker": "IT",
+          "title": "Analyst Report: Gartner, Inc.",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "The analyst report is specifically about Gartner, Inc."
+        },
+        {
+          "id": "374368ecae4bc66b",
+          "ticker": "IT",
+          "title": "Securden Recognized in the 2026 Gartner® Research: Reduce Cybersecurity Attacks With Least Privilege Endpoint Strategies",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "0fc7e1e82a0509b8",
+          "ticker": "IT",
+          "title": "Flexera is Only Vendor Named a Customers’ Choice in the 2026 Gartner® Peer Insights™ Voice of the Customer for Software Asset Management Tools Report",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "67d5d9e71c715cc3",
+          "ticker": "IT",
+          "title": "Jefferies Adjusts Price Target on Gartner to $140 From $167, Maintains Hold Rating",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "The price-target action is specifically about Gartner."
+        },
+        {
+          "id": "d1ee31f9274efff8",
+          "ticker": "IT",
+          "title": "Vitria Technology Sets the Standard for Event Intelligence Solutions as Knowledge-Driven AIOps Reaches the Enterprise Mainstream",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "1200236b6e6f8973",
+          "ticker": "IT",
+          "title": "SoundHound AI (SOUN) Stock Could Trade At A Premium Despite Gartner Recognition",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "566050faffed817c",
+          "ticker": "CAT",
+          "title": "Satya Nadella's Microsoft Needs Power. Joe Creed's Caterpillar Sells It.",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Caterpillar is a directly named issuer."
+        },
+        {
+          "id": "42999c264c342cd0",
+          "ticker": "CAT",
+          "title": "What Makes Caterpillar (CAT) a New Buy Stock",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Caterpillar and CAT are the named issuer and security."
+        },
+        {
+          "id": "e5ebb5160b6a9324",
+          "ticker": "CAT",
+          "title": "Caterpillar (CAT) Earnings Expected to Grow: What to Know Ahead of Next Week's Release",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Caterpillar and CAT are the named issuer and security."
+        },
+        {
+          "id": "4845849a13aaf4ce",
+          "ticker": "CAT",
+          "title": "After Ford Soars 44% on AI Fever, Traders Want Proof It’s Real",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "2fba548ad1d93719",
+          "ticker": "CAT",
+          "title": "Jefferies Global Best Ideas List Has 5 US Dividend Stocks With Huge Total Return Potential",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "59982038fba77708",
+          "ticker": "CAT",
+          "title": "Caterpillar (CAT) Stock Looks Slightly Above Fair Value Today",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Caterpillar and CAT are the named issuer and security."
+        },
+        {
+          "id": "74b7259bf718caeb",
+          "ticker": "CAT",
+          "title": "Caterpillar (CAT) Faces Rare Earth Squeeze As China Export Curbs Reset Supply Chains",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Caterpillar and CAT are the named issuer and security."
+        },
+        {
+          "id": "24a8ad82b13f212a",
+          "ticker": "CAT",
+          "title": "Review & Preview: Brace Yourself",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "15747bbfbeb7e077",
+          "ticker": "CAT",
+          "title": "Caterpillar (CAT) Stock Sinks As Market Gains: What You Should Know",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Caterpillar and CAT are the named issuer and security."
+        },
+        {
+          "id": "a59848b1c3b2b5c4",
+          "ticker": "CAT",
+          "title": "Stock Market Today: Dow Up As These Stocks Test Entries; This AI Play Fights Back Before Key Event (Live Coverage)",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "ed0be6a76530ab19",
+          "ticker": "XYZ",
+          "title": "Visa Stock Rises as Report Signals 2,600 Job Cuts",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "472ec22fa24bacec",
+          "ticker": "XYZ",
+          "title": "Block vs. PayPal: Which Fintech Stock Is a Better Buy Right Now?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Block is the named issuer and primary subject."
+        },
+        {
+          "id": "bd8fdee93d215318",
+          "ticker": "XYZ",
+          "title": "Judge Blocks Minnesota's Prediction Market Ban",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "c4e6288c318e924f",
+          "ticker": "XYZ",
+          "title": "PROG Holdings Q2 Preview: Leveraging Strengths Amid Market Woes",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "cfa55bb7d1f66316",
+          "ticker": "XYZ",
+          "title": "Visa trims 7% of workforce as fintech belt-tightening spreads",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "4d6b8c6e3547b046",
+          "ticker": "XYZ",
+          "title": "Visa to Cut 7% of Workforce as CEO Seeks to Revamp Company",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "14e0486b70ea5016",
+          "ticker": "XYZ",
+          "title": "AI Across Sezzle: Can It Help Scale Efficiency and Product Velocity?",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "6808991f31504da0",
+          "ticker": "XYZ",
+          "title": "Can Bitcoin Price Reach $500,000? Coinbase Is Preparing for Its Biggest Security Threat",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "e81d7382053596f6",
+          "ticker": "XYZ",
+          "title": "Meet The 2 S&P 500 CEOs Paid Less Than $500 A Year",
+          "truth": "ambiguous",
+          "verdict": "ambiguous",
+          "reason": "Generic CEO roundup may include Block, but issuer materiality is not established in the frozen title."
+        },
+        {
+          "id": "b53f1a6faeb26f53",
+          "ticker": "XYZ",
+          "title": "The Dark Sides Of Cash App You'll Wish You Knew About Sooner",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Cash App is an officially bound Block business brand and the primary subject."
+        },
+        {
+          "id": "df41c53fd17fea41",
+          "ticker": "GEN",
+          "title": "Norton Study Reveals Emerging Risks for Kids Online, Prompting Parents to Have a New Kind of \"The Talk\"",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Norton is an officially bound Gen brand and the primary subject."
+        },
+        {
+          "id": "d5ecb3956833669d",
+          "ticker": "GEN",
+          "title": "MoneyLion One Launches Premium Banking Helping Everyday Americans Earn More from Every Paycheck",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "MoneyLion is a Gen-controlled business and the primary subject."
+        },
+        {
+          "id": "98296649286439e7",
+          "ticker": "GEN",
+          "title": "Gen Half-Year Threat Report: Attackers are Moving Closer to the Systems People Trust",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Gen issuer threat report is the primary subject."
+        },
+        {
+          "id": "475a5dd9954e1df0",
+          "ticker": "GEN",
+          "title": "Gen to Announce Fiscal 2027 First Quarter Results on August 6, 2026",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Gen issuer results announcement is the primary subject."
+        },
+        {
+          "id": "0fd0d9ca9ff4f4a8",
+          "ticker": "GEN",
+          "title": "CVLT Grew. The Stock Did Not. Someone Is Wrong",
+          "truth": "irrelevant",
+          "verdict": "true_negative",
+          "reason": "Title is about another issuer or contains only an incidental sector/peer/provider association."
+        },
+        {
+          "id": "55538f36b58ae7a5",
+          "ticker": "GEN",
+          "title": "Own ServiceNow For AI? Gen Digital's Numbers Speak Louder",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Gen Digital is directly compared as a named issuer."
+        },
+        {
+          "id": "0313b9e065383c51",
+          "ticker": "GEN",
+          "title": "GEN Grew. The Stock Did Not. Someone Is Wrong",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "GEN security performance is the primary subject."
+        },
+        {
+          "id": "05a84fe24b7e1173",
+          "ticker": "GEN",
+          "title": "Norton Genie Expands to Claude, Bringing AI-Powered Scam Detection into Everyday Conversations",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Norton is an officially bound Gen brand and the primary subject."
+        },
+        {
+          "id": "7b299743447f6112",
+          "ticker": "GEN",
+          "title": "Gen Digital Stock: Is GEN Underperforming the Technology Sector?",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "Gen Digital and GEN are the named issuer and security."
+        },
+        {
+          "id": "7be28cdfe1e3dbb1",
+          "ticker": "GEN",
+          "title": "MoneyLion Survey Finds Summer Financial Pressure Hits Gen Z The Hardest",
+          "truth": "relevant",
+          "verdict": "true_positive",
+          "reason": "MoneyLion is a Gen-controlled business and the primary subject."
+        }
+      ],
+      "freshness_days": {
+        "median": 0.4587149668402778,
+        "p95": 19.086006633506944,
+        "within_7d_rate": 0.8739495798319328,
+        "within_30d_rate": 0.9831932773109243,
+        "within_90d_rate": 1.0
+      }
+    }
+  }
+}

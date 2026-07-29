@@ -1,0 +1,256 @@
+{
+  "schema": "uzi.us_entity_recall_shadow_labels.v1",
+  "reviewed_at": "2026-07-29",
+  "review_method": "Blind title-level issuer attribution. relatedTickers may support review but never makes a generic or other-issuer title relevant by itself.",
+  "default_truth": "irrelevant",
+  "default_reason": "The visible title is about another issuer, a broad market/sector move, or lacks target-issuer evidence.",
+  "labels": {
+    "e2ed1f5596334da2": {
+      "truth": "ambiguous",
+      "reason": "Michael Saylor is strongly associated with the issuer, but a founder opinion is not automatically a company event."
+    },
+    "1f1b7703fdd90067": {
+      "truth": "ambiguous",
+      "reason": "Michael Saylor is strongly associated with the issuer, but a founder opinion is not automatically a company event."
+    },
+    "42f4cec769c9bd86": {
+      "truth": "relevant",
+      "reason": "The title explicitly names the former legal name MicroStrategy and its Bitcoin purchase activity."
+    },
+    "9c73c913c63ad738": {
+      "truth": "ambiguous",
+      "reason": "The title describes a basket but does not identify which constituents are discussed."
+    },
+
+    "9d04420592fc2017": {
+      "truth": "relevant",
+      "reason": "Explicit Kiniksa earnings coverage."
+    },
+    "df5cd14364fe73a4": {
+      "truth": "ambiguous",
+      "reason": "Generic gainers title does not expose issuer identity."
+    },
+    "bdf8dcccf9f5c505": {
+      "truth": "relevant",
+      "reason": "Explicit Kiniksa product and analyst coverage."
+    },
+    "ba07d5335c04540e": {
+      "truth": "relevant",
+      "reason": "Explicit Kiniksa analyst action."
+    },
+    "a929882d3360368e": {
+      "truth": "relevant",
+      "reason": "Explicit Kiniksa results and guidance."
+    },
+    "4928446c7c1b22be": {
+      "truth": "relevant",
+      "reason": "Explicit Kiniksa earnings coverage."
+    },
+    "a5d180252151876f": {
+      "truth": "relevant",
+      "reason": "Explicit legal name and ticker."
+    },
+    "bb9c8caf0fda12a9": {
+      "truth": "relevant",
+      "reason": "Explicit Kiniksa financial results."
+    },
+    "51e5656dc342b153": {
+      "truth": "relevant",
+      "reason": "Issuer financial results title."
+    },
+
+    "89c2aa9dc471dc4e": {
+      "truth": "relevant",
+      "reason": "Explicit Oscar Health trading signal."
+    },
+    "8aa7cd6d8634a5d2": {
+      "truth": "relevant",
+      "reason": "Explicit issuer investor event."
+    },
+    "f29a700eec00d0c1": {
+      "truth": "relevant",
+      "reason": "Explicit Oscar Health analysis."
+    },
+    "0ff7dd628f66c962": {
+      "truth": "relevant",
+      "reason": "Explicit Oscar Health valuation/momentum analysis."
+    },
+    "193f44c65d4b8cc5": {
+      "truth": "ambiguous",
+      "reason": "Basket title hides which stock maps to which view."
+    },
+    "b015c2355cdd08f2": {
+      "truth": "relevant",
+      "reason": "Explicit Oscar Health valuation/momentum analysis."
+    },
+    "5b4c5a1c6205bb6c": {
+      "truth": "relevant",
+      "reason": "Explicit legal name and ticker."
+    },
+    "d820bd66b07ba3c7": {
+      "truth": "ambiguous",
+      "reason": "Generic basket title does not expose Oscar Health."
+    },
+    "7c2e8f398f2c30f8": {
+      "truth": "relevant",
+      "reason": "Explicit legal name and ticker."
+    },
+
+    "78d1684b1c5d3b74": {
+      "truth": "relevant",
+      "reason": "Explicit IQVIA move."
+    },
+    "0f6afb585a0201db": {
+      "truth": "relevant",
+      "reason": "Explicit IQVIA results and outlook."
+    },
+    "cda969ecca69d8e4": {
+      "truth": "relevant",
+      "reason": "Explicit IQVIA earnings."
+    },
+    "ac39c841cc360d30": {
+      "truth": "relevant",
+      "reason": "Explicit IQVIA legal name and earnings."
+    },
+    "7222a2d77deecd19": {
+      "truth": "ambiguous",
+      "reason": "Broad market title hides the issuer-specific discussion."
+    },
+    "9e2e54abf00fdc78": {
+      "truth": "ambiguous",
+      "reason": "Sector update title hides the issuer-specific discussion."
+    },
+    "a2187f2fa37e64a7": {
+      "truth": "relevant",
+      "reason": "Explicit IQVIA earnings."
+    },
+    "e2d5b34d1002f6e4": {
+      "truth": "ambiguous",
+      "reason": "The title does not name the healthcare stock."
+    },
+    "8123a3c116c62029": {
+      "truth": "ambiguous",
+      "reason": "Generic gainers title does not expose issuer identity."
+    },
+    "43dfcf8aa077b526": {
+      "truth": "relevant",
+      "reason": "Explicit IQVIA legal name and earnings."
+    },
+
+    "ad5e2305351366b8": {
+      "truth": "relevant",
+      "reason": "Explicit Lucid move and catalyst."
+    },
+    "00f625426ccad818": {
+      "truth": "relevant",
+      "reason": "Explicit Lucid move."
+    },
+    "8834495b8a9af3a0": {
+      "truth": "relevant",
+      "reason": "Explicit Lucid move and catalyst."
+    },
+    "08c9b715c847a4aa": {
+      "truth": "relevant",
+      "reason": "Explicit ticker and move."
+    },
+    "d373e8a0f3df2f3f": {
+      "truth": "relevant",
+      "reason": "Explicit Lucid relative performance."
+    },
+    "35904782725c544f": {
+      "truth": "relevant",
+      "reason": "Explicit Lucid ownership event."
+    },
+    "c414f308d04e9223": {
+      "truth": "relevant",
+      "reason": "Explicit Lucid ownership event."
+    },
+
+    "7fed6fa9d5b33a7a": {
+      "truth": "relevant",
+      "reason": "Explicit NVIDIA investment and expansion."
+    },
+    "5be3caa82bfece9b": {
+      "truth": "ambiguous",
+      "reason": "Anthropic title does not expose NVIDIA's role."
+    },
+    "7c077bbf310e36ba": {
+      "truth": "relevant",
+      "reason": "NVIDIA is an explicit subject of the market story."
+    },
+    "ad041bb8ae649ce4": {
+      "truth": "ambiguous",
+      "reason": "The title does not expose NVIDIA's role in the model comparison."
+    },
+    "0da196041c37d22d": {
+      "truth": "irrelevant",
+      "reason": "SK Hynix is the event issuer; NVIDIA appears only as a partner qualifier."
+    },
+
+    "0ff67f4c2269890a": {
+      "truth": "relevant",
+      "reason": "Explicit Itron move."
+    },
+    "34256ff479c9d958": {
+      "truth": "relevant",
+      "reason": "Explicit Itron results and outlook."
+    },
+    "a0dd5c3e70658c59": {
+      "truth": "relevant",
+      "reason": "Explicit Itron results and outlook."
+    },
+    "8dc3d21618ad6e44": {
+      "truth": "relevant",
+      "reason": "Explicit Itron legal name and earnings."
+    },
+    "9187782bda623a6c": {
+      "truth": "relevant",
+      "reason": "Explicit Itron move."
+    },
+    "8f3a2332fe251a37": {
+      "truth": "relevant",
+      "reason": "Explicit Itron earnings."
+    },
+    "13ab72b3526a849a": {
+      "truth": "relevant",
+      "reason": "Explicit Itron results and guidance."
+    },
+    "314023e62762971e": {
+      "truth": "relevant",
+      "reason": "Explicit Itron earnings."
+    },
+    "1241be7df3a6cf6e": {
+      "truth": "relevant",
+      "reason": "Explicit Itron earnings."
+    },
+    "7e8cbd2e22334124": {
+      "truth": "relevant",
+      "reason": "Explicit legal name, exchange ticker, and earnings."
+    },
+
+    "b166f90301d05351": {
+      "truth": "relevant",
+      "reason": "MU is explicitly named as part of the memory-stock selloff."
+    },
+    "46d190ebc34a7f16": {
+      "truth": "relevant",
+      "reason": "Explicit Micron move."
+    },
+    "931c3c9123c46b05": {
+      "truth": "ambiguous",
+      "reason": "Live market roundup does not expose Micron's role in the title."
+    },
+    "ecc1496aa49e9cbb": {
+      "truth": "ambiguous",
+      "reason": "Broad market title does not expose Micron's role."
+    },
+    "56b0dd74f5604433": {
+      "truth": "ambiguous",
+      "reason": "Broad recap title does not expose Micron's role."
+    },
+    "40a5ab1fb2caf48e": {
+      "truth": "relevant",
+      "reason": "Explicit Micron move."
+    }
+  }
+}

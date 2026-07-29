@@ -171,3 +171,62 @@ def test_source_bound_aliases_do_not_enable_generic_gen_or_google_mentions():
         "META",
         "Meta Platforms, Inc.",
     )
+
+
+def test_strategy_rebrand_recovers_old_name_without_generic_word_pollution():
+    from fetch_events import _news_matches_entity
+
+    assert _news_matches_entity(
+        "Michael Saylor Says Bitcoin Has Won, So Why Did MicroStrategy Stop Buying BTC?",
+        "",
+        "MSTR",
+        "MSTR",
+        "Strategy Inc.",
+    )
+    assert _news_matches_entity(
+        "Strategy Announces Second Quarter 2026 Financial Results",
+        "",
+        "MSTR",
+        "MSTR",
+        "Strategy Inc.",
+    )
+    assert not _news_matches_entity(
+        "Atlassian's Strategic Position in the AI Landscape",
+        "",
+        "MSTR",
+        "MSTR",
+        "Strategy Inc.",
+    )
+    assert not _news_matches_entity(
+        "A Better Portfolio Strategy for Volatile Markets",
+        "",
+        "MSTR",
+        "MSTR",
+        "Strategy Inc.",
+    )
+
+
+def test_other_issuer_event_is_not_owned_by_named_partner():
+    from fetch_events import _news_matches_entity
+
+    assert not _news_matches_entity(
+        "Nvidia Partner SK Hynix Misses Q2 Sales Target But Profit Surprises",
+        "",
+        "NVDA",
+        "NVDA",
+        "NVIDIA Corporation",
+    )
+    assert not _news_matches_entity(
+        "SK hynix posts 1,200% net profit boost on AI chip boom",
+        "SK hynix is a specialist supplier of high-bandwidth memory chips to US industry behemoth Nvidia.",
+        "NVDA",
+        "NVDA",
+        "NVIDIA Corporation",
+    )
+    assert _news_matches_entity(
+        "Nvidia Reports Record Quarterly Revenue",
+        "",
+        "NVDA",
+        "NVDA",
+        "NVIDIA Corporation",
+    )

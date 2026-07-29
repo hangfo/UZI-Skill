@@ -1,0 +1,52 @@
+{
+  "schema": "uzi.us_entity_recall_shadow_profiles.v1",
+  "profiles": {
+    "MSTR": {
+      "legal_name": "Strategy Inc.",
+      "selection_reason": "2025 年由 MicroStrategy 更名为 Strategy；普通词新名与明确前法人名形成精度/召回双重压力。",
+      "aliases": [
+        {
+          "value": "MicroStrategy",
+          "kind": "former_legal_name_candidate",
+          "source_url": "https://www.strategy.com/company",
+          "binding": "Issuer official company page states that it rebranded from MicroStrategy to Strategy in February 2025."
+        }
+      ]
+    },
+    "KNSA": {
+      "legal_name": "Kiniksa Pharmaceuticals International, plc",
+      "selection_reason": "2026-07-28 涨幅榜且 3/6/12 月真实动量均强，用作强法人名召回控制。",
+      "aliases": []
+    },
+    "OSCR": {
+      "legal_name": "Oscar Health, Inc.",
+      "selection_reason": "6 个月涨幅约 161%，同时 Oscar 是常见人名，用作品牌词边界控制。",
+      "aliases": []
+    },
+    "IQV": {
+      "legal_name": "IQVIA Holdings Inc.",
+      "selection_reason": "当日涨幅榜且 3/6 月动量强，用作独特造词法人名控制。",
+      "aliases": []
+    },
+    "LCID": {
+      "legal_name": "Lucid Group, Inc.",
+      "selection_reason": "当日涨幅约 21.5% 但 6/12 月仍为负，用作短期反弹而非持续动量控制。",
+      "aliases": []
+    },
+    "NVDA": {
+      "legal_name": "NVIDIA Corporation",
+      "selection_reason": "活跃成交大盘科技股，用作大量跨发行人关联新闻污染控制。",
+      "aliases": []
+    },
+    "ITRI": {
+      "legal_name": "Itron, Inc.",
+      "selection_reason": "当日涨幅约 26.2% 且由真实财报触发，用作事件密集型控制。",
+      "aliases": []
+    },
+    "MU": {
+      "legal_name": "Micron Technology, Inc.",
+      "selection_reason": "高成交量且 6/12 月动量强；继续验证 MU 不匹配 Musk。",
+      "aliases": []
+    }
+  }
+}

@@ -13,7 +13,7 @@ from typing import Any
 ENTITY_STOPWORDS = {
     "company", "corporation", "corp", "digital", "group", "holding",
     "holdings", "inc", "incorporated", "limited", "ltd", "markets", "motor",
-    "plc", "semiconductor", "technology", "technologies",
+    "plc", "semiconductor", "strategy", "technology", "technologies",
 }
 COMMON_WORD_TICKERS = {"AI", "C", "F", "IT", "ON", "CAT", "GEN"}
 
@@ -23,6 +23,28 @@ US_ENTITY_PROFILES: dict[str, dict[str, Any]] = {
         "legal_name": "Micron Technology, Inc.",
         "selection_reason": "短 ticker；验证 MU 不回退为 Musk substring 污染。",
         "aliases": [],
+    },
+    "MSTR": {
+        "legal_name": "Strategy Inc.",
+        "selection_reason": "公司由 MicroStrategy 更名为普通词 Strategy；旧名召回与新名精度必须同时受控。",
+        "aliases": [
+            {
+                "value": "MicroStrategy",
+                "kind": "former_legal_name",
+                "source_url": "https://www.strategy.com/company",
+                "binding": "Strategy official company page states that it rebranded from MicroStrategy in February 2025",
+            },
+            {
+                "value": "Strategy",
+                "kind": "issuer_short_brand",
+                "source_url": "https://www.strategy.com/investor-relations",
+                "binding": "Strategy investor relations binds Strategy to Nasdaq: MSTR",
+                "patterns": [
+                    r"^Strategy\s+(?:to|Reports?|Announces?|Launches?|Completes?|Acquires?|Buys?|Purchases?|Adds?|Holds?|Raises?|Offers?|Prices?)\b",
+                    r"^Strategy\s+\((?:NASDAQ\s*:\s*)?MSTR\)\b",
+                ],
+            },
+        ],
     },
     "AI": {
         "legal_name": "C3.ai, Inc.",
@@ -214,17 +236,25 @@ def _legal_entity_values(company_name: str) -> list[str]:
         }
     ]
     base_phrase = " ".join(base_tokens)
-    values = ([base_phrase] if len(base_phrase) >= 4 else []) + distinctive
+    has_non_stopword = any(token.lower() not in ENTITY_STOPWORDS for token in base_tokens)
+    values = ([base_phrase] if len(base_phrase) >= 4 and has_non_stopword else []) + distinctive
     return list(dict.fromkeys(values))
 
 
 def _secondary_only(text: str, value: str) -> bool:
     escaped = re.escape(value)
+    issuer_qualifier = (
+        rf"(?<![A-Za-z0-9])(?i:{escaped})\s+"
+        rf"(?:Partner|Supplier|Customer)\s+[A-Z][A-Za-z0-9&.-]+"
+    )
+    if re.search(issuer_qualifier, text):
+        return True
     patterns = (
         rf"\bformer\s+{escaped}\b",
         rf"\b(?:recognized|named)\b.{{0,100}}\b{escaped}\b",
         rf"\bdespite\s+{escaped}\s+(?:recognition|mention)\b",
         rf"\baccording\s+to\s+{escaped}\b",
+        rf"\b(?:supplier|partner|customer)\b.{{0,80}}\b(?:to|of|for)\b.{{0,50}}\b{escaped}\b",
     )
     return any(re.search(pattern, text, re.I) for pattern in patterns)
 
