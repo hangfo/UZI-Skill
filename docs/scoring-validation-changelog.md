@@ -4,6 +4,14 @@
 
 ## 2026-07-29
 
+### entity 合并审计与真实动量收益 walk-forward
+
+- 独立复核三批真实 Yahoo 冻结集共 349 行：逐批候选 precision 均为 `100%`，recall 为 `98.28%/100%/100%`，污染率均为 `0`；行级合计 `TP=166/FP=0/FN=1`，唯一争议 FN 是无发行人主语的泛 Big Tech 日程标题，继续 fail-closed。
+- 新增研究工具 `tools/us_momentum_walkforward.py`，冻结 37 只美股 10 年 Yahoo 复权日线与 SPY，按信号日 t、下一收盘入场、21/63/126 日不重叠窗口形成 4518 个真实信号并扣 20bp 摩擦。技术分数对未来 SPY 超额 Spearman 仅 `0.025/0.042/0.058`，高低分平均超额 `+0.77/+2.52/-5.08`，不支持调高动量权重。
+- Stage 2 相对 Stage 4 全样本平均超额 `+1.19/+7.00/+7.01`，但 2017-2022 分段为 `-0.01/+5.32/-2.79`，只支持保留现有趋势护栏，不支持新买入规则或参数优化。
+- 最新真实生产 LCID lite `41.1`（Stage 4、投资分 31.2、回避）与 CLS medium `51.4`（Stage 2、投资分 65.7，但综合仍观望偏空），均 `critical=0`；单日上涨没有自动升级综合结论。
+- 扩展冻结对照为 `86 raw + 7 synthetic = 93`，正反顺序均 `93/93 ok`、`0 possible_regression`、0 performance warning，全部评分/档位零变化；`113/113` direct tests、`py_compile`、`git diff --check` 通过。未改生产评分、动量、事件阈值或估值，未跑 deep/update，SEC/CBOE 未联网。完整结论见 `docs/us-entity-merge-audit-momentum-backtest-20260729.md`。
+
 ### NU/T 短 ticker 邻近发行人污染与第三批真实 holdout
 
 - 第三批冻结 150 条真实 Yahoo 标题，覆盖 `NU/MARA/T/SOFI/JBLU/INTC/NOK/FOUR/CLS/RGEN`，并用官方绑定品牌/旧名及 Nu Skin、T. Rowe Price 做反向真实检索。修改前 precision/recall/污染率为 `86.67%/100%/12.82%`，修改后为 `100%/100%/0`，10 条跨发行人误报全部消失，0 false negative。

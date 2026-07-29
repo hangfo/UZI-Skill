@@ -1,5 +1,14 @@
 # UZI-Skill 交接记录 - 2026-07-08
 
+## 2026-07-29 entity 合并审计与真实收益回测
+
+- 当前分支仍为 `codex/scoring-validation-us-entity-recall-shadow`；正式分支/个人 origin 保持 `48e20fc4c9fe9823ab055155511be3bc503cb78b`，本分支起点为 `a48f4b3b74f07a41ba1ef3b6b32b516602150a39`。不要自动合回正式分支。
+- 三批真实 Yahoo 集共 349 行复核：候选行级合计 `TP=166/FP=0/FN=1`，precision `100%`、recall `99.40%`、污染 `0`。唯一 FN 是无发行人主语的泛 Big Tech 日程标题，继续 fail-closed。
+- 新增只读 `tools/us_momentum_walkforward.py`：37 只美股、SPY、10 年复权日线、4518 个不重叠 21/63/126 日真实信号、20bp 摩擦。完整技术分数没有单调收益证据；Stage 2 相对 Stage 4 在全样本较强但早期分段不稳定。结论是不调分、不新增动量规则。
+- 最新生产 LCID lite `41.1`（投资分 31.2、Stage 4、回避）与 CLS medium `51.4`（投资分 65.7、Stage 2，但综合观望偏空），均 `critical=0`。
+- 冻结对照扩展到 `93/93 ok`、`0 review`、`0 possible_regression`，全部评分/档位零变化；正向 `7.915s -> 7.268s`、交换顺序 `5.073s -> 6.682s`，均无 performance warning。direct `113/113`。
+- 完整文档：`docs/us-entity-merge-audit-momentum-backtest-20260729.md`。SEC 因无真实联系人未请求，CBOE 零请求；未装依赖、未跑 deep/update。下一步默认 `GPT-5.6 Terra + 中推理` 做正式 fast-forward 文件审计；真实冲突或全市场无幸存者偏差研究才用 `GPT-5.6 Sol + 高推理`。
+
 ## 2026-07-29 第三批 US entity holdout 与短 ticker 污染修复
 
 - 当前隔离分支 `codex/scoring-validation-us-entity-recall-shadow`，正式基线仍为 `48e20fc4c9fe9823ab055155511be3bc503cb78b`，候选代码检查点 `91cb6eb22f8cac4970617c8036c5b3bc022426df`。`main`、`codex/windows-local-stable`、正式分支均未修改；upstream push 仍为 `DISABLED`。
