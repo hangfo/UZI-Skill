@@ -35,6 +35,14 @@ SEC/FRED/Massive 脱敏真实端点均通过，Massive 免费层真实落后 Yah
 `103 ok / 0 possible_regression`，评分/档位零变化。IREN 4.01 因无审计分歧且
 相关内控缺陷已整改而保持 ambiguous，不进入评分。
 
+同日独立正式吸收审计又在查看结果前冻结 LAD/EXLS/CBZ/GEHC/VRT/HIMS 六只真实
+热门与大跌对照。加入新缓存后，正式/候选正反同输入比较均为
+`113 ok / 0 review / 0 possible_regression`，评分与交易档位仍全部零变化；候选
+`667f543` 已纯 fast-forward 吸收到正式分支。新六股 750 个 10 年真实信号的
+技术分-超额 Spearman 为 `+0.0049/-0.0521/-0.1252`，继续不支持动量加权或反向
+调参。多个独立 SEC Item 4.01 正文确认 item code 本身没有单一方向，继续只做
+全文语境 shadow；Massive 继续只做非覆盖式 EOD 核验。
+
 ---
 
 ## 改动总览

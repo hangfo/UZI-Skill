@@ -4,6 +4,21 @@
 
 ## 2026-07-30
 
+### SEC/FRED/Massive 独立正式吸收审计
+
+- 对 `fff93f6 → 667f543` 做独立安全、代码重叠、真实端点、同输入与历史收益复验；
+  逐提交真实凭据精确扫描 0 命中，DPAPI 生命周期与脱敏 SEC/FRED/Massive live
+  验证通过，CBOE 0 请求，TradingView 非官方接口未接入。
+- 新增 LAD/EXLS/CBZ/GEHC/VRT/HIMS 六只预先冻结的真实热门/大跌对照；生产综合分
+  `41.2/44.8/46.0/43.0/46.8/42.7`，仅 VRT 为 `quality_watch`，其余均 avoid。
+- 新六股 10 年 walk-forward 共 750 信号；技术分-超额 Spearman
+  `+0.0049/-0.0521/-0.1252`，不支持加权或反向调参。
+- 加入新缓存后正反顺序均 `113/113 ok`、0 possible regression、全部评分/档位
+  零变化；候选以 `--ff-only` 吸收到正式分支。
+- 多个独立 SEC Item 4.01 正文显示相同 item code 可有不同实质语境，继续
+  `score_consumption_allowed=false`，不自动归类负面。完整记录见
+  `docs/sec-fred-massive-formal-integration-audit-20260730.md`。
+
 ### SEC/FRED/Massive 安全配置与真实美股 shadow
 
 - 新增 Windows DPAPI CurrentUser 遮罩配置；凭据只存在仓库外加密文件，不进入

@@ -328,6 +328,25 @@ must contain commit 418ae5b; use git log -1 for the latest documentation commit
 4. 评分验证稳定后，再改善 HTML 可读性。
 5. 最后才考虑公式或权重调参。
 
+## 2026-07-30 SEC/FRED/Massive 正式吸收后交接
+
+- 正式分支已从 `fff93f6388ed605c7cf56ad4cad7133eb7681018` 纯 fast-forward
+  吸收候选 `667f54322ecdd286c646994a672ca08b7b87efa6`。
+- 加入 LAD/EXLS/CBZ/GEHC/VRT/HIMS 最新真实缓存后，正反分支 harness 均为
+  `113 ok / 0 review / 0 possible_regression`；评分、Stage 与交易档位零变化。
+- SEC/FRED/Massive 脱敏 live 复验、逐提交凭据精确扫描、DPAPI 生命周期均通过；
+  CBOE 未访问，TradingView 非官方接口未接入。
+- 新六股 10 年回测 750 信号仍没有稳定技术分 alpha；不要改评分、动量、Stage、
+  P0/P1、估值或交易阈值，也不要从小样本推导反向做空规则。
+- Item 4.01 必须读官方正文；多个独立样本已证明同一 item code 的语境不同，
+  保持 `score_consumption_allowed=false`，不自动归类负面。
+- Massive 免费层新鲜度会变化，只保留 `overwrote_primary=false` 的 EOD shadow；
+  Yahoo 仍为美股主行情。FRED 只保存原始观察值，不生成情绪或评分。
+- 完整审计：
+  `docs/sec-fred-massive-formal-integration-audit-20260730.md`。
+- 下一步只积累自然 holdout；若不能建立包含退市证券的 point-in-time 美股宇宙，
+  停止动量优化，转为数据质量与来源漂移监控。
+
 ## 下一轮边界规则
 
 - 不重新安装。
