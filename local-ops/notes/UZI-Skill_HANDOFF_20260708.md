@@ -3,7 +3,7 @@
 ## 2026-07-30 SEC/FRED/Massive 安全 shadow 与真实动量复核
 
 - 当前隔离分支 `codex/scoring-validation-sec-fred-massive-shadow`，起点
-  `3b8637a`；正式 `codex/scoring-validation-guardrails` 及 origin 均为
+  `3b8637a`，已验证代码提交 `5873eac`；正式 `codex/scoring-validation-guardrails` 及 origin 均为
   `fff93f6`，upstream/main=`fce996c`，upstream push=`DISABLED`。
 - 新增 DPAPI 遮罩配置、FRED evidence-only shadow、Massive EOD non-mutating
   对照；TradingView Premium 不作为行情 API，CBOE 零联网。
