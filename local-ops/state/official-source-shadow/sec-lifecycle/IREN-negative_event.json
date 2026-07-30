@@ -1,0 +1,133 @@
+{
+  "schema_version": "uzi.evidence_overlay.v1",
+  "ticker": "IREN",
+  "market": "US",
+  "target": "negative_event",
+  "status": "ready",
+  "confidence": {
+    "level": "high",
+    "score": 85,
+    "factors": [
+      "required evidence is present and frozen"
+    ],
+    "label_zh": "高",
+    "factors_zh": [
+      "必要证据已存在并冻结"
+    ]
+  },
+  "evidence": [
+    {
+      "source": "sec_submissions",
+      "url": "https://www.sec.gov/Archives/edgar/data/1878848/000114036125043599/ef20060170_8k.htm",
+      "title": "IREN Ltd (IREN) 8-K Item 4.01: Changes in Registrant's Certifying Accountant",
+      "published_at": "2025-11-28",
+      "fetched_at": "2026-07-30T03:51:43Z",
+      "fields": [
+        "15_events.recent_news",
+        "sec_submissions.recent.items"
+      ],
+      "severity": "P1",
+      "event_type": "sec_8k_item",
+      "form": "8-K",
+      "accession": "0001140361-25-043599",
+      "item_code": "4.01",
+      "official_source": true,
+      "entity_match": "exact",
+      "entity_scope": "issuer",
+      "match_method": "SEC CIK+ticker",
+      "source_record_id": "0001140361-25-043599",
+      "canonical_event_id": "sec_submissions:0001140361-25-043599",
+      "resolution_status": "unknown",
+      "age_days": 244,
+      "as_of_date": "2026-07-30",
+      "severity_label_zh": "P1 重大风险升级"
+    }
+  ],
+  "field_mapping": {
+    "sec_submissions": {
+      "events": [
+        {
+          "severity": "P1",
+          "event_type": "sec_8k_item",
+          "published_at": "2025-11-28",
+          "source_record_id": "0001140361-25-043599",
+          "entity_scope": "issuer"
+        }
+      ]
+    },
+    "sec_litigation_releases": {
+      "events": []
+    },
+    "sec_trading_suspensions": {
+      "events": []
+    }
+  },
+  "source_plan": [
+    {
+      "source": "sec_litigation_releases",
+      "role": "official enforcement"
+    },
+    {
+      "source": "sec_trading_suspensions",
+      "role": "official regulator trading suspension"
+    },
+    {
+      "source": "sec_submissions",
+      "role": "company filed events"
+    }
+  ],
+  "source_coverage": [
+    {
+      "source": "sec_submissions",
+      "status": "ok",
+      "scanned": 1,
+      "matched": 1,
+      "failed": 0,
+      "eligible": 1
+    },
+    {
+      "source": "sec_litigation_releases",
+      "status": "ok",
+      "scanned": 100,
+      "matched": 0,
+      "failed": 0,
+      "eligible": 0
+    },
+    {
+      "source": "sec_trading_suspensions",
+      "status": "ok",
+      "scanned": 100,
+      "matched": 0,
+      "failed": 0,
+      "eligible": 0
+    }
+  ],
+  "errors": [],
+  "fetched_at": "2026-07-30T03:51:40Z",
+  "as_of": "2026-07-30",
+  "lookback_days": 730,
+  "performance": {
+    "elapsed_sec": 5.309
+  },
+  "guardrails": [
+    "online evidence is frozen before branch comparison",
+    "missing evidence stays a gap; do not infer facts",
+    "same overlay must be reused for baseline and candidate refs"
+  ],
+  "lifecycle": {
+    "status": "no_match",
+    "links": [],
+    "policy": [
+      "resolution requires a later exact-issuer official record",
+      "resolution must match the same narrow event family and rule topic",
+      "penalties, fraud, non-reliance and generic remediation stay unresolved"
+    ],
+    "scanned": 0
+  },
+  "display": {
+    "target_label_zh": "负面事件证据",
+    "status_label_zh": "证据已冻结",
+    "confidence_label_zh": "高",
+    "summary_zh": "IREN 负面事件证据：证据已冻结，置信度 高"
+  }
+}

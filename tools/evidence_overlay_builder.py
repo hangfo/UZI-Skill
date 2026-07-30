@@ -77,6 +77,35 @@ _SEC_PLACEHOLDER_MARKERS = (
 _SEC_PLACEHOLDER_EMAIL_DOMAINS = {"example.com", "example.org", "example.net", "test.com"}
 
 SUPPORTED_TARGETS = ("missing_financials", "negative_event")
+
+
+def _load_windows_secure_source_config() -> None:
+    """Load DPAPI-backed SEC identity for CLI use without overriding env."""
+    scripts_dir = (
+        Path(__file__).resolve().parents[1]
+        / "skills"
+        / "deep-analysis"
+        / "scripts"
+    )
+    inserted = False
+    if str(scripts_dir) not in sys.path:
+        sys.path.insert(0, str(scripts_dir))
+        inserted = True
+    try:
+        from lib.secure_config import load_secure_config
+
+        load_secure_config([SEC_USER_AGENT_ENV])
+    except Exception:
+        # The normal identity gate remains authoritative and value-free.
+        pass
+    finally:
+        if inserted:
+            try:
+                sys.path.remove(str(scripts_dir))
+            except ValueError:
+                pass
+
+
 SEC_FINANCIAL_CONCEPTS = {
     "revenue": ("Revenues", "RevenueFromContractWithCustomerExcludingAssessedTax", "SalesRevenueNet"),
     "net_income": ("NetIncomeLoss", "ProfitLoss"),
@@ -2357,6 +2386,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
 
 
 def main(argv: list[str] | None = None) -> int:
+    _load_windows_secure_source_config()
     args = parse_args(argv or sys.argv[1:])
     overlay = build_overlay(
         args.ticker,

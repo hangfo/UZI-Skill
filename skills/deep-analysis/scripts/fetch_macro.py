@@ -5,6 +5,7 @@ import json
 import sys
 from datetime import datetime
 
+from lib.fred_source import fetch_fred_macro_snapshot
 from lib.web_search import search, search_trusted
 
 
@@ -68,6 +69,16 @@ def main(industry: str = "综合", market: str = "A") -> dict:
     commodity = _sentiment(_bodies("commodity"))
     industry_macro = _sentiment(_bodies("industry_macro"))
     has_evidence = any(snippets.values())
+    official_macro = None
+    if is_global:
+        try:
+            official_macro = fetch_fred_macro_snapshot()
+        except Exception as exc:
+            official_macro = {
+                "status": "gap",
+                "reason": type(exc).__name__,
+                "observations": {},
+            }
 
     return {
         "data": {
@@ -87,8 +98,12 @@ def main(industry: str = "综合", market: str = "A") -> dict:
             "industry": industry,
             "market": market,
             "rate_market": "US" if is_global else "CN",
+            "official_macro_observations": official_macro,
         },
-        "source": "web_search:ddgs + heuristic sentiment",
+        "source": (
+            "web_search:ddgs + heuristic sentiment + FRED official observations (shadow)"
+            if is_global else "web_search:ddgs + heuristic sentiment"
+        ),
         "fallback": not has_evidence,
     }
 

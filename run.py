@@ -52,6 +52,15 @@ SCRIPTS_DIR = next((c for c in _layout_candidates if c.exists()), _layout_candid
 sys.path.insert(0, str(SCRIPTS_DIR))
 os.chdir(str(SCRIPTS_DIR))
 
+# Load optional Windows DPAPI-protected source credentials before .env.
+# Explicit process environment variables still win.
+try:
+    from lib.secure_config import load_secure_config
+
+    load_secure_config()
+except Exception as exc:
+    print(f"secure source configuration unavailable ({type(exc).__name__})")
+
 
 # ─── .env 加载（v2.3，零依赖，不覆盖已存在的 shell env）──
 def _load_dotenv():

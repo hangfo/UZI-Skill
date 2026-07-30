@@ -1,0 +1,43 @@
+{
+  "schema": "uzi.sec_lifecycle_context_shadow.v1",
+  "as_of": "2026-07-30",
+  "reviews": [
+    {
+      "ticker": "HURN",
+      "target": "negative_event",
+      "overlay_status": "gap",
+      "shadow_label": "no_qualified_event",
+      "reason": "No eligible issuer-bound P0/P1 record was found in the bounded SEC submissions, litigation-release, or trading-suspension scan.",
+      "score_consumption_allowed": false
+    },
+    {
+      "ticker": "IREN",
+      "target": "negative_event",
+      "overlay_status": "ready",
+      "shadow_label": "ambiguous_context_required",
+      "event_url": "https://www.sec.gov/Archives/edgar/data/1878848/000114036125043599/ef20060170_8k.htm",
+      "event_date": "2025-11-28",
+      "item_code": "4.01",
+      "issuer_binding": "SEC CIK 0001878848 plus ticker IREN",
+      "context_checks": {
+        "auditor_change_disclosed": true,
+        "adverse_or_disclaimer_opinion": false,
+        "auditor_disagreement": false,
+        "referenced_2024_control_weakness": true,
+        "control_weakness_remediated_by_2025_06_30": true
+      },
+      "remediation_source": "https://www.sec.gov/Archives/edgar/data/1878848/000187884825000063/iren-20250630.htm",
+      "reason": "Item metadata alone overstates current risk. The filing reports no disagreement, while the referenced prior control weakness was already remediated in the 2025 10-K.",
+      "score_consumption_allowed": false
+    },
+    {
+      "ticker": "GRMN",
+      "target": "missing_financials",
+      "overlay_status": "ready",
+      "shadow_label": "official_financial_corroboration",
+      "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001121788.json",
+      "issuer_binding": "SEC CIK 0001121788 plus ticker GRMN",
+      "score_consumption_allowed": false
+    }
+  ]
+}

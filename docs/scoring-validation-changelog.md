@@ -2,6 +2,26 @@
 
 > 当前文档记录 `codex/scoring-validation-guardrails` 分支上的评分验证、branch-vs-branch harness、证据冻结与文档治理改动。它是开发追溯文档，不是 agent 指令入口；影响 agent 行为的规则仍以 `AGENTS.md` 和相关 harness 文档为准。
 
+## 2026-07-30
+
+### SEC/FRED/Massive 安全配置与真实美股 shadow
+
+- 新增 Windows DPAPI CurrentUser 遮罩配置；凭据只存在仓库外加密文件，不进入
+  `.env`、命令行、Git、日志或报告。SEC 继续要求真实联系身份。
+- FRED 只附加原始观察值/日期/vintage，不翻译情绪、不进入评分；Massive Basic
+  只做 EOD close/freshness shadow，绝不覆盖 Yahoo/yfinance。
+- TradingView Premium 不作为行情 API；CBOE 无许可继续零请求。
+- 当日 Yahoo 榜单冻结 PATH/IREN/HURN/GRMN/MANH/AVTR，生产综合分
+  `48.4/45.7/45.1/52.3/45.8/40.4`；热度、跳涨和超卖均未自动升级为买入。
+- 六股 10 年真实 walk-forward 共 724 信号，技术分-超额 Spearman
+  `-0.021/-0.036/-0.000`，继续拒绝动量调参。
+- SEC/FRED/Massive 脱敏真实请求均通过。FRED 8/8 ready；Massive Basic 六股均
+  落后 Yahoo 一日，异日不再计算误导性 close 差；IREN 4.01 正文无审计分歧且
+  相关内控缺陷已整改，保持 ambiguous、不进入评分。
+- 正反顺序均 `103/103 ok`、0 possible regression、全部评分/档位零变化；
+  相关 direct `230/230`。完整记录见
+  `docs/sec-fred-massive-secure-shadow-validation-20260730.md`。
+
 ## 2026-07-29
 
 ### SEC 默认离线、Yahoo 美股日线尾部新鲜度与真实压力验证

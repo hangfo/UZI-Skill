@@ -1,0 +1,178 @@
+{
+  "schema_version": "uzi.evidence_overlay.v1",
+  "ticker": "GRMN",
+  "market": "US",
+  "target": "missing_financials",
+  "status": "ready",
+  "confidence": {
+    "level": "high",
+    "score": 85,
+    "factors": [
+      "required evidence is present and frozen"
+    ],
+    "label_zh": "高",
+    "factors_zh": [
+      "必要证据已存在并冻结"
+    ]
+  },
+  "evidence": [
+    {
+      "source": "local_raw_data",
+      "url": "D:\\UZI-Skill\\skills\\deep-analysis\\scripts\\.cache\\GRMN\\raw_data.json",
+      "title": "Cached raw_data financial fields for GRMN",
+      "published_at": null,
+      "fetched_at": "2026-07-30T03:51:50Z",
+      "fields": [
+        "gross_margin",
+        "net_margin",
+        "revenue_history",
+        "roe"
+      ]
+    },
+    {
+      "source": "sec_companyfacts",
+      "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001121788.json",
+      "title": "SEC companyfacts for GARMIN LTD (GRMN)",
+      "published_at": "2026-04-29",
+      "fetched_at": "2026-07-30T03:51:54Z",
+      "fields": [
+        "assets",
+        "equity",
+        "net_income",
+        "revenue"
+      ]
+    }
+  ],
+  "field_mapping": {
+    "cache_raw_data": {
+      "roe": "19.9%",
+      "net_margin": "23.3%",
+      "gross_margin": "58.7%",
+      "revenue_history": [
+        48.6,
+        52.28,
+        62.97,
+        72.46
+      ]
+    },
+    "sec_companyfacts": {
+      "revenue": {
+        "concept": "RevenueFromContractWithCustomerExcludingAssessedTax",
+        "label": "Revenue from Contract with Customer, Excluding Assessed Tax",
+        "values": [
+          {
+            "value": 1535099000,
+            "fy": 2026,
+            "fp": "Q1",
+            "form": "10-Q",
+            "filed": "2026-04-29",
+            "accn": "0001193125-26-188908"
+          },
+          {
+            "value": 1753489000,
+            "fy": 2026,
+            "fp": "Q1",
+            "form": "10-Q",
+            "filed": "2026-04-29",
+            "accn": "0001193125-26-188908"
+          }
+        ]
+      },
+      "net_income": {
+        "concept": "NetIncomeLoss",
+        "label": "Net Income (Loss) Attributable to Parent",
+        "values": [
+          {
+            "value": 332769000,
+            "fy": 2026,
+            "fp": "Q1",
+            "form": "10-Q",
+            "filed": "2026-04-29",
+            "accn": "0001193125-26-188908"
+          },
+          {
+            "value": 405078000,
+            "fy": 2026,
+            "fp": "Q1",
+            "form": "10-Q",
+            "filed": "2026-04-29",
+            "accn": "0001193125-26-188908"
+          }
+        ]
+      },
+      "assets": {
+        "concept": "Assets",
+        "label": "Assets",
+        "values": [
+          {
+            "value": 10993669000,
+            "fy": 2026,
+            "fp": "Q1",
+            "form": "10-Q",
+            "filed": "2026-04-29",
+            "accn": "0001193125-26-188908"
+          },
+          {
+            "value": 10952438000,
+            "fy": 2026,
+            "fp": "Q1",
+            "form": "10-Q",
+            "filed": "2026-04-29",
+            "accn": "0001193125-26-188908"
+          }
+        ]
+      },
+      "equity": {
+        "concept": "StockholdersEquity",
+        "label": "Stockholders' Equity Attributable to Parent",
+        "values": [
+          {
+            "value": 7848398000,
+            "fy": 2026,
+            "fp": "Q1",
+            "form": "10-Q",
+            "filed": "2026-04-29",
+            "accn": "0001193125-26-188908"
+          },
+          {
+            "value": 8179478000,
+            "fy": 2026,
+            "fp": "Q1",
+            "form": "10-Q",
+            "filed": "2026-04-29",
+            "accn": "0001193125-26-188908"
+          }
+        ]
+      }
+    }
+  },
+  "source_plan": [
+    {
+      "source": "sec_companyfacts",
+      "role": "official XBRL facts"
+    },
+    {
+      "source": "sec_submissions",
+      "role": "filing provenance"
+    }
+  ],
+  "source_coverage": [],
+  "errors": [],
+  "fetched_at": "2026-07-30T03:51:50Z",
+  "as_of": "2026-07-30",
+  "lookback_days": 730,
+  "performance": {
+    "elapsed_sec": 3.734
+  },
+  "guardrails": [
+    "online evidence is frozen before branch comparison",
+    "missing evidence stays a gap; do not infer facts",
+    "same overlay must be reused for baseline and candidate refs"
+  ],
+  "display": {
+    "target_label_zh": "财务字段补证据",
+    "status_label_zh": "证据已冻结",
+    "confidence_label_zh": "高",
+    "summary_zh": "GRMN 财务字段补证据：证据已冻结，置信度 高"
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "captured_at": "2026-07-30",
+  "results": {
+    "PATH": {
+      "status": "massive_delayed_or_market_open",
+      "primary": {
+        "date": "2026-07-29",
+        "close": 12.59000015258789
+      },
+      "massive": {
+        "date": "2026-07-28",
+        "close": 12.19
+      },
+      "calendar_gap_days": 1,
+      "close_diff_pct": null,
+      "plan_semantics": "Stocks Basic is end-of-day, not real-time",
+      "adjustment_note": "Massive aggregates are split-adjusted but not dividend-adjusted; never splice them into total-return backtests.",
+      "overwrote_primary": false
+    },
+    "IREN": {
+      "status": "massive_delayed_or_market_open",
+      "primary": {
+        "date": "2026-07-29",
+        "close": 29.309999465942383
+      },
+      "massive": {
+        "date": "2026-07-28",
+        "close": 33.93
+      },
+      "calendar_gap_days": 1,
+      "close_diff_pct": null,
+      "plan_semantics": "Stocks Basic is end-of-day, not real-time",
+      "adjustment_note": "Massive aggregates are split-adjusted but not dividend-adjusted; never splice them into total-return backtests.",
+      "overwrote_primary": false
+    },
+    "HURN": {
+      "status": "massive_delayed_or_market_open",
+      "primary": {
+        "date": "2026-07-29",
+        "close": 170.3699951171875
+      },
+      "massive": {
+        "date": "2026-07-28",
+        "close": 121.37
+      },
+      "calendar_gap_days": 1,
+      "close_diff_pct": null,
+      "plan_semantics": "Stocks Basic is end-of-day, not real-time",
+      "adjustment_note": "Massive aggregates are split-adjusted but not dividend-adjusted; never splice them into total-return backtests.",
+      "overwrote_primary": false
+    },
+    "GRMN": {
+      "status": "massive_delayed_or_market_open",
+      "primary": {
+        "date": "2026-07-29",
+        "close": 294.8299865722656
+      },
+      "massive": {
+        "date": "2026-07-28",
+        "close": 253.65
+      },
+      "calendar_gap_days": 1,
+      "close_diff_pct": null,
+      "plan_semantics": "Stocks Basic is end-of-day, not real-time",
+      "adjustment_note": "Massive aggregates are split-adjusted but not dividend-adjusted; never splice them into total-return backtests.",
+      "overwrote_primary": false
+    }
+  }
+}

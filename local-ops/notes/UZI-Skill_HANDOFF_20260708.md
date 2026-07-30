@@ -1,5 +1,23 @@
 # UZI-Skill 交接记录 - 2026-07-08
 
+## 2026-07-30 SEC/FRED/Massive 安全 shadow 与真实动量复核
+
+- 当前隔离分支 `codex/scoring-validation-sec-fred-massive-shadow`，起点
+  `3b8637a`；正式 `codex/scoring-validation-guardrails` 及 origin 均为
+  `fff93f6`，upstream/main=`fce996c`，upstream push=`DISABLED`。
+- 新增 DPAPI 遮罩配置、FRED evidence-only shadow、Massive EOD non-mutating
+  对照；TradingView Premium 不作为行情 API，CBOE 零联网。
+- PATH/IREN/HURN/GRMN/MANH/AVTR 真实生产均 critical=0；综合
+  `48.4/45.7/45.1/52.3/45.8/40.4`。六股 724 信号回测的技术分-超额相关
+  `-0.021/-0.036/-0.000`，不调动量或 Stage。
+- SEC/FRED/Massive 脱敏真实端点通过；FRED 8/8 ready，Massive 六股均真实落后
+  Yahoo 一日且不覆盖主序列。IREN 4.01 正文无审计分歧，引用的内控缺陷已整改，
+  保持 ambiguous，不进入评分。
+- 正反 `103/103 ok`、0 review、0 possible regression、评分/档位零变化；
+  direct `230/230`，py_compile/diff/JSONL 通过。可以提交并只推送隔离分支；
+  不要自动合回正式分支。完整报告：
+  `docs/sec-fred-massive-secure-shadow-validation-20260730.md`。
+
 ## 2026-07-29 US entity 正式吸收门禁与热门股压力验证
 
 - 隔离分支代码提交 `3b8840b` 相对正式 `48e20fc4c9fe9823ab055155511be3bc503cb78b` 为纯 fast-forward；upstream/main 保持 `fce996c`，upstream push 为 `DISABLED`，`main` 和 `codex/windows-local-stable` 未修改。

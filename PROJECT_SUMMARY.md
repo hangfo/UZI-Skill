@@ -26,6 +26,15 @@ yfinance 日线尾部落后一个交易日，现只用 Yahoo v8 五日尾部追�
 105 项冻结对照为 `105 ok / 0 possible_regression`，评分/档位同输入零变化。
 新增 8 股 1045 信号压力回测仍不支持提高动量权重。
 
+截至 2026-07-30，隔离分支新增 Windows DPAPI 遮罩配置、FRED 官方宏观
+evidence-only shadow 和 Massive Stocks Basic EOD 非覆盖式对照。TradingView
+Premium 不被当作通用行情 API，CBOE 继续零联网。PATH/IREN/HURN/GRMN 真实生产
+并增加 MANH/AVTR holdout；六股 724 信号 walk-forward 再次否定动量加权。
+SEC/FRED/Massive 脱敏真实端点均通过，Massive 免费层真实落后 Yahoo 一个交易日，
+因此只保留 EOD shadow；103 项正反冻结对照均为
+`103 ok / 0 possible_regression`，评分/档位零变化。IREN 4.01 因无审计分歧且
+相关内控缺陷已整改而保持 ambiguous，不进入评分。
+
 ---
 
 ## 改动总览

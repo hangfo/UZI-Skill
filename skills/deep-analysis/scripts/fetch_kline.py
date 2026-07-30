@@ -358,6 +358,18 @@ def main(ticker: str) -> dict:
     indicators = compute_indicators(klines)
     chips = fetch_chip_distribution(ti)
     viz_shape = _extract_for_viz(klines)
+    massive_shadow = None
+    if ti.market == "U":
+        try:
+            from lib.massive_source import compare_massive_eod
+
+            massive_shadow = compare_massive_eod(ti.code, klines)
+        except Exception as exc:
+            massive_shadow = {
+                "status": "gap",
+                "reason": type(exc).__name__,
+                "overwrote_primary": False,
+            }
 
     # Derive stage / ma_align / macd / rsi human labels from indicators
     stage_label = STAGE_LABEL.get(indicators.get("stage", 0), "—")
@@ -380,6 +392,7 @@ def main(ticker: str) -> dict:
             "macd": macd_label,
             "rsi": rsi_label,
             "chip_distribution": chips,
+            "massive_eod_shadow": massive_shadow,
             **viz_shape,
         },
         "source": "akshare:stock_zh_a_hist + stock_cyq_em (+ 6 path fallback chain)",
