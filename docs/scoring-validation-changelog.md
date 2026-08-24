@@ -2,6 +2,24 @@
 
 > 当前文档记录 `codex/scoring-validation-guardrails` 分支上的评分验证、branch-vs-branch harness、证据冻结与文档治理改动。它是开发追溯文档，不是 agent 指令入口；影响 agent 行为的规则仍以 `AGENTS.md` 和相关 harness 文档为准。
 
+## 2026-08-24
+
+### Market Loop 六股实体、证据与真实收益审计
+
+- 对同事系统 2026-08-23 周日选出的 TFPM/MAIN/JNJ/CC/300024/LLY 复原轨迹：
+  主要由新闻/分析文章触发；`CC` 是 Canton 加密资产与美股 Chemours 的跨资产同代码
+  碰撞，`300024` 是上纬新材机器人新闻向另一发行人的主题污染。
+- UZI v3.9.2 fresh medium 综合分 `57.2/47.5/50.6/40.9/42.8/56.5`；其中
+  CC 分数对原候选无效，其余均未进入总体买入档。CLI 报告均 `critical=0`，但没有
+  agent 人工复核，且当前新闻含候选时间后的信息，不能冒充点时回测。
+- 有效四只美股 10 年真实 walk-forward 共 528 信号，技术分-超额 Spearman
+  `-0.075/-0.115/-0.100`；300024 对沪深 300 的 10 年验证共 154 信号，分别为
+  `-0.025/-0.099/-0.427`，长周期样本稀少。结果继续不支持提高动量权重或反向调参。
+- 新增 research-only `tools/a_momentum_walkforward.py`，对浅历史基准 fail closed；首次
+  `510300.SH` 仅 154 行被拒绝，改用 `000300.SH` 后得到约 2,426 行完整基准。
+  相关 direct tests `17/17`、编译、diff 检查和 0 secret 命中通过；生产评分/阈值未改。
+- 完整记录见 `docs/market-loop-agent-six-stock-audit-20260824.md`。
+
 ## 2026-07-30
 
 ### SEC/FRED/Massive 独立正式吸收审计
