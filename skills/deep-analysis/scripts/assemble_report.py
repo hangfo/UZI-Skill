@@ -8,12 +8,16 @@ from __future__ import annotations
 import json
 import shutil
 import sys
+from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
 
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
 from lib.cache import read_task_output, market_status  # noqa: E402
+from lib.market_field_contracts import (  # noqa: E402
+    enabled_dims_for_raw, is_dim_applicable, market_of, presentation_for,
+)
 
 ROOT = HERE.parent
 TEMPLATE = ROOT / "assets" / "report-template.html"
@@ -212,11 +216,14 @@ def _extract_kpi_value(raw_dim_data: dict, key: str) -> str:
     return "—"
 
 
-def render_dim_card(dim_key: str, dim_score: dict, raw_dim: dict) -> str:
+def render_dim_card(dim_key: str, dim_score: dict, raw_dim: dict, market: str = "A") -> str:
     """Render one dimension card (data-driven from DIM_META)."""
-    meta = DIM_META.get(dim_key)
+    base_meta = DIM_META.get(dim_key)
+    meta = deepcopy(base_meta) if base_meta else None
     if not meta:
         return ""
+    meta.update({k: v for k, v in presentation_for(dim_key, market).items()
+                 if k in ("title", "en")})
     score = dim_score.get("score")
     label = _safe(dim_score.get("label"), "—")
     pass_items = dim_score.get("reasons_pass") or []
@@ -306,9 +313,15 @@ def render_dim_category(cat: str, dimensions: dict, raw: dict) -> str:
     """Render all cards in one category."""
     raw_dims = raw.get("dimensions", {}) if raw else {}
     dim_scores = dimensions.get("dimensions", {}) if dimensions else {}
+    market = market_of(raw)
+    enabled_dims = enabled_dims_for_raw(raw)
     cards = []
     for key in CAT_GROUPS.get(cat, []):
-        cards.append(render_dim_card(key, dim_scores.get(key, {}), raw_dims.get(key, {})))
+        if not is_dim_applicable(key, market):
+            continue
+        if enabled_dims is not None and key not in enabled_dims:
+            continue
+        cards.append(render_dim_card(key, dim_scores.get(key, {}), raw_dims.get(key, {}), market=market))
     return "\n".join(cards)
 
 
@@ -380,8 +393,21 @@ def assemble(ticker: str) -> Path:
     bp = dashboard.get("battle_plan") or {}
     zones = syn.get("buy_zones") or {}
     trap = (raw.get("dimensions", {}).get("18_trap") or {}).get("data") or {}
-    trap_level = trap.get("trap_level") or "🟢 安全"
-    trap_color, trap_emoji = trap_color_emoji(trap_level)
+    _enabled_dims = enabled_dims_for_raw(raw)
+    _trap_enabled = _enabled_dims is None or "18_trap" in _enabled_dims
+    _trap_title = "杀猪盘体检" if _mkt == "A" else "推广操纵风险"
+    if not _trap_enabled:
+        trap_level = "未执行"
+        trap_color, trap_emoji = "yellow", "⚪"
+        trap_recommendation = "本次分析档位未执行重搜索，不得把缺少命中解释为已确认安全。"
+    elif trap.get("evidence_strength") == "sampled":
+        trap_level = "抽样检查"
+        trap_color, trap_emoji = "yellow", "🟡"
+        trap_recommendation = "仅检查本地硬风险；未执行 8 信号重搜索，不构成安全确认。"
+    else:
+        trap_level = trap.get("trap_level") or "未取得证据"
+        trap_color, trap_emoji = trap_color_emoji(trap_level)
+        trap_recommendation = _safe(trap.get("recommendation"), "未取得足够证据")
 
     bull = debate.get("bull") or {}
     bear = debate.get("bear") or {}
@@ -422,9 +448,10 @@ def assemble(ticker: str) -> Path:
             f" · {syn['verdict_detail']}" if syn.get("verdict_detail") else ""
         ),
         "{{TRAP_LEVEL}}": trap_level,
+        "{{TRAP_TITLE}}": _trap_title,
         "{{TRAP_COLOR}}": trap_color,
         "{{TRAP_EMOJI}}": trap_emoji,
-        "{{TRAP_RECOMMENDATION}}": _safe(trap.get("recommendation"), "数据正常，未发现异常推广痕迹"),
+        "{{TRAP_RECOMMENDATION}}": trap_recommendation,
         "{{CORE_CONCLUSION}}": _safe(dashboard.get("core_conclusion")),
         "{{DP_TREND}}": _safe(dp.get("trend")),
         "{{DP_PRICE}}": _safe(dp.get("price")),
@@ -456,6 +483,7 @@ def assemble(ticker: str) -> Path:
         "{{ZONE_TECH_RATIONALE}}": _safe((zones.get("technical") or {}).get("rationale")),
         "{{ZONE_YOUZI_PRICE}}": str(_safe((zones.get("youzi") or {}).get("price"))),
         "{{ZONE_YOUZI_RATIONALE}}": _safe((zones.get("youzi") or {}).get("rationale")),
+        "{{ZONE_TACTICAL_LABEL}}": "YOUZI 游资派" if _mkt == "A" else "TACTICAL 交易派",
         "{{GENERATED_AT}}": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "{{BULL_COUNT}}": str(bull_count),
         "{{BEAR_COUNT}}": str(bear_count),
@@ -470,6 +498,10 @@ def assemble(ticker: str) -> Path:
         "{{MARKET_STATUS_CLASS}}": "open" if market_status().get("is_open") else "closed",
         "{{DATA_FETCHED_AT}}": (raw.get("fetched_at") or "")[:19].replace("T", " "),
         "{{PLUGIN_VERSION}}": _get_plugin_version(),
+        "{{DIM_SECTION_TITLE}}": (
+            "速判核心维度" if ((raw.get("analysis_profile") or {}).get("depth") == "lite")
+            else "全维深度透视"
+        ),
     }
     for k, v in replacements.items():
         template = template.replace(k, str(v))

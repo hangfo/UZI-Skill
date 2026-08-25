@@ -1405,6 +1405,15 @@ def _autofill_qualitative_via_mx(raw: dict, ticker: str) -> None:
     name = basic.get("name") or ticker
     industry = basic.get("industry") or "综合"
     code_raw = ticker.split(".")[0] if "." in ticker else ticker
+    from lib.market_field_contracts import enabled_dims_for_raw, is_dim_applicable, market_of
+    _market = market_of(raw)
+    _enabled_dims = enabled_dims_for_raw(raw)
+    _macro_query = {
+        "A": "2026 中国 利率 货币政策 降息 汇率 大宗商品 宏观环境",
+        "H": "2026 香港 联系汇率 港元利率 美元利率 大宗商品 宏观环境",
+        "U": "2026 美国 美联储利率 美元 大宗商品 宏观环境",
+        "G": "2026 全球 利率 汇率 大宗商品 宏观环境",
+    }.get(_market, "2026 全球 利率 汇率 大宗商品 宏观环境")
 
     def _is_default_or_empty(v) -> bool:
         """True if value is missing OR a generic-default placeholder."""
@@ -1420,7 +1429,7 @@ def _autofill_qualitative_via_mx(raw: dict, ticker: str) -> None:
     targets = [
         # v3.9.4 · 3_macro autofill 聚焦宏观（利率/汇率/大宗）· 不带行业名 —— 此前带行业名会把行业展望误填成宏观利率
         ("3_macro",     lambda d: all(_is_default_or_empty(d.get(k)) for k in ("rate_cycle","fx_trend","geo_risk","commodity")),
-                        lambda: f"2026 中国 利率 货币政策 降息 汇率 大宗商品 宏观环境"),
+                        lambda: _macro_query),
         ("7_industry",  lambda d: _is_default_or_empty(d.get("growth")) and not (d.get("cninfo_metrics") or {}).get("industry_pe_weighted"),
                         lambda: f"{industry} 2026 行业增速 TAM 市场规模 渗透率"),
         ("8_materials", lambda d: _is_default_or_empty(d.get("core_material")),
@@ -1436,6 +1445,8 @@ def _autofill_qualitative_via_mx(raw: dict, ticker: str) -> None:
     skipped_full = 0
     failed_count = 0
     for dim_key, is_empty_fn, query_fn in targets:
+        if (_enabled_dims is not None and dim_key not in _enabled_dims) or not is_dim_applicable(dim_key, _market):
+            continue
         dim = dims.get(dim_key) or {}
         data = dim.get("data") or {}
         try:

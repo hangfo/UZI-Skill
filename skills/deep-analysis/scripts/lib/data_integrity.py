@@ -14,6 +14,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from lib.market_field_contracts import (
+    enabled_dims_for_raw, is_dim_applicable, market_of,
+    market_recovery_hints, presentation_for,
+)
+
 
 # (dim_key, data_path, label, critical)
 # data_path is a dotted path into dim["data"][...]
@@ -103,13 +108,23 @@ def validate(raw: dict) -> dict:
         }
     """
     dims = raw.get("dimensions", {}) or {}
+    market = market_of(raw)
+    enabled_dims = enabled_dims_for_raw(raw)
 
     missing_critical: list[dict] = []
     missing_optional: list[dict] = []
     total_checks = 0
     passed_checks = 0
 
+    not_collected: list[dict] = []
+    not_applicable: list[dict] = []
     for dim_key, path, label, critical in CRITICAL_CHECKS:
+        if not is_dim_applicable(dim_key, market):
+            not_applicable.append({"dim": dim_key, "path": path, "label": label})
+            continue
+        if enabled_dims is not None and dim_key not in enabled_dims:
+            not_collected.append({"dim": dim_key, "path": path, "label": label})
+            continue
         total_checks += 1
         dim = dims.get(dim_key) or {}
         data = dim.get("data") or {}
@@ -126,6 +141,13 @@ def validate(raw: dict) -> dict:
     # Enrichment coverage
     missing_enrichment: list[dict] = []
     for dim_key, label in ENRICHMENT_DIMS:
+        market_label = presentation_for(dim_key, market).get("label", label)
+        if not is_dim_applicable(dim_key, market):
+            not_applicable.append({"dim": dim_key, "field": "_entire_dim", "label": market_label})
+            continue
+        if enabled_dims is not None and dim_key not in enabled_dims:
+            not_collected.append({"dim": dim_key, "field": "_entire_dim", "label": market_label})
+            continue
         dim = dims.get(dim_key) or {}
         data = dim.get("data") or {}
         # Check if the dim has any non-empty string/list/number in its values
@@ -135,7 +157,7 @@ def validate(raw: dict) -> dict:
                 has_content = True
                 break
         if not has_content:
-            missing_enrichment.append({"dim": dim_key, "label": label})
+            missing_enrichment.append({"dim": dim_key, "label": market_label})
 
     # Fallback dim detection
     fallback_dims = [
@@ -154,6 +176,12 @@ def validate(raw: dict) -> dict:
         "missing_optional": missing_optional,
         "missing_enrichment": missing_enrichment,
         "fallback_dims": fallback_dims,
+        "market": market,
+        "analysis_depth": ((raw.get("analysis_profile") or {}).get("depth")
+                           if isinstance(raw.get("analysis_profile"), dict)
+                           else raw.get("analysis_depth")),
+        "not_collected": not_collected,
+        "not_applicable": not_applicable,
         "coverage_pct": coverage_pct,
         "passed_checks": passed_checks,
         "total_checks": total_checks,
@@ -221,6 +249,7 @@ def generate_recovery_tasks(raw: dict, integrity: dict) -> list[dict]:
     code = basic.get("code") or raw.get("ticker") or ""
     industry = (dims.get("7_industry") or {}).get("data", {}).get("industry") or basic.get("industry") or "综合"
     name = basic.get("name") or raw.get("ticker") or code
+    market = integrity.get("market") or market_of(raw)
     code_raw = code.split(".")[0] if "." in code else code
     # EastMoney uses 0/1 prefix for SZ/SH
     eastmoney_code = (("1." if code.endswith(".SH") else "0.") + code_raw) if code_raw else ""
@@ -247,7 +276,8 @@ def generate_recovery_tasks(raw: dict, integrity: dict) -> list[dict]:
     # Critical + optional missing fields
     for entry in integrity.get("missing_critical", []) + integrity.get("missing_optional", []):
         key = (entry["dim"], entry["path"])
-        hints = _RECOVERY_HINTS.get(key, ["ws: '{name} {label}'".format(name=name, label=entry["label"])])
+        hints = (market_recovery_hints(market, entry["dim"], entry["path"])
+                 or _RECOVERY_HINTS.get(key, ["ws: '{name} {label}'".format(name=name, label=entry["label"])]))
         severity = "critical" if entry in integrity.get("missing_critical", []) else "optional"
         tasks.append({
             "dim": entry["dim"],
@@ -260,7 +290,8 @@ def generate_recovery_tasks(raw: dict, integrity: dict) -> list[dict]:
 
     # Whole-dim enrichment gaps
     for entry in integrity.get("missing_enrichment", []):
-        hints = _ENRICHMENT_HINTS.get(entry["dim"], ["ws: '{name} {label}'".format(name=name, label=entry["label"])])
+        hints = (market_recovery_hints(market, entry["dim"], "_entire_dim")
+                 or _ENRICHMENT_HINTS.get(entry["dim"], ["ws: '{name} {label}'".format(name=name, label=entry["label"])]))
         tasks.append({
             "dim": entry["dim"],
             "field": "_entire_dim",
@@ -291,6 +322,10 @@ def refresh_recovery_artifact(raw: dict, ticker: str, gaps_path: str | Path) -> 
         "raw_fetched_at": raw.get("fetched_at"),
         "coverage_pct": integrity.get("coverage_pct", 0),
         "critical_missing": integrity.get("critical_missing", False),
+        "market": integrity.get("market"),
+        "analysis_depth": integrity.get("analysis_depth"),
+        "not_collected": integrity.get("not_collected", []),
+        "not_applicable": integrity.get("not_applicable", []),
         "tasks": tasks,
     }
     path.write_text(

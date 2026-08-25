@@ -85,6 +85,13 @@ def _viz_chain(raw: dict) -> str:
 
 
 def _viz_trap(raw: dict) -> str:
+    if raw.get("evidence_strength") == "sampled":
+        return (
+            '<div style="padding:12px;background:#f8fafc;border:1px solid #cbd5e1;'
+            'border-radius:8px;color:#475569;font-size:12px;line-height:1.6">'
+            '本档位未执行 8 信号重搜索；“未发现本地硬风险”不等于已确认安全。'
+            '</div>'
+        )
     import re
     hit_str = str(raw.get("signals_hit", "0/8"))
     m = re.search(r'(\d+)', hit_str)

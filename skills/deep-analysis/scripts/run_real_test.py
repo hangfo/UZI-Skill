@@ -196,7 +196,15 @@ def collect_raw_data(ticker: str, max_workers: int = 6, resume: bool = True) -> 
             _initial_market = _parse(ticker).market
     except Exception:
         pass
-    raw = {"ticker": ticker, "market": _initial_market, "fetched_at": _dt.now().isoformat(timespec="seconds")}
+    from lib.analysis_profile import get_profile as _get_profile
+    _profile = _get_profile()
+    raw = {
+        "ticker": ticker,
+        "market": _initial_market,
+        "fetched_at": _dt.now().isoformat(timespec="seconds"),
+        "analysis_profile": {"depth": _profile.depth, "label": _profile.label_cn},
+        "fetchers_enabled": sorted(_profile.fetchers_enabled),
+    }
     dims: dict = {}
     t0 = time.time()
 
@@ -759,8 +767,12 @@ def stage2(ticker: str) -> str:
                     t["agent_note"] = acks.get(key, acks.get(t["dim"], ""))
             syn["data_gaps"] = {
                 "coverage_pct": gaps_doc.get("coverage_pct", 0),
+                "market": gaps_doc.get("market"),
+                "analysis_depth": gaps_doc.get("analysis_depth"),
                 "total_gaps": len(tasks),
                 "unresolved": sum(1 for t in tasks if t["status"] == "pending"),
+                "not_collected": gaps_doc.get("not_collected", []),
+                "not_applicable": gaps_doc.get("not_applicable", []),
                 "tasks": tasks,
             }
             print(f"  data_gaps: {syn['data_gaps']['total_gaps']} 项 · 已 ack {syn['data_gaps']['total_gaps'] - syn['data_gaps']['unresolved']}")

@@ -50,6 +50,22 @@ def _get_dim(ctx: dict, key: str) -> dict:
     return (ctx["dims"].get(key) or {}).get("data") or {}
 
 
+def _profile_for_ctx(ctx: dict):
+    """Use the persisted run profile so stage2-only rerenders stay deterministic."""
+    from lib.analysis_profile import get_profile
+    raw = ctx.get("raw") or {}
+    profile = raw.get("analysis_profile")
+    depth = profile.get("depth") if isinstance(profile, dict) else raw.get("analysis_depth")
+    return get_profile(depth if depth in ("lite", "medium", "deep") else None)
+
+
+def _is_lite_ctx(ctx: dict) -> bool:
+    try:
+        return _profile_for_ctx(ctx).depth == "lite"
+    except Exception:
+        return False
+
+
 def check_industry_mapping_sanity(ctx: dict) -> list[Issue]:
     """BUG#R10 class · 行业被错误映射到高碰撞类别"""
     issues = []
@@ -87,8 +103,7 @@ def check_all_dims_exist(ctx: dict) -> list[Issue]:
     # lite 模式只跑 7 个维度，未启用的不能报 critical missing
     required_numbered = set(range(20))
     try:
-        from lib.analysis_profile import get_profile
-        profile = get_profile()
+        profile = _profile_for_ctx(ctx)
         # profile.fetchers_enabled 形如 {"0_basic", "1_financials", ...}
         enabled_nums = {
             int(k.split("_")[0])
@@ -124,8 +139,7 @@ def check_empty_dims(ctx: dict) -> list[Issue]:
     # v2.10.4 · 只检查当前 profile 启用的维度
     enabled_nums = None
     try:
-        from lib.analysis_profile import get_profile
-        profile = get_profile()
+        profile = _profile_for_ctx(ctx)
         enabled_nums = {
             int(k.split("_")[0])
             for k in profile.fetchers_enabled
@@ -272,9 +286,8 @@ def check_coverage_threshold(ctx: dict) -> list[Issue]:
 
     # v2.10.5 · profile-aware 重算 coverage（仅当 profile 可用）
     try:
-        from lib.analysis_profile import get_profile
         from lib.data_integrity import CRITICAL_CHECKS
-        profile = get_profile()
+        profile = _profile_for_ctx(ctx)
         enabled = profile.fetchers_enabled
         raw_dims = ctx.get("raw", {}).get("dimensions", {}) or {}
         # 只算 profile 启用维度的检查项
@@ -306,7 +319,8 @@ def check_coverage_threshold(ctx: dict) -> list[Issue]:
         # CLI-only / lite 模式下降级：即使 critical 也降 warning（无 agent 可补）
         import os as _os
         is_cli_only = (
-            _os.environ.get("UZI_DEPTH") == "lite"
+            _is_lite_ctx(ctx)
+            or _os.environ.get("UZI_DEPTH") == "lite"
             or _os.environ.get("UZI_LITE") == "1"
             or _os.environ.get("UZI_CLI_ONLY") == "1"
             or _os.environ.get("CI") == "true"
@@ -433,7 +447,8 @@ def check_agent_analysis_exists(ctx: dict) -> list[Issue]:
     # v2.10.4 · 识别是否处于"无 agent 直跑"模式
     import os
     is_cli_only = (
-        os.environ.get("UZI_DEPTH") == "lite"
+        _is_lite_ctx(ctx)
+        or os.environ.get("UZI_DEPTH") == "lite"
         or os.environ.get("UZI_LITE") == "1"
         or os.environ.get("UZI_CLI_ONLY") == "1"
         # CI/batch 环境也视为无 agent

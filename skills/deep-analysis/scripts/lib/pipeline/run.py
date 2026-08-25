@@ -43,7 +43,9 @@ def run_pipeline(ticker: str, resume: bool = True) -> str:
     # 里会因 raw.get("market", "A") 被误判为 A 股，导致雪球/东财/A股龙虎榜等兜底路径乱跑，
     # 最终出现 NOK 这类 ADR 被当 A 股检查的假缺口。
     from lib.market_router import parse_ticker as _parse_ticker
+    from lib.analysis_profile import get_profile as _get_profile
     _ti = _parse_ticker(ticker)
+    _profile = _get_profile()
     _basic = raw_dict.get("0_basic") or {}
     _basic_market = _basic.get("market") if isinstance(_basic, dict) else None
     raw_data_compatible = {
@@ -51,6 +53,8 @@ def run_pipeline(ticker: str, resume: bool = True) -> str:
         "market": _basic_market if _basic_market in ("A", "H", "U", "G") else _ti.market,
         "code": _ti.code,
         "full": _ti.full,
+        "analysis_profile": {"depth": _profile.depth, "label": _profile.label_cn},
+        "fetchers_enabled": sorted(_profile.fetchers_enabled),
         "dimensions": {k: v for k, v in raw_dict.items()
                        if k not in ("fund_managers", "similar_stocks")},
     }

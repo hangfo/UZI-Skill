@@ -2924,7 +2924,7 @@ section[id], div[id^="dim-"], .dim-card[id] { scroll-margin-top: 20px; }
     <div class="bento safety-card {{TRAP_COLOR}}">
       <div class="safety-icon">{{TRAP_EMOJI}}</div>
       <div class="safety-text">
-        <strong>杀猪盘体检 · {{TRAP_LEVEL}}</strong>
+        <strong>{{TRAP_TITLE}} · {{TRAP_LEVEL}}</strong>
         <span>{{TRAP_RECOMMENDATION}}</span>
       </div>
     </div>
@@ -3103,7 +3103,7 @@ section[id], div[id^="dim-"], .dim-card[id] { scroll-margin-top: 20px; }
   <!-- ─── 19 维 DEEP SCAN ─── -->
   <div class="section-head" id="section-scan">
     <div class="section-tag">05 / DEEP SCAN</div>
-    <h2 class="section-title">全维深度透视</h2>
+    <h2 class="section-title">{{DIM_SECTION_TITLE}}</h2>
     <div class="section-line"></div>
   </div>
 
@@ -3174,7 +3174,7 @@ section[id], div[id^="dim-"], .dim-card[id] { scroll-margin-top: 20px; }
     <div class="zone"><div class="zone-label">VALUE 价值派</div><div class="zone-price">{{CURRENCY}}{{ZONE_VALUE_PRICE}}</div><div class="zone-rationale">{{ZONE_VALUE_RATIONALE}}</div></div>
     <div class="zone"><div class="zone-label">GROWTH 成长派</div><div class="zone-price">{{CURRENCY}}{{ZONE_GROWTH_PRICE}}</div><div class="zone-rationale">{{ZONE_GROWTH_RATIONALE}}</div></div>
     <div class="zone"><div class="zone-label">TECH 技术派</div><div class="zone-price">{{CURRENCY}}{{ZONE_TECH_PRICE}}</div><div class="zone-rationale">{{ZONE_TECH_RATIONALE}}</div></div>
-    <div class="zone"><div class="zone-label">YOUZI 游资派</div><div class="zone-price">{{CURRENCY}}{{ZONE_YOUZI_PRICE}}</div><div class="zone-rationale">{{ZONE_YOUZI_RATIONALE}}</div></div>
+    <div class="zone"><div class="zone-label">{{ZONE_TACTICAL_LABEL}}</div><div class="zone-price">{{CURRENCY}}{{ZONE_YOUZI_PRICE}}</div><div class="zone-rationale">{{ZONE_YOUZI_RATIONALE}}</div></div>
   </div>
 
   <!-- v3.6.0 · 分享卡 + QR · 报告链接二维码 + 一句话总结 -->
@@ -3241,7 +3241,7 @@ section[id], div[id^="dim-"], .dim-card[id] { scroll-margin-top: 20px; }
 
       <!-- 杀猪盘 -->
       <div style="margin-bottom:14px;font-size:12px">
-        <span style="color:{{TRAP_COLOR}}">{{TRAP_EMOJI}} 杀猪盘检测：{{TRAP_LEVEL}}</span>
+        <span style="color:{{TRAP_COLOR}}">{{TRAP_EMOJI}} {{TRAP_TITLE}}：{{TRAP_LEVEL}}</span>
       </div>
 
       <!-- QR -->
@@ -3315,7 +3315,7 @@ section[id], div[id^="dim-"], .dim-card[id] { scroll-margin-top: 20px; }
 
   <div class="sc-trap {{TRAP_COLOR}}">
     <span style="font-size:40px">{{TRAP_EMOJI}}</span>
-    <span>杀猪盘体检：{{TRAP_LEVEL}}</span>
+    <span>{{TRAP_TITLE}}：{{TRAP_LEVEL}}</span>
   </div>
 
   <div style="text-align:center;margin:20px 0 10px">

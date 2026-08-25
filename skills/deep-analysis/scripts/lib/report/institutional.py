@@ -572,9 +572,10 @@ def _render_data_gap_banner(data_gaps: dict | None, raw: dict | None = None, syn
         if ack:
             subtitle += f"（其中 <strong>{ack}</strong> 已由 agent 确认"
             subtitle += "真的拿不到）"
+        depth = data_gaps.get("analysis_depth") or "unknown"
         hint = (
-            "Agent 已尝试浏览器抓取 / MX API / WebSearch / 逻辑推导；"
-            "划线字段为已确认无法补齐，其余字段显示为 “—”。"
+            f"仅列出适用于当前市场、且 {depth} 档位已启用后仍未补齐的字段；"
+            "未运行的浏览器 / MX API / WebSearch 不作“已尝试”声明。"
         )
 
     return f'''<div class="{banner_class}" role="alert">
