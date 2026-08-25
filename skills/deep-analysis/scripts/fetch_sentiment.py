@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-import os
 import sys
 
 from lib import data_sources as ds
@@ -12,31 +11,6 @@ from lib.web_search import search
 
 def main(ticker: str) -> dict:
     ti = parse_ticker(ticker)
-
-    if os.environ.get("UZI_AUX_HEAVY") != "1":
-        name = ti.code
-        return {
-            "ticker": ti.full,
-            "data": {
-                "xueqiu_heat": "热度 0",
-                "thermometer_value": 0,
-                "guba_volume": "—",
-                "big_v_mentions": "—",
-                "positive_pct": "50%",
-                "sentiment_label": "中性",
-                "platform_snippets": {},
-                "platform_hits": {},
-                "total_mentions": 0,
-                "hot_trend_mentions": {"stock_name": name, "total_hits": 0, "evidence_strength": "sampled"},
-                "hot_trend_hit_count": 0,
-                "news_multi_source": {},
-                "news_sources_ok": 0,
-                "news_total_hits": 0,
-                "_note": "medium/lite skip heavy sentiment web search; deep enables full social/news scan",
-            },
-            "source": "sampled:UZI_AUX_HEAVY=0",
-            "fallback": False,
-        }
 
     basic = ds.fetch_basic(ti)
     name = basic.get("name") or ti.code
@@ -73,8 +47,8 @@ def main(ticker: str) -> dict:
     negative_kws = ["看空", "下跌", "亏损", "利空", "减仓", "卖出", "割肉", "杀跌"]
     pos = sum(1 for kw in positive_kws if kw in text)
     neg = sum(1 for kw in negative_kws if kw in text)
-    total = pos + neg if (pos + neg) > 0 else 1
-    positive_pct = round(pos / total * 100, 0)
+    has_signal = (pos + neg) > 0
+    positive_pct = round(pos / (pos + neg) * 100, 0) if has_signal else None
 
     # Heat gauge (0-100) based on total platform hits
     total_hits = sum(platform_hit.values())
@@ -117,8 +91,8 @@ def main(ticker: str) -> dict:
         if news_text:
             pos += sum(1 for kw in positive_kws if kw in news_text)
             neg += sum(1 for kw in negative_kws if kw in news_text)
-            total2 = pos + neg if (pos + neg) > 0 else 1
-            positive_pct = round(pos / total2 * 100, 0)
+            has_signal = (pos + neg) > 0
+            positive_pct = round(pos / (pos + neg) * 100, 0) if has_signal else None
         news_hit = news_multi.get("total_hits", 0) or 0
         heat = min(100, heat + news_hit * 2)
     except Exception as _e:
@@ -131,8 +105,12 @@ def main(ticker: str) -> dict:
             "thermometer_value": heat,
             "guba_volume": f"{platform_hit.get('guba', 0)} 条结果",
             "big_v_mentions": f"{big_v_count} 位大V提及" if big_v_count else "—",
-            "positive_pct": f"{positive_pct}%",
-            "sentiment_label": "乐观" if positive_pct > 60 else "悲观" if positive_pct < 40 else "中性",
+            "sentiment_data_available": has_signal,
+            "positive_pct": f"{positive_pct}%" if has_signal else "—",
+            "sentiment_label": (
+                ("乐观" if positive_pct > 60 else "悲观" if positive_pct < 40 else "中性")
+                if has_signal else "数据缺失（未抓到有效舆情，非真实负面）"
+            ),
             "platform_snippets": snippets,
             "platform_hits": platform_hit,
             "total_mentions": total_hits,

@@ -183,8 +183,9 @@ FETCHER_REGISTRY: dict[str, type] = {
         legacy_module="fetch_futures",
         required=[],
         optional=["linked_contract", "price_trend", "inventory"],
-        args_fn=lambda t, r: (r.get("0_basic", {}).get("data", {}).get("industry", "") or "综合",),
-        depends_on=["0_basic"],
+        args_fn=lambda t, r: (r.get("0_basic", {}).get("data", {}).get("industry", "") or "综合",
+                              (r.get("8_materials", {}).get("data", {}).get("materials_detail") or None),),
+        depends_on=["0_basic", "8_materials"],
     ),
 
     # 10_valuation · 估值
@@ -276,6 +277,18 @@ FETCHER_REGISTRY: dict[str, type] = {
         required=[],
         optional=["xueqiu_cubes", "tgb_mentions", "ths_simu", "dpswang", "summary"],
         args_fn=lambda t, r: (t,),
+    ),
+
+    # similar_stocks · 相似股（顶层字段 · 报告"跟它最像的另外几只票"卡片）
+    # v3.9.4 · 之前未注册进 pipeline → 该卡片恒显示"暂无可比股"
+    "similar_stocks": _make_adapter(
+        dim_key="similar_stocks",
+        legacy_module="fetch_similar_stocks",
+        required=[],
+        optional=["similar_stocks"],
+        top_level=["similar_stocks"],  # 写 raw 顶层 · 与 legacy wave3 一致
+        args_fn=lambda t, r: (t, 4),
+        markets=("A",),
     ),
 }
 

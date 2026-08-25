@@ -2,6 +2,8 @@
 
 补全：原方案要求 PE/PB/PEG/PS/EV/EBITDA + DCF + 历史分位 + 行业中枢
 """
+from __future__ import annotations
+
 import json
 import math
 import sys
@@ -119,6 +121,155 @@ def dcf_sensitivity_matrix(
         "growths": growths,
         "values": values,
         "current_price": current_price,
+    }
+
+
+def _mx_latest_pct(result: dict, label_substr: str) -> tuple[float, str] | tuple[None, None]:
+    """Extract the newest percentage and its stated lookback window."""
+    if not isinstance(result, dict) or result.get("error"):
+        return None, None
+    data = result.get("data") or {}
+    inner = data.get("data") if isinstance(data.get("data"), dict) else data
+    search = (inner or {}).get("searchDataResultDTO") or {}
+    for dto in search.get("dataTableDTOList") or []:
+        if not isinstance(dto, dict):
+            continue
+        table = dto.get("table") or dto.get("rawTable") or {}
+        name_map = dto.get("nameMap") or {}
+        if isinstance(name_map, list):
+            name_map = {str(i): value for i, value in enumerate(name_map)}
+        for key, values in table.items():
+            if key == "headName" or not isinstance(values, list):
+                continue
+            label = str(name_map.get(key) or name_map.get(str(key)) or key)
+            if label_substr not in label:
+                continue
+            for raw in values:
+                try:
+                    value = float(
+                        str(raw).replace("%", "").replace("倍", "").replace(",", "").strip()
+                    )
+                except (TypeError, ValueError):
+                    continue
+                if value < 0:
+                    continue
+                window = "历史"
+                if "5年" in label or "5 年" in label:
+                    window = "5 年"
+                elif "3年" in label or "3 年" in label:
+                    window = "3 年"
+                elif "上市以来" in label:
+                    window = "上市以来"
+                return value, window
+    return None, None
+
+
+def _fetch_valuation_via_mx(
+    code: str,
+    name_hint: str = "",
+    basic: dict | None = None,
+) -> dict:
+    """Fill valuation fields through basic data and MX without mini-racer."""
+    basic = basic or {}
+    try:
+        from lib.mx_api import MXClient
+        client = MXClient()
+    except Exception:
+        client = None
+
+    pe = basic.get("pe_ttm")
+    pb = basic.get("pb")
+    used_basic = pe is not None or pb is not None
+    used_mx = False
+    pe_quantile = None
+    pe_window = "5 年"
+    pb_quantile = None
+
+    if client is not None and client.available:
+        label = name_hint.strip() or code
+        if pe is None or pb is None:
+            try:
+                snapshot = client.fetch_snapshot(label) or {}
+            except Exception:
+                snapshot = {}
+            if pe is None:
+                for key, raw in snapshot.items():
+                    if "市盈率" in str(key) or "PE" in str(key).upper():
+                        try:
+                            pe = float(str(raw).replace("%", "").replace("倍", ""))
+                            used_mx = True
+                            break
+                        except (TypeError, ValueError):
+                            continue
+            if pb is None:
+                for key, raw in snapshot.items():
+                    if "市净率" in str(key) or str(key).upper() == "PB":
+                        try:
+                            pb = float(str(raw).replace("%", "").replace("倍", ""))
+                            used_mx = True
+                            break
+                        except (TypeError, ValueError):
+                            continue
+
+        def query(query_text: str) -> dict:
+            try:
+                return client.query(query_text)
+            except Exception:
+                return {}
+
+        pe_quantile, pe_window = _mx_latest_pct(
+            query(f"{label} 市盈率近五年分位数"), "市盈率"
+        )
+        if pe_quantile is None:
+            pe_quantile, pe_window = _mx_latest_pct(
+                query(f"{code} 市盈率历史百分位"), "市盈率"
+            )
+        pb_quantile, _ = _mx_latest_pct(
+            query(f"{label} 市净率近五年分位数"), "市净率"
+        )
+        if pb_quantile is None:
+            pb_quantile, _ = _mx_latest_pct(
+                query(f"{code} 市净率PB历史百分位"), "市净率"
+            )
+        used_mx = used_mx or pe_quantile is not None or pb_quantile is not None
+
+    source = "basic+mx_api" if used_basic and used_mx else "mx_api" if used_mx else "basic"
+    out: dict[str, Any] = {"_valuation_source": source}
+    if pe is not None:
+        out["pe"] = str(pe)
+    if pb is not None:
+        out["pb"] = str(pb)
+    if pe_quantile is not None:
+        out["pe_quantile"] = f"{pe_window or '历史'} {pe_quantile:.0f} 分位"
+    if pb_quantile is not None:
+        out["pb_quantile"] = f"{pb_quantile:.0f}%"
+    return out
+
+
+def main_safe(ticker: str) -> dict:
+    """Fetch valuation without mini-racer-prone akshare endpoints."""
+    ti = parse_ticker(ticker)
+    try:
+        basic = ds.fetch_basic(ti) or {}
+    except Exception:
+        basic = {}
+    data = _fetch_valuation_via_mx(
+        ti.code,
+        getattr(ti, "raw", "") or basic.get("name") or "",
+        basic,
+    )
+    for field in ("pe", "pb", "pe_quantile", "pb_quantile"):
+        data.setdefault(field, "—")
+    filled = any(
+        data.get(field) not in (None, "", "—")
+        for field in ("pe", "pb", "pe_quantile", "pb_quantile")
+    )
+    source = data.get("_valuation_source") or "basic"
+    return {
+        "ticker": ti.full,
+        "data": data,
+        "source": f"{source} (mini_racer-safe)",
+        "fallback": not filled,
     }
 
 
@@ -301,6 +452,8 @@ def main(ticker: str) -> dict:
                     current_price=current_price,
                     shares_out=total_shares,
                 )
+            elif not total_shares:
+                dcf_sensitivity = {"_note": "股本数据缺失 · 无法计算每股敏感性", "values": []}
         else:
             dcf_result = {"available": False, "reason": dcf_unavailable_reason}
     except Exception as e:
@@ -310,39 +463,55 @@ def main(ticker: str) -> dict:
     iv_total = dcf_result.get("intrinsic_value_total") if isinstance(dcf_result, dict) else None
     dcf_display = f"{_currency_prefix(dcf_currency)}{iv_total / 1e8:.1f}亿" if iv_total else "—"
 
+    data = {
+        "pe": str(cur_pe) if cur_pe is not None else "—",
+        "pb": str(basic.get("pb")) if basic.get("pb") is not None else "—",
+        "pe_quantile": f"5 年 {pe_quantile_val:.0f} 分位" if pe_quantile_val is not None else "—",
+        "pb_quantile": f"{pb_quantile_val:.0f}%" if pb_quantile_val is not None else "—",
+        "industry_pe": str(industry_pe_avg) if industry_pe_avg else "—",
+        "industry_pe_fallback_reason": industry_pe_fallback_reason,
+        "dcf": dcf_display,
+        "pe_history": pe_history,
+        "dcf_simple": dcf_result,
+        "dcf_sensitivity": dcf_sensitivity,
+    }
+    data.update({
+        "industry_pe_source": industry_pe_source,
+        "industry_pe_match_method": industry_pe_match_method,
+        "industry_pe_input_industry": str(basic.get("industry") or ""),
+        "market_pe_reference": str(market_pe_reference) if market_pe_reference else "—",
+        "market_pe_reference_source": market_pe_reference_source,
+        "market_pe_reference_method": (
+            "cninfo 行业加权 PE 的等权均值；非同行估值，不进入 industry_pe"
+            if market_pe_reference is not None else ""
+        ),
+        "dcf_is_proxy": dcf_input_is_proxy,
+        "dcf_input_basis": dcf_input_basis,
+        "dcf_input_period": dcf_input_period,
+        "dcf_input_value_yi": round(dcf_input_value_yi, 2) if dcf_input_value_yi is not None else None,
+        "dcf_input_source_fields": dcf_input_source_fields,
+        "dcf_currency": dcf_currency,
+        "dcf_warning": dcf_warning,
+        "dcf_available": bool(iv_total),
+        "dcf_unavailable_reason": dcf_unavailable_reason,
+    })
+    if any(data.get(field) in (None, "", "—") for field in ("pe", "pe_quantile", "pb_quantile")):
+        mx_data = _fetch_valuation_via_mx(
+            ti.code,
+            getattr(ti, "raw", "") or basic.get("name") or "",
+            basic,
+        )
+        for field in ("pe", "pb", "pe_quantile", "pb_quantile"):
+            if data.get(field) in (None, "", "—") and mx_data.get(field) not in (None, "", "—"):
+                data[field] = mx_data[field]
+        if mx_data.get("_valuation_source"):
+            data["_valuation_source"] = mx_data["_valuation_source"]
+
     return {
         "ticker": ti.full,
-        "data": {
-            "pe": str(cur_pe) if cur_pe is not None else "—",
-            "pb": str(basic.get("pb")) if basic.get("pb") is not None else "—",
-            "pe_quantile": f"5 年 {pe_quantile_val:.0f} 分位" if pe_quantile_val is not None else "—",
-            "pb_quantile": f"{pb_quantile_val:.0f}%" if pb_quantile_val is not None else "—",
-            "industry_pe": str(industry_pe_avg) if industry_pe_avg else "—",
-            "industry_pe_source": industry_pe_source,
-            "industry_pe_match_method": industry_pe_match_method,
-            "industry_pe_input_industry": str(basic.get("industry") or ""),
-            "industry_pe_fallback_reason": industry_pe_fallback_reason,
-            "market_pe_reference": str(market_pe_reference) if market_pe_reference else "—",
-            "market_pe_reference_source": market_pe_reference_source,
-            "market_pe_reference_method": (
-                "cninfo 行业加权 PE 的等权均值；非同行估值，不进入 industry_pe"
-                if market_pe_reference is not None else ""
-            ),
-            "dcf": dcf_display,
-            "dcf_is_proxy": dcf_input_is_proxy,
-            "dcf_input_basis": dcf_input_basis,
-            "dcf_input_period": dcf_input_period,
-            "dcf_input_value_yi": round(dcf_input_value_yi, 2) if dcf_input_value_yi is not None else None,
-            "dcf_input_source_fields": dcf_input_source_fields,
-            "dcf_currency": dcf_currency,
-            "dcf_warning": dcf_warning,
-            "dcf_available": bool(iv_total),
-            "dcf_unavailable_reason": dcf_unavailable_reason,
-            "pe_history": pe_history,
-            "dcf_simple": dcf_result,
-            "dcf_sensitivity": dcf_sensitivity,
-        },
-        "source": "baidu:valuation + cninfo:industry_pe_ratio + simple_dcf",
+        "data": data,
+        "source": "baidu:valuation + cninfo:industry_pe_ratio + simple_dcf"
+        + ("+mx_api" if "mx_api" in str(data.get("_valuation_source") or "") else ""),
         "fallback": False,
     }
 

@@ -32,7 +32,7 @@ class MonkeyPatch:
     def __init__(self) -> None:
         self._undo: list[tuple[str, Any]] = []
 
-    def setattr(self, target: Any, name: Any, value: Any = ...) -> None:
+    def setattr(self, target: Any, name: Any, value: Any = ..., raising: bool = True) -> None:
         if isinstance(target, str):
             if value is not ...:
                 raise TypeError("dotted-path setattr accepts target and value only")
@@ -43,9 +43,17 @@ class MonkeyPatch:
         elif value is ...:
             raise TypeError("object setattr requires target, name and value")
         existed = hasattr(target, name)
+        if not existed and raising:
+            raise AttributeError(name)
         old = getattr(target, name, None)
         setattr(target, name, value)
         self._undo.append(("attr", (target, name, existed, old)))
+
+    def setitem(self, mapping: Any, name: Any, value: Any) -> None:
+        existed = name in mapping
+        old = mapping.get(name)
+        mapping[name] = value
+        self._undo.append(("item", (mapping, name, existed, old)))
 
     def setenv(self, name: str, value: str) -> None:
         existed = name in os.environ
@@ -81,6 +89,12 @@ class MonkeyPatch:
                     os.environ[name] = old
                 else:
                     os.environ.pop(name, None)
+            elif kind == "item":
+                mapping, name, existed, old = payload
+                if existed:
+                    mapping[name] = old
+                else:
+                    mapping.pop(name, None)
             else:
                 os.chdir(payload)
         self._undo.clear()

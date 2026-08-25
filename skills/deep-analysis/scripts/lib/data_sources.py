@@ -311,6 +311,50 @@ def _fetch_a_share_basic_from_baostock(ti: TickerInfo, *, include_quote: bool = 
     return source
 
 
+def _parse_em_direct_payload(data: dict) -> dict:
+    """Normalize EastMoney push2 single-stock payload.
+
+    push2 fields use mixed scales:
+    - f43/f60: price * 100
+    - f170: change pct * 100
+    - f47: volume in lots, never a fallback for change pct
+    - f116/f117: market cap / circulating cap in yuan
+    """
+    if not data:
+        return {}
+
+    def _scaled(field: str, scale: float = 100.0):
+        raw = data.get(field)
+        return raw / scale if raw not in (None, "", "-") else None
+
+    out: dict[str, Any] = {}
+    price = _scaled("f43")
+    prev_close = _scaled("f60")
+    change_pct = _scaled("f170")
+    if change_pct is None and price and prev_close:
+        change_pct = round((price - prev_close) / prev_close * 100, 2)
+
+    if price:
+        out["price"] = price
+    if prev_close:
+        out["prev_close"] = prev_close
+    if change_pct is not None:
+        out["change_pct"] = round(change_pct, 2)
+    if data.get("f47") not in (None, "", "-"):
+        out["volume"] = data.get("f47")
+    if data.get("f162"):
+        out["pe_ttm"] = data["f162"] / 100
+    if data.get("f167"):
+        out["pb"] = data["f167"] / 100
+    if data.get("f116"):
+        out["market_cap"] = f"{round(data['f116'] / 1e8, 1)}亿"
+        out["market_cap_raw"] = data["f116"]
+    if data.get("f117"):
+        out["circulating_cap"] = f"{round(data['f117'] / 1e8, 1)}亿"
+        out["circulating_cap_raw"] = data["f117"]
+    return out
+
+
 def _ensure_a_share_basic_fields(out: dict, ti: TickerInfo) -> dict:
     """Field-level fallback gate for A-share basic data.
 
@@ -547,24 +591,14 @@ def _fetch_basic_a(ti: TickerInfo) -> dict:
             url = "https://push2.eastmoney.com/api/qt/stock/get"
             params = {
                 "secid": secid,
-                "fields": "f43,f44,f45,f46,f47,f48,f50,f57,f58,f116,f117,f162,f164,f167,f170",
+                "fields": "f43,f44,f45,f46,f47,f48,f50,f57,f58,f60,f116,f117,f162,f164,f167,f170",
                 "ut": "fa5fd1943c7b386f172d6893dbfba10b",
             }
             r = requests.get(url, params=params, timeout=8, headers={"User-Agent": "Mozilla/5.0"})
             data = (r.json() or {}).get("data") or {}
             if data:
-                scale = 100.0
-                price = (data.get("f43") or 0) / scale
-                chg = (data.get("f170") or 0) / scale if data.get("f170") not in (None, "", "-") else None
-                mcap_raw = _safe_positive_float(data.get("f116"))
-                out.update({
-                    "price": price if price else out.get("price"),
-                    "change_pct": chg,
-                    "pe_ttm": (data.get("f162") or 0) / 100 if data.get("f162") else out.get("pe_ttm"),
-                    "pb": (data.get("f167") or 0) / 100 if data.get("f167") else out.get("pb"),
-                    "market_cap": _format_market_cap_yi(mcap_raw) or out.get("market_cap"),
-                    "market_cap_raw": mcap_raw or out.get("market_cap_raw"),
-                })
+                parsed = _parse_em_direct_payload(data)
+                out.update({k: v for k, v in parsed.items() if v not in (None, "", "-")})
                 out["_fallback_snap"] = "em-direct"
         except Exception as e:
             out["_em_direct_err"] = str(e)
@@ -663,10 +697,12 @@ def _fetch_basic_a(ti: TickerInfo) -> dict:
         try:
             df_pe = ak.stock_zh_valuation_baidu(symbol=ti.code, indicator="市盈率(TTM)", period="近一年")
             if df_pe is not None and not df_pe.empty and "value" in df_pe.columns:
-                # Take the latest non-null value
+                # 取最新一个非空值（含负值）· 不能跳负取正 —— 亏损股会被显示成历史正 PE，
+                # 是最危险的估值误导（负 PE 看起来"很便宜"）
                 for v in reversed(df_pe["value"].tolist()):
-                    if v and float(v) > 0:
+                    if v is not None and str(v).strip() not in ("", "nan", "--"):
                         out["pe_ttm"] = round(float(v), 3)
+                        out["_baidu_pe_fallback"] = "历史序列最新值 · 非实时 TTM"
                         break
         except Exception as e:
             out["_baidu_pe_err"] = str(e)[:80]
@@ -918,7 +954,8 @@ def _hk_yahoo_symbol(code5: str) -> str:
 def _fetch_basic_us(ti: TickerInfo) -> dict:
     if yf is None:
         raise RuntimeError("yfinance not installed")
-    t = yf.Ticker(ti.code)
+    from .global_peers import to_yahoo_symbol
+    t = yf.Ticker(to_yahoo_symbol(ti))
     info = _retry(lambda: t.info)
 
     fast: dict[str, Any] = {}
@@ -1004,9 +1041,7 @@ def _fetch_kline_impl(ti: TickerInfo, period: str, start: str, adjust: str) -> l
         return _kline_a_share_chain(ti, period, start, adjust)
     if ti.market == "H":
         return _kline_hk_chain(ti, period, start, adjust)
-    if ti.market in ("U", "G"):
-        return _kline_us_chain(ti)
-    return []
+    return _kline_us_chain(ti)
 
 
 def _kline_a_share_chain(ti: TickerInfo, period: str, start: str, adjust: str) -> list[dict]:
@@ -1276,10 +1311,12 @@ def _yahoo_v8_chart(symbol: str, range_: str = "2y") -> list[dict]:
 
 
 def _kline_us_chain(ti: TickerInfo) -> list[dict]:
-    """US K-line: yfinance + Yahoo v8 freshness tail → akshare → v8 → stooq."""
+    """Global K-line: yfinance plus a strictly newer Yahoo v8 tail and fallbacks."""
+    from .global_peers import to_yahoo_symbol
+    symbol = to_yahoo_symbol(ti)
     if yf:
         try:
-            t = yf.Ticker(ti.code)
+            t = yf.Ticker(symbol)
             df = _retry(lambda: t.history(period="2y", interval="1d"), attempts=2)
             if df is not None and len(df) > 0:
                 df = df.reset_index()
@@ -1297,18 +1334,18 @@ def _kline_us_chain(ti: TickerInfo) -> list[dict]:
             pass
     if ak:
         try:
-            df = ak.stock_us_hist(symbol=ti.code, period="daily", start_date="20240101", adjust="qfq")
+            df = ak.stock_us_hist(symbol=symbol, period="daily", start_date="20240101", adjust="qfq")
             if df is not None and len(df) > 0:
                 return df.to_dict("records")
         except Exception:
             pass
     # v2.13.7 · Yahoo Chart v8 HTTP（绕开 yfinance cookie/crumb 机制，更稳）
-    rows = _yahoo_v8_chart(ti.code, range_="2y")
+    rows = _yahoo_v8_chart(symbol, range_="2y")
     if rows:
         return rows
     if requests:
         try:
-            url = f"https://stooq.com/q/d/l/?s={ti.code.lower()}.us&i=d"
+            url = f"https://stooq.com/q/d/l/?s={symbol.lower()}.us&i=d"
             r = requests.get(url, timeout=12)
             lines = r.text.strip().splitlines()
             if len(lines) > 1:
@@ -1387,6 +1424,7 @@ def _fetch_financials_impl(ti: TickerInfo) -> dict:
         t = yf.Ticker(ti.code)
         return {
             "income": t.financials.to_dict() if t.financials is not None else {},
+            "quarterly_income": t.quarterly_financials.to_dict() if t.quarterly_financials is not None else {},
             "balance": t.balance_sheet.to_dict() if t.balance_sheet is not None else {},
             "cashflow": t.cashflow.to_dict() if t.cashflow is not None else {},
         }
