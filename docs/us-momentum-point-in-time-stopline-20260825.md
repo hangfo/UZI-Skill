@@ -140,3 +140,15 @@ SHA-256 为 `74b1a2ec62a7d3abe08a8c54dfd950f09c6e699095e1c25f615fcd96aa9e494b`�
 - SEC Item 4.01 仍按正文语境 shadow，没有多个独立官方样本时不自动归类负面；
 - 未修改生产评分、动量、Stage、P0/P1、估值或交易阈值；
 - `main`、`codex/windows-local-stable` 未修改，`upstream` push 保持禁用。
+
+## 正式吸收门禁
+
+- 候选检查点：`f8d0738108067d53f19117744b4b69da1a7b14b9`；基线：
+  `106a920d5930e8e93e45e529c811b9317fbea25b`。
+- 同一批 84 个真实缓存输入与 7 个合成对抗案例，在 lite/medium 两档比较：正向与交换
+  执行顺序均为 `91 ok / 0 review / 0 possible_regression`，所有评分和交易档位零变化。
+- 全量 60 个 direct-compatible 测试文件：`684/684 passed`；新增相关测试 `7/7`；
+  Python 编译和 `git diff --check` 通过。
+- 候选差异与新增文件通用敏感信息扫描：0 命中；没有 CBOE、TradingView 非官方接口或
+  缺少真实身份的 SEC 网络请求。
+- 正式分支与候选为纯祖先关系，可 `--ff-only`，不存在代码冲突或语义重叠合并。
