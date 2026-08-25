@@ -76,6 +76,9 @@ depth applicability contract.
 
 - Frozen cached scores were identical before/after the repair for NVDA 61.5,
   LAD 56.6, MU 61.3, LLY 61.8 and JNJ 61.1; every dimension score was unchanged.
+- The formal branch harness compared 78 real cached inputs plus 7 synthetic
+  adversarial cases in lite and medium: 85 `ok`, 0 `review`, 0
+  `possible_regression`.
 - The cached regression basket passed for 600519, 00700, AAPL, MSTR and AXTI in
   lite and medium profiles with no score/tier regression.
 - Fresh real-data `NVDA --depth lite --no-browser --no-resume`: overall 57.1,
@@ -91,9 +94,9 @@ depth applicability contract.
   one A-share display-rounding assertion, and two Windows Bash executable/syntax
   checks. Thirteen pytest-import files remain unrun because pytest is absent and
   dependencies were not installed.
-- Python compilation and diff whitespace checks passed. SEC credentials were
-  not printed; CBOE requests were zero; TradingView unofficial interfaces were
-  not used.
+- Python compilation, JSONL parsing, diff whitespace and secret-value scans
+  passed with zero exposure. SEC credentials were not printed; CBOE requests
+  were zero; TradingView unofficial interfaces were not used.
 
 ## Investment interpretation and limits
 

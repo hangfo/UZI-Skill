@@ -440,4 +440,5 @@
 - 新增统一 market/depth 字段契约：美股不再显示北向/两融、龙虎榜；港股资金面使用港股通/南向语义；A 股语义保持不变。
 - 未执行的重搜索不再渲染为“安全”，美股/港股使用“推广操纵风险”和“TACTICAL 交易派”展示标签；公式与分数不变。
 - 真实 NVDA/MU lite 均为 5 个适用卡片、3 个真实缺口、0 critical；缓存五股评分逐维零变化，回归篮子通过。
+- 正式同输入 harness 覆盖 78 个真实缓存与 7 个合成对抗案例：`85 ok`、`0 review`、`0 possible_regression`。
 - 详细审计见 `docs/report-market-field-audit-20260825.md`。
