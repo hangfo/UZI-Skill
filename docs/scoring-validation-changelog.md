@@ -428,3 +428,8 @@
 2. 下一项高收益工作是“事件生命周期关联”：将后续整改、解除停牌、恢复合规等官方公告关联到 canonical event，生成可复核的 `resolution_status`，仍先进入 overlay 再对照。
 3. 对 NYSE/Nasdaq 等动态列表只做 schema 稳定性评估；没有稳定官方字段时保持 gap，不以页面抓取数量换覆盖率。
 4. 持续按固定窗口和官方列表顺序补自然出现的 P0/P1 holdout，不围绕当前阈值挑样本，也不继续扩张标题关键词。
+# 2026-08-25 · UZI upstream data-integrity intake
+
+- 吸收全球同行、US TTM、缺失数据真实性、进程隔离和报告修复；保留本地 SEC/FRED/Massive、FCFF/净债桥及动态评分极化契约。
+- 双向同输入 `117/117 ok`、`0 review`、`0 possible_regression`，评分与档位零意外变化。
+- 真实 NVDA lite 暴露并修复一个 `moat_total=None` 的机构建模边界；未改评分、动量、Stage、P0/P1、估值或交易阈值。

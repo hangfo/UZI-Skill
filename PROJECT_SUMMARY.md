@@ -241,3 +241,6 @@ python run.py 600519.SH --score-drift  # 同上，适用 A 股
 | 00700.HK | overall ±1 | 护城河实分；事件修复后若有负面新闻略降 |
 | MSTR | overall -2~4 | Catalyst 权重降低；Stage 3/4 cap 覆盖面扩大 |
 | AXTI | overall -3~5 | Stage 3 cap 现在生效；成长规则修复后 B/H 组可能更看多（抵消部分） |
+# 2026-08-25 三上游 intake
+
+`a-stock-data` 已升级为 `3.7.1+uzi.1`，`global-stock-data` 保持已一致的 `2.0.3`；UZI 上游 HEAD `b004d7a` 已在隔离分支语义吸收。双向同输入 117/117、0 possible regression；真实端点和 NVDA lite 通过，详见 `docs/upstream-intake-audit-20260825.md`。
