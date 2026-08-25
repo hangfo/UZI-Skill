@@ -13,6 +13,7 @@
 """
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -25,6 +26,8 @@ SCRIPT = REPO_ROOT / "install-hermes.sh"
 
 def test_install_script_exists():
     assert SCRIPT.exists(), "install-hermes.sh 必须在 repo root"
+    if os.name == "nt":
+        return  # NTFS checkout does not expose the POSIX executable bit.
     # 可执行权限
     import stat
     mode = SCRIPT.stat().st_mode
@@ -33,6 +36,8 @@ def test_install_script_exists():
 
 def test_install_script_bash_syntax_valid():
     """bash -n 不实际执行 · 只检查语法."""
+    if os.name == "nt":
+        return  # WSL startup is not a bounded syntax check on Windows hosts.
     bash = shutil.which("bash")
     if not bash:
         return  # CI 没 bash · skip

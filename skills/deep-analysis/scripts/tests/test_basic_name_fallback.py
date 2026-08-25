@@ -63,7 +63,8 @@ def test_ensure_a_share_basic_fields_repairs_market_cap_from_tencent(monkeypatch
 
     fixed = _ensure_a_share_basic_fields(out, ti)
 
-    assert fixed["market_cap"] == "16968.39亿"
+    # Canonical display contract is one decimal in 亿元; raw precision remains.
+    assert fixed["market_cap"] == "16968.4亿"
     assert fixed["market_cap_raw"] == 1696839000000.0
     assert "field:tencent_qt" in fixed["_fallback_snap"]
 

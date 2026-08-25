@@ -17,6 +17,14 @@
 
 当前原则：评分公式先冻结；先用同一批缓存 raw data 做旧分支 vs 新分支的中立对照。英文入口、agent 指令、命令模板和 schema 契约不做机械翻译，避免改变工具行为。
 
+截至 2026-08-25，真实热门美股复验已把“当前榜单不能用于调参”从文档原则固化为
+`us_momentum_walkforward.py` 的点时宇宙门禁。没有来源可追溯、无前视、完整包含
+退市证券的历史宇宙时，工具明确输出 `parameter_tuning_allowed=false`。当日预先冻结的
+NVDA/PLUG/BMNR/TSLA/SNAP/CELH 均用 fresh Yahoo 数据完成 lite 报告；六股十年 788 个
+信号在时间切片间显著翻转，不支持修改评分、动量、Stage 或交易阈值。Windows 旧契约
+测试债也已清理，全量 direct-compatible 为 `684/684`。详见
+`docs/us-momentum-point-in-time-stopline-20260825.md`。
+
 截至 2026-07-13，branch-vs-branch 已证明结构化官方负面事件存在明确交易决策问题，因此只增加了最小事件风险消费契约，没有继续调权重。最终 67 项对照为 `61 ok / 6 review / 0 possible_regression`；结构化 P1 处理能力从 `4.0/10` 提升到 `8.8/10`。在线官方事实先冻结为 overlay，实体匹配、时效、去重、严重度和评分全部离线确定性执行。
 
 截至 2026-07-29，US entity shadow 已用三批共 349 条真实 Yahoo 新闻验证，候选为 precision `100%`、recall `99.40%`、跨发行人污染 `0`；AAL 生产审计进一步修复法人名行业通用词污染。正式分支对候选的 99 项冻结比较为 `99 ok / 0 possible_regression`，评分和交易档位全为零变化。37 股 10 年真实 walk-forward 不支持增加动量权重，Stage 只保留为风险护栏；当前热门 8 股压力样本因选择偏差不用于调参。

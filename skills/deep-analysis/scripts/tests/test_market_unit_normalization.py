@@ -189,10 +189,12 @@ def test_lite_profile_sets_fund_limit(monkeypatch):
 def test_global_listing_suffixes_route_without_breaking_us_classes():
     from lib.market_router import parse_ticker
 
-    assert parse_ticker("SIVE.ST").market == "G"
-    assert parse_ticker("7203.T").market == "G"
-    assert parse_ticker("2330.TW").market == "G"
-    assert parse_ticker("2330.TWO").market == "G"
+    # Global venues retain an ISO-like country market so routing does not
+    # collapse Sweden/Japan/Taiwan into one opaque bucket.
+    assert parse_ticker("SIVE.ST").market == "SE"
+    assert parse_ticker("7203.T").market == "JP"
+    assert parse_ticker("2330.TW").market == "TW"
+    assert parse_ticker("2330.TWO").market == "TW"
     assert parse_ticker("BRK.B").market == "U"
     assert parse_ticker("600519.SH").market == "A"
     assert parse_ticker("00700.HK").market == "H"
@@ -250,7 +252,17 @@ def test_pipeline_collect_respects_lite_profile(monkeypatch):
     def fake_get_fetcher(dim):
         return FakeFetcher(dim)
 
+    def run_inline(jobs, *, max_workers, overall_timeout):
+        # Windows production uses spawn isolation, so monkeypatches do not
+        # propagate into child processes.  This test targets orchestration and
+        # deliberately evaluates the queued jobs in-process.
+        return [
+            collect_mod.ProcessOutcome(key=job.key, value=job.target(*job.args, **job.kwargs))
+            for job in jobs
+        ]
+
     monkeypatch.setattr(collect_mod, "get_fetcher", fake_get_fetcher)
+    monkeypatch.setattr(collect_mod, "run_process_jobs", run_inline)
     out = collect_mod.collect("600519", raw_previous={}, max_workers=1)
 
     assert set(calls) == {"0_basic", "1_financials", "2_kline", "10_valuation", "11_governance", "15_events", "16_lhb"}

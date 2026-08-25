@@ -2,6 +2,24 @@
 
 > 当前文档记录 `codex/scoring-validation-guardrails` 分支上的评分验证、branch-vs-branch harness、证据冻结与文档治理改动。它是开发追溯文档，不是 agent 指令入口；影响 agent 行为的规则仍以 `AGENTS.md` 和相关 harness 文档为准。
 
+## 2026-08-25
+
+### 点时宇宙调参门禁、真实热门美股与 Windows 测试债清理
+
+- `tools/us_momentum_walkforward.py` 新增点时宇宙契约；当前/手选股票默认输出
+  `selected_universe_only` 和 `parameter_tuning_allowed=false`。只有来源可追溯、
+  无前视、完整包含退市证券且全员取价成功的历史宇宙才具备参数研究资格。
+- 预先按 Yahoo 活跃/涨幅与流动性冻结 NVDA/PLUG/BMNR/TSLA/SNAP/CELH，fresh lite
+  真实生产均 `critical=0`；单日热度没有把低质量或 Stage 3/4 股票推成买入。
+- 六股十年 Yahoo walk-forward 共 788 信号、0 失败。21/63 日高低分超额为
+  `+3.37%/+5.60%`，126 日转为 `-2.83%`；截至 2022 与 2023 起的切片还发生明显
+  翻转，叠加选择/幸存者偏差，继续禁止动量、Stage 或交易阈值调参。
+- 冻结真实价格离线重放的输入哈希与全部指标完全一致。
+- 清理 7 个已知 Windows/旧契约测试失败；全量 direct-compatible 从 `673/680`
+  提升至 `684/684`。13 个 pytest-only 文件仍因未安装 pytest 而明确未运行。
+- 未改生产评分、动量、Stage、P0/P1、估值或交易阈值。完整记录见
+  `docs/us-momentum-point-in-time-stopline-20260825.md`。
+
 ## 2026-08-24
 
 ### Market Loop 六股实体、证据与真实收益审计

@@ -43,6 +43,108 @@ DEFAULT_HORIZONS = [21, 63, 126]
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) UZI-WalkForward/1.0"
 
 
+def _universe_audit(
+    manifest: dict[str, Any] | None,
+    requested_tickers: list[str],
+    fetch_failures: dict[str, str] | None = None,
+) -> tuple[dict[str, Any], dict[str, list[tuple[str, str | None]]]]:
+    """Validate whether a universe can support parameter-tuning claims.
+
+    A current or hand-picked ticker list can still be useful as a stress test,
+    but it is never evidence for optimizing momentum weights.  Eligibility
+    requires a complete point-in-time archive, explicit delisted coverage and
+    successful price retrieval for every requested member.
+    """
+    requested = {str(t).upper() for t in requested_tickers}
+    failures = fetch_failures or {}
+    membership: dict[str, list[tuple[str, str | None]]] = defaultdict(list)
+    reasons: list[str] = []
+    if not manifest:
+        return ({
+            "status": "selected_universe_only",
+            "parameter_tuning_allowed": False,
+            "point_in_time": False,
+            "includes_delisted": False,
+            "complete_universe": False,
+            "reasons": [
+                "no point-in-time universe manifest",
+                "current/popular tickers create selection and survivorship bias",
+            ],
+        }, {})
+
+    if manifest.get("schema") != "uzi.us_point_in_time_universe.v1":
+        reasons.append("unsupported universe manifest schema")
+    if manifest.get("source_type") not in {"official_listing_archive", "licensed_point_in_time_database"}:
+        reasons.append("source is not an official archive or licensed point-in-time database")
+    if manifest.get("lookahead_free") is not True:
+        reasons.append("lookahead_free is not explicitly true")
+    if manifest.get("includes_delisted") is not True:
+        reasons.append("delisted securities are not included")
+    if manifest.get("complete_universe") is not True:
+        reasons.append("universe completeness is not attested")
+    if not manifest.get("source") or not manifest.get("source_url"):
+        reasons.append("source provenance is incomplete")
+
+    members = manifest.get("memberships") or []
+    if not isinstance(members, list) or not members:
+        reasons.append("membership history is empty")
+        members = []
+    delisted_members = 0
+    for row in members:
+        ticker = str((row or {}).get("ticker") or "").upper()
+        start = str((row or {}).get("effective_from") or "")
+        end_value = (row or {}).get("effective_to")
+        end = str(end_value) if end_value else None
+        try:
+            if not ticker or not start:
+                raise ValueError
+            datetime.fromisoformat(start)
+            if end:
+                datetime.fromisoformat(end)
+                if end < start:
+                    raise ValueError
+                delisted_members += 1
+        except (TypeError, ValueError):
+            reasons.append(f"invalid membership interval for {ticker or '<missing>'}")
+            continue
+        membership[ticker].append((start, end))
+
+    missing = sorted(requested - set(membership))
+    extra = sorted(set(membership) - requested)
+    if missing:
+        reasons.append("requested tickers missing from membership history: " + ",".join(missing))
+    if extra:
+        reasons.append("manifest universe was only partially requested: " + ",".join(extra[:10]))
+    if delisted_members == 0:
+        reasons.append("no finite membership interval demonstrates delisted coverage")
+    failed_members = sorted(t for t in failures if t in requested)
+    if failed_members:
+        reasons.append("price retrieval failed for universe members: " + ",".join(failed_members))
+
+    allowed = not reasons
+    return ({
+        "status": "optimization_eligible" if allowed else "universe_contract_failed",
+        "parameter_tuning_allowed": allowed,
+        "point_in_time": True,
+        "includes_delisted": manifest.get("includes_delisted") is True,
+        "complete_universe": manifest.get("complete_universe") is True,
+        "source": manifest.get("source"),
+        "source_url": manifest.get("source_url"),
+        "members": len(membership),
+        "finite_memberships": delisted_members,
+        "reasons": reasons,
+    }, dict(membership))
+
+
+def _membership_allows(
+    membership: dict[str, list[tuple[str, str | None]]], ticker: str, signal_date: str
+) -> bool:
+    if not membership:
+        return True
+    return any(start <= signal_date and (end is None or signal_date <= end)
+               for start, end in membership.get(ticker, []))
+
+
 def _fetch_yahoo_daily(ticker: str, range_: str, retries: int = 3) -> list[dict[str, Any]]:
     query = urllib.parse.urlencode({
         "interval": "1d",
@@ -214,6 +316,7 @@ def _build_signals(
     horizons: Iterable[int],
     min_history: int,
     round_trip_cost_bps: float,
+    membership: dict[str, list[tuple[str, str | None]]] | None = None,
 ) -> list[dict[str, Any]]:
     spy_by_date = {row["Date"]: float(row["Close"]) for row in benchmark}
     signals: list[dict[str, Any]] = []
@@ -222,6 +325,8 @@ def _build_signals(
         for horizon in horizons:
             last_signal = len(rows) - horizon - 2
             for index in range(min_history - 1, last_signal + 1, horizon):
+                if not _membership_allows(membership or {}, ticker, rows[index]["Date"]):
+                    continue
                 entry = rows[index + 1]
                 exit_ = rows[index + 1 + horizon]
                 spy_entry = spy_by_date.get(entry["Date"])
@@ -325,6 +430,7 @@ def _markdown(result: dict[str, Any]) -> str:
         f"- source: `{result['source']}`",
         f"- universe: `{', '.join(result['tickers'])}`",
         f"- benchmark: `{result['benchmark']}`",
+        f"- universe audit: `{result['universe_audit']['status']}`; parameter tuning allowed: `{result['universe_audit']['parameter_tuning_allowed']}`",
         f"- input_sha256: `{result['input_sha256']}`",
         f"- signals: `{len(result['signals'])}`; failures: `{len(result['fetch_failures'])}`",
         "",
@@ -349,6 +455,9 @@ def _markdown(result: dict[str, Any]) -> str:
         "This validates only the historically reconstructable technical dimension. "
         "It is not a backtest of current news, entity matching, fundamentals, or the "
         "full UZI composite score.",
+        "",
+        "Unless universe_audit is optimization_eligible, these results are stress-test "
+        "evidence only and must not change production parameters.",
     ])
     return "\n".join(lines) + "\n"
 
@@ -362,6 +471,7 @@ def main() -> int:
     parser.add_argument("--min-history", type=int, default=260)
     parser.add_argument("--round-trip-cost-bps", type=float, default=20.0)
     parser.add_argument("--prices-in", type=Path)
+    parser.add_argument("--universe-manifest", type=Path)
     parser.add_argument("--prices-out", type=Path)
     parser.add_argument("--json-out", type=Path)
     parser.add_argument("--markdown-out", type=Path)
@@ -410,12 +520,16 @@ def main() -> int:
             json.dumps(frozen_prices, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
         )
 
+    manifest = (json.loads(args.universe_manifest.read_text(encoding="utf-8"))
+                if args.universe_manifest else None)
+    universe_audit, membership = _universe_audit(manifest, tickers, failures)
     signals = _build_signals(
         bars,
         benchmark_rows,
         args.horizons,
         args.min_history,
         args.round_trip_cost_bps,
+        membership=membership,
     )
     result = {
         "schema": "uzi.us_momentum_walkforward.v1",
@@ -429,6 +543,7 @@ def main() -> int:
         "min_history": args.min_history,
         "round_trip_cost_bps": args.round_trip_cost_bps,
         "sampling": "signal at close t; entry next close; non-overlap stride=horizon per issuer",
+        "universe_audit": universe_audit,
         "fetch_failures": failures,
         "analysis": _analyze(signals, args.horizons),
         "temporal_holdouts": {
@@ -458,6 +573,7 @@ def main() -> int:
         "failures": failures,
         "signals": len(signals),
         "analysis": result["analysis"],
+        "universe_audit": universe_audit,
     }, ensure_ascii=False))
     return 0 if bars and signals else 1
 
