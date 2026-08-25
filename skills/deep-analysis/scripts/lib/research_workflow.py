@@ -653,7 +653,7 @@ def run_idea_screen(features: dict, style: str = "quality") -> dict:
             ("净利率 > 15%", features.get("net_margin", 0) > 15),
             ("FCF 持续为正", features.get("fcf_positive", False)),
             ("资产负债率 < 50%", 0 < features.get("debt_ratio", 100) < 50),
-            ("护城河 ≥ 28/40", features.get("moat_total", 0) >= 28),
+            ("护城河 ≥ 28/40", (features.get("moat_total") or 0) >= 28),
         ],
         "gulp": [
             ("PEG < 1.5", features.get("peg", 99) < 1.5),
